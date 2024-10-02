@@ -2,7 +2,7 @@ import React from "react";
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 
-const ProjLeadDailyAttRec = () => {
+const ProjLeadTrainersCV = () => {
     return (
         <div className="bg-gray-200 min-h-screen flex">
             {/* Sidebar with fixed width */}
@@ -13,7 +13,7 @@ const ProjLeadDailyAttRec = () => {
             <div className="flex-1 ml-[20%]">
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
-                    <h1 className="text-2xl font-semibold mb-5">Daily Attendance Record</h1>
+                    <h1 className="text-2xl font-semibold mb-5">Trainers CV/DTR</h1>
 
                     {/* Project Details and Progress Status Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
@@ -65,33 +65,23 @@ const ProjLeadDailyAttRec = () => {
                     {/* Add New Submission Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Add New Submission</h2>
-                        <div className="grid grid-cols-3 gap-4">
-                            {/* Day Input */}
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Trainer Name Input */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Day</label>
+                                <label className="block text-sm font-medium text-gray-700">Trainer Name</label>
                                 <input
                                     type="text"
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Enter Day"
+                                    placeholder="Enter Trainer Name"
                                 />
                             </div>
                             
-                            {/* Date Input */}
+                            {/* Date Submitted Input */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Date</label>
+                                <label className="block text-sm font-medium text-gray-700">Date Submitted</label>
                                 <input
                                     type="date"
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                />
-                            </div>
-                            
-                            {/* Total Number of Attendees Input */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Total Number of Attendees</label>
-                                <input
-                                    type="number"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Number of Attendees"
                                 />
                             </div>
                         </div>
@@ -110,4 +100,4 @@ const ProjLeadDailyAttRec = () => {
     );
 };
 
-export default ProjLeadDailyAttRec;
+export default ProjLeadTrainersCV;

@@ -12,6 +12,10 @@ import ProjLeadRequirements from "./pages/projectlead/ProjLeadRequirements";
 import ProjLeadAccReport from "./pages/projectlead/ProjLeadAccReport";
 import ProjLeadCreateAccReport from "./pages/projectlead/ProjLeadCreateAccReport";
 import ProjLeadDailyAttRec from "./pages/projectlead/ProjLeadDailyAttRec";
+import ProjLeadListofParticipants from "./pages/projectlead/ProjLeadListofParticipants";
+import ProjLeadTrainersCV from "./pages/projectlead/ProjLeadTrainersCV";
+import ProjLeadLecNotes from "./pages/projectlead/ProjLeadLecNotes";
+import ProjLeadOthers from "./pages/projectlead/ProjLeadOthers";
 import Topbar from "./components/Topbar";
 import DeptOffSideBar from './components/DeptOffSideBar';
 import DeptOffDashboard from "./pages/deptoff/DeptOffDashboard";
@@ -30,7 +34,7 @@ function App() {
       <Route path="/deptoff" element={ <DeptOffDashboard /> } />
       <Route path="/coordinator" element={ <CoordinatorDashboard /> } />
       <Route path="/signatory" element={ <SignatoryDashboard /> } />
-      <Route path="/try" element={ <ProjLeadCreateAccReport /> } />
+      <Route path="/try" element={ <ProjLeadOthers /> } />
     </Routes>
   );
 }
