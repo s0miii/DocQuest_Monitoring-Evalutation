@@ -30,7 +30,7 @@ function App() {
       <Route path="/deptoff" element={ <DeptOffDashboard /> } />
       <Route path="/coordinator" element={ <CoordinatorDashboard /> } />
       <Route path="/signatory" element={ <SignatoryDashboard /> } />
-      <Route path="/try" element={ <ProjLeadDailyAttRec /> } />
+      <Route path="/try" element={ <ProjLeadCreateAccReport /> } />
     </Routes>
   );
 }
