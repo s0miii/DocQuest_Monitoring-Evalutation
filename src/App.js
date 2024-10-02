@@ -8,6 +8,10 @@ import EStaffDocumentsList from "./pages/estaff/EStaffDocumentsList";
 import EstaffDashboard from "./pages/estaff/EstaffDashboard";
 import EstaffViewDocument from "./pages/estaff/EstaffViewDocuments";
 import ProjLeadDashboard from "./pages/projectlead/ProjLeadDashboard";
+import ProjLeadRequirements from "./pages/projectlead/ProjLeadRequirements";
+import ProjLeadAccReport from "./pages/projectlead/ProjLeadAccReport";
+import ProjLeadCreateAccReport from "./pages/projectlead/ProjLeadCreateAccReport";
+import ProjLeadDailyAttRec from "./pages/projectlead/ProjLeadDailyAttRec";
 import Topbar from "./components/Topbar";
 import DeptOffSideBar from './components/DeptOffSideBar';
 import DeptOffDashboard from "./pages/deptoff/DeptOffDashboard";
@@ -26,6 +30,7 @@ function App() {
       <Route path="/deptoff" element={ <DeptOffDashboard /> } />
       <Route path="/coordinator" element={ <CoordinatorDashboard /> } />
       <Route path="/signatory" element={ <SignatoryDashboard /> } />
+      <Route path="/try" element={ <ProjLeadDailyAttRec /> } />
     </Routes>
   );
 }
