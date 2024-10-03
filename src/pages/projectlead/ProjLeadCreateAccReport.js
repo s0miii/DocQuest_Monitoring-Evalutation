@@ -161,7 +161,7 @@ const ProjLeadCreateAccReport = () => {
                         </div>
                     </div>
 
-                    {/* PREXC Achievement (Table Layout) */}
+                    {/* PREXC Achievement */}
                     <div className="bg-white shadow-lg rounded-lg p-8 mb-6">
                         <div className="overflow-x-auto">
                             <table className="min-w-full table-auto border-collapse border border-gray-300">
@@ -180,32 +180,32 @@ const ProjLeadCreateAccReport = () => {
                                     <tr>
                                         <td className="border border-gray-300 px-4 py-2 text-left"> Number of Trainees who evaluated the training to be at least satisfactory </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <input className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
+                                            <input type="number" className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <input className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
+                                            <input type="number" className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <input className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
+                                            <input type="number" className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="border border-gray-300 px-4 py-2">Persons Trained Weighted by the Number of Days Training
-                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2">Persons Trained Weighted by the Number of Days Training</td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <input className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
+                                            <input type="number" className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
                                             <div className="w-full bg-gray-100 rounded-lg p-2 text-center">Rating 100%</div>
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <input className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
+                                            <input type="number" className="w-full bg-gray-100 rounded-lg p-2" placeholder="Enter input..." />
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
 
                     {/* Project Narrative */}
                     <div className="bg-white shadow-lg rounded-lg p-8 mb-6">
@@ -235,18 +235,24 @@ const ProjLeadCreateAccReport = () => {
                     </div>
 
                     {/* Photo Documentation */}
-                    <div className="bg-white shadow-lg rounded-lg p-8 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-6">Photo Documentation</h2>
-                        <div className="flex justify-center items-center bg-gray-100 p-4 rounded-lg mb-4 w-full">
-                            <div className="flex flex-col items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                                <p className="text-gray-500 mt-2">Add Photo</p>
+                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-center mb-4">Photo Documentation</h2>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Attached Photo</label>
+                            <div className="flex items-center">
+                                <input
+                                    type="file"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Upload Photo"
+                                    style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                                />
                             </div>
                         </div>
                         <div className="flex justify-center">
-                            <button className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition">
+                            <button
+                                type="button"
+                                className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
+                            >
                                 Submit
                             </button>
                         </div>

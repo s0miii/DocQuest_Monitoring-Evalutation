@@ -40,6 +40,12 @@ const ProjLeadRequirements = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">Project proposal</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Approved</td>
                                     </tr>
+                                    <tr>
+                                        <td className="px-6 py-4 whitespace-nowrap">1021210012</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">Tesda Vocational</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">Project proposal</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">Approved</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
