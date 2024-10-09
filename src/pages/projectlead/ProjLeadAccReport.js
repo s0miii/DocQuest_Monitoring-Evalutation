@@ -1,8 +1,15 @@
 import React from "react";
+import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 
 const ProjLeadAccReport = () => {
+    const navigate = useNavigate();
+
+    const handleAddNewSubmission = () => {
+        navigate('/requirements/create-accomplishment-report');
+    };
+
     return (
         <div className="bg-gray-200 min-h-screen flex">
             {/* Sidebar with fixed width */}
@@ -86,7 +93,10 @@ const ProjLeadAccReport = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.75v14.5m7.25-7.25H4.75" />
                             </svg>
                         </div>
-                        <button className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition">
+                        <button
+                            onClick={handleAddNewSubmission}
+                            className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
+                        >
                             Add
                         </button>
                     </div>

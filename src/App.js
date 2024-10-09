@@ -34,7 +34,14 @@ function App() {
       <Route path="/deptoff" element={ <DeptOffDashboard /> } />
       <Route path="/coordinator" element={ <CoordinatorDashboard /> } />
       <Route path="/signatory" element={ <SignatoryDashboard /> } />
-      <Route path="/try" element={ <ProjLeadOthers /> } />
+      <Route path="/requirements" element={<ProjLeadRequirements />} />
+      <Route path="/requirements/accomplishment-report" element={<ProjLeadAccReport />} />
+      <Route path="/requirements/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
+      <Route path="/requirements/list-of-participants" element={<ProjLeadListofParticipants />} />
+      <Route path="/requirements/daily-attendance" element={<ProjLeadDailyAttRec />} />
+      <Route path="/requirements/trainer-cv" element={<ProjLeadTrainersCV />} />
+      <Route path="/requirements/modules-notes" element={<ProjLeadLecNotes />} />
+      <Route path="/requirements/others" element={<ProjLeadOthers />} />
     </Routes>
   );
 }
