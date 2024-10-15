@@ -23,6 +23,8 @@ import DeptOffGenerateDocument from "./pages/deptoff/DeptOffGenerateDocument";
 import DeptOffProfilePage from "./pages/deptoff/DeptOffProfilePage";
 import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
+import EStaffProjects from "./pages/estaff/EStaffProjects";
+import EStaffProjMonitoring from "./pages/estaff/EStaffProjMonitoring";
 
 function App() {
   return (
@@ -42,6 +44,8 @@ function App() {
       <Route path="/requirements/trainer-cv" element={<ProjLeadTrainersCV />} />
       <Route path="/requirements/modules-notes" element={<ProjLeadLecNotes />} />
       <Route path="/requirements/others" element={<ProjLeadOthers />} />
+      <Route path="/try" element={<EStaffProjects />} />
+      <Route path="/projects/monitoring" element={<EStaffProjMonitoring />} />
     </Routes>
   );
 }
