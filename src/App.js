@@ -44,7 +44,7 @@ function App() {
       <Route path="/requirements/trainer-cv" element={<ProjLeadTrainersCV />} />
       <Route path="/requirements/modules-notes" element={<ProjLeadLecNotes />} />
       <Route path="/requirements/others" element={<ProjLeadOthers />} />
-      <Route path="/try" element={<EStaffProjects />} />
+      <Route path="/projects" element={<EStaffProjects />} />
       <Route path="/projects/monitoring" element={<EStaffProjMonitoring />} />
     </Routes>
   );

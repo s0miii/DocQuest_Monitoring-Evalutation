@@ -1,9 +1,15 @@
 import React from "react";
 import { FaSearch, FaFilter } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import EStaffSidebar from "../../components/EStaffSideBar";
 
 const EStaffProjects = () => {
+    const navigate = useNavigate();
+
+    const handleViewClick = (path) => {
+        navigate(path);
+    }
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -71,7 +77,9 @@ const EStaffProjects = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">Placeholder Inc.</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Incomplete</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black-600">View</button>
+                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projects/monitoring')}>
+                                                View
+                                            </button>
                                         </td>
                                     </tr>
                                     <tr>
@@ -82,7 +90,9 @@ const EStaffProjects = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">Placeholder Inc.</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Incomplete</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black-600">View</button>
+                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projects/monitoring')}>
+                                                View
+                                            </button>
                                         </td>
                                     </tr>
                                     <tr>
@@ -93,18 +103,22 @@ const EStaffProjects = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">Placeholder Inc.</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Incomplete</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black-600">View</button>
+                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projects/monitoring')}>
+                                                View
+                                            </button>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="px-6 py-4 whitespace-nowrap">CITC</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">CEA</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Valueno, Rabosa A.</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Tesda Vocational</td>
                                         <td className="px-6 py-4 whitespace-nowrap">May 2024</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Placeholder Inc.</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Incomplete</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black-600">View</button>
+                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projects/monitoring')}>
+                                                View
+                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>

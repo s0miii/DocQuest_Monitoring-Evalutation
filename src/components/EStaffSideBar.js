@@ -47,13 +47,15 @@ function EStaffSideBar() {
                         <Link to="/documents" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/documents"]) ? "text-yellow-500" : ""}`}>Documents</Link>
                     </li>
                     <li>
-                        <button onClick={toggleProjectsSubMenu} className="text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none">
-                            Projects
-                        </button>
-                        <ul className={`${isProjectsSubMenuVisible ? "" : "hidden"} bg-indigo-900`}>
-                            <li><Link to="/projects/monitoring" className="block px-6 py-3 hover:text-yellow-500">Monitoring</Link></li>
-                            <li><Link to="/projects/evaluation" className="block px-6 py-3 hover:text-yellow-500">Evaluation</Link></li>
-                        </ul>
+                        <div className="flex flex-col">
+                            <Link to="/projects" onClick={toggleProjectsSubMenu} className={`text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none ${isActive(["/projects"]) ? "text-yellow-500" : ""}`}>
+                                Projects
+                            </Link>
+                            <ul className={`${isProjectsSubMenuVisible ? "" : "hidden"} bg-indigo-900`}>
+                                <li><Link to="/projects/monitoring" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projects/monitoring"]) ? "text-yellow-500" : ""}`}>Monitoring</Link></li>
+                                <li><Link to="/projects/evaluation" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projects/evaluation"]) ? "text-yellow-500" : ""}`}>Evaluation</Link></li>
+                            </ul>
+                        </div>
                     </li>
                     <li>
                         <Link to="/auto-message" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/auto-message"]) ? "text-yellow-500" : ""}`}>
