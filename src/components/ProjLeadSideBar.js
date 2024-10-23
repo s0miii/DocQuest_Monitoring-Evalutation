@@ -47,7 +47,7 @@ function ProjLeadSidebar() {
                     </li>
                     <li>
                         <button onClick={toggleRequirementsSubMenu} className={`text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none ${isActive(["/requirements"]) ? "text-yellow-500" : ""}`}>
-                            Requirements
+                            Documentary Requirements
                         </button>
                         <ul className={`${isRequirementsSubMenuVisible ? '' : 'hidden'} bg-indigo-900`}>
                         <li><Link to="/requirements/accomplishment-report" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/accomplishment-report", "/requirements/create-accomplishment-report"]) ? "text-yellow-500" : ""}`}>Accomplishment Report</Link></li>

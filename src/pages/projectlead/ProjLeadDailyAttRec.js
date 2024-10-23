@@ -1,25 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 
 const ProjLeadDailyAttRec = () => {
+    const [selectedProponent, setSelectedProponent] = useState("");
+
+    const submittedFiles = [
+        { fileName: "Day 1 Attendance.pdf", submittedBy: "Proponent A", date: "2024-10-10" },
+        { fileName: "Day 2 Attendance.pdf", submittedBy: "Proponent B", date: "2024-10-11" },
+        { fileName: "Day 3 Attendance.pdf", submittedBy: "Proponent C", date: "2024-10-12" }
+    ];
+
     return (
         <div className="bg-gray-200 min-h-screen flex">
-            {/* Sidebar with fixed width */}
             <div className="w-1/5 fixed h-full">
                 <ProjLeadSidebar />
             </div>
-            {/* Main content area */}
             <div className="flex-1 ml-[20%]">
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <h1 className="text-2xl font-semibold mb-5">Daily Attendance Record/List of Participants</h1>
 
-                    {/* Project Details and Progress Status Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Project Details</h2>
                         <div className="grid grid-cols-2 gap-4">
-                            {/* Project Title and Leader */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Title</label>
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">Tesda Vocational</p>
@@ -30,7 +34,6 @@ const ProjLeadDailyAttRec = () => {
                             </div>
                         </div>
                         
-                        {/* College/Campus, Target Date, Partner Agency */}
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">College/Campus</label>
@@ -47,70 +50,46 @@ const ProjLeadDailyAttRec = () => {
                         </div>
                     </div>
 
-                    {/* File Submission Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Attach Files</h2>
+                        <h2 className="text-xl font-semibold text-center mb-4">Assign Daily Attendance Submission</h2>
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Attached File</label>
-                            <div className="flex items-center">
-                                <input
-                                    type="file"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Upload Photo"
-                                    style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
-                                />
-                            </div>
+                            <label className="block text-sm font-medium text-gray-700">Enter Proponent</label>
+                            <input
+                                type="text"
+                                value={selectedProponent}
+                                onChange={(e) => setSelectedProponent(e.target.value)}
+                                className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                placeholder="Enter proponent name/email"
+                            />
                         </div>
                         <div className="flex justify-center">
-                            <button
-                                type="button"
-                                className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
-                            >
-                                Submit
+                            <button type="button" className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition">
+                                Assign Task
                             </button>
                         </div>
                     </div>
 
-                    {/* Add New Submission Section */}
-                    <div className="bg-white shadow-lg rounded-lg p-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Add New Submission</h2>
-                        <div className="grid grid-cols-3 gap-4">
-                            {/* Day Input */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Day</label>
-                                <input
-                                    type="text"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Enter Day"
-                                />
-                            </div>
-                            
-                            {/* Date Input */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Date</label>
-                                <input
-                                    type="date"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                />
-                            </div>
-                            
-                            {/* Total Number of Attendees Input */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Total Number of Attendees</label>
-                                <input
-                                    type="number"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Number of Attendees"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-center mt-6">
-                            <button
-                                type="button"
-                                className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
-                            >
-                                Submit
-                            </button>
+                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
+                                <thead>
+                                    <tr className="bg-gray-100 border-b">
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">File Name</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Submitted By</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {submittedFiles.map((file, index) => (
+                                        <tr key={index} className={`border-b ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">{file.fileName}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{file.submittedBy}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{file.date}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

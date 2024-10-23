@@ -25,11 +25,7 @@ import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
 import EStaffProjects from "./pages/estaff/EStaffProjects";
 import EStaffProjMonitoring from "./pages/estaff/EStaffProjMonitoring";
-import EStaffProjAccReport from "./pages/estaff/EStaffProjAccReport";
-import EStaffProjParticipantsList from "./pages/estaff/EStaffProjParticipantsList";
-import EStaffProjAttendanceRecord from "./pages/estaff/EStaffProjAttendanceRecord";
-import EStaffProjAdditionalDocs from "./pages/estaff/EStaffProjAdditionalDocs";
-import EStaffProjEvaluation from "./pages/estaff/EStaffProjEvaluation";
+
 
 
 function App() {
@@ -52,11 +48,7 @@ function App() {
       <Route path="/requirements/others" element={<ProjLeadOthers />} />
       <Route path="/projects" element={<EStaffProjects />} />
       <Route path="/projects/monitoring" element={<EStaffProjMonitoring />} />
-      <Route path="/projects/monitoring/accomplishment-report" element={<EStaffProjAccReport />} />
-      <Route path="/projects/monitoring/participants-list" element={<EStaffProjParticipantsList />} />
-      <Route path="/projects/monitoring/daily-attendance" element={<EStaffProjAttendanceRecord />} />
-      <Route path="/projects/monitoring/additional-documents" element={<EStaffProjAdditionalDocs />} />
-      <Route path="/projects/monitoring/evaluation-summary" element={<EStaffProjEvaluation />} />
+
     </Routes>
   );
 }
