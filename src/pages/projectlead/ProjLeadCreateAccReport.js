@@ -1,11 +1,19 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
+import { FaArrowLeft } from "react-icons/fa";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 
 const ProjLeadCreateAccReport = () => {
     const [projectType, setProjectType] = useState("");
     const [projectCategory, setProjectCategory] = useState("");
     const [trainingModality, setTrainingModality] = useState("");
+    
+    const navigate = useNavigate();
+
+    const handleViewClick = (path) => {
+        navigate(path);
+    }
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -17,11 +25,9 @@ const ProjLeadCreateAccReport = () => {
             <div className="flex-1 ml-[20%]">
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
-                <div className="flex items-center mb-5">
-                        <button className="mr-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                            </svg>
+                    <div className="flex items-center mb-5">
+                        <button className="my-5 mr-3" onClick={() => handleViewClick('/requirements/accomplishment-report')}>
+                        <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold text-left">Create Accomplishment Report</h1>
                     </div>

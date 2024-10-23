@@ -58,11 +58,6 @@ function EStaffSideBar() {
                         </div>
                     </li>
                     <li>
-                        <Link to="/auto-message" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/auto-message"]) ? "text-yellow-500" : ""}`}>
-                            Auto Message
-                        </Link>
-                    </li>
-                    <li>
                         <Link to="/email" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/email"]) ? "text-yellow-500" : ""}`}>
                             Email
                         </Link>

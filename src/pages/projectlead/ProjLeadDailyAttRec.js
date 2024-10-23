@@ -13,7 +13,7 @@ const ProjLeadDailyAttRec = () => {
             <div className="flex-1 ml-[20%]">
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
-                    <h1 className="text-2xl font-semibold mb-5">Daily Attendance Record</h1>
+                    <h1 className="text-2xl font-semibold mb-5">Daily Attendance Record/List of Participants</h1>
 
                     {/* Project Details and Progress Status Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">

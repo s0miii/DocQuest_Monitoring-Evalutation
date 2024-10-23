@@ -4,10 +4,8 @@ import { Link, useLocation } from "react-router-dom";
 function ProjLeadSidebar() {
     const location = useLocation();
 
-    const isRequirementsPath = location.pathname.startsWith("/requirements");
-
     const [isSubMenuVisible, setIsSubMenuVisible] = useState(false);
-    const [isRequirementsSubMenuVisible, setIsRequirementsSubMenuVisible] = useState(isRequirementsPath);
+    const [isRequirementsSubMenuVisible, setIsRequirementsSubMenuVisible] = useState(false);
 
     const toggleSubMenu = () => {
         setIsSubMenuVisible(!isSubMenuVisible);
@@ -46,13 +44,13 @@ function ProjLeadSidebar() {
                         <Link to="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Create MOA/MOU</Link>
                     </li>
                     <li>
-                        <button onClick={toggleRequirementsSubMenu} className={`text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none ${isActive(["/requirements"]) ? "text-yellow-500" : ""}`}>
-                            Requirements
-                        </button>
+                        <Link to="/requirements" onClick={toggleRequirementsSubMenu} className={`text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none ${isActive(["/requirements"]) ? "text-yellow-500" : ""}`}>
+                            Documentary Requirements
+                        </Link>
                         <ul className={`${isRequirementsSubMenuVisible ? '' : 'hidden'} bg-indigo-900`}>
                             <li><Link to="/requirements/accomplishment-report" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/accomplishment-report", "/requirements/create-accomplishment-report"]) ? "text-yellow-500" : ""}`}>Accomplishment Report</Link></li>
-                            <li><Link to="/requirements/list-of-participants" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/list-of-participants"]) ? "text-yellow-500" : ""}`}>List of Participants</Link></li>
                             <li><Link to="/requirements/daily-attendance" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/daily-attendance"]) ? "text-yellow-500" : ""}`}>Daily Attendance Record</Link></li>
+                            <li><Link to="/requirements/evaluation-summary" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/evaluation-summary"]) ? "text-yellow-500" : ""}`}>Evaluation Summary</Link></li>
                             <li><Link to="/requirements/trainer-cv" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/trainer-cv"]) ? "text-yellow-500" : ""}`}>Trainer CV/DTR</Link></li>
                             <li><Link to="/requirements/modules-notes" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/modules-notes"]) ? "text-yellow-500" : ""}`}>Modules/Notes</Link></li>
                             <li><Link to="/requirements/others" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/others"]) ? "text-yellow-500" : ""}`}>Other </Link></li>

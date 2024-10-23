@@ -12,7 +12,6 @@ import ProjLeadRequirements from "./pages/projectlead/ProjLeadRequirements";
 import ProjLeadAccReport from "./pages/projectlead/ProjLeadAccReport";
 import ProjLeadCreateAccReport from "./pages/projectlead/ProjLeadCreateAccReport";
 import ProjLeadDailyAttRec from "./pages/projectlead/ProjLeadDailyAttRec";
-import ProjLeadListofParticipants from "./pages/projectlead/ProjLeadListofParticipants";
 import ProjLeadTrainersCV from "./pages/projectlead/ProjLeadTrainersCV";
 import ProjLeadLecNotes from "./pages/projectlead/ProjLeadLecNotes";
 import ProjLeadOthers from "./pages/projectlead/ProjLeadOthers";
@@ -30,6 +29,7 @@ import EStaffProjParticipantsList from "./pages/estaff/EStaffProjParticipantsLis
 import EStaffProjAttendanceRecord from "./pages/estaff/EStaffProjAttendanceRecord";
 import EStaffProjAdditionalDocs from "./pages/estaff/EStaffProjAdditionalDocs";
 import EStaffProjEvaluation from "./pages/estaff/EStaffProjEvaluation";
+import ProjLeadEvalSum from "./pages/projectlead/ProjLeadEvalSum";
 
 function App() {
   return (
@@ -44,13 +44,18 @@ function App() {
       <Route path="/requirements" element={<ProjLeadRequirements />} />
       <Route path="/requirements/accomplishment-report" element={<ProjLeadAccReport />} />
       <Route path="/requirements/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
-      <Route path="/requirements/list-of-participants" element={<ProjLeadListofParticipants />} />
       <Route path="/requirements/daily-attendance" element={<ProjLeadDailyAttRec />} />
+      <Route path="/requirements/evaluation-summary" element={<ProjLeadEvalSum />} />
       <Route path="/requirements/trainer-cv" element={<ProjLeadTrainersCV />} />
       <Route path="/requirements/modules-notes" element={<ProjLeadLecNotes />} />
       <Route path="/requirements/others" element={<ProjLeadOthers />} />
       <Route path="/projects" element={<EStaffProjects />} />
       <Route path="/projects/monitoring" element={<EStaffProjMonitoring />} />
+      <Route path="/projects/monitoring/accomplishment-report" element={<EStaffProjAccReport />} />
+      <Route path="/projects/monitoring/participants-list" element={<EStaffProjParticipantsList />} />
+      <Route path="/projects/monitoring/daily-attendance" element={<EStaffProjAttendanceRecord />} />
+      <Route path="/projects/monitoring/additional-documents" element={<EStaffProjAdditionalDocs />} />
+      <Route path="/projects/monitoring/evaluation-summary" element={<EStaffProjEvaluation />} />
     </Routes>
   );
 }
