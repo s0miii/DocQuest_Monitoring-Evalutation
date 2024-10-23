@@ -12,6 +12,7 @@ import ProjLeadRequirements from "./pages/projectlead/ProjLeadRequirements";
 import ProjLeadAccReport from "./pages/projectlead/ProjLeadAccReport";
 import ProjLeadCreateAccReport from "./pages/projectlead/ProjLeadCreateAccReport";
 import ProjLeadDailyAttRec from "./pages/projectlead/ProjLeadDailyAttRec";
+import ProjLeadEvalSum from "./pages/projectlead/ProjLeadEvalSum";
 import ProjLeadTrainersCV from "./pages/projectlead/ProjLeadTrainersCV";
 import ProjLeadLecNotes from "./pages/projectlead/ProjLeadLecNotes";
 import ProjLeadOthers from "./pages/projectlead/ProjLeadOthers";
@@ -29,7 +30,7 @@ import EStaffProjParticipantsList from "./pages/estaff/EStaffProjParticipantsLis
 import EStaffProjAttendanceRecord from "./pages/estaff/EStaffProjAttendanceRecord";
 import EStaffProjAdditionalDocs from "./pages/estaff/EStaffProjAdditionalDocs";
 import EStaffProjEvaluation from "./pages/estaff/EStaffProjEvaluation";
-import ProjLeadEvalSum from "./pages/projectlead/ProjLeadEvalSum";
+
 
 function App() {
   return (
