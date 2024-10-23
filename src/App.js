@@ -25,6 +25,11 @@ import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
 import EStaffProjects from "./pages/estaff/EStaffProjects";
 import EStaffProjMonitoring from "./pages/estaff/EStaffProjMonitoring";
+import EStaffProjAccReport from "./pages/estaff/EStaffProjAccReport";
+import EStaffProjParticipantsList from "./pages/estaff/EStaffProjParticipantsList";
+import EStaffProjAttendanceRecord from "./pages/estaff/EStaffProjAttendanceRecord";
+import EStaffProjAdditionalDocs from "./pages/estaff/EStaffProjAdditionalDocs";
+import EStaffProjEvaluation from "./pages/estaff/EStaffProjEvaluation";
 
 function App() {
   return (
