@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 function ProjLeadSidebar() {
     const location = useLocation();
 
-    const isRequirementsPath = location.pathname.startsWith("/requirements");
+    const isRequirementsPath = location.pathname.startsWith("/projlead/requirements");
 
     const [isSubMenuVisible, setIsSubMenuVisible] = useState(false);
     const [isRequirementsSubMenuVisible, setIsRequirementsSubMenuVisible] = useState(isRequirementsPath);
@@ -46,16 +46,16 @@ function ProjLeadSidebar() {
                         <Link to="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Create MOA/MOU</Link>
                     </li>
                     <li>
-                        <button onClick={toggleRequirementsSubMenu} className={`text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none ${isActive(["/requirements"]) ? "text-yellow-500" : ""}`}>
+                        <button onClick={toggleRequirementsSubMenu} className={`text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none ${isActive(["/projlead/requirements"]) ? "text-yellow-500" : ""}`}>
                             Documentary Requirements
                         </button>
                         <ul className={`${isRequirementsSubMenuVisible ? '' : 'hidden'} bg-indigo-900`}>
-                        <li><Link to="/requirements/accomplishment-report" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/accomplishment-report", "/requirements/create-accomplishment-report"]) ? "text-yellow-500" : ""}`}>Accomplishment Report</Link></li>
-                            <li><Link to="/requirements/daily-attendance" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/daily-attendance"]) ? "text-yellow-500" : ""}`}>Daily Attendance Record</Link></li>
-                            <li><Link to="/requirements/evaluation-summary" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/evaluation-summary"]) ? "text-yellow-500" : ""}`}>Evaluation Summary</Link></li>
-                            <li><Link to="/requirements/trainer-cv" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/trainer-cv"]) ? "text-yellow-500" : ""}`}>Trainer CV/DTR</Link></li>
-                            <li><Link to="/requirements/modules-notes" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/modules-notes"]) ? "text-yellow-500" : ""}`}>Modules/Notes</Link></li>
-                            <li><Link to="/requirements/others" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/requirements/others"]) ? "text-yellow-500" : ""}`}>Other </Link></li>
+                        <li><Link to="/projlead/requirements/accomplishment-report" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projlead/requirements/accomplishment-report", "/requirements/create-accomplishment-report"]) ? "text-yellow-500" : ""}`}>Accomplishment Report</Link></li>
+                            <li><Link to="/projlead/requirements/daily-attendance" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projlead/requirements/daily-attendance"]) ? "text-yellow-500" : ""}`}>Daily Attendance Record</Link></li>
+                            <li><Link to="/projlead/requirements/evaluation-summary" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projlead/requirements/evaluation-summary"]) ? "text-yellow-500" : ""}`}>Evaluation Summary</Link></li>
+                            <li><Link to="/projlead/requirements/trainer-cv" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projlead/requirements/trainer-cv"]) ? "text-yellow-500" : ""}`}>Trainer CV/DTR</Link></li>
+                            <li><Link to="/projlead/requirements/modules-notes" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projlead/requirements/modules-notes"]) ? "text-yellow-500" : ""}`}>Modules/Notes</Link></li>
+                            <li><Link to="/projlead/requirements/others" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projlead/requirements/others"]) ? "text-yellow-500" : ""}`}>Other </Link></li>
                         </ul>
                     </li>
                     <li><Link to="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Log out</Link></li>

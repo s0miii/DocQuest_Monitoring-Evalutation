@@ -25,6 +25,10 @@ import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
 import EStaffProjects from "./pages/estaff/EStaffProjects";
 import EStaffProjMonitoring from "./pages/estaff/EStaffProjMonitoring";
+import ProponentsProjects from "./pages/proponents/ProponentsProjects"
+import ProponentsProjReq from "./pages/proponents/ProponentsProjReq";
+import ProponentsDailyAttRec from "./pages/proponents/ProponentsDailyAttRec";
+import ProponentsLecNotes from "./pages/proponents/ProponentsLecNotes";
 
 
 
@@ -38,16 +42,20 @@ function App() {
       <Route path="/deptoff" element={ <DeptOffDashboard /> } />
       <Route path="/coordinator" element={ <CoordinatorDashboard /> } />
       <Route path="/signatory" element={ <SignatoryDashboard /> } />
-      <Route path="/requirements" element={<ProjLeadRequirements />} />
-      <Route path="/requirements/accomplishment-report" element={<ProjLeadAccReport />} />
-      <Route path="/requirements/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
-      <Route path="/requirements/daily-attendance" element={<ProjLeadDailyAttRec />} />
-      <Route path="/requirements/evaluation-summary" element={<ProjLeadEvalSum />} />
-      <Route path="/requirements/trainer-cv" element={<ProjLeadTrainersCV />} />
-      <Route path="/requirements/modules-notes" element={<ProjLeadLecNotes />} />
-      <Route path="/requirements/others" element={<ProjLeadOthers />} />
-      <Route path="/projects" element={<EStaffProjects />} />
-      <Route path="/projects/monitoring" element={<EStaffProjMonitoring />} />
+      <Route path="/projlead/requirements" element={<ProjLeadRequirements />} />
+      <Route path="/projlead/requirements/accomplishment-report" element={<ProjLeadAccReport />} />
+      <Route path="/projlead/requirements/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
+      <Route path="/projlead/requirements/daily-attendance" element={<ProjLeadDailyAttRec />} />
+      <Route path="/projlead/requirements/evaluation-summary" element={<ProjLeadEvalSum />} />
+      <Route path="/projlead/requirements/trainer-cv" element={<ProjLeadTrainersCV />} />
+      <Route path="/projlead/requirements/modules-notes" element={<ProjLeadLecNotes />} />
+      <Route path="/projlead/requirements/others" element={<ProjLeadOthers />} />
+      <Route path="projects" element={<EStaffProjects />} />
+      <Route path="projects/monitoring" element={<EStaffProjMonitoring />} />
+      <Route path="/proponents/projects" element={<ProponentsProjects />} />
+      <Route path="/proponents/projects/req" element={<ProponentsProjReq />} />
+      <Route path="/proponents/projects/req/dtr" element={<ProponentsDailyAttRec/>} />
+      <Route path="/proponents/projects/req/lecnotes" element={<ProponentsLecNotes/>} />
 
     </Routes>
   );
