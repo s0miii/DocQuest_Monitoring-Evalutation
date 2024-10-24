@@ -1,8 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 
 const ProjLeadLecNotes = () => {
+    const [selectedProponent, setSelectedProponent] = useState("");
+
+    const submittedFiles = [
+        { fileName: "Day 1 Lecture Notes.pdf", submittedBy: "Proponent A", date: "2024-10-10" },
+        { fileName: "Day 2 Lecture Notes.pdf", submittedBy: "Proponent B", date: "2024-10-11" },
+        { fileName: "Day 3 Lecture Notes.pdf", submittedBy: "Proponent C", date: "2024-10-12" }
+    ];
+
     return (
         <div className="bg-gray-200 min-h-screen flex">
             {/* Sidebar with fixed width */}
@@ -46,76 +54,46 @@ const ProjLeadLecNotes = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* File Submission Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Attach Files</h2>
+                        <h2 className="text-xl font-semibold text-center mb-4">Assign Modules/Lecture Notes Submission</h2>
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Attached File</label>
-                            <div className="flex items-center">
-                                <input
-                                    type="file"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Upload Photo"
-                                    style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
-                                />
-                            </div>
+                            <label className="block text-sm font-medium text-gray-700">Enter Proponent</label>
+                            <input
+                                type="text"
+                                value={selectedProponent}
+                                onChange={(e) => setSelectedProponent(e.target.value)}
+                                className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                placeholder="Enter proponent name/email"
+                            />
                         </div>
                         <div className="flex justify-center">
-                            <button
-                                type="button"
-                                className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
-                            >
-                                Submit
+                            <button type="button" className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition">
+                                Assign Task
                             </button>
                         </div>
                     </div>
 
-                    {/* Add New Submission Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Add New Submission</h2>
-                        <div className="grid grid-cols-2 gap-6">
-                            {/* Row 1 */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Project Leader</label>
-                                <input
-                                    type="text"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Project Leader"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Project Title</label>
-                                <input
-                                    type="text"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Project Title"
-                                />
-                            </div>
-                            {/* Row 2 */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Document Type</label>
-                                <input
-                                    type="text"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Document Type"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Date Submitted</label>
-                                <input
-                                    type="date"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-center mt-6">
-                            <button
-                                type="button"
-                                className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
-                            >
-                                Submit
-                            </button>
+                        <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
+                                <thead>
+                                    <tr className="bg-gray-100 border-b">
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">File Name</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Submitted By</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {submittedFiles.map((file, index) => (
+                                        <tr key={index} className={`border-b ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">{file.fileName}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{file.submittedBy}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{file.date}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
