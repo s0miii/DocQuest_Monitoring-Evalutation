@@ -47,30 +47,6 @@ const ProjLeadTrainersCV = () => {
                         </div>
                     </div>
 
-                    {/* File Submission Section */}
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Attach Files</h2>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Attached File</label>
-                            <div className="flex items-center">
-                                <input
-                                    type="file"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Upload Photo"
-                                    style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-center">
-                            <button
-                                type="button"
-                                className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
-                            >
-                                Submit
-                            </button>
-                        </div>
-                    </div>
-
                     {/* Add New Submission Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Add New Submission</h2>
@@ -94,7 +70,19 @@ const ProjLeadTrainersCV = () => {
                                 />
                             </div>
                         </div>
-                        <div className="flex justify-center mt-6">
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Attached File</label>
+                            <div className="flex items-center">
+                                <input
+                                    type="file"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Upload Photo"
+                                    style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-center">
                             <button
                                 type="button"
                                 className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
@@ -103,6 +91,9 @@ const ProjLeadTrainersCV = () => {
                             </button>
                         </div>
                     </div>
+
+
+
                 </div>
             </div>
         </div>
