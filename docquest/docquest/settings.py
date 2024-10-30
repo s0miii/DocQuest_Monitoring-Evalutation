@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'docquestapp',
     "whitenoise.runserver_nostatic",
     'corsheaders',
+    'monitoring_evaluation',
 ]
 
 MIDDLEWARE = [
