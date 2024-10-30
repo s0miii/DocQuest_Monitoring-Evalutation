@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('monitoring/', include('monitoring_evaluation.urls')),
 
     re_path('signup', views.signup),
     re_path('name_and_roles', views.name_and_roles),
