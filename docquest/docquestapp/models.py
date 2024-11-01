@@ -4,8 +4,9 @@ from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager
 from django.utils import timezone
 from django.contrib.auth.models import PermissionsMixin
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 import datetime
-import hashlib
 
 class Roles(models.Model):
     roleID = models.AutoField(primary_key=True)
@@ -123,28 +124,10 @@ class Project(models.Model):
     moaID = models.ForeignKey(MOA, related_name='projectMoa', on_delete=models.CASCADE, null=True)
     agency = models.ManyToManyField(PartnerAgency, related_name='projectAgency') #a3
 
-    routingProgress = models.IntegerField(default=0)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     dateCreated = models.DateTimeField(auto_now_add=True)
 
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
-
-    # def save(self, *args, **kwargs):
-    #     # Save the instance first to ensure projectID is generated.
-    #     super(Project, self).save(*args, **kwargs)
-
-    #     # Generate the unique code if it hasn't been set yet.
-    #     if not self.uniqueCode:
-    #         self.uniqueCode = f"{self.projectID}-{self.dateCreated.strftime('%Y%m%d')}"
-
-    #     # Update project status based on routingProgress
-    #     if self.routingProgress >= 7:
-    #         self.status = 'approved'
-    #     elif self.status != 'rejected':  # Do not change to pending if already rejected
-    #         self.status = 'pending'
-
-    #     # Save the instance again if there are changes.
-    #     super(Project, self).save(*args, **kwargs)
 
 class Signatories(models.Model):
     APPROVAL_CHOICES = [
@@ -154,53 +137,60 @@ class Signatories(models.Model):
     ]
     
     project = models.ForeignKey(Project, related_name='signatoryProject', on_delete=models.CASCADE)
-    userID = models.ForeignKey(CustomUser, related_name='signatoryUser', on_delete=models.CASCADE)
-    signatureCode = models.CharField(max_length=255)
-    approvalStatus = models.CharField(max_length=10, choices=APPROVAL_CHOICES, default='none')
-
-    def generate_signature_code(self):
-        """
-        Generate the signature code in the format userId-projectId-date+checksum.
-        """
-        date_str = self.project.dateCreated.strftime('%Y%m%d')  # Convert dateCreated to YYYYMMDD
-        code_without_checksum = f"{self.userID.pk}-{self.project.projectID}-{date_str}"
-        checksum = self.calculate_checksum(code_without_checksum)
-        return f"{code_without_checksum}+{checksum}"
-
-    def calculate_checksum(self, code):
-        """
-        Calculate a checksum using a simple hash (or sum of ASCII values).
-        """
-        return sum(ord(char) for char in code) % 10  # Simple checksum (mod 10)
-
-    def save(self, *args, **kwargs):
-        # Handle approval status logic
-        if self.approvalStatus == 'approved':
-            # Generate the signatureCode only when approvalStatus is approved
-            if not self.signatureCode:
-                self.signatureCode = self.generate_signature_code()
-
-            # Increment the routingProgress of the associated project
-            self.project.routingProgress += 1
-
-        elif self.approvalStatus == 'rejected':
-            # If rejected, set project status to 'rejected'
-            self.project.status = 'rejected'
-            # Ensure routingProgress doesn't get updated further once rejected
-            self.project.routingProgress = min(self.project.routingProgress, 7)
-
-        # Save the project with the updated routingProgress and status
-        self.project.save()
-
-        # Call the super method to save the Signatories instance
-        super(Signatories, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return self.signatureCode if self.signatureCode else "No signature code"
+    name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
 
 class Proponents(models.Model): #a1
     project = models.ForeignKey(Project, related_name='proponent', on_delete=models.CASCADE)
-    proponent = models.CharField(max_length=50)
+    userID = models.ForeignKey(CustomUser, related_name='proponentUser', on_delete=models.CASCADE)
+
+class NonUserProponents(models.Model):
+    project = models.ForeignKey(Project, related_name='nonUserProponents', on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+class Deliverables(models.Model):
+    deliverableID = models.AutoField(primary_key=True)
+    deliverableName = models.CharField(max_length=100)
+
+class UserProjectDeliverables(models.Model):
+    userID = models.ForeignKey(CustomUser, related_name='userProjectDeliverables', on_delete=models.CASCADE)
+    projectID = models.ForeignKey(Project, related_name='userProjectDeliverables', on_delete=models.CASCADE)
+    deliverableID = models.ForeignKey(Deliverables, related_name='userProjectDeliverables', on_delete=models.CASCADE)
+
+class Notification(models.Model):
+    notificationID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(CustomUser, related_name='notification', on_delete=models.CASCADE)
+    contentType = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
+    objectID = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
+    source = GenericForeignKey('contentType', 'objectID')  # Polymorphic link to the related object
+    message = models.CharField(max_length=255)
+    status = models.CharField(max_length=10, choices=[('Unread', 'Unread'), ('Read', 'Read')], default='Unread')
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+class DocumentPDF(models.Model):
+    documentID = models.AutoField(primary_key=True)
+    fileData = models.BinaryField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    contentType = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
+    objectID = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
+    source = GenericForeignKey('contentType', 'objectID')  # Polymorphic link to the related object
+
+class Review(models.Model):
+    STATUS_CHOICES = [
+        ('approved', 'Approved'),
+        ('pending', 'Pending'),
+        ('rejected', 'Rejected'),
+    ]
+
+    reviewID = models.AutoField(primary_key=True)
+    contentOwnerID = models.ForeignKey(CustomUser, related_name='reviewsContentOwner', on_delete=models.CASCADE)
+    contentType = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
+    objectID = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
+    source = GenericForeignKey('contentType', 'objectID')  # Polymorphic link to the related object
+    reviewedByID = models.ForeignKey(CustomUser, related_name='reviewsReviewedBy', on_delete=models.CASCADE)
+    reviewStatus = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    reviewDate = models.DateTimeField(auto_now_add=True)
+    comment = models.TextField()
 
 class GoalsAndObjectives(models.Model): #a5
     GAOID = models.AutoField(primary_key=True)
