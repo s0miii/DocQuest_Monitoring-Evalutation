@@ -130,12 +130,6 @@ class Project(models.Model):
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
 class Signatories(models.Model):
-    APPROVAL_CHOICES = [
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-        ('none', 'None'),
-    ]
-    
     project = models.ForeignKey(Project, related_name='signatoryProject', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
