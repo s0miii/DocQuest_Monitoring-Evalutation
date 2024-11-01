@@ -83,12 +83,12 @@ class LoadingOfTrainersSerializer(serializers.ModelSerializer):
 class SignatoriesSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Signatories
-        fields = ['userID', 'approvalStatus']
+        fields = ['name', 'title']
 
-class ProponentsSerializer(serializers.ModelSerializer):
+class NonUserProponentsSerializer(serializers.ModelSerializer):
     class Meta(object):
-        model = Proponents
-        fields = ['proponent']
+        model = NonUserProponents
+        fields = ['name']
 
 class RegionSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -200,7 +200,8 @@ class GetProjectSerializer(serializers.ModelSerializer):
 
 class PostProjectSerializer(serializers.ModelSerializer):
     userID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-    proponents = ProponentsSerializer(many=True)
+    proponents = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
+    nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = PostAddressSerializer()
     agency = serializers.PrimaryKeyRelatedField(queryset=PartnerAgency.objects.all(), many=True)
     goalsAndObjectives = GoalsAndObjectivesSerializer(many=True)
@@ -219,13 +220,14 @@ class PostProjectSerializer(serializers.ModelSerializer):
             'userID', 'programCategory', 'projectTitle', 'projectType',
             'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',  
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
-            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'projectLocationID',
+            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
             'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 
         ]
 
     def create(self, validated_data):
         proponents_data = validated_data.pop('proponents')
+        nonUserProponents_data = validated_data.pop('nonUserProponents')
         address_data = validated_data.pop('projectLocationID')
         projectLocationID = Address.objects.create(**address_data)
         agency_data = validated_data.pop('agency')
@@ -241,9 +243,10 @@ class PostProjectSerializer(serializers.ModelSerializer):
         project = Project.objects.create(projectLocationID=projectLocationID, **validated_data)
 
         project.agency.set(agency_data)
+        project.proponents.set(proponents_data)
 
-        for proponent_data in proponents_data:
-            Proponents.objects.create(project=project, **proponent_data)
+        for nonUserProponents_data in nonUserProponents_data:
+            NonUserProponents.objects.create(project=project, **nonUserProponents_data)
         
         for goalsAndObjective_data in goalsAndObjectives_data:
             GoalsAndObjectives.objects.create(project=project, **goalsAndObjective_data)

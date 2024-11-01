@@ -123,6 +123,7 @@ class Project(models.Model):
     projectLocationID = models.ForeignKey(Address, related_name='projectLocation', on_delete=models.CASCADE) #a2
     moaID = models.ForeignKey(MOA, related_name='projectMoa', on_delete=models.CASCADE, null=True)
     agency = models.ManyToManyField(PartnerAgency, related_name='projectAgency') #a3
+    proponents = models.ManyToManyField(CustomUser, related_name='proponent')
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     dateCreated = models.DateTimeField(auto_now_add=True)
@@ -133,10 +134,6 @@ class Signatories(models.Model):
     project = models.ForeignKey(Project, related_name='signatoryProject', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
-
-class Proponents(models.Model): #a1
-    project = models.ForeignKey(Project, related_name='proponent', on_delete=models.CASCADE)
-    userID = models.ForeignKey(CustomUser, related_name='proponentUser', on_delete=models.CASCADE)
 
 class NonUserProponents(models.Model):
     project = models.ForeignKey(Project, related_name='nonUserProponents', on_delete=models.CASCADE)
