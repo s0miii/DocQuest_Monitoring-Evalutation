@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from docquestapp.models import *
 from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
+from django.contrib.contenttypes.models import ContentType
 
 # mga nagamit
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -84,6 +85,11 @@ class SignatoriesSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Signatories
         fields = ['name', 'title']
+
+class ProponentsSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = CustomUser
+        fields = ['firstname', 'lastname']
 
 class NonUserProponentsSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -173,9 +179,34 @@ class GetProjectLeaderSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['userID', 'firstname', 'lastname']
 
+class DeliverablesSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Deliverables
+        fields = ['deliverableName']
+
+class UserProjectDeliverablesSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = UserProjectDeliverables
+        fields = ['userID', 'projectID', 'deliverableID']
+        list_serializer_class = serializers.ListSerializer  # Use ListSerializer for bulk operations
+
+class NotificationSerializer(serializers.ModelSerializer):
+    content_type = serializers.SlugRelatedField(
+        queryset=ContentType.objects.all(),
+        slug_field='model'  # Shows the model name as a string (e.g., 'project' or 'moa')
+    )
+
+    class Meta:
+        model = Notification
+        fields = [
+            'notificationID', 'userID', 'content_type',
+            'source_id', 'message', 'status', 'timestamp'
+        ]
+
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
     proponents = ProponentsSerializer(source='proponent', many=True)
+    nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = AddressSerializer()
     agency = PartnerAgencySerializer(many=True)
     goalsAndObjectives = GoalsAndObjectivesSerializer(many=True)
@@ -193,7 +224,7 @@ class GetProjectSerializer(serializers.ModelSerializer):
             'userID', 'programCategory', 'projectTitle', 'projectType',
             'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',  
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
-            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'projectLocationID',
+            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
             'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 'dateCreated'
         ]

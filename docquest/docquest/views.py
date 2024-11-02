@@ -113,32 +113,98 @@ def get_project(request, pk):
     project_serializer = GetProjectSerializer(instance=project)
     return Response(project_serializer.data)
 
-@api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
-def update_signatory_status(request, signatory_id):
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def bulk_create_deliverables(request):
+    # Ensure request data is a list
+    if isinstance(request.data, list):
+        serializer = UserProjectDeliverablesSerializer(date=request.data, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response(
+            {"error": "Expected a list of items for bulk creation"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def send_notifications_to_director_and_staff(request):
+    # Get content type and object ID from request data
+    content_type_model = request.data.get('content_type')
+    source_id = request.data.get('source_id')
+
+    # Determine the message based on content type
+    if content_type_model.lower() == 'project':
+        message = 'New project to review'
+    elif content_type_model.lower() == 'moa':
+        message = 'New MOA to review'
+    else:
+        return Response(
+            {"error": "Invalid content type specified. Must be 'project' or 'moa'."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validate if the content type exists in the ContentType table
     try:
-        # Fetch the Signatories instance by ID
-        signatory = Signatories.objects.get(pk=signatory_id)
-    except Signatories.DoesNotExist:
-        return Response({"error": "Signatory not found."}, status=status.HTTP_404_NOT_FOUND)
+        content_type = ContentType.objects.get(model=content_type_model.lower())
+    except ContentType.DoesNotExist:
+        return Response(
+            {"error": "Invalid content type specified"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    # Get the new approval status from the request data
-    new_status = request.data.get('approvalStatus')
+    # Filter users with roles 'director' or 'staff'
+    director_staff_users = CustomUser.objects.filter(
+        role__code__in=['ecrd', 'estf']
+    ).distinct()
 
-    if new_status not in dict(Signatories.APPROVAL_CHOICES).keys():
-        return Response({"error": "Invalid approval status."}, status=status.HTTP_400_BAD_REQUEST)
+    # Create notifications for each user
+    notifications = [
+        Notification(
+            userID=user,
+            content_type=content_type,
+            source_id=source_id,
+            message=message
+        )
+        for user in director_staff_users
+    ]
 
-    # Update the approval status
-    signatory.approvalStatus = new_status
+    # Bulk create notifications
+    Notification.objects.bulk_create(notifications)
+
+    # Serialize and return created notifications
+    serializer = NotificationSerializer(notifications, many=True)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+# @api_view(['PATCH'])
+# @permission_classes([IsAuthenticated])
+# def update_signatory_status(request, signatory_id):
+#     try:
+#         # Fetch the Signatories instance by ID
+#         signatory = Signatories.objects.get(pk=signatory_id)
+#     except Signatories.DoesNotExist:
+#         return Response({"error": "Signatory not found."}, status=status.HTTP_404_NOT_FOUND)
+
+#     # Get the new approval status from the request data
+#     new_status = request.data.get('approvalStatus')
+
+#     if new_status not in dict(Signatories.APPROVAL_CHOICES).keys():
+#         return Response({"error": "Invalid approval status."}, status=status.HTTP_400_BAD_REQUEST)
+
+#     # Update the approval status
+#     signatory.approvalStatus = new_status
     
-    # If the new status is approved, generate the signature code
-    if new_status == 'approved':
-        signatory.signatureCode = signatory.generate_signature_code()
+#     # If the new status is approved, generate the signature code
+#     if new_status == 'approved':
+#         signatory.signatureCode = signatory.generate_signature_code()
 
-    # Save the updated signatory instance
-    signatory.save()
+#     # Save the updated signatory instance
+#     signatory.save()
 
-    return Response({"message": "Approval status updated successfully.", "signatureCode": signatory.signatureCode}, status=status.HTTP_200_OK)
+#     return Response({"message": "Approval status updated successfully.", "signatureCode": signatory.signatureCode}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

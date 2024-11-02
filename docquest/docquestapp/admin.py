@@ -44,9 +44,9 @@ class RolesAdmin(admin.ModelAdmin):
     fields = ["role", "code"]
     list_display = ["roleID", "role", "code"]
 
-class SignatoriesAdmin(admin.ModelAdmin):
-    fields = ["project", "userID", "signatureCode", "approvalStatus"]
-    list_display = ["project", "userID", "signatureCode", "approvalStatus"]
+# class SignatoriesAdmin(admin.ModelAdmin):
+#     fields = ["project", "userID", "signatureCode", "approvalStatus"]
+#     list_display = ["project", "userID", "signatureCode", "approvalStatus"]
 
 class RegionAdmin(admin.ModelAdmin):
     fields = ["region"]
@@ -81,4 +81,4 @@ admin.site.register(Barangay, BarangayAdmin)
 admin.site.register(Address, AddressAdmin)
 admin.site.register(PartnerAgency, PartnerAgencyAdmin)
 admin.site.register(CustomUser, CreateUserAdmin)
-admin.site.register(Signatories, SignatoriesAdmin)
+# admin.site.register(Signatories, SignatoriesAdmin)
