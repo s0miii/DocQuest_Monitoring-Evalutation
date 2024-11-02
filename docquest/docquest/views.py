@@ -179,6 +179,122 @@ def send_notifications_to_director_and_staff(request):
     serializer = NotificationSerializer(notifications, many=True)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_review(request):
+    # Get the logged-in user as content owner
+    content_owner = request.user
+
+    # Extract content type and source ID from request data
+    content_type_model = request.data.get('content_type')
+    source_id = request.data.get('source_id')
+    comment = request.data.get('comment', '')
+
+    # Validate and retrieve the content type
+    try:
+        content_type = ContentType.objects.get(model=content_type_model.lower())
+    except ContentType.DoesNotExist:
+        return Response(
+            {"error": "Invalid content type specified. Must be 'project' or 'moa'."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Find a user with the 'director' role to assign as reviewedBy
+    try:
+        director_user = CustomUser.objects.filter(role__code='ecrd').first()
+        if not director_user:
+            return Response(
+                {"error": "No user with the 'director' role found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    except CustomUser.DoesNotExist:
+        return Response(
+            {"error": "Error retrieving director user."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Create the review instance
+    review_data = {
+        'contentOwnerID': content_owner.userID,
+        'content_type': content_type.id,
+        'source_id': source_id,
+        'reviewedByID': director_user.userID,
+        'comment': comment,
+        'reviewStatus': 'pending'
+    }
+    
+    serializer = ReviewSerializer(data=review_data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def approve_or_deny_project(request, review_id):
+    # Only a user with the "director" role should be able to perform this action
+    if not request.user.role.filter(code='ecrd').exists():
+        return Response(
+            {"error": "You do not have the required permissions to perform this action."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    try:
+        # Fetch the review instance
+        review = Review.objects.get(reviewID=review_id)
+        project = Project.objects.get(projectID=review.source_id)
+
+        # Determine approval or rejection
+        action = request.data.get('action')
+        comment = request.data.get('comment', '')
+
+        if action == 'approve':
+            review.reviewStatus = 'approved'
+            project.status = 'approved'
+            message = 'Your project has been approved.'
+        elif action == 'deny':
+            review.reviewStatus = 'rejected'
+            review.comment = comment
+            project.status = 'rejected'
+            message = 'Your project has been rejected.'
+        else:
+            return Response(
+                {"error": "Invalid action. Must be 'approve' or 'deny'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Save changes to the review and project
+        review.save()
+        project.save()
+
+        # Create a notification for the content owner
+        notification = Notification.objects.create(
+            userID=review.contentOwnerID,
+            content_type=ContentType.objects.get_for_model(Review),
+            source_id=review.reviewID,
+            message=f"Review status for your project '{project.projectTitle}' has been updated: {review.reviewStatus}",
+            status='Unread'
+        )
+
+        # Serialize and return the updated review and notification
+        review_serializer = ReviewSerializer(review)
+        notification_serializer = NotificationSerializer(notification)
+        
+        return Response(
+            {
+                "review": review_serializer.data,
+                "notification": notification_serializer.data,
+                "project_status": project.status
+            },
+            status=status.HTTP_200_OK
+        )
+
+    except Review.DoesNotExist:
+        return Response({"error": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
+    except Project.DoesNotExist:
+        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+
 # @api_view(['PATCH'])
 # @permission_classes([IsAuthenticated])
 # def update_signatory_status(request, signatory_id):
