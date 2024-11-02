@@ -32,6 +32,12 @@ urlpatterns = [
     #send notification
     path('send_notifications_to_director_and_staff', views.send_notifications_to_director_and_staff),
 
+    #review post request
+    path('create_review', views.create_review),
+
+    #Director approve or deny project
+    path('approve_or_deny_project/<int:review_id>/', views.approve_or_deny_project),
+
     # get address
     path('get_regions', views.get_regions),
     path('get_provinces/<int:regionID>/', views.get_provinces),

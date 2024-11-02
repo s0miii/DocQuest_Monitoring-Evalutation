@@ -181,7 +181,7 @@ class Review(models.Model):
     reviewedByID = models.ForeignKey(CustomUser, related_name='reviewsReviewedBy', on_delete=models.CASCADE)
     reviewStatus = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     reviewDate = models.DateTimeField(auto_now_add=True)
-    comment = models.TextField()
+    comment = models.TextField(null=True, blank=True)
 
 class GoalsAndObjectives(models.Model): #a5
     GAOID = models.AutoField(primary_key=True)

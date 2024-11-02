@@ -203,6 +203,14 @@ class NotificationSerializer(serializers.ModelSerializer):
             'source_id', 'message', 'status', 'timestamp'
         ]
 
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Review
+        fields = [
+            'reviewID', 'contentOwnerID', 'content_type', 'source_id',
+            'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
+        ]
+
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
     proponents = ProponentsSerializer(source='proponent', many=True)
@@ -226,7 +234,8 @@ class GetProjectSerializer(serializers.ModelSerializer):
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
-            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 'dateCreated'
+            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 'dateCreated',
+            'reviewStatus'
         ]
 
 class PostProjectSerializer(serializers.ModelSerializer):
