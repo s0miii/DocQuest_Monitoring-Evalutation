@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from docquestapp.models import *
 from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
+from django.contrib.contenttypes.models import ContentType
 
 # mga nagamit
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -34,11 +35,6 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = CustomUser
         fields = ['userID', 'firstname', 'lastname', 'roles']
-
-class TargetGroupSerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = TargetGroup
-        fields = ['targetGroup']
     
 class GoalsAndObjectivesSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -61,7 +57,7 @@ class EvaluationAndMonitoringSerializer(serializers.ModelSerializer):
             'risksAssumptions', 'type'
         ]
 
-class BudgetaryRequirementsItemsSerializer(serializers.ModelSerializer):
+class BudgetRequirementsItemsSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = BudgetRequirementsItems
         fields = ['itemName', 'ustpAmount', 'partnerAmount', 'totalAmount']
@@ -70,8 +66,13 @@ class ProjectActivitiesSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = ProjectActivities
         fields = [
-            'objective', 'involved', 'targetDate', 'personResponsibleID'
+            'objective', 'involved', 'targetDate', 'personResponsible'
         ]
+
+class ProjectManagementTeamSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = ProjectManagementTeam
+        fields = ['name']
 
 class LoadingOfTrainersSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -83,12 +84,17 @@ class LoadingOfTrainersSerializer(serializers.ModelSerializer):
 class SignatoriesSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Signatories
-        fields = ['userID', 'approvalStatus']
+        fields = ['name', 'title']
 
 class ProponentsSerializer(serializers.ModelSerializer):
     class Meta(object):
-        model = Proponents
-        fields = ['proponent']
+        model = CustomUser
+        fields = ['firstname', 'lastname']
+
+class NonUserProponentsSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = NonUserProponents
+        fields = ['name']
 
 class RegionSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -138,6 +144,11 @@ class AddressSerializer(serializers.ModelSerializer):
         model = Address
         fields = ['addressID', 'street', 'barangay']
 
+class PostAddressSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Address
+        fields = ['street', 'barangayID']
+
 class PartnerAgencySerializer(serializers.ModelSerializer):
     class Meta(object):
         model = PartnerAgency
@@ -168,93 +179,123 @@ class GetProjectLeaderSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['userID', 'firstname', 'lastname']
 
+class DeliverablesSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Deliverables
+        fields = ['deliverableName']
+
+class UserProjectDeliverablesSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = UserProjectDeliverables
+        fields = ['userID', 'projectID', 'deliverableID']
+        list_serializer_class = serializers.ListSerializer  # Use ListSerializer for bulk operations
+
+class NotificationSerializer(serializers.ModelSerializer):
+    content_type = serializers.SlugRelatedField(
+        queryset=ContentType.objects.all(),
+        slug_field='model'  # Shows the model name as a string (e.g., 'project' or 'moa')
+    )
+
+    class Meta:
+        model = Notification
+        fields = [
+            'notificationID', 'userID', 'content_type',
+            'source_id', 'message', 'status', 'timestamp'
+        ]
+
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
+    proponents = ProponentsSerializer(source='proponent', many=True)
+    nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = AddressSerializer()
     agency = PartnerAgencySerializer(many=True)
-    targetGroups = TargetGroupSerializer(source='targetGroup', many=True)
     goalsAndObjectives = GoalsAndObjectivesSerializer(many=True)
-    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(source='monitoringPlanSched', many=True)
-    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(source='evalAndMonitoring', many=True)
-    budgetaryRequirements = BudgetaryRequirementsItemsSerializer(source='budgetRequirements', many=True)
     projectActivities = ProjectActivitiesSerializer(many=True)
+    projectManagementTeam = ProjectManagementTeamSerializer(many=True)
+    budgetRequirements = BudgetRequirementsItemsSerializer(many=True)
+    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(source='evalAndMonitoring', many=True)
+    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(source='monitoringPlanSched', many=True)
     loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
     signatories = SignatoriesSerializer(source='signatoryProject', many=True)
-    proponents = ProponentsSerializer(source='proponent', many=True)
 
     class Meta(object):
         model = Project
         fields = [
             'userID', 'programCategory', 'projectTitle', 'projectType',
-            'projectCategory', 'researchTitle', 'program', 'accreditationLevel',
-            'college', 'projectLocationID', 'agency', 'targetImplementation',
-            'totalHours', 'background', 'projectComponent', 'beneficiaries',
-            'totalBudget', 'targetGroups', 'goalsAndObjectives', 'monitoringPlanSchedules',
-            'evaluationAndMonitorings', 'budgetaryRequirements', 'projectActivities',
-            'loadingOfTrainers', 'signatories', 'proponents'
+            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',  
+            'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
+            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
+            'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
+            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 'dateCreated'
         ]
 
 class PostProjectSerializer(serializers.ModelSerializer):
     userID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-    projectLocationID = serializers.PrimaryKeyRelatedField(queryset=Address.objects.all())
+    proponents = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
+    nonUserProponents = NonUserProponentsSerializer(many=True)
+    projectLocationID = PostAddressSerializer()
     agency = serializers.PrimaryKeyRelatedField(queryset=PartnerAgency.objects.all(), many=True)
-
-    targetGroups = TargetGroupSerializer(many=True)
     goalsAndObjectives = GoalsAndObjectivesSerializer(many=True)
-    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
-    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
-    budgetaryRequirements = BudgetaryRequirementsItemsSerializer(many=True)
     projectActivities = ProjectActivitiesSerializer(many=True)
+    projectManagementTeam = ProjectManagementTeamSerializer(many=True)
+    budgetRequirements = BudgetRequirementsItemsSerializer(many=True)
+    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
+    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
+    
     loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
     signatories = SignatoriesSerializer(many=True)
-    proponents = ProponentsSerializer(many=True)
 
     class Meta(object):
         model = Project
         fields = [
             'userID', 'programCategory', 'projectTitle', 'projectType',
-            'projectCategory', 'researchTitle', 'program', 'accreditationLevel',
-            'college', 'projectLocationID', 'agency', 'targetImplementation',
-            'totalHours', 'background', 'projectComponent', 'beneficiaries',
-            'totalBudget', 'targetGroups', 'goalsAndObjectives', 'monitoringPlanSchedules',
-            'evaluationAndMonitorings', 'budgetaryRequirements', 'projectActivities',
-            'loadingOfTrainers', 'signatories', 'proponents'
+            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',  
+            'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
+            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
+            'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
+            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 
         ]
 
-    def create(self, validated_data): 
-        targetGroups_data = validated_data.pop('targetGroups')
+    def create(self, validated_data):
+        proponents_data = validated_data.pop('proponents')
+        nonUserProponents_data = validated_data.pop('nonUserProponents')
+        address_data = validated_data.pop('projectLocationID')
+        projectLocationID = Address.objects.create(**address_data)
+        agency_data = validated_data.pop('agency')
         goalsAndObjectives_data = validated_data.pop('goalsAndObjectives')
-        monitoringPlanSchedules_data = validated_data.pop('monitoringPlanSchedules')
-        evaluationAndMonitorings_data = validated_data.pop('evaluationAndMonitorings')
-        budgetaryRequirements_data = validated_data.pop('budgetaryRequirements')
         projectActivities_data = validated_data.pop('projectActivities')
+        projectManagementTeam_data = validated_data.pop('projectManagementTeam')
+        budgetRequirements_data = validated_data.pop('budgetRequirements')
+        evaluationAndMonitorings_data = validated_data.pop('evaluationAndMonitorings')
+        monitoringPlanSchedules_data = validated_data.pop('monitoringPlanSchedules')
         loadingOfTrainers_data = validated_data.pop('loadingOfTrainers')
         signatories_data = validated_data.pop('signatories')
-        proponents_data = validated_data.pop('proponents')
-
-        agency_data = validated_data.pop('agency')
-
-        project = Project.objects.create(**validated_data)
+        
+        project = Project.objects.create(projectLocationID=projectLocationID, **validated_data)
 
         project.agency.set(agency_data)
+        project.proponents.set(proponents_data)
 
-        for targetGroup_data in targetGroups_data:
-            TargetGroup.objects.create(project=project, **targetGroup_data)
+        for nonUserProponents_data in nonUserProponents_data:
+            NonUserProponents.objects.create(project=project, **nonUserProponents_data)
         
         for goalsAndObjective_data in goalsAndObjectives_data:
             GoalsAndObjectives.objects.create(project=project, **goalsAndObjective_data)
+        
+        for projectActivity_data in projectActivities_data:
+            ProjectActivities.objects.create(project=project, **projectActivity_data)
 
-        for monitoringPlanSchedule_data in monitoringPlanSchedules_data:
-            MonitoringPlanAndSchedule.objects.create(project=project, **monitoringPlanSchedule_data)
+        for projectManagementTeam_data in projectManagementTeam_data:
+            ProjectManagementTeam.objects.create(project=project, **projectManagementTeam_data)
+
+        for budgetaryRequirement_data in budgetRequirements_data:
+            BudgetRequirementsItems.objects.create(project=project, **budgetaryRequirement_data)
 
         for evaluationAndMonitoring_data in evaluationAndMonitorings_data:
             EvaluationAndMonitoring.objects.create(project=project, **evaluationAndMonitoring_data)
 
-        for budgetaryRequirement_data in budgetaryRequirements_data:
-            BudgetRequirementsItems.objects.create(project=project, **budgetaryRequirement_data)
-
-        for projectActivity_data in projectActivities_data:
-            ProjectActivities.objects.create(project=project, **projectActivity_data)
+        for monitoringPlanSchedule_data in monitoringPlanSchedules_data:
+            MonitoringPlanAndSchedule.objects.create(project=project, **monitoringPlanSchedule_data)
 
         for loadingOfTrainer_data in loadingOfTrainers_data:
             LoadingOfTrainers.objects.create(project=project, **loadingOfTrainer_data)
@@ -262,7 +303,9 @@ class PostProjectSerializer(serializers.ModelSerializer):
         for signatory_data in signatories_data:
             Signatories.objects.create(project=project, **signatory_data)
 
-        for proponent_data in proponents_data:
-            Proponents.objects.create(project=project, **proponent_data)
-
         return project
+
+class GetProjectStatusSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Project
+        fields = ['uniqueCode', 'projectTitle', 'dateCreated', 'status']

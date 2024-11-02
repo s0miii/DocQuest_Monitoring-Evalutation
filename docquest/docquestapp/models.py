@@ -4,6 +4,9 @@ from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager
 from django.utils import timezone
 from django.contrib.auth.models import PermissionsMixin
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+import datetime
 
 class Roles(models.Model):
     roleID = models.AutoField(primary_key=True)
@@ -92,41 +95,95 @@ class Effectivity(models.Model):
     moaID = models.ForeignKey(MOA, related_name='effectivity', on_delete=models.CASCADE)
 
 class Project(models.Model):
+    STATUS_CHOICES = [
+        ('approved', 'Approved'),
+        ('pending', 'Pending'),
+        ('rejected', 'Rejected'),
+    ]
+
     projectID = models.AutoField(primary_key=True)
     userID = models.ForeignKey(CustomUser, related_name='projectUser', on_delete=models.CASCADE)
-    programCategory = models.CharField(max_length=50)
-    projectTitle = models.CharField(max_length=150)
-    projectType = models.CharField(max_length=50)
-    projectCategory = models.CharField(max_length=100)
-    researchTitle = models.CharField(max_length=150)
-    program = models.CharField(max_length=150)
-    accreditationLevel = models.CharField(max_length=50)
-    college = models.CharField(max_length=50)
-    projectLocationID = models.ForeignKey(Address, related_name='projectLocation', on_delete=models.CASCADE) 
-    agency = models.ManyToManyField(PartnerAgency, related_name='projectAgency')
-    targetImplementation = models.DateField()
-    totalHours = models.FloatField()
-    background = models.TextField()
-    projectComponent = models.TextField()
-    beneficiaries = models.TextField()
-    totalBudget = models.IntegerField()
+    programCategory = models.CharField(max_length=50) #1
+    projectTitle = models.CharField(max_length=150) #2
+    projectType = models.CharField(max_length=50) #3 
+    projectCategory = models.CharField(max_length=100) #4
+    researchTitle = models.CharField(max_length=150) #5
+    program = models.CharField(max_length=150) #6
+    accreditationLevel = models.CharField(max_length=50) #7
+    college = models.CharField(max_length=50) #8
+    beneficiaries = models.TextField() #9
+    targetImplementation = models.DateField() #10
+    totalHours = models.FloatField() #11
+    background = models.TextField() #12
+    projectComponent = models.TextField() #13
+    targetScope = models.TextField() #14
+    ustpBudget = models.IntegerField(default=0) #15
+    partnerAgencyBudget = models.IntegerField(default=0) #16
+    totalBudget = models.IntegerField() #17
+    projectLocationID = models.ForeignKey(Address, related_name='projectLocation', on_delete=models.CASCADE) #a2
     moaID = models.ForeignKey(MOA, related_name='projectMoa', on_delete=models.CASCADE, null=True)
+    agency = models.ManyToManyField(PartnerAgency, related_name='projectAgency') #a3
+    proponents = models.ManyToManyField(CustomUser, related_name='proponent')
+
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    dateCreated = models.DateTimeField(auto_now_add=True)
+
+    uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
 class Signatories(models.Model):
     project = models.ForeignKey(Project, related_name='signatoryProject', on_delete=models.CASCADE)
-    userID = models.ForeignKey(CustomUser, related_name='signatoryUser', on_delete=models.CASCADE)
-    approvalStatus = models.BooleanField(default=False)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    title = models.CharField(max_length=100, null=True, blank=True)
 
-class Proponents(models.Model):
-    project = models.ForeignKey(Project, related_name='proponent', on_delete=models.CASCADE)
-    proponent = models.CharField(max_length=50)
+class NonUserProponents(models.Model):
+    project = models.ForeignKey(Project, related_name='nonUserProponents', on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
 
-class TargetGroup(models.Model):
-    targetGroupID = models.AutoField(primary_key=True)
-    targetGroup = models.CharField(max_length=200)
-    project = models.ForeignKey(Project, related_name='targetGroup', on_delete=models.CASCADE)
+class Deliverables(models.Model):
+    deliverableID = models.AutoField(primary_key=True)
+    deliverableName = models.CharField(max_length=100)
 
-class GoalsAndObjectives(models.Model):
+class UserProjectDeliverables(models.Model):
+    userID = models.ForeignKey(CustomUser, related_name='userProjectDeliverables', on_delete=models.CASCADE)
+    projectID = models.ForeignKey(Project, related_name='userProjectDeliverables', on_delete=models.CASCADE)
+    deliverableID = models.ForeignKey(Deliverables, related_name='userProjectDeliverables', on_delete=models.CASCADE)
+
+class Notification(models.Model):
+    notificationID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(CustomUser, related_name='notification', on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
+    source_id = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
+    source = GenericForeignKey('content_type', 'source_id')  # Polymorphic link to the related object
+    message = models.CharField(max_length=255)
+    status = models.CharField(max_length=10, choices=[('Unread', 'Unread'), ('Read', 'Read')], default='Unread')
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+class DocumentPDF(models.Model):
+    documentID = models.AutoField(primary_key=True)
+    fileData = models.BinaryField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
+    source_id = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
+    source = GenericForeignKey('content_type', 'source_id')  # Polymorphic link to the related object
+
+class Review(models.Model):
+    STATUS_CHOICES = [
+        ('approved', 'Approved'),
+        ('pending', 'Pending'),
+        ('rejected', 'Rejected'),
+    ]
+
+    reviewID = models.AutoField(primary_key=True)
+    contentOwnerID = models.ForeignKey(CustomUser, related_name='reviewsContentOwner', on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
+    source_id = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
+    source = GenericForeignKey('content_type', 'source_id')  # Polymorphic link to the related object
+    reviewedByID = models.ForeignKey(CustomUser, related_name='reviewsReviewedBy', on_delete=models.CASCADE)
+    reviewStatus = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    reviewDate = models.DateTimeField(auto_now_add=True)
+    comment = models.TextField()
+
+class GoalsAndObjectives(models.Model): #a5
     GAOID = models.AutoField(primary_key=True)
     goalsAndObjectives = models.TextField()
     project = models.ForeignKey(Project, related_name='goalsAndObjectives', on_delete=models.CASCADE)
@@ -141,15 +198,19 @@ class LoadingOfTrainers(models.Model):
     totalBudgetRequirement = models.IntegerField()
     project = models.ForeignKey(Project, related_name='loadingOfTrainers', on_delete=models.CASCADE)
 
-class ProjectActivities(models.Model):
+class ProjectActivities(models.Model): #a6
     projectActivitiesID = models.AutoField(primary_key=True)
     objective = models.TextField()
     involved = models.TextField()
     targetDate = models.DateField()
-    personResponsible = models.CharField(max_length=50)
+    personResponsible = models.TextField()
     project = models.ForeignKey(Project, related_name='projectActivities', on_delete=models.CASCADE)
 
-class BudgetRequirementsItems(models.Model):
+class ProjectManagementTeam(models.Model): #a7
+    name = models.CharField(max_length=50)
+    project = models.ForeignKey(Project, related_name='projectManagementTeam', on_delete=models.CASCADE)
+
+class BudgetRequirementsItems(models.Model): #a8
     itemID = models.AutoField(primary_key=True)
     itemName = models.CharField(max_length=50)
     ustpAmount = models.IntegerField()
@@ -157,16 +218,16 @@ class BudgetRequirementsItems(models.Model):
     totalAmount = models.IntegerField()
     project = models.ForeignKey(Project, related_name='budgetRequirements', on_delete=models.CASCADE)
 
-class EvaluationAndMonitoring(models.Model):
+class EvaluationAndMonitoring(models.Model): #a9
     EAMID = models.AutoField(primary_key=True)
-    projectSummary = models.TextField()
-    indicators = models.TextField()
-    meansOfVerification = models.TextField()
-    risksAssumptions = models.TextField()
-    type = models.CharField(max_length=100)
+    projectSummary = models.TextField(default="Empty")
+    indicators = models.TextField(default="Empty")
+    meansOfVerification = models.TextField(default="Empty")
+    risksAssumptions = models.TextField(default="Empty")
+    type = models.CharField(max_length=100, default="Empty")
     project = models.ForeignKey(Project, related_name='evalAndMonitoring', on_delete=models.CASCADE)
 
-class MonitoringPlanAndSchedule(models.Model):
+class MonitoringPlanAndSchedule(models.Model): #a10
     MPASID = models.AutoField(primary_key=True)
     approach = models.TextField()
     dataGatheringStrategy = models.TextField()
