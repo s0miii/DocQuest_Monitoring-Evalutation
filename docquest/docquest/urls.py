@@ -24,12 +24,19 @@ urlpatterns = [
 
     # get project
     path('get_project/<int:pk>/', views.get_project),
+    path('get_project_status/<int:pk>/', views.get_project_status),
+
+    # update signatory sa project
+    # path('update_signatory_status/<int:signatory_id>/', views.update_signatory_status),
+
+    #send notification
+    path('send_notifications_to_director_and_staff', views.send_notifications_to_director_and_staff),
 
     # get address
     path('get_regions', views.get_regions),
-    path('get_provinces', views.get_provinces),
-    path('get_cities', views.get_cities),
-    path('get_barangays', views.get_barangays),
+    path('get_provinces/<int:regionID>/', views.get_provinces),
+    path('get_cities/<int:provinceID>/', views.get_cities),
+    path('get_barangays/<int:cityID>/', views.get_barangays),
 
     re_path('test_token', views.test_token),
 ]
