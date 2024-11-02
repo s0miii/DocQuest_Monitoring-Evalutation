@@ -132,8 +132,8 @@ class Project(models.Model):
 
 class Signatories(models.Model):
     project = models.ForeignKey(Project, related_name='signatoryProject', on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    title = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    title = models.CharField(max_length=100, null=True, blank=True)
 
 class NonUserProponents(models.Model):
     project = models.ForeignKey(Project, related_name='nonUserProponents', on_delete=models.CASCADE)
@@ -151,9 +151,9 @@ class UserProjectDeliverables(models.Model):
 class Notification(models.Model):
     notificationID = models.AutoField(primary_key=True)
     userID = models.ForeignKey(CustomUser, related_name='notification', on_delete=models.CASCADE)
-    contentType = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
-    objectID = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
-    source = GenericForeignKey('contentType', 'objectID')  # Polymorphic link to the related object
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
+    source_id = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
+    source = GenericForeignKey('content_type', 'source_id')  # Polymorphic link to the related object
     message = models.CharField(max_length=255)
     status = models.CharField(max_length=10, choices=[('Unread', 'Unread'), ('Read', 'Read')], default='Unread')
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -162,9 +162,9 @@ class DocumentPDF(models.Model):
     documentID = models.AutoField(primary_key=True)
     fileData = models.BinaryField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    contentType = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
-    objectID = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
-    source = GenericForeignKey('contentType', 'objectID')  # Polymorphic link to the related object
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
+    source_id = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
+    source = GenericForeignKey('content_type', 'source_id')  # Polymorphic link to the related object
 
 class Review(models.Model):
     STATUS_CHOICES = [
@@ -175,9 +175,9 @@ class Review(models.Model):
 
     reviewID = models.AutoField(primary_key=True)
     contentOwnerID = models.ForeignKey(CustomUser, related_name='reviewsContentOwner', on_delete=models.CASCADE)
-    contentType = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
-    objectID = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
-    source = GenericForeignKey('contentType', 'objectID')  # Polymorphic link to the related object
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # Refers to the model type (Project, MOA)
+    source_id = models.PositiveIntegerField()  # ID of the related object (Project or MOA)
+    source = GenericForeignKey('content_type', 'source_id')  # Polymorphic link to the related object
     reviewedByID = models.ForeignKey(CustomUser, related_name='reviewsReviewedBy', on_delete=models.CASCADE)
     reviewStatus = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     reviewDate = models.DateTimeField(auto_now_add=True)

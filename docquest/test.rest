@@ -1,9 +1,9 @@
 POST http://127.0.0.1:8000/signup
 Content-Type: application/json
 
-{ "email": "william@gmail.com", "password": "testpass", "firstname": "William", "middlename": "Akut",
-    "lastname": "Thomas", "campus": "USTP-CDO", "college": "NO COLLEGE SELECTED", 
-    "department": "NO DEPARTMENT SELECTED", "contactNumber": "NO NUMBER", "role": [8]
+{ "email": "guylord@gmail.com", "password": "testpass", "firstname": "Guylord", "middlename": "Akut",
+    "lastname": "Sagun", "campus": "USTP-CDO", "college": "NO COLLEGE SELECTED", 
+    "department": "NO DEPARTMENT SELECTED", "contactNumber": "NO NUMBER", "role": [9]
 }
 
 ###
@@ -48,26 +48,16 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
     "partnerAgencyBudget": 0,
     "totalBudget": 12000,
     "proponents": [
+        11,
+        12,
+        13
+    ],
+    "nonUserProponents": [
         {
-            "proponent": "Jocelyn B. Barbosa, Ph.D."
+            "name": "Jomar Llevado, MIT"
         },
         {
-            "proponent": "Jomar Llevado, MIT"
-        },
-        {
-            "proponent": "Quinto Tan Jr., MIT"
-        },
-        {
-            "proponent": "Charlane Vallar, MIT"
-        },
-        {
-            "proponent": "Dario Minoza"
-        },
-        {
-            "proponent": "Matthew Maulion, MSc"
-        },
-        {
-            "proponent": "Select Student Leaders"
+            "name": "Quinto Tan Jr., MIT"
         }
     ],
     "projectLocationID": {
@@ -199,34 +189,45 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
     ],
     "signatories": [
         {
-            "userID": 11,
-            "approvalStatus": "none"
+            "name": "John Doe",
+            "title": "Program Chair"
         },
         {
-            "userID": 12,
-            "approvalStatus": "none"
+            "name": "Jane Smith",
+            "title": "College Dean"
         },
         {
-            "userID": 13,
-            "approvalStatus": "none"
+            "name": "Mike Johnson",
+            "title": "Director, Extension & Community Relations"
         },
         {
-            "userID": 14,
-            "approvalStatus": "none"
+            "name": "Emily Brown",
+            "title": "Vice - Chancellor for Academic Affairs"
         },
         {
-            "userID": 15,
-            "approvalStatus": "none"
+            "name": "David Wilson",
+            "title": "Vice - Chancellor for Research and Innovation"
         },
         {
-            "userID": 16,
-            "approvalStatus": "none"
+            "name": "Olivia Taylor",
+            "title": "Accoutant III"
         },
         {
-            "userID": 17,
-            "approvalStatus": "none"
+            "name": "William Thomas",
+            "title": "Chancellor, USTP CDO"
         }
     ]
+}
+
+###
+
+POST http://127.0.0.1:8000/send_notifications_to_director_and_staff
+Content-Type: application/json
+Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+
+{
+    "content_type": "project",
+    "source_id": 11
 }
 
 ###
