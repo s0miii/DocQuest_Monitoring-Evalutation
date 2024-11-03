@@ -56,6 +56,22 @@ class PartnerAgencyAdmin(admin.ModelAdmin):
     fields = ["agencyName", "addressID"]
     list_display = ["agencyID", "agencyName", "addressID"]
 
+
+# additions for trial
+class ProjectAdmin(admin.ModelAdmin):
+    fields = [
+        'projectTitle', 'userID', 'programCategory', 'projectType', 'projectCategory',
+        'researchTitle', 'program', 'accreditationLevel', 'college', 'projectLocationID',
+        'agency', 'targetImplementation', 'totalHours', 'background', 'projectComponent',
+        'beneficiaries', 'totalBudget', 'moaID'
+    ]
+    list_display = ['projectTitle', 'userID', 'programCategory', 'projectType', 'college']
+
+admin.site.register(Project, ProjectAdmin)
+admin.site.register(MOA)
+
+#end of trial
+
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Roles, RolesAdmin)
 admin.site.register(Region, RegionAdmin)
