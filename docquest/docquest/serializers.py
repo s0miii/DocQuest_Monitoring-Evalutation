@@ -2,6 +2,7 @@ from rest_framework import serializers
 from docquestapp.models import *
 from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
 from django.contrib.contenttypes.models import ContentType
+from django.db.models.fields.related import ForeignObjectRel
 
 # mga nagamit
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -213,7 +214,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
-    proponents = ProponentsSerializer(source='proponent', many=True)
+    proponents = ProponentsSerializer(many=True)
     nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = AddressSerializer()
     agency = PartnerAgencySerializer(many=True)
@@ -235,7 +236,7 @@ class GetProjectSerializer(serializers.ModelSerializer):
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
             'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 'dateCreated',
-            'reviewStatus'
+            'status'
         ]
 
 class PostProjectSerializer(serializers.ModelSerializer):
@@ -262,7 +263,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
-            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 
+            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories' 
         ]
 
     def create(self, validated_data):
@@ -313,6 +314,110 @@ class PostProjectSerializer(serializers.ModelSerializer):
             Signatories.objects.create(project=project, **signatory_data)
 
         return project
+
+class UpdateProjectSerializer(serializers.ModelSerializer):
+    userID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    proponents = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
+    nonUserProponents = NonUserProponentsSerializer(many=True)
+    projectLocationID = PostAddressSerializer()
+    agency = serializers.PrimaryKeyRelatedField(queryset=PartnerAgency.objects.all(), many=True)
+    goalsAndObjectives = GoalsAndObjectivesSerializer(many=True)
+    projectActivities = ProjectActivitiesSerializer(many=True)
+    projectManagementTeam = ProjectManagementTeamSerializer(many=True)
+    budgetRequirements = BudgetRequirementsItemsSerializer(many=True)
+    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(source='evalAndMonitoring', many=True)
+    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(source='monitoringPlanSched', many=True)
+    loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
+    signatories = SignatoriesSerializer(source='signatoryProject', many=True)
+
+    class Meta:
+        model = Project
+        fields = [
+            'userID', 'programCategory', 'projectTitle', 'projectType', 'projectCategory',
+            'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',
+            'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
+            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents',
+            'projectLocationID', 'agency', 'goalsAndObjectives', 'projectActivities',
+            'projectManagementTeam', 'budgetRequirements', 'evaluationAndMonitorings',
+            'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories'
+        ]
+
+    def update(self, instance, validated_data):
+        # Pop out all the related data
+        proponents_data = validated_data.pop('proponents', [])
+        non_user_proponents_data = validated_data.pop('nonUserProponents', [])
+        address_data = validated_data.pop('projectLocationID', {})
+        agency_data = validated_data.pop('agency', [])
+        goals_and_objectives_data = validated_data.pop('goalsAndObjectives', [])
+        project_activities_data = validated_data.pop('projectActivities', [])
+        project_management_team_data = validated_data.pop('projectManagementTeam', [])
+        budget_requirements_data = validated_data.pop('budgetRequirements', [])
+        evaluation_and_monitoring_data = validated_data.pop('evaluationAndMonitorings', [])
+        monitoring_plan_schedules_data = validated_data.pop('monitoringPlanSchedules', [])
+        loading_of_trainers_data = validated_data.pop('loadingOfTrainers', [])
+        signatories_data = validated_data.pop('signatories', [])
+
+        # Update the main project instance
+        for attr, value in validated_data.items():
+            # Check if the attribute is a reverse relationship and skip it if so
+            if not isinstance(instance._meta.get_field(attr), ForeignObjectRel):
+                setattr(instance, attr, value)
+        instance.save()
+
+        # Update related fields
+        instance.agency.set(agency_data)
+        instance.proponents.set(proponents_data)
+
+        # Update or create address data
+        if address_data:
+            address = instance.projectLocationID
+            for attr, value in address_data.items():
+                setattr(address, attr, value)
+            address.save()
+
+        # Clear existing related data on update
+        NonUserProponents.objects.filter(project=instance).delete()
+        GoalsAndObjectives.objects.filter(project=instance).delete()
+        ProjectActivities.objects.filter(project=instance).delete()
+        ProjectManagementTeam.objects.filter(project=instance).delete()
+        BudgetRequirementsItems.objects.filter(project=instance).delete()
+        MonitoringPlanAndSchedule.objects.filter(project=instance).delete()
+        LoadingOfTrainers.objects.filter(project=instance).delete()
+        Signatories.objects.filter(project=instance).delete()
+
+        # Handle EvaluationAndMonitoring updates
+        EvaluationAndMonitoring.objects.filter(project=instance).delete()  # Clear existing records
+
+        if evaluation_and_monitoring_data:
+            try:
+                for data in evaluation_and_monitoring_data:
+                    # Logging each item to confirm data structure
+                    print("Creating EvaluationAndMonitoring with data:", data)
+                    EvaluationAndMonitoring.objects.create(project=instance, **data)
+            except Exception as e:
+                # Log the error to debug any issues during creation
+                print("Error creating EvaluationAndMonitoring:", e)
+
+        # Repopulate other related data
+        for data in non_user_proponents_data:
+            NonUserProponents.objects.create(project=instance, **data)
+        for data in goals_and_objectives_data:
+            GoalsAndObjectives.objects.create(project=instance, **data)
+        for data in project_activities_data:
+            ProjectActivities.objects.create(project=instance, **data)
+        for data in project_management_team_data:
+            ProjectManagementTeam.objects.create(project=instance, **data)
+        for data in budget_requirements_data:
+            BudgetRequirementsItems.objects.create(project=instance, **data)
+        for data in monitoring_plan_schedules_data:
+            MonitoringPlanAndSchedule.objects.create(project=instance, **data)
+        for data in loading_of_trainers_data:
+            LoadingOfTrainers.objects.create(project=instance, **data)
+        for data in signatories_data:
+            Signatories.objects.create(project=instance, **data)
+
+        return instance
+
 
 class GetProjectStatusSerializer(serializers.ModelSerializer):
     class Meta(object):

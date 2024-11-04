@@ -38,6 +38,9 @@ urlpatterns = [
     #Director approve or deny project
     path('approve_or_deny_project/<int:review_id>/', views.approve_or_deny_project),
 
+    #edit project
+    path('edit_project/<int:project_id>/', views.edit_project),
+
     # get address
     path('get_regions', views.get_regions),
     path('get_provinces/<int:regionID>/', views.get_provinces),

@@ -295,6 +295,52 @@ def approve_or_deny_project(request, review_id):
     except Project.DoesNotExist:
         return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
 
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def edit_project(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id)
+    except Project.DoesNotExist:
+        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = UpdateProjectSerializer(instance=project, data=request.data, partial=True)
+    if serializer.is_valid():
+        project = serializer.save()
+
+        # Update related many-to-many or reverse relationships
+        if 'agency' in request.data:
+            project.agency.set(request.data['agency'])
+
+        if 'proponents' in request.data:
+            project.proponents.set(request.data['proponents'])
+
+        # Get all users with the 'Director' role code
+        director_role_code = 'ecrd'  # Assuming 'DIR' is the code for the Director role
+        director_users = CustomUser.objects.filter(role__code=director_role_code)
+
+        # Send notification to each director
+        for director in director_users:
+            Notification.objects.create(
+                userID=director,
+                content_type=ContentType.objects.get_for_model(Project),
+                source_id=project.projectID,
+                message="Project has been updated and requires review."
+            )
+
+        # Assign a director as the reviewer (assuming one director for the review)
+        if director_users.exists():
+            review = Review.objects.create(
+                contentOwnerID=request.user,
+                content_type=ContentType.objects.get_for_model(Project),
+                source_id=project.projectID,
+                reviewedByID=director_users.first(),  # Assigning the first director found
+                reviewStatus='pending',
+                comment="Project has been edited and is pending approval."
+            )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 # @api_view(['PATCH'])
 # @permission_classes([IsAuthenticated])
 # def update_signatory_status(request, signatory_id):
