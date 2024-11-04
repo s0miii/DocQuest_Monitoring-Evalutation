@@ -259,6 +259,203 @@ Authorization: Token 541d546c10c4d03586aa3f3d6d99f0df4344444d
 
 ###
 
+PUT http://127.0.0.1:8000/edit_project/10/
+Content-Type: application/json
+Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+
+{
+    "userID": 10,
+    "programCategory": "I-Share",
+    "projectTitle": "Edited Title",
+    "projectType": "New Project",
+    "projectCategory": "Skills Training/Capacity Building",
+    "researchTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
+    "program": "BSIT and BSDS",
+    "accreditationLevel": "IV",
+    "college": "CITC",
+    "beneficiaries": "Out of School Youth Development Alliance (OSYDA)",
+    "targetImplementation": "2024-08-01",
+    "totalHours": 24,
+    "background": "The Out-of-School Youth Development Alliance (OSYDA) will be conducting its annual program “KAHIGAYONAN: Skills Expo & Enrollment and Job Fair” at Ayala Malls Centrio, Cagayan de Oro City on August 2024. This year's activity has been branded as “UY! IPORTUNIDAD para sa Kabatan-onan, Year 3”. In our continued support of their endeavors, the College of Information Technology and Computing spearheaded by Dr. Jocelyn Barbosa would like to conduct an outreach activity and training during the event, aimed at utilizing the eMonitorMo app developed last year in a partnership with the University of Science and Technology of Southern Philippines and USAID. The team sees this as an opportunity to not only strengthen the college's partnership with OSYDA but also improve the services offered to our city's youth population.",
+    "projectComponent": "Participant Orientation and Registration into the eMonitorMo App",
+    "targetScope": "Ayala Malls Centrio, CM Recto Avenue/Kahig:ayonan Participants",
+    "ustpBudget": 12000,
+    "partnerAgencyBudget": 0,
+    "totalBudget": 12000,
+    "proponents": [
+        11,
+        12,
+        13
+    ],
+    "nonUserProponents": [
+        {
+            "name": "Jomar Llevado, MIT"
+        },
+        {
+            "name": "Quinto Tan Jr., MIT"
+        }
+    ],
+    "projectLocationID": {
+      "street": "Ayala Malls Centrio",
+      "barangayID": 1
+    },
+    "agency": [1],
+    "goalsAndObjectives": [
+        {
+            "goalsAndObjectives": "This extension activity aimsto orient, train and register the participant so the “KAHIGAYONAN” program in order to familiarize them with the services that the eMonitorMo app delivers."
+        }
+    ],
+    "projectActivities": [
+        {
+            "objective": "Orient and register eligible participants of the Kahigayonan Skills Expo event to the eMonitorMo Application",
+            "involved": "Application Orientation and Registration",
+            "targetDate": "2024-08-01",
+            "personResponsible": "Dr. Jocelyn B. Barbosa, Quinto Tan, MIT, Charlene Vallar, MIT, Jomar Llevado, MIT"
+        }
+    ],
+    "projectManagementTeam": [
+      {
+        "name": "Dr. Jocelyn B. Barbosa"
+      },
+      {
+        "name": "Quinto Tan, MIT"
+      },
+      {
+        "name": "Charlene Vallar, MIT"
+      },
+      {
+        "name": "Jomar Llevado, MIT"
+      }
+    ],
+    "budgetRequirements": [
+        {
+            "itemName": "Honorarium",
+            "ustpAmount": 12000,
+            "partnerAmount": 0,
+            "totalAmount": 12000
+        }
+    ],
+    "evaluationAndMonitorings": [
+        {
+            "projectSummary": "Increase access to opportunities for the youth",
+            "indicators": "Number of registered eMonitorMo users",
+            "meansOfVerification": "Data Generated from eMonitorMo Application",
+            "type": "Goal"
+        },
+        {
+            "projectSummary": "Registered Youth in eMonitorMo",
+            "indicators": "Number of accounts added into the application",
+            "type": "Outputs"
+        },
+        {
+            "projectSummary": "Orientation and Registration",
+            "type": "Activities"
+        }
+    ],
+    "monitoringPlanSchedules": [
+        {
+            "approach": "Trainings Need Assessment/Pre-training Survey",
+            "dataGatheringStrategy": "Survey Questionnaire, Interview with Key Informant or FGD",
+            "schedule": "A week after receiving training/extension request",
+            "implementationPhase": "Before Project Implementation"
+        },
+        {
+            "approach": "Pretest and posttest Skills Demo or Competency Assessment",
+            "dataGatheringStrategy": "Multiple Choice Questtionnaire, survey questionnaire, competency checklist",
+            "schedule": "During training proper",
+            "implementationPhase": "During Project Implementation"
+        },
+        {
+            "approach": "Effects of Project to Participants and Community Questionnaire Trainings Need Assessment",
+            "dataGatheringStrategy": "Survey Questionnaire, Interview with Key Informant or FGD",
+            "schedule": "May be periodically scheduled based on the objectives of the extension project (e.g. after 3 months, after 6 months, etc.)",
+            "implementationPhase": "After Project Implementation"
+        }
+    ],
+    "loadingOfTrainers": [
+        {
+            "faculty": "Dr. Jocelyn Barbosa",
+            "trainingLoad": "Introduction to E-Monitor and its role in developing the Youth",
+            "hours": 8,
+            "ustpBudget": 2400,
+            "agencyBudget": 0,
+            "totalBudgetRequirement": 1200
+        },
+        {
+            "faculty": "Charlane Vallar, MIT",
+            "trainingLoad": "Module 1: Services offered by the eMonitorMo Application",
+            "hours": 16,
+            "ustpBudget": 2400,
+            "agencyBudget": 0,
+            "totalBudgetRequirement": 2400
+        },
+        {
+            "faculty": "Quinto Tan, MIT",
+            "trainingLoad": "Module 2: Navigating the eMonitorMo Application (Web Platform)",
+            "hours": 16,
+            "ustpBudget": 2400,
+            "agencyBudget": 0,
+            "totalBudgetRequirement": 2400
+        },
+        {
+            "faculty": "Dario Minoza",
+            "trainingLoad": "Module 2: Navigating the eMonitorMo Application (Web Platform)",
+            "hours": 16,
+            "ustpBudget": 2400,
+            "agencyBudget": 0,
+            "totalBudgetRequirement": 2400
+        },
+        {
+            "faculty": "Matthew Maulion, MSc",
+            "trainingLoad": "Module 3: Navigating the eMonitorMo Application (Web Platform)",
+            "hours": 8,
+            "ustpBudget": 1800,
+            "agencyBudget": 0,
+            "totalBudgetRequirement": 1200
+        },
+        {
+            "faculty": "Jomar Llevado, MIT",
+            "trainingLoad": "Module 3: Navigating the eMonitorMo Application (Web Platform)",
+            "hours": 16,
+            "ustpBudget": 2400,
+            "agencyBudget": 0,
+            "totalBudgetRequirement": 2400
+        }
+    ],
+    "signatories": [
+        {
+            "name": "John Doe",
+            "title": "Program Chair"
+        },
+        {
+            "name": "Jane Smith",
+            "title": "College Dean"
+        },
+        {
+            "name": "Mike Johnson",
+            "title": "Director, Extension & Community Relations"
+        },
+        {
+            "name": "Emily Brown",
+            "title": "Vice - Chancellor for Academic Affairs"
+        },
+        {
+            "name": "David Wilson",
+            "title": "Vice - Chancellor for Research and Innovation"
+        },
+        {
+            "name": "Olivia Taylor",
+            "title": "Accoutant III"
+        },
+        {
+            "name": "William Thomas",
+            "title": "Chancellor, USTP CDO"
+        }
+    ]
+}
+
+###
+
 PATCH http://127.0.0.1:8000/update_signatory_status/15/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
@@ -269,7 +466,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 ###
 
-GET http://127.0.0.1:8000/get_project/9/
+GET http://127.0.0.1:8000/get_project/11/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
