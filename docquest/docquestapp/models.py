@@ -73,10 +73,20 @@ class PartnerAgency(models.Model):
     addressID = models.ForeignKey(Address, related_name='partnerAgency', on_delete=models.CASCADE)
 
 class MOA(models.Model):
+    STATUS_CHOICES = [
+        ('approved', 'Approved'),
+        ('pending', 'Pending'),
+        ('rejected', 'Rejected'),
+    ]
+
     moaID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(CustomUser, related_name='moaUser', on_delete=models.CASCADE)
     partyADescription = models.TextField()
     partyBDescription = models.TextField()
     termination = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    dateCreated = models.DateTimeField(auto_now_add=True)
+    uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
 class Witnesseth(models.Model):
     witnessethID = models.AutoField(primary_key=True)
@@ -131,7 +141,7 @@ class Project(models.Model):
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
 class Signatories(models.Model):
-    project = models.ForeignKey(Project, related_name='signatoryProject', on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, related_name='signatories', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
     title = models.CharField(max_length=100, null=True, blank=True)
 
@@ -181,7 +191,7 @@ class Review(models.Model):
     reviewedByID = models.ForeignKey(CustomUser, related_name='reviewsReviewedBy', on_delete=models.CASCADE)
     reviewStatus = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     reviewDate = models.DateTimeField(auto_now_add=True)
-    comment = models.TextField()
+    comment = models.TextField(null=True, blank=True)
 
 class GoalsAndObjectives(models.Model): #a5
     GAOID = models.AutoField(primary_key=True)
@@ -225,7 +235,7 @@ class EvaluationAndMonitoring(models.Model): #a9
     meansOfVerification = models.TextField(default="Empty")
     risksAssumptions = models.TextField(default="Empty")
     type = models.CharField(max_length=100, default="Empty")
-    project = models.ForeignKey(Project, related_name='evalAndMonitoring', on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, related_name='evaluationAndMonitorings', on_delete=models.CASCADE)
 
 class MonitoringPlanAndSchedule(models.Model): #a10
     MPASID = models.AutoField(primary_key=True)
@@ -233,4 +243,4 @@ class MonitoringPlanAndSchedule(models.Model): #a10
     dataGatheringStrategy = models.TextField()
     schedule = models.TextField()
     implementationPhase = models.TextField()
-    project = models.ForeignKey(Project, related_name='monitoringPlanSched', on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, related_name='monitoringPlanSchedules', on_delete=models.CASCADE)
