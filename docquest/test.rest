@@ -265,20 +265,20 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 {
     "userID": 10,
-    "programCategory": "I-Share",
+    "programCategory": "I-Share Edit",
     "projectTitle": "Edited Title",
-    "projectType": "New Project",
-    "projectCategory": "Skills Training/Capacity Building",
-    "researchTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
-    "program": "BSIT and BSDS",
-    "accreditationLevel": "IV",
-    "college": "CITC",
-    "beneficiaries": "Out of School Youth Development Alliance (OSYDA)",
+    "projectType": "New Project Edit",
+    "projectCategory": "Edit Skills Training/Capacity Building",
+    "researchTitle": "Edit E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
+    "program": "Edit BSIT and BSDS",
+    "accreditationLevel": "Edit IV",
+    "college": "Edit CITC",
+    "beneficiaries": "Edit Out of School Youth Development Alliance (OSYDA)",
     "targetImplementation": "2024-08-01",
     "totalHours": 24,
-    "background": "The Out-of-School Youth Development Alliance (OSYDA) will be conducting its annual program “KAHIGAYONAN: Skills Expo & Enrollment and Job Fair” at Ayala Malls Centrio, Cagayan de Oro City on August 2024. This year's activity has been branded as “UY! IPORTUNIDAD para sa Kabatan-onan, Year 3”. In our continued support of their endeavors, the College of Information Technology and Computing spearheaded by Dr. Jocelyn Barbosa would like to conduct an outreach activity and training during the event, aimed at utilizing the eMonitorMo app developed last year in a partnership with the University of Science and Technology of Southern Philippines and USAID. The team sees this as an opportunity to not only strengthen the college's partnership with OSYDA but also improve the services offered to our city's youth population.",
-    "projectComponent": "Participant Orientation and Registration into the eMonitorMo App",
-    "targetScope": "Ayala Malls Centrio, CM Recto Avenue/Kahig:ayonan Participants",
+    "background": "Edit The Out-of-School Youth Development Alliance (OSYDA) will be conducting its annual program “KAHIGAYONAN: Skills Expo & Enrollment and Job Fair” at Ayala Malls Centrio, Cagayan de Oro City on August 2024. This year's activity has been branded as “UY! IPORTUNIDAD para sa Kabatan-onan, Year 3”. In our continued support of their endeavors, the College of Information Technology and Computing spearheaded by Dr. Jocelyn Barbosa would like to conduct an outreach activity and training during the event, aimed at utilizing the eMonitorMo app developed last year in a partnership with the University of Science and Technology of Southern Philippines and USAID. The team sees this as an opportunity to not only strengthen the college's partnership with OSYDA but also improve the services offered to our city's youth population.",
+    "projectComponent": "Edit Participant Orientation and Registration into the eMonitorMo App",
+    "targetScope": "Edit Ayala Malls Centrio, CM Recto Avenue/Kahig:ayonan Participants",
     "ustpBudget": 12000,
     "partnerAgencyBudget": 0,
     "totalBudget": 12000,
@@ -289,47 +289,47 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
     ],
     "nonUserProponents": [
         {
-            "name": "Jomar Llevado, MIT"
+            "name": "Edit Jomar Llevado, MIT"
         },
         {
-            "name": "Quinto Tan Jr., MIT"
+            "name": "Edit Quinto Tan Jr., MIT"
         }
     ],
     "projectLocationID": {
-      "street": "Ayala Malls Centrio",
+      "street": "Edit Ayala Malls Centrio",
       "barangayID": 1
     },
     "agency": [1],
     "goalsAndObjectives": [
         {
-            "goalsAndObjectives": "This extension activity aimsto orient, train and register the participant so the “KAHIGAYONAN” program in order to familiarize them with the services that the eMonitorMo app delivers."
+            "goalsAndObjectives": "Edit This extension activity aimsto orient, train and register the participant so the “KAHIGAYONAN” program in order to familiarize them with the services that the eMonitorMo app delivers."
         }
     ],
     "projectActivities": [
         {
-            "objective": "Orient and register eligible participants of the Kahigayonan Skills Expo event to the eMonitorMo Application",
-            "involved": "Application Orientation and Registration",
+            "objective": "Edit Orient and register eligible participants of the Kahigayonan Skills Expo event to the eMonitorMo Application",
+            "involved": "Edit Application Orientation and Registration",
             "targetDate": "2024-08-01",
-            "personResponsible": "Dr. Jocelyn B. Barbosa, Quinto Tan, MIT, Charlene Vallar, MIT, Jomar Llevado, MIT"
+            "personResponsible": "Edit Dr. Jocelyn B. Barbosa, Quinto Tan, MIT, Charlene Vallar, MIT, Jomar Llevado, MIT"
         }
     ],
     "projectManagementTeam": [
       {
-        "name": "Dr. Jocelyn B. Barbosa"
+        "name": "Edit Dr. Jocelyn B. Barbosa"
       },
       {
-        "name": "Quinto Tan, MIT"
+        "name": "Edit Quinto Tan, MIT"
       },
       {
-        "name": "Charlene Vallar, MIT"
+        "name": "Edit Charlene Vallar, MIT"
       },
       {
-        "name": "Jomar Llevado, MIT"
+        "name": "Edit Jomar Llevado, MIT"
       }
     ],
     "budgetRequirements": [
         {
-            "itemName": "Honorarium",
+            "itemName": "Edit Honorarium",
             "ustpAmount": 12000,
             "partnerAmount": 0,
             "totalAmount": 12000
@@ -337,14 +337,14 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
     ],
     "evaluationAndMonitorings": [
         {
-            "projectSummary": "Increase access to opportunities for the youth",
-            "indicators": "Number of registered eMonitorMo users",
-            "meansOfVerification": "Data Generated from eMonitorMo Application",
-            "type": "Goal"
+            "projectSummary": "Edit working",
+            "indicators": "Edit Number of registered eMonitorMo users",
+            "meansOfVerification": "Edit Data Generated from eMonitorMo Application",
+            "type": "Edit Goal"
         },
         {
-            "projectSummary": "Registered Youth in eMonitorMo",
-            "indicators": "Number of accounts added into the application",
+            "projectSummary": "Edit Registered Youth in eMonitorMo",
+            "indicators": "Edit Number of accounts added into the application",
             "type": "Outputs"
         },
         {
@@ -354,19 +354,19 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
     ],
     "monitoringPlanSchedules": [
         {
-            "approach": "Trainings Need Assessment/Pre-training Survey",
+            "approach": "my edit approach working",
             "dataGatheringStrategy": "Survey Questionnaire, Interview with Key Informant or FGD",
             "schedule": "A week after receiving training/extension request",
             "implementationPhase": "Before Project Implementation"
         },
         {
-            "approach": "Pretest and posttest Skills Demo or Competency Assessment",
+            "approach": "Edit Pretest and posttest Skills Demo or Competency Assessment",
             "dataGatheringStrategy": "Multiple Choice Questtionnaire, survey questionnaire, competency checklist",
             "schedule": "During training proper",
             "implementationPhase": "During Project Implementation"
         },
         {
-            "approach": "Effects of Project to Participants and Community Questionnaire Trainings Need Assessment",
+            "approach": "Edit Effects of Project to Participants and Community Questionnaire Trainings Need Assessment",
             "dataGatheringStrategy": "Survey Questionnaire, Interview with Key Informant or FGD",
             "schedule": "May be periodically scheduled based on the objectives of the extension project (e.g. after 3 months, after 6 months, etc.)",
             "implementationPhase": "After Project Implementation"
@@ -374,7 +374,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
     ],
     "loadingOfTrainers": [
         {
-            "faculty": "Dr. Jocelyn Barbosa",
+            "faculty": "Edit r. Jocelyn Barbosa",
             "trainingLoad": "Introduction to E-Monitor and its role in developing the Youth",
             "hours": 8,
             "ustpBudget": 2400,
@@ -424,7 +424,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
     ],
     "signatories": [
         {
-            "name": "John Doe",
+            "name": "John Edit",
             "title": "Program Chair"
         },
         {
@@ -466,7 +466,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 ###
 
-GET http://127.0.0.1:8000/get_project/11/
+GET http://127.0.0.1:8000/get_project/10/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 

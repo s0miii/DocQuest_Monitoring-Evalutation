@@ -252,12 +252,12 @@ def approve_or_deny_project(request, review_id):
         if action == 'approve':
             review.reviewStatus = 'approved'
             project.status = 'approved'
-            message = 'Your project has been approved.'
+            message = 'Your project has been approved and ready to print.'
         elif action == 'deny':
             review.reviewStatus = 'rejected'
             review.comment = comment
             project.status = 'rejected'
-            message = 'Your project has been rejected.'
+            message = 'Your project has been rejected, please revise and resubmit'
         else:
             return Response(
                 {"error": "Invalid action. Must be 'approve' or 'deny'."},
