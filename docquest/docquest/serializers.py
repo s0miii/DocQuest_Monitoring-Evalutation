@@ -2,6 +2,7 @@ from rest_framework import serializers
 from docquestapp.models import *
 from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
 from django.contrib.contenttypes.models import ContentType
+from django.db.models.fields.related import ForeignObjectRel
 
 # mga nagamit
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -162,17 +163,89 @@ class MOASerializer(serializers.ModelSerializer):
 class WitnessethSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Witnesseth
-        fields = ['witnessethID', 'whereas', 'moaID']
+        fields = ['witnessethID', 'whereas']
 
 class PartyObligationSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = PartyObligation
-        fields = ['poID', 'obligation', 'party', 'moaID']
+        fields = ['poID', 'obligation', 'party']
 
 class EffectivitySerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Effectivity
-        fields = ['effectiveID', 'effectivity', 'moaID']
+        fields = ['effectivityID', 'effectivity']
+
+class PostMOASerializer(serializers.ModelSerializer):
+    witnesseth = WitnessethSerializer(many=True)
+    partyObligation = PartyObligationSerializer(many=True)
+    effectivity = EffectivitySerializer(many=True)
+
+    class Meta:
+        model = MOA
+        fields = [
+            'moaID', 'partyADescription', 'partyBDescription', 'termination',
+            'witnesseth', 'partyObligation', 'effectivity'
+        ]
+
+    def create(self, validated_data):
+        # Extract related data
+        witnesseth_data = validated_data.pop('witnesseth')
+        party_obligation_data = validated_data.pop('partyObligation')
+        effectivity_data = validated_data.pop('effectivity')
+
+        # Create MOA instance
+        moa = MOA.objects.create(**validated_data)
+
+        # Create related instances
+        for witnesseth in witnesseth_data:
+            Witnesseth.objects.create(moaID=moa, **witnesseth)
+        
+        for party_obligation in party_obligation_data:
+            PartyObligation.objects.create(moaID=moa, **party_obligation)
+        
+        for effectivity in effectivity_data:
+            Effectivity.objects.create(moaID=moa, **effectivity)
+
+        return moa
+
+class UpdateMOASerializer(serializers.ModelSerializer):
+    witnesseth = WitnessethSerializer(many=True)
+    partyObligation = PartyObligationSerializer(many=True)
+    effectivity = EffectivitySerializer(many=True)
+
+    class Meta:
+        model = MOA
+        fields = [
+            'moaID', 'partyADescription', 'partyBDescription', 'termination',
+            'witnesseth', 'partyObligation', 'effectivity'
+        ]
+    
+    def update(self, instance, validated_data):
+        witnesseth_data = validated_data.pop('witnesseth')
+        partyObligation_data = validated_data.pop('partyObligation')
+        effectivity_data = validated_data.pop('effectivity')
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+    
+        # Clear existing related data on update
+        instance.witnesseth.all().delete()
+        instance.partyObligation.all().delete()
+        instance.effectivity.all().delete()
+
+        # Create related instances
+        for witnesseth in witnesseth_data:
+            Witnesseth.objects.create(moaID=instance, **witnesseth)
+        
+        for party_obligation in partyObligation_data:
+            PartyObligation.objects.create(moaID=instance, **party_obligation)
+        
+        for effectivity in effectivity_data:
+            Effectivity.objects.create(moaID=instance, **effectivity)
+        
+        instance.save()
+        return instance
 
 class GetProjectLeaderSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -203,9 +276,27 @@ class NotificationSerializer(serializers.ModelSerializer):
             'source_id', 'message', 'status', 'timestamp'
         ]
 
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Review
+        fields = [
+            'reviewID', 'contentOwnerID', 'content_type', 'source_id',
+            'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
+        ]
+
+class DocumentPDFSerializer(serializers.ModelSerializer):
+    content_type = serializers.SlugRelatedField(
+        queryset=ContentType.objects.all(),
+        slug_field='model'  # Accepts model name (e.g., 'project' or 'moa')
+    )
+
+    class Meta:
+        model = DocumentPDF
+        fields = ['documentID', 'fileData', 'timestamp', 'content_type', 'source_id']
+
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
-    proponents = ProponentsSerializer(source='proponent', many=True)
+    proponents = ProponentsSerializer(many=True)
     nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = AddressSerializer()
     agency = PartnerAgencySerializer(many=True)
@@ -213,10 +304,10 @@ class GetProjectSerializer(serializers.ModelSerializer):
     projectActivities = ProjectActivitiesSerializer(many=True)
     projectManagementTeam = ProjectManagementTeamSerializer(many=True)
     budgetRequirements = BudgetRequirementsItemsSerializer(many=True)
-    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(source='evalAndMonitoring', many=True)
-    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(source='monitoringPlanSched', many=True)
+    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
+    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
     loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
-    signatories = SignatoriesSerializer(source='signatoryProject', many=True)
+    signatories = SignatoriesSerializer(many=True)
 
     class Meta(object):
         model = Project
@@ -226,7 +317,8 @@ class GetProjectSerializer(serializers.ModelSerializer):
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
-            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 'dateCreated'
+            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 'dateCreated',
+            'status'
         ]
 
 class PostProjectSerializer(serializers.ModelSerializer):
@@ -253,7 +345,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
-            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 
+            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories' 
         ]
 
     def create(self, validated_data):
@@ -304,6 +396,99 @@ class PostProjectSerializer(serializers.ModelSerializer):
             Signatories.objects.create(project=project, **signatory_data)
 
         return project
+
+class UpdateProjectSerializer(serializers.ModelSerializer):
+    userID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    proponents = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
+    nonUserProponents = NonUserProponentsSerializer(many=True)
+    projectLocationID = PostAddressSerializer()
+    agency = serializers.PrimaryKeyRelatedField(queryset=PartnerAgency.objects.all(), many=True)
+    goalsAndObjectives = GoalsAndObjectivesSerializer(many=True)
+    projectActivities = ProjectActivitiesSerializer(many=True)
+    projectManagementTeam = ProjectManagementTeamSerializer(many=True)
+    budgetRequirements = BudgetRequirementsItemsSerializer(many=True)
+    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
+    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
+    loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
+    signatories = SignatoriesSerializer(many=True)
+
+    class Meta(object):
+        model = Project
+        fields = [
+            'userID', 'programCategory', 'projectTitle', 'projectType',
+            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',  
+            'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
+            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
+            'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
+            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories' 
+        ]
+
+    def update(self, instance, validated_data):
+        proponents_data = validated_data.pop('proponents')
+        nonUserProponents_data = validated_data.pop('nonUserProponents')
+        address_data = validated_data.pop('projectLocationID')
+        agency_data = validated_data.pop('agency')
+        goalsAndObjectives_data = validated_data.pop('goalsAndObjectives')
+        projectActivities_data = validated_data.pop('projectActivities')
+        projectManagementTeam_data = validated_data.pop('projectManagementTeam')
+        budgetRequirements_data = validated_data.pop('budgetRequirements')
+        evaluationAndMonitorings_data = validated_data.pop('evaluationAndMonitorings')
+        monitoringPlanSchedules_data = validated_data.pop('monitoringPlanSchedules')
+        loadingOfTrainers_data = validated_data.pop('loadingOfTrainers')
+        signatories_data = validated_data.pop('signatories')
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        instance.agency.set(agency_data)
+        instance.proponents.set(proponents_data)
+
+        if address_data:
+            for key, value in address_data.items():
+                setattr(instance.projectLocationID, key, value)
+            instance.projectLocationID.save()
+
+        # Clear existing related data on update
+        instance.nonUserProponents.all().delete()
+        instance.goalsAndObjectives.all().delete()
+        instance.projectActivities.all().delete()
+        instance.projectManagementTeam.all().delete()
+        instance.budgetRequirements.all().delete()
+        instance.evaluationAndMonitorings.all().delete()
+        instance.monitoringPlanSchedules.all().delete()
+        instance.loadingOfTrainers.all().delete()
+        instance.signatories.all().delete()
+
+        for nonUserProponents_data in nonUserProponents_data:
+            NonUserProponents.objects.create(project=instance, **nonUserProponents_data)
+        
+        for goalsAndObjective_data in goalsAndObjectives_data:
+            GoalsAndObjectives.objects.create(project=instance, **goalsAndObjective_data)
+        
+        for projectActivity_data in projectActivities_data:
+            ProjectActivities.objects.create(project=instance, **projectActivity_data)
+
+        for projectManagementTeam_data in projectManagementTeam_data:
+            ProjectManagementTeam.objects.create(project=instance, **projectManagementTeam_data)
+
+        for budgetaryRequirement_data in budgetRequirements_data:
+            BudgetRequirementsItems.objects.create(project=instance, **budgetaryRequirement_data)
+
+        for evaluationAndMonitoring_data in evaluationAndMonitorings_data:
+            EvaluationAndMonitoring.objects.create(project=instance, **evaluationAndMonitoring_data)
+
+        for monitoringPlanSchedule_data in monitoringPlanSchedules_data:
+            MonitoringPlanAndSchedule.objects.create(project=instance, **monitoringPlanSchedule_data)
+
+        for loadingOfTrainer_data in loadingOfTrainers_data:
+            LoadingOfTrainers.objects.create(project=instance, **loadingOfTrainer_data)
+
+        for signatory_data in signatories_data:
+            Signatories.objects.create(project=instance, **signatory_data)
+        
+        instance.save()
+        return instance
 
 class GetProjectStatusSerializer(serializers.ModelSerializer):
     class Meta(object):
