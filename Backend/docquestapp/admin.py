@@ -72,10 +72,15 @@ class ProponentsAdmin(admin.ModelAdmin):
     list_filter = ["project"]  # Filter by project to easily categorize
     search_fields = ["proponent", "project__projectTitle"]  # Search fields for ease of navigation
 
+class LoadingOfTrainersAdmin(admin.ModelAdmin):
+    list_display = ["LOTID", "faculty", "hours", "ustpBudget", "agencyBudget", "totalBudgetRequirement", "project"]
+    list_filter = ["project"] 
+    search_fields = ["faculty", "project__projectTitle"]    
+
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(MOA)
 admin.site.register(Proponents, ProponentsAdmin)
-
+admin.site.register(LoadingOfTrainers, LoadingOfTrainersAdmin)
 #end of trial
 
 admin.site.register(CustomUser, CustomUserAdmin)

@@ -5,7 +5,7 @@
     <title>Evaluation Form</title>
 </head>
 <body>
-    <h1>Evaluation for {{ proponent.proponent }} - Project: {{ project.projectTitle }}</h1>
+    <h1>Evaluation for {{ trainer.faculty }} - Project: {{ project.projectTitle }}</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}

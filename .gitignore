@@ -2,3 +2,4 @@ venv/
 docquest/*.sqlite3
 uploads/
 myvenv/
+.history/
