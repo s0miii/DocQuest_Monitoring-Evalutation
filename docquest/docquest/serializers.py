@@ -222,10 +222,10 @@ class GetProjectSerializer(serializers.ModelSerializer):
     projectActivities = ProjectActivitiesSerializer(many=True)
     projectManagementTeam = ProjectManagementTeamSerializer(many=True)
     budgetRequirements = BudgetRequirementsItemsSerializer(many=True)
-    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(source='evalAndMonitoring', many=True)
-    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(source='monitoringPlanSched', many=True)
+    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
+    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
     loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
-    signatories = SignatoriesSerializer(source='signatoryProject', many=True)
+    signatories = SignatoriesSerializer(many=True)
 
     class Meta(object):
         model = Project
@@ -325,99 +325,88 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
     projectActivities = ProjectActivitiesSerializer(many=True)
     projectManagementTeam = ProjectManagementTeamSerializer(many=True)
     budgetRequirements = BudgetRequirementsItemsSerializer(many=True)
-    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(source='evalAndMonitoring', many=True)
-    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(source='monitoringPlanSched', many=True)
+    evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
+    monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
     loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
-    signatories = SignatoriesSerializer(source='signatoryProject', many=True)
+    signatories = SignatoriesSerializer(many=True)
 
-    class Meta:
+    class Meta(object):
         model = Project
         fields = [
-            'userID', 'programCategory', 'projectTitle', 'projectType', 'projectCategory',
-            'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',
+            'userID', 'programCategory', 'projectTitle', 'projectType',
+            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',  
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
-            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents',
-            'projectLocationID', 'agency', 'goalsAndObjectives', 'projectActivities',
-            'projectManagementTeam', 'budgetRequirements', 'evaluationAndMonitorings',
-            'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories'
+            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
+            'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
+            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories' 
         ]
 
     def update(self, instance, validated_data):
-        # Pop out all the related data
-        proponents_data = validated_data.pop('proponents', [])
-        non_user_proponents_data = validated_data.pop('nonUserProponents', [])
-        address_data = validated_data.pop('projectLocationID', {})
-        agency_data = validated_data.pop('agency', [])
-        goals_and_objectives_data = validated_data.pop('goalsAndObjectives', [])
-        project_activities_data = validated_data.pop('projectActivities', [])
-        project_management_team_data = validated_data.pop('projectManagementTeam', [])
-        budget_requirements_data = validated_data.pop('budgetRequirements', [])
-        evaluation_and_monitoring_data = validated_data.pop('evaluationAndMonitorings', [])
-        monitoring_plan_schedules_data = validated_data.pop('monitoringPlanSchedules', [])
-        loading_of_trainers_data = validated_data.pop('loadingOfTrainers', [])
-        signatories_data = validated_data.pop('signatories', [])
+        proponents_data = validated_data.pop('proponents')
+        nonUserProponents_data = validated_data.pop('nonUserProponents')
+        address_data = validated_data.pop('projectLocationID')
+        agency_data = validated_data.pop('agency')
+        goalsAndObjectives_data = validated_data.pop('goalsAndObjectives')
+        projectActivities_data = validated_data.pop('projectActivities')
+        projectManagementTeam_data = validated_data.pop('projectManagementTeam')
+        budgetRequirements_data = validated_data.pop('budgetRequirements')
+        evaluationAndMonitorings_data = validated_data.pop('evaluationAndMonitorings')
+        monitoringPlanSchedules_data = validated_data.pop('monitoringPlanSchedules')
+        loadingOfTrainers_data = validated_data.pop('loadingOfTrainers')
+        signatories_data = validated_data.pop('signatories')
 
-        # Update the main project instance
         for attr, value in validated_data.items():
-            # Check if the attribute is a reverse relationship and skip it if so
-            if not isinstance(instance._meta.get_field(attr), ForeignObjectRel):
-                setattr(instance, attr, value)
+            setattr(instance, attr, value)
         instance.save()
 
-        # Update related fields
         instance.agency.set(agency_data)
         instance.proponents.set(proponents_data)
 
-        # Update or create address data
         if address_data:
-            address = instance.projectLocationID
-            for attr, value in address_data.items():
-                setattr(address, attr, value)
-            address.save()
+            for key, value in address_data.items():
+                setattr(instance.projectLocationID, key, value)
+            instance.projectLocationID.save()
 
         # Clear existing related data on update
-        NonUserProponents.objects.filter(project=instance).delete()
-        GoalsAndObjectives.objects.filter(project=instance).delete()
-        ProjectActivities.objects.filter(project=instance).delete()
-        ProjectManagementTeam.objects.filter(project=instance).delete()
-        BudgetRequirementsItems.objects.filter(project=instance).delete()
-        MonitoringPlanAndSchedule.objects.filter(project=instance).delete()
-        LoadingOfTrainers.objects.filter(project=instance).delete()
-        Signatories.objects.filter(project=instance).delete()
+        instance.nonUserProponents.all().delete()
+        instance.goalsAndObjectives.all().delete()
+        instance.projectActivities.all().delete()
+        instance.projectManagementTeam.all().delete()
+        instance.budgetRequirements.all().delete()
+        instance.evaluationAndMonitorings.all().delete()
+        instance.monitoringPlanSchedules.all().delete()
+        instance.loadingOfTrainers.all().delete()
+        instance.signatories.all().delete()
 
-        # Handle EvaluationAndMonitoring updates
-        EvaluationAndMonitoring.objects.filter(project=instance).delete()  # Clear existing records
+        for nonUserProponents_data in nonUserProponents_data:
+            NonUserProponents.objects.create(project=instance, **nonUserProponents_data)
+        
+        for goalsAndObjective_data in goalsAndObjectives_data:
+            GoalsAndObjectives.objects.create(project=instance, **goalsAndObjective_data)
+        
+        for projectActivity_data in projectActivities_data:
+            ProjectActivities.objects.create(project=instance, **projectActivity_data)
 
-        if evaluation_and_monitoring_data:
-            try:
-                for data in evaluation_and_monitoring_data:
-                    # Logging each item to confirm data structure
-                    print("Creating EvaluationAndMonitoring with data:", data)
-                    EvaluationAndMonitoring.objects.create(project=instance, **data)
-            except Exception as e:
-                # Log the error to debug any issues during creation
-                print("Error creating EvaluationAndMonitoring:", e)
+        for projectManagementTeam_data in projectManagementTeam_data:
+            ProjectManagementTeam.objects.create(project=instance, **projectManagementTeam_data)
 
-        # Repopulate other related data
-        for data in non_user_proponents_data:
-            NonUserProponents.objects.create(project=instance, **data)
-        for data in goals_and_objectives_data:
-            GoalsAndObjectives.objects.create(project=instance, **data)
-        for data in project_activities_data:
-            ProjectActivities.objects.create(project=instance, **data)
-        for data in project_management_team_data:
-            ProjectManagementTeam.objects.create(project=instance, **data)
-        for data in budget_requirements_data:
-            BudgetRequirementsItems.objects.create(project=instance, **data)
-        for data in monitoring_plan_schedules_data:
-            MonitoringPlanAndSchedule.objects.create(project=instance, **data)
-        for data in loading_of_trainers_data:
-            LoadingOfTrainers.objects.create(project=instance, **data)
-        for data in signatories_data:
-            Signatories.objects.create(project=instance, **data)
+        for budgetaryRequirement_data in budgetRequirements_data:
+            BudgetRequirementsItems.objects.create(project=instance, **budgetaryRequirement_data)
 
+        for evaluationAndMonitoring_data in evaluationAndMonitorings_data:
+            EvaluationAndMonitoring.objects.create(project=instance, **evaluationAndMonitoring_data)
+
+        for monitoringPlanSchedule_data in monitoringPlanSchedules_data:
+            MonitoringPlanAndSchedule.objects.create(project=instance, **monitoringPlanSchedule_data)
+
+        for loadingOfTrainer_data in loadingOfTrainers_data:
+            LoadingOfTrainers.objects.create(project=instance, **loadingOfTrainer_data)
+
+        for signatory_data in signatories_data:
+            Signatories.objects.create(project=instance, **signatory_data)
+        
+        instance.save()
         return instance
-
 
 class GetProjectStatusSerializer(serializers.ModelSerializer):
     class Meta(object):

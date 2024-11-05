@@ -131,7 +131,7 @@ class Project(models.Model):
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
 class Signatories(models.Model):
-    project = models.ForeignKey(Project, related_name='signatoryProject', on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, related_name='signatories', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
     title = models.CharField(max_length=100, null=True, blank=True)
 
@@ -225,7 +225,7 @@ class EvaluationAndMonitoring(models.Model): #a9
     meansOfVerification = models.TextField(default="Empty")
     risksAssumptions = models.TextField(default="Empty")
     type = models.CharField(max_length=100, default="Empty")
-    project = models.ForeignKey(Project, related_name='evalAndMonitoring', on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, related_name='evaluationAndMonitorings', on_delete=models.CASCADE)
 
 class MonitoringPlanAndSchedule(models.Model): #a10
     MPASID = models.AutoField(primary_key=True)
@@ -233,4 +233,4 @@ class MonitoringPlanAndSchedule(models.Model): #a10
     dataGatheringStrategy = models.TextField()
     schedule = models.TextField()
     implementationPhase = models.TextField()
-    project = models.ForeignKey(Project, related_name='monitoringPlanSched', on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, related_name='monitoringPlanSchedules', on_delete=models.CASCADE)
