@@ -163,17 +163,89 @@ class MOASerializer(serializers.ModelSerializer):
 class WitnessethSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Witnesseth
-        fields = ['witnessethID', 'whereas', 'moaID']
+        fields = ['witnessethID', 'whereas']
 
 class PartyObligationSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = PartyObligation
-        fields = ['poID', 'obligation', 'party', 'moaID']
+        fields = ['poID', 'obligation', 'party']
 
 class EffectivitySerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Effectivity
-        fields = ['effectiveID', 'effectivity', 'moaID']
+        fields = ['effectivityID', 'effectivity']
+
+class PostMOASerializer(serializers.ModelSerializer):
+    witnesseth = WitnessethSerializer(many=True)
+    partyObligation = PartyObligationSerializer(many=True)
+    effectivity = EffectivitySerializer(many=True)
+
+    class Meta:
+        model = MOA
+        fields = [
+            'moaID', 'partyADescription', 'partyBDescription', 'termination',
+            'witnesseth', 'partyObligation', 'effectivity'
+        ]
+
+    def create(self, validated_data):
+        # Extract related data
+        witnesseth_data = validated_data.pop('witnesseth')
+        party_obligation_data = validated_data.pop('partyObligation')
+        effectivity_data = validated_data.pop('effectivity')
+
+        # Create MOA instance
+        moa = MOA.objects.create(**validated_data)
+
+        # Create related instances
+        for witnesseth in witnesseth_data:
+            Witnesseth.objects.create(moaID=moa, **witnesseth)
+        
+        for party_obligation in party_obligation_data:
+            PartyObligation.objects.create(moaID=moa, **party_obligation)
+        
+        for effectivity in effectivity_data:
+            Effectivity.objects.create(moaID=moa, **effectivity)
+
+        return moa
+
+class UpdateMOASerializer(serializers.ModelSerializer):
+    witnesseth = WitnessethSerializer(many=True)
+    partyObligation = PartyObligationSerializer(many=True)
+    effectivity = EffectivitySerializer(many=True)
+
+    class Meta:
+        model = MOA
+        fields = [
+            'moaID', 'partyADescription', 'partyBDescription', 'termination',
+            'witnesseth', 'partyObligation', 'effectivity'
+        ]
+    
+    def update(self, instance, validated_data):
+        witnesseth_data = validated_data.pop('witnesseth')
+        partyObligation_data = validated_data.pop('partyObligation')
+        effectivity_data = validated_data.pop('effectivity')
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+    
+        # Clear existing related data on update
+        instance.witnesseth.all().delete()
+        instance.partyObligation.all().delete()
+        instance.effectivity.all().delete()
+
+        # Create related instances
+        for witnesseth in witnesseth_data:
+            Witnesseth.objects.create(moaID=instance, **witnesseth)
+        
+        for party_obligation in partyObligation_data:
+            PartyObligation.objects.create(moaID=instance, **party_obligation)
+        
+        for effectivity in effectivity_data:
+            Effectivity.objects.create(moaID=instance, **effectivity)
+        
+        instance.save()
+        return instance
 
 class GetProjectLeaderSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -211,6 +283,16 @@ class ReviewSerializer(serializers.ModelSerializer):
             'reviewID', 'contentOwnerID', 'content_type', 'source_id',
             'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
         ]
+
+class DocumentPDFSerializer(serializers.ModelSerializer):
+    content_type = serializers.SlugRelatedField(
+        queryset=ContentType.objects.all(),
+        slug_field='model'  # Accepts model name (e.g., 'project' or 'moa')
+    )
+
+    class Meta:
+        model = DocumentPDF
+        fields = ['documentID', 'fileData', 'timestamp', 'content_type', 'source_id']
 
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
