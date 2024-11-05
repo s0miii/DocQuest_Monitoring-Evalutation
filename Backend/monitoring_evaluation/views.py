@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Documents, Checklist, Progress, Evaluation
-from docquestapp.models import Project, Proponents
+from docquestapp.models import Project, LoadingOfTrainers
 from .serializers import ChecklistSerializer, DocumentsSerializer, ProgressSerializer, EvaluationSerializer
 from .forms import EvaluationForm
 from rest_framework.permissions import IsAuthenticated
@@ -46,7 +46,7 @@ class EvaluationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def generate_evaluation_url(self, request, pk=None):
-        proponent = get_object_or_404(Proponents, pk=pk)
+        trainer = get_object_or_404(LoadingOfTrainers, LOTID=pk)
         project_id = request.query_params.get('project_id')
 
         if not project_id:
@@ -55,7 +55,7 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         project = get_object_or_404(Project, id=project_id)
 
         # Generate the evaluation URL
-        evaluation_url = f"{request.build_absolute_uri('/')[:-1]}/evaluation/{proponent.id}/{project.id}/"
+        evaluation_url = f"{request.build_absolute_uri('/')[:-1]}/evaluation/{trainer.LOTID}/{project.id}/"
         return Response({"evaluation_url": evaluation_url}, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
@@ -67,16 +67,16 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 # Evaluation Form View for HTML Form Submission
-def evaluation_form_view(request, proponent_id, project_id):
-    # Retrieve the specific Proponent and Project
-    proponent = get_object_or_404(Proponents, id=proponent_id)
+def evaluation_form_view(request, trainer_id, project_id):
+    # Retrieve the specific Trainer and Project
+    trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id)
     project = get_object_or_404(Project, projectID=project_id)
 
     if request.method == 'POST':
         form = EvaluationForm(request.POST)
         if form.is_valid():
             evaluation = form.save(commit=False)
-            evaluation.proponents = proponent
+            evaluation.trainer = trainer
             evaluation.project = project
             evaluation.stored_overall_rating = evaluation.calculate_overall_rating()
             evaluation.save()
@@ -86,4 +86,4 @@ def evaluation_form_view(request, proponent_id, project_id):
         form = EvaluationForm()
 
     # Render the form with the necessary context
-    return render(request, 'evaluation_form.html', {'form': form, 'proponent': proponent, 'project': project})    
+    return render(request, 'evaluation_form.html', {'form': form, 'trainer': trainer, 'project': project})    

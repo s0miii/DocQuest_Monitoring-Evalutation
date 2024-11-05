@@ -22,6 +22,6 @@ class ProgressAdmin(admin.ModelAdmin):
 # Register Evaluation model
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
-    list_display = ('proponents', 'project', 'attendee_name', 'stored_overall_rating')
-    list_filter = ('project', 'proponents')
-    search_fields = ('attendee_name', 'project__projectTitle', 'proponents__proponent')
+    list_display = ('trainer', 'project', 'attendee_name', 'stored_overall_rating')
+    list_filter = ('project', 'trainer')
+    search_fields = ('attendee_name', 'project__projectTitle', 'trainer__faculty')

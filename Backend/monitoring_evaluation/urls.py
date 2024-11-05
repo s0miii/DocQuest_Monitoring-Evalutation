@@ -12,6 +12,6 @@ router.register(r'evaluation', EvaluationViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('evaluation/<int:proponent_id>/<int:project_id>/', evaluation_form_view, name='evaluation_form'),
+    path('evaluation/<int:trainer_id>/<int:project_id>/', evaluation_form_view, name='evaluation_form'),
     path('evaluation_thank_you/', TemplateView.as_view(template_name="thank_you.html"), name='evaluation_thank_you'),
 ]

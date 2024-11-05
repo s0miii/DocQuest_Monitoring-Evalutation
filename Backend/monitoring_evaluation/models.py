@@ -1,5 +1,5 @@
 from django.db import models
-from docquestapp.models import Project, Proponents
+from docquestapp.models import Project, LoadingOfTrainers
 from django.urls import reverse
 
 # Checklist Model
@@ -43,7 +43,7 @@ class Progress(models.Model):
 
 # Model for Evaluation Form
 class Evaluation(models.Model):
-    proponents = models.ForeignKey(Proponents, on_delete=models.CASCADE, related_name="evaluations")
+    trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluations")
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluations")
     attendee_name = models.CharField(max_length=255)
     relevance_of_topics = models.IntegerField(choices=[(i, i) for i in range(6)])
@@ -100,7 +100,7 @@ class Evaluation(models.Model):
         return reverse('evaluation_form', args=[str(self.id)])
 
     def __str__(self):
-        return f"Evaluation for Proponent {self.proponents.id} - Project {self.project.projectID}"
+        return f"Evaluation for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"
 
     
 
