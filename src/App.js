@@ -58,7 +58,6 @@ function App() {
       <Route path="/proponents/projects/req/dtr" element={<ProponentsDailyAttRec/>} />
       <Route path="/proponents/projects/req/lecnotes" element={<ProponentsLecNotes/>} />
       <Route path="/eval" element={<EvaluationForm/>} />
-
     </Routes>
   );
 }
