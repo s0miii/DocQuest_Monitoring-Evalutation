@@ -1,18 +1,23 @@
-# monitoring_evaluation/signals.py
-
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .models import Checklist, Documents, Progress
-from docquestapp.models import Project
 
-# Efficient Signal for Updating Progress
-@receiver([post_save, post_delete], sender=Checklist)
-@receiver([post_save, post_delete], sender=Documents)
-def update_progress(sender, instance, **kwargs):
-    project = instance.project
-    progress, _ = Progress.objects.get_or_create(project=project)
+# Update progress whenever checklist items change
+@receiver(post_save, sender=Checklist)
+@receiver(post_delete, sender=Checklist)
+def update_total_items(sender, instance, **kwargs):
+    try:
+        progress, _ = Progress.objects.get_or_create(project=instance.project)
+        progress.update_progress()
+    except Progress.DoesNotExist:
+        pass
 
-    # Update total_items (based on checklist) and completed_items (based on documents)
-    progress.total_items = Checklist.objects.filter(project=project).count()
-    progress.completed_items = Documents.objects.filter(project=project).count()
-    progress.save()
+# Update progress whenever documents are added, updated, or removed
+@receiver(post_save, sender=Documents)
+@receiver(post_delete, sender=Documents)
+def update_completed_items(sender, instance, **kwargs):
+    try:
+        progress, _ = Progress.objects.get_or_create(project=instance.project)
+        progress.update_progress()
+    except Progress.DoesNotExist:
+        pass

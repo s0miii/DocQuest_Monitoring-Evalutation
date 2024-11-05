@@ -1,10 +1,10 @@
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .models import Documents,Checklist, Progress
+from .models import Documents, Checklist, Progress
 from docquestapp.models import Project
 from .serializers import ChecklistSerializer, DocumentsSerializer, ProgressSerializer
-
+from rest_framework.permissions import IsAuthenticated
 
 # Checklist Viewset
 class ChecklistViewSet(viewsets.ModelViewSet):
@@ -16,53 +16,23 @@ class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Documents.objects.all()
     serializer_class = DocumentsSerializer
 
-    def create(self, request, *args, **kwargs):
-        project_id = request.data.get('project_id')
-        checklist_item_id = request.data.get('checklist_item_id')
-
-        #validtae project
-        try:
-            project = Project.objects.get(projectID=project_id)
-        except Project.DoesNotExist:
-            return Response({'error': 'Project does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # validate checklist item
-        try:
-            checklist_item = Checklist.objects.get(id=checklist_item_id, project=project)
-        except Checklist.DoesNotExist:
-            return Response({'error': 'Checklist item does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        
-
-        #create Document
-        document = Documents.objects.create(
-            project=project,
-            name=request.data.get('name'),
-            file=request.FILES.get('file'),
-            checklist_item=checklist_item
-        )
-
-        # update progress
-        progress, created = Progress.objects.get_or_create(project=project)
-        # update completed items if it's the first time fulfilling this checklist item
-        if Documents.objects.filter(project=project, checklist_item=checklist_item).count == 1:
-            progress.completed_items += 1
-        progress.total_items = Checklist.objects.filter(project=project).count()
-        progress.save
-
-        serializer = self.get_serializer(document)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # Progress is updated automatically when a document is created
+    def perform_create(self, serializer):
+        document = serializer.save()
+        if document.status == 'submitted':
+            # Update progress
+            progress, created = Progress.objects.get_or_create(project=document.project)
+            progress.update_progress()
 
 # Progress Viewset for Tracking
 class ProgressViewSet(viewsets.ModelViewSet):
     queryset = Progress.objects.all()
     serializer_class = ProgressSerializer
+    permission_classes = [IsAuthenticated]
 
+    # Action to retrieve specific progress details
     @action(detail=True, methods=['get'])
     def get_progress(self, request, pk=None):
-        project = Project.objects.get(pk=pk)
-        progress = Progress.objects.get(project=project)
+        progress = self.get_object()
         serializer = self.get_serializer(progress)
         return Response(serializer.data)
-
-
-
