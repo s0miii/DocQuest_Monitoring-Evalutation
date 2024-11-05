@@ -100,7 +100,7 @@ def create_project(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_project(request, pk): 
     user = request.user  # Get the authenticated user
 
@@ -114,7 +114,7 @@ def get_project(request, pk):
     return Response(project_serializer.data)
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def bulk_create_deliverables(request):
     # Ensure request data is a list
     if isinstance(request.data, list):
@@ -130,7 +130,7 @@ def bulk_create_deliverables(request):
         )
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def send_notifications_to_director_and_staff(request):
     # Get content type and object ID from request data
     content_type_model = request.data.get('content_type')
@@ -251,6 +251,7 @@ def approve_or_deny_project(request, review_id):
 
         if action == 'approve':
             review.reviewStatus = 'approved'
+            review.comment = None
             project.status = 'approved'
             message = 'Your project has been approved and ready to print.'
         elif action == 'deny':
@@ -286,6 +287,86 @@ def approve_or_deny_project(request, review_id):
                 "review": review_serializer.data,
                 "notification": notification_serializer.data,
                 "project_status": project.status
+            },
+            status=status.HTTP_200_OK
+        )
+
+    except Review.DoesNotExist:
+        return Response({"error": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
+    except Project.DoesNotExist:
+        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def approve_or_deny_moa(request, review_id):
+    # Only a user with the "director" role should be able to perform this action
+    if not request.user.role.filter(code='ecrd').exists():
+        return Response(
+            {"error": "You do not have the required permissions to perform this action."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    try:
+        # Fetch the review instance
+        review = Review.objects.get(reviewID=review_id)
+        moa = MOA.objects.get(moaID=review.source_id)
+
+        # Determine approval or rejection
+        action = request.data.get('action')
+        comment = request.data.get('comment', '')
+
+        if action == 'approve':
+            review.reviewStatus = 'approved'
+            review.comment = None
+            moa.status = 'approved'
+            message = 'MOA has been approved and ready to print.'
+
+            staff_role_code = 'estf'  # Assuming 'DIR' is the code for the Director role
+            staff_users = CustomUser.objects.filter(role__code=staff_role_code)
+
+            # Send notification to each director
+            for staff in staff_users:
+                Notification.objects.create(
+                    userID=staff,
+                    content_type=ContentType.objects.get_for_model(MOA),
+                    source_id=moa.moaID,
+                    message=message
+                )
+
+        elif action == 'deny':
+            review.reviewStatus = 'rejected'
+            review.comment = comment
+            moa.status = 'rejected'
+            message = 'Your MOA has been rejected, please revise and resubmit'
+
+        else:
+            return Response(
+                {"error": "Invalid action. Must be 'approve' or 'deny'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Save changes to the review and project
+        review.save()
+        moa.save()
+
+        # Create a notification for the content owner
+        notification = Notification.objects.create(
+            userID=review.contentOwnerID,
+            content_type=ContentType.objects.get_for_model(Review),
+            source_id=review.reviewID,
+            message=f"Review status for your MOA has been updated: {review.reviewStatus}",
+            status='Unread'
+        )
+
+        # Serialize and return the updated review and notification
+        review_serializer = ReviewSerializer(review)
+        notification_serializer = NotificationSerializer(notification)
+        
+        return Response(
+            {
+                "review": review_serializer.data,
+                "notification": notification_serializer.data,
+                "project_status": moa.status
             },
             status=status.HTTP_200_OK
         )
@@ -340,6 +421,132 @@ def edit_project(request, project_id):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_moa(request):
+    # Create a mutable copy of request.data so we can modify it
+    data = request.data.copy()
+    
+    # Assign the authenticated user as userID
+    data['userID'] = request.user.userID
+
+    serializer = PostMOASerializer(data=data)
+
+    if serializer.is_valid():
+        moa = serializer.save(userID=request.user)
+
+        if moa.dateCreated and not moa.uniqueCode:
+            moa.uniqueCode = f"{moa.moaID}-{moa.dateCreated.strftime('%Y%m%d')}"
+        moa.save()
+
+        # Get all users with the 'Director' role code
+        director_role_code = 'ecrd'  # Assuming 'DIR' is the code for the Director role
+        director_users = CustomUser.objects.filter(role__code=director_role_code)
+
+        # Create notification
+        for director in director_users:
+            Notification.objects.create(
+                userID=director,
+                content_type=ContentType.objects.get_for_model(MOA),
+                source_id=moa.moaID,
+                message="MOA has been submitted and requires review."
+            )
+
+        # Create a review for this MOA
+        if director_users.exists():
+            review = Review.objects.create(
+                contentOwnerID=request.user,
+                content_type=ContentType.objects.get_for_model(MOA),
+                source_id=moa.moaID,
+                reviewedByID=director_users.first(),  # Assigning the first director found
+                reviewStatus='pending',
+            )
+
+        return Response({"message": "MOA submitted for review."}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def edit_moa(request, moa_id):
+    try:
+        moa = MOA.objects.get(pk=moa_id)
+    except MOA.DoesNotExist:
+        return Response({"error": "MOA not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = UpdateMOASerializer(instance=moa, data=request.data)
+    if serializer.is_valid():
+        moa = serializer.save()
+
+        # Get all users with the 'Director' role code
+        director_role_code = 'ecrd'  # Assuming 'DIR' is the code for the Director role
+        director_users = CustomUser.objects.filter(role__code=director_role_code)
+
+        # Send notification to each director
+        for director in director_users:
+            Notification.objects.create(
+                userID=director,
+                content_type=ContentType.objects.get_for_model(MOA),
+                source_id=moa.moaID,
+                message="MOA has been updated and requires review."
+            )
+
+        # Assign a director as the reviewer (assuming one director for the review)
+        if director_users.exists():
+            review = Review.objects.create(
+                contentOwnerID=request.user,
+                content_type=ContentType.objects.get_for_model(MOA),
+                source_id=moa.moaID,
+                reviewedByID=director_users.first(),  # Assigning the first director found
+                reviewStatus='pending',
+                comment="MOA has been edited and is pending approval."
+            )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_document_pdf(request):
+    serializer = DocumentPDFSerializer(data=request.data)
+    if serializer.is_valid():
+        document = serializer.save()
+
+        # Determine the message and target user based on content type
+        content_type = serializer.validated_data['content_type']
+        source_id = serializer.validated_data['source_id']
+
+        if content_type.model == 'project':
+            # Retrieve the related Project instance
+            try:
+                project = Project.objects.get(pk=source_id)
+                target_user = project.userID  # The user associated with the Project
+                message = "Project is approved/complete signatures, prepare and submit MOA."
+            except Project.DoesNotExist:
+                return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        elif content_type.model == 'moa':
+            # Retrieve the related MOA instance
+            try:
+                moa = MOA.objects.get(pk=source_id)
+                target_user = moa.userID  # The user associated with the MOA
+                message = "MOA is approved, you can now start the project."
+            except MOA.DoesNotExist:
+                return Response({"error": "MOA not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        else:
+            return Response({"error": "Invalid content type"}, status=status.HTTP_400_BAD_REQUEST)
+
+       # Create a notification for the target user
+        Notification.objects.create(
+            user=target_user,
+            message=message,
+            timestamp=document.timestamp
+        )
+
+        return Response({"message": message}, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # @api_view(['PATCH'])
 # @permission_classes([IsAuthenticated])

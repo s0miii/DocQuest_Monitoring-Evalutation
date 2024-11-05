@@ -73,10 +73,20 @@ class PartnerAgency(models.Model):
     addressID = models.ForeignKey(Address, related_name='partnerAgency', on_delete=models.CASCADE)
 
 class MOA(models.Model):
+    STATUS_CHOICES = [
+        ('approved', 'Approved'),
+        ('pending', 'Pending'),
+        ('rejected', 'Rejected'),
+    ]
+
     moaID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(CustomUser, related_name='moaUser', on_delete=models.CASCADE)
     partyADescription = models.TextField()
     partyBDescription = models.TextField()
     termination = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    dateCreated = models.DateTimeField(auto_now_add=True)
+    uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
 class Witnesseth(models.Model):
     witnessethID = models.AutoField(primary_key=True)

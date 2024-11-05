@@ -38,8 +38,20 @@ urlpatterns = [
     #Director approve or deny project
     path('approve_or_deny_project/<int:review_id>/', views.approve_or_deny_project),
 
+    # Director approve or deny MOA
+    path('approve_or_deny_moa/<int:review_id>/', views.approve_or_deny_moa),
+
     #edit project
     path('edit_project/<int:project_id>/', views.edit_project),
+
+    # post moa
+    path('create_moa', views.create_moa),
+
+    # edit moa
+    path('edit_moa/<int:moa_id>/', views.edit_moa),
+
+    # submit pdf
+    path('create_document_pdf', views.create_document_pdf),
 
     # get address
     path('get_regions', views.get_regions),
