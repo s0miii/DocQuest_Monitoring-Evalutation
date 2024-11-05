@@ -1,0 +1,304 @@
+POST http://127.0.0.1:8000/signup
+Content-Type: application/json
+
+{ "email": "ej@gmail.com", "password": "testpass", "firstname": "Chalbert", "middlename": "Akut",
+    "lastname": "Reyes", "campus": "USTP-CDO", "college": "CITC", "department": "BSIT", "contactNumber": "09123456789",
+    "role": [3]
+}
+
+###
+
+POST http://127.0.0.1:8000/auth/token/login/
+Content-Type: application/json
+
+{ "email": "chalbert@gmail.com", "password": "testpass"}
+
+###
+
+POST http://127.0.0.1:8000/auth/token/logout/
+Content-Type: application/json
+Authorization: Token 946d9449e71eee646961e26e1f44206b6ea0bd23
+
+{}
+
+###
+
+# submit created proj
+POST http://127.0.0.1:8000/create_project
+Content-Type: application/json
+Authorization: Token 605bcb7594044106d834bc23e31120d69aca0f78
+
+{
+    "userID": 1,
+    "programCategory": "Community Development",
+    "projectTitle": "Sustainable Agriculture Program",
+    "projectType": "Research",
+    "projectCategory": "Agriculture",
+    "researchTitle": "Organic Farming Techniques",
+    "program": "Agriculture and Food Security",
+    "accreditationLevel": "Level 3",
+    "college": "College of Agriculture",
+    "projectLocationID": 1,
+    "agency": [1],
+    "targetImplementation": "2024-12-01",
+    "totalHours": 120.5,
+    "background": "This project aims to promote sustainable agriculture through organic farming techniques.",
+    "projectComponent": "Training and development of organic farming methods.",
+    "beneficiaries": "Local farmers and rural communities.",
+    "totalBudget": 500000,
+    "targetGroups": [
+        {
+            "targetGroup": "Farmers"
+        },
+        {
+            "targetGroup": "Local Government Units"
+        }
+    ],
+    "goalsAndObjectives": [
+        {
+            "goalsAndObjectives": "Increase agricultural productivity using organic methods."
+        },
+        {
+            "goalsAndObjectives": "Provide training to local farmers on sustainable farming practices."
+        }
+    ],
+    "monitoringPlanSchedules": [
+        {
+            "approach": "On-site visits and evaluations.",
+            "dataGatheringStrategy": "Surveys and farmer interviews.",
+            "schedule": "Every quarter of the year.",
+            "implementationPhase": "Training and farming stages."
+        }
+    ],
+    "evaluationAndMonitorings": [
+        {
+            "projectSummary": "The project aims to improve food security in rural areas.",
+            "indicators": "Increased yield, adoption of organic methods.",
+            "meansOfVerification": "Farmers' reports and crop analysis.",
+            "risksAssumptions": "Weather and pest challenges.",
+            "type": "Mid-term evaluation."
+        }
+    ],
+    "budgetaryRequirements": [
+        {
+            "itemName": "Organic Fertilizers",
+            "ustpAmount": 10000,
+            "partnerAmount": 5000,
+            "totalAmount": 15000
+        },
+        {
+            "itemName": "Training Materials",
+            "ustpAmount": 2000,
+            "partnerAmount": 1000,
+            "totalAmount": 3000
+        }
+    ],
+    "projectActivities": [
+        {
+            "objective": "Train farmers in organic farming techniques.",
+            "involved": "Agriculture trainers and local farmers.",
+            "targetDate": "2024-11-01",
+            "personResponsibleID": "2"
+        }
+    ],
+    "loadingOfTrainers": [
+        {
+            "faculty": "Agriculture Department Faculty",
+            "trainingLoad": "Organic farming training sessions.",
+            "hours": 40.0,
+            "ustpBudget": 50000,
+            "agencyBudget": 25000,
+            "totalBudgetRequirement": 75000
+        }
+    ],
+    "signatories": [
+        {
+            "userID": 2,
+            "approvalStatus": false
+        },
+        {
+            "userID": 3,
+            "approvalStatus": false
+        }
+    ],
+    "proponents": [
+        {
+            "proponent": "John Doe"
+        },
+        {
+            "proponent": "Jane Smith"
+        }
+    ]
+}
+
+###
+
+# mao ni tig kuha sa username og roles pang display
+GET http://127.0.0.1:8000/name_and_roles
+Content-Type: application/json
+Authorization: Token f17c9f447d3e24b919f102815eb536bc5cf62ba0
+
+###
+
+# get request inig navigate sa user profile
+GET http://127.0.0.1:8000/get_user_details
+Content-Type: application/json
+Authorization: Token f17c9f447d3e24b919f102815eb536bc5cf62ba0
+
+###
+
+# patch request inig edit user
+PATCH http://127.0.0.1:8000/edit_user_details/2/
+Content-Type: application/json
+Authorization: Token f17c9f447d3e24b919f102815eb536bc5cf62ba0
+
+{"firstname": "Chalbeee"}
+
+###
+
+POST http://127.0.0.1:8000/signup
+Content-Type: application/json
+
+{ "email": "ej1@gmail.com", "password": "testpass", "firstname": "Emmannuel", "middlename": "Akut",
+    "lastname": "Duallo", "campus": "USTP-CDO", "college": "CITC", "department": "BSIT", "contactNumber": "09123456789",
+    "role": [4]
+}
+
+###
+
+POST http://127.0.0.1:8000/roles
+Content-Type: application/json
+
+{ "userID": 1, "projectLead": true }
+
+###
+
+POST http://127.0.0.1:8000/create_project
+Content-Type: application/json
+
+{
+  "agencyAddress": {
+    "street": "123 Main St",
+    "barangay": "Barangay 1",
+    "city": "City Name",
+    "province": "Province Name",
+    "postal_code": "12345"
+  },
+  "projectAddress": {
+    "street": "456 Project Ave",
+    "barangay": "Barangay 2",
+    "city": "Another City",
+    "province": "Another Province",
+    "postal_code": "67890"
+  },
+  "agency": {
+    "agencyName": "Partner Agency Name"
+  },
+  "project": {
+    "programCategory": "Community Development",
+    "projectTitle": "Empowerment Through Education",
+    "projectType": "Training",
+    "projectCategory": "Education",
+    "researchTitle": "Improving Literacy in Rural Areas",
+    "program": "Adult Education Program",
+    "accreditationLevel": "Level 1",
+    "college": "College of Education",
+    "targetImplementation": "2024-09-01",
+    "totalHours": 120.5,
+    "background": "This project aims to improve literacy in rural communities.",
+    "projectComponent": "Training, Workshops",
+    "beneficiaries": "Adults in rural areas",
+    "totalBudget": 500000
+  },
+  "proponents": {
+    "userID": 1
+  },
+  "goalsAndObjectives": [
+    {
+      "goalsAndObjectives": "Improve literacy rates by 20% within one year."
+    },
+    {
+      "goalsAndObjectives": "Conduct 10 workshops on basic reading and writing skills."
+    }
+  ],
+  "projectActivities": [
+    {
+      "objective": "Organize workshops",
+      "involved": "Trainers, Volunteers",
+      "targetDate": "2024-10-01",
+      "personResponsibleID": 1
+    },
+    {
+      "objective": "Distribute educational materials",
+      "involved": "Volunteers",
+      "targetDate": "2024-11-01",
+      "personResponsibleID": 2
+    }
+  ],
+  "budgetRequirements": [
+    {
+      "itemName": "Training Materials",
+      "ustpAmount": 10000,
+      "partnerAmount": 5000,
+      "totalAmount": 15000
+    },
+    {
+      "itemName": "Venue Rental",
+      "ustpAmount": 20000,
+      "partnerAmount": 10000,
+      "totalAmount": 30000
+    }
+  ],
+  "evalAndMonitoring": [
+    {
+      "projectSummary": "Evaluation of project impact on literacy.",
+      "indicators": "Literacy rate improvement, participant feedback",
+      "meansOfVerification": "Surveys, Tests",
+      "risksAssumptions": "Attendance may vary due to weather.",
+      "type": "Qualitative"
+    }
+  ],
+  "monitoringPlanAndSchedule": [
+    {
+      "approach": "Monthly progress meetings",
+      "dataGatheringStrategy": "Interviews and surveys",
+      "schedule": "Monthly",
+      "implementationPhase": "Throughout project duration"
+    }
+  ],
+  "targetGroup": [
+    {
+      "targetGroup": "Adults in rural areas"
+    }
+  ],
+  "loadingOfTrainers": [
+    {
+      "userID": 3,
+      "trainingLoad": "Full-time",
+      "hours": 40,
+      "ustpBudget": 20000,
+      "agencyBudget": 10000,
+      "totalBudgetRequirement": 30000
+    }
+  ],
+  "signatories": [
+    {
+      "userID": 2,
+      "approvalStatus": true
+    },
+    {
+      "userID": 3,
+      "approvalStatus": false
+    }
+  ]
+}
+
+###
+
+GET http://127.0.0.1:8000/test_token
+Content-Type: application/json
+Authorization: Token 4c1073b73c080cb4116094e3ed21895f73f60d47
+
+{}
+
+###
