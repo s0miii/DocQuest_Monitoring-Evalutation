@@ -29,6 +29,7 @@ import ProponentsProjects from "./pages/proponents/ProponentsProjects"
 import ProponentsProjReq from "./pages/proponents/ProponentsProjReq";
 import ProponentsDailyAttRec from "./pages/proponents/ProponentsDailyAttRec";
 import ProponentsLecNotes from "./pages/proponents/ProponentsLecNotes";
+import EvaluationForm from "./pages/proponents/EvaluationForm";
 
 
 
@@ -56,6 +57,7 @@ function App() {
       <Route path="/proponents/projects/req" element={<ProponentsProjReq />} />
       <Route path="/proponents/projects/req/dtr" element={<ProponentsDailyAttRec/>} />
       <Route path="/proponents/projects/req/lecnotes" element={<ProponentsLecNotes/>} />
+      <Route path="/eval" element={<EvaluationForm/>} />
 
     </Routes>
   );
