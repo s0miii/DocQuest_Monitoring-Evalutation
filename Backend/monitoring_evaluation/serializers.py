@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Checklist, Documents, Progress
+from .models import Checklist, Documents, Progress, Evaluation
 
 class ChecklistSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,4 +14,9 @@ class DocumentsSerializer(serializers.ModelSerializer):
 class ProgressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Progress
+        fields = '__all__'    
+        
+class EvaluationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Evaluation
         fields = '__all__'

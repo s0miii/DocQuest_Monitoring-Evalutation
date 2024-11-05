@@ -67,8 +67,14 @@ class ProjectAdmin(admin.ModelAdmin):
     ]
     list_display = ['projectTitle', 'userID', 'programCategory', 'projectType', 'college']
 
+class ProponentsAdmin(admin.ModelAdmin):
+    list_display = ["project", "proponent"]  # Fields to display in the list view
+    list_filter = ["project"]  # Filter by project to easily categorize
+    search_fields = ["proponent", "project__projectTitle"]  # Search fields for ease of navigation
+
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(MOA)
+admin.site.register(Proponents, ProponentsAdmin)
 
 #end of trial
 
