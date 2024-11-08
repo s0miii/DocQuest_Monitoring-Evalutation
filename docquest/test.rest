@@ -23,6 +23,23 @@ Authorization: Token 946d9449e71eee646961e26e1f44206b6ea0bd23
 
 ###
 
+GET http://127.0.0.1:8000/get_agencies
+Content-Type: application/json
+
+{}
+
+###
+
+POST http://127.0.0.1:8000/create_agency
+Content-Type: application/json
+Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+
+{
+    "agencyName": "Jollibee Ketkai"
+}
+
+###
+
 # submit created proj
 POST http://127.0.0.1:8000/create_project
 Content-Type: application/json
@@ -554,6 +571,12 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 ###
 
 GET http://127.0.0.1:8000/get_project/10/
+Content-Type: application/json
+Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+
+###
+
+GET http://127.0.0.1:8000/get_users_exclude_roles
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
