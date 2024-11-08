@@ -89,3 +89,28 @@ def evaluation_form_view(request, trainer_id, project_id):
 
     # Render the form with the necessary context
     return render(request, 'evaluation_form.html', {'form': form, 'trainer': trainer, 'project': project})    
+
+def evaluation_summary_view(request):
+    projects = Project.objects.all()
+    project_summaries = []
+
+    for project in projects:
+        trainers = project.loadingOfTrainers.all()
+        trainer_evaluations = []
+
+        for trainer in trainers:
+            evaluations = Evaluation.objects.filter(project=project, trainer=trainer)
+            if evaluations.exists():
+                trainer_evaluations.append({
+                    'trainer': trainer,
+                    'evaluations': evaluations,
+                })
+
+        if trainer_evaluations:
+            project_summaries.append({
+                'project': project,
+                'trainer_evaluations': trainer_evaluations,
+            })        
+
+    context = {'project_summaries': project_summaries}
+    return render(request, 'evaluation_summary.html', context)            
