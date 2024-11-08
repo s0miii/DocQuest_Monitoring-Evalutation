@@ -1,7 +1,7 @@
 from django.db import models
 from docquestapp.models import Project, LoadingOfTrainers
 from django.urls import reverse
-
+from django.utils import timezone
 # Checklist Model
 class Checklist(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="checklist_items")
@@ -64,11 +64,13 @@ class Evaluation(models.Model):
     venue_assessment = models.IntegerField(choices=[(i, i) for i in range(6)])
     timeliness = models.IntegerField(choices=[(i, i) for i in range(6)])
     overall_management = models.IntegerField(choices=[(i, i) for i in range(6)])
-    stored_overall_rating = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    # stored_overall_rating = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    stored_overall_rating = models.IntegerField(null=True, blank=True, verbose_name="Overall Rating")
+    submitted_at = models.DateTimeField(default=timezone.now, verbose_name="Date Submitted")
+
 
      
     def calculate_overall_rating(self):
-        # List of all rating fields
         ratings = [
             self.relevance_of_topics,
             self.organizational_flow,
@@ -89,7 +91,8 @@ class Evaluation(models.Model):
         
         # Filter out None values and calculate the average
         total_ratings = [r for r in ratings if r is not None]
-        return sum(total_ratings) / len(total_ratings) if total_ratings else 0  
+        average_rating = sum(total_ratings) / len(total_ratings) if total_ratings else 0 
+        return round(average_rating)
     
     def save(self, *args, **kwargs):
         # Calculate overall_rating before saving

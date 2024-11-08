@@ -81,6 +81,8 @@ def evaluation_form_view(request, trainer_id, project_id):
             evaluation.stored_overall_rating = evaluation.calculate_overall_rating()
             evaluation.save()
 
+            print("Stored Overall Rating:", evaluation.stored_overall_rating)
+
             return render(request, 'thank_you.html', {'stored_overall_rating': evaluation.stored_overall_rating})
     else:
         form = EvaluationForm()
