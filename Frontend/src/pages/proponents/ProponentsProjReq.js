@@ -59,10 +59,28 @@ const ProponentsProjReq = () => {
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <p>Daily Attendance Record</p>
+                                    <p>List of Participants/Daily Attendance Sheet</p>
                                     <p className="text-gray-500 text-sm">0 document attached</p>
                                 </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/proponents/projects/req/dtr')}>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/proponents/proj/req/daily-attendance')}>
+                                    View
+                                </button>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p>Summary of Evaluation/Evaluation Sheets</p>
+                                    <p className="text-gray-500 text-sm">0 document attached</p>
+                                </div>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/proponents/proj/req/evaluation-summary')}>
+                                    View
+                                </button>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p>TrainersCV/DTR</p>
+                                    <p className="text-gray-500 text-sm">0 document attached</p>
+                                </div>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/proponents/proj/req/trainer-cv-dtr')}>
                                     View
                                 </button>
                             </div>
@@ -71,7 +89,7 @@ const ProponentsProjReq = () => {
                                     <p>Modules/Lecture Notes</p>
                                     <p className="text-gray-500 text-sm">0 document attached</p>
                                 </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/proponents/projects/req/lecnotes')}>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/proponents/proj/req/modules-notes')}>
                                     View
                                 </button>
                             </div>

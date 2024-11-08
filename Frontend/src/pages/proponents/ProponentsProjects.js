@@ -20,7 +20,7 @@ const ProponentsProjects = () => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <h1 className="text-2xl font-semibold mb-5">Projects Overview</h1>
-                    <div className="grid grid-cols-2 gap-4 mb-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-10">
                         {/* Completed */}
                         <div className="bg-green-500 text-white rounded-lg p-6 flex flex-col items-center justify-center">
                             <h2 className="text-lg font-semibold">Completed</h2>
@@ -68,7 +68,7 @@ const ProponentsProjects = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">Tesda Vocational</td>
                                         <td className="px-6 py-4 whitespace-nowrap">May 2024</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/proponents/projects/req')}>
+                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/proponents/proj/req')}>
                                                 View
                                             </button>
                                         </td>

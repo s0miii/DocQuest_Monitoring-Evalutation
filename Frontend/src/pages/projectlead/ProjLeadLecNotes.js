@@ -54,24 +54,6 @@ const ProjLeadLecNotes = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Assign Modules/Lecture Notes Submission</h2>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Enter Proponent</label>
-                            <input
-                                type="text"
-                                value={selectedProponent}
-                                onChange={(e) => setSelectedProponent(e.target.value)}
-                                className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                placeholder="Enter proponent name/email"
-                            />
-                        </div>
-                        <div className="flex justify-center">
-                            <button type="button" className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition">
-                                Assign Task
-                            </button>
-                        </div>
-                    </div>
 
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>

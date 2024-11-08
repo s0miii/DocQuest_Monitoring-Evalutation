@@ -53,29 +53,7 @@ const ProjLeadRequirements = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">Project Proposal</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Approved</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projlead/requirements/accomplishment-report')}>
-                                                View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="px-6 py-4 whitespace-nowrap">20240560</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Tesda Vocational</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Project Proposal</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Approved</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projlead/requirements/accomplishment-report')}>
-                                                View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="px-6 py-4 whitespace-nowrap">20240560</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Tesda Vocational</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Project Proposal</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Approved</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projlead/requirements/accomplishment-report')}>
+                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projlead/req/accomplishment-report')}>
                                                 View
                                             </button>
                                         </td>
