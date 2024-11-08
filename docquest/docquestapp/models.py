@@ -70,7 +70,7 @@ class Address(models.Model):
 class PartnerAgency(models.Model):
     agencyID = models.AutoField(primary_key=True)
     agencyName = models.CharField(max_length=100)
-    addressID = models.ForeignKey(Address, related_name='partnerAgency', on_delete=models.CASCADE)
+    addressID = models.ForeignKey(Address, related_name='partnerAgency', on_delete=models.CASCADE, null=True)
 
 class MOA(models.Model):
     STATUS_CHOICES = [
@@ -206,7 +206,7 @@ class LoadingOfTrainers(models.Model):
     ustpBudget = models.IntegerField()
     agencyBudget = models.IntegerField()
     totalBudgetRequirement = models.IntegerField()
-    project = models.ForeignKey(Project, related_name='loadingOfTrainers', on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, related_name='loadingOfTrainers', on_delete=models.CASCADE,blank=True, null=True)
 
 class ProjectActivities(models.Model): #a6
     projectActivitiesID = models.AutoField(primary_key=True)
@@ -230,11 +230,11 @@ class BudgetRequirementsItems(models.Model): #a8
 
 class EvaluationAndMonitoring(models.Model): #a9
     EAMID = models.AutoField(primary_key=True)
-    projectSummary = models.TextField(default="Empty")
-    indicators = models.TextField(default="Empty")
-    meansOfVerification = models.TextField(default="Empty")
-    risksAssumptions = models.TextField(default="Empty")
-    type = models.CharField(max_length=100, default="Empty")
+    projectSummary = models.TextField(null=True, blank=True)
+    indicators = models.TextField(null=True, blank=True)
+    meansOfVerification = models.TextField(null=True, blank=True)
+    risksAssumptions = models.TextField(null=True, blank=True)
+    type = models.CharField(max_length=100)
     project = models.ForeignKey(Project, related_name='evaluationAndMonitorings', on_delete=models.CASCADE)
 
 class MonitoringPlanAndSchedule(models.Model): #a10

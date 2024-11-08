@@ -92,6 +92,12 @@ class ProponentsSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['firstname', 'lastname']
 
+class GetProponentsSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(many=True)
+    class Meta(object):
+        model = CustomUser
+        fields = ['userID', 'firstname', 'lastname', 'role']
+
 class NonUserProponentsSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = NonUserProponents
@@ -334,7 +340,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
     evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
     monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
     
-    loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
+    loadingOfTrainers = LoadingOfTrainersSerializer(many=True, required=False)
     signatories = SignatoriesSerializer(many=True)
 
     class Meta(object):
@@ -360,7 +366,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
         budgetRequirements_data = validated_data.pop('budgetRequirements')
         evaluationAndMonitorings_data = validated_data.pop('evaluationAndMonitorings')
         monitoringPlanSchedules_data = validated_data.pop('monitoringPlanSchedules')
-        loadingOfTrainers_data = validated_data.pop('loadingOfTrainers')
+        loadingOfTrainers_data = validated_data.pop('loadingOfTrainers', [])
         signatories_data = validated_data.pop('signatories')
         
         project = Project.objects.create(projectLocationID=projectLocationID, **validated_data)
@@ -490,7 +496,15 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+class GetNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['firstname', 'lastname']
+
 class GetProjectStatusSerializer(serializers.ModelSerializer):
+    projectUser = GetNameSerializer(source='userID', read_only=True)
     class Meta(object):
         model = Project
-        fields = ['uniqueCode', 'projectTitle', 'dateCreated', 'status']
+        fields = [
+            'projectID', 'uniqueCode', 'projectTitle', 'dateCreated', 'status', 'projectUser'
+        ]

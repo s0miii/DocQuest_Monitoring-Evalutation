@@ -53,6 +53,13 @@ urlpatterns = [
     # submit pdf
     path('create_document_pdf', views.create_document_pdf),
 
+    # get all proponents name
+    path('get_users_exclude_roles', views.get_users_exclude_roles),
+
+    # get/create agency
+    path('create_agency', views.create_agency),
+    path('get_agencies', views.get_agencies),
+
     # get address
     path('get_regions', views.get_regions),
     path('get_provinces/<int:regionID>/', views.get_provinces),

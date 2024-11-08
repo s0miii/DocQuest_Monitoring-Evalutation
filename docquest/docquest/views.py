@@ -577,6 +577,34 @@ def create_document_pdf(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def get_users_exclude_roles(request):
+    # Filter users excluding those with role code "ecrd" or "estf"
+    users = CustomUser.objects.exclude(role__code__in=["ecrd", "estf"]).distinct()
+    serializer = GetProponentsSerializer(users, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_agencies(request):
+    agency = PartnerAgency.objects.all()
+
+    agency_serializer = PartnerAgencySerializer(agency, many=True)
+
+    return Response(agency_serializer.data)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_agency(request):
+    agency_serializer = PartnerAgencySerializer(data=request.data)
+
+    if agency_serializer.is_valid():
+        agency_serializer.save()
+        return Response(agency_serializer.data, status=status.HTTP_201_CREATED)
+
+    return Response(agency_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_regions(request):
     # Query all regions
     regions = Region.objects.all()
