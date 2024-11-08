@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useState }  from "react";
 import Topbar from "../../components/Topbar";
 import ProponentsSideBar from "../../components/ProponentsSideBar";
 
 const ProponentsLecNotes = () => {
+    const [attachedFiles, setAttachedFiles] = useState([]);
+
+    const handleFileChange = (event) => {
+        const files = Array.from(event.target.files);
+        setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
+    };
+
     return (
         <div className="bg-gray-200 min-h-screen flex">
             {/* Sidebar with fixed width */}
@@ -71,21 +78,41 @@ const ProponentsLecNotes = () => {
                             </div>
                         </div>
 
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Attached File</label>
-                            <div className="flex items-center">
-                                <input
-                                    type="file"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Upload Photo"
-                                    style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
-                                />
+                        {/* Attached Files Section */}
+                        <div className="border border-gray-300 rounded-lg p-6 flex flex-col items-center mb-6 relative mt-4">
+                            <h3 className="font-semibold text-center mb-1">Attached Files</h3>
+                            <div className="text-gray-400 mb-1">
+                                <span className="block text-center text-5xl">+</span>
                             </div>
+                            <input
+                                type="file"
+                                multiple
+                                onChange={handleFileChange}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                            />
                         </div>
+
+                        {/* Preview of Attached Files */}
+                        {attachedFiles.length > 0 && (
+                            <div className="grid grid-cols-3 gap-4 mb-6">
+                                {attachedFiles.map((file, index) => (
+                                    <div key={index} className="border border-gray-300 rounded-lg p-4">
+                                        <img
+                                            src={URL.createObjectURL(file)}
+                                            alt={`attachment-preview-${index}`}
+                                            className="h-32 w-full object-cover rounded-lg"
+                                        />
+                                        <p className="text-xs text-center mt-2">{file.name}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
                         <div className="flex justify-center">
                             <button
                                 type="button"
-                                className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
+                                className="bg-yellow-500 text-white font-bold py-2 px-12 rounded-lg hover:bg-yellow-600 transition"
                             >
                                 Submit
                             </button>

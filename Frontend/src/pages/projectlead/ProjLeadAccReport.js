@@ -7,7 +7,7 @@ const ProjLeadAccReport = () => {
     const navigate = useNavigate();
 
     const handleAddNewSubmission = () => {
-        navigate('/projlead/requirements/create-accomplishment-report');
+        navigate('/projlead/req/create-accomplishment-report');
     };
 
     return (

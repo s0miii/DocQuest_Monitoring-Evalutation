@@ -47,6 +47,52 @@ const ProjLeadTrainersCV = () => {
                         </div>
                     </div>
 
+                    {/* Add New Submission Section */}
+                    <div className="bg-white shadow-lg rounded-lg p-6">
+                        <h2 className="text-xl font-semibold text-center mb-4">Add New Submission</h2>
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Trainer Name Input */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Trainer Name</label>
+                                <input
+                                    type="text"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Enter Trainer Name"
+                                />
+                            </div>
+                            
+                            {/* Date Submitted Input */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Date Submitted</label>
+                                <input
+                                    type="date"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Attached File</label>
+                            <div className="flex items-center">
+                                <input
+                                    type="file"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Upload Photo"
+                                    style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-center">
+                            <button
+                                type="button"
+                                className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+
+
 
                 </div>
             </div>

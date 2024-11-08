@@ -8,12 +8,34 @@ const ProjLeadCreateAccReport = () => {
     const [projectType, setProjectType] = useState("");
     const [projectCategory, setProjectCategory] = useState("");
     const [trainingModality, setTrainingModality] = useState("");
-    
+    const [photos, setPhotos] = useState([{ file: null, description: '' }]);
+
     const navigate = useNavigate();
 
     const handleViewClick = (path) => {
         navigate(path);
-    }
+    };
+
+
+    const handleFileChange = (index, file) => {
+        const newPhotos = [...photos];
+        newPhotos[index].file = file;
+        setPhotos(newPhotos);
+    };
+
+    const handleDescriptionChange = (index, description) => {
+        const newPhotos = [...photos];
+        newPhotos[index].description = description;
+        setPhotos(newPhotos);
+    };
+
+    const addPhotoField = () => {
+        setPhotos([...photos, { file: null, description: '' }]);
+    };
+
+    const handleSubmit = () => {
+        console.log(photos);
+    };
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -240,29 +262,51 @@ const ProjLeadCreateAccReport = () => {
                         </div>
                     </div>
 
+
                     {/* Photo Documentation */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Photo Documentation</h2>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Attached Photo</label>
-                            <div className="flex items-center">
+                        {photos.map((photo, index) => (
+                            <div key={index} className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Attached Photo {index + 1}</label>
+                                <div className="flex items-center">
+                                    <input
+                                        type="file"
+                                        className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                        onChange={(e) => handleFileChange(index, e.target.files[0])}
+                                        style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                                    />
+                                </div>
+                                <label className="block text-sm font-medium text-gray-700 mt-2">Description</label>
                                 <input
-                                    type="file"
+                                    type="text"
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Upload Photo"
-                                    style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                                    placeholder="Enter description"
+                                    value={photo.description}
+                                    onChange={(e) => handleDescriptionChange(index, e.target.value)}
                                 />
                             </div>
+                        ))}
+                        <div className="flex justify-start mb-4">
+                            <span
+                                className="text-blue-500 cursor-pointer hover:underline"
+                                onClick={addPhotoField}
+                            >
+                                Attach Another Photo
+                            </span>
                         </div>
                         <div className="flex justify-center">
                             <button
                                 type="button"
                                 className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
+                                onClick={handleSubmit}
                             >
                                 Submit
                             </button>
                         </div>
                     </div>
+
+
 
                     {/* Footer Signatures
                     <div className="bg-white shadow-lg rounded-lg p-8 mb-6">

@@ -62,9 +62,8 @@ const ProjLeadDashboard = () => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <h1 className="text-2xl font-semibold mb-5">Documents Overview</h1>
+                    <div className="grid grid-cols-4 gap-2 mb-10">
 
-                    {/* Responsive Overview Cards */}
-                    <div className="grid grid-cols-4 gap-4 mb-10">
                         {/* Campus Proposal */}
                         <div className="bg-gray-400 rounded-lg text-white p-6 flex flex-col items-center justify-center">
                             <h2 className="text-lg font-semibold text-black">Campus Proposal</h2>
