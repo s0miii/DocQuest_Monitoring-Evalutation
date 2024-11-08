@@ -64,9 +64,9 @@ class Evaluation(models.Model):
     venue_assessment = models.IntegerField(choices=[(i, i) for i in range(6)])
     timeliness = models.IntegerField(choices=[(i, i) for i in range(6)])
     overall_management = models.IntegerField(choices=[(i, i) for i in range(6)])
-    # stored_overall_rating = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     stored_overall_rating = models.IntegerField(null=True, blank=True, verbose_name="Overall Rating")
     submitted_at = models.DateTimeField(default=timezone.now, verbose_name="Date Submitted")
+    evaluation_number = models.IntegerField(null=True, blank=True, verbose_name="No.")
 
 
      
@@ -97,6 +97,17 @@ class Evaluation(models.Model):
     def save(self, *args, **kwargs):
         # Calculate overall_rating before saving
         self.stored_overall_rating = self.calculate_overall_rating()
+
+        if not self.evaluation_number:
+            last_evaluation = Evaluation.objects.filter(
+                trainer=self.trainer, project=self.project
+            ).order_by('evaluation_number').last()
+
+            if last_evaluation and last_evaluation.evaluation_number is not None:
+                self.evaluation_number = last_evaluation.evaluation_number + 1
+            else:
+                self.evaluation_number = 1
+        
         super().save(*args, **kwargs)
    
     def get_absolute_url(self):
