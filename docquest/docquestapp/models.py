@@ -88,6 +88,24 @@ class MOA(models.Model):
     dateCreated = models.DateTimeField(auto_now_add=True)
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
+class FirstParty(models.Model):
+    firstPartyID = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    title = models.CharField(max_length=50)
+    moaID = models.ForeignKey(MOA, related_name='firstParty', on_delete=models.CASCADE)
+
+class SecondParty(models.Model):
+    secondPartyID = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    title = models.CharField(max_length=50)
+    moaID = models.ForeignKey(MOA, related_name='secondParty', on_delete=models.CASCADE)
+
+class Witnesses(models.Model):
+    witnessID = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    title = models.CharField(max_length=50)
+    moaID = models.ForeignKey(MOA, related_name='witnesses', on_delete=models.CASCADE)
+
 class Witnesseth(models.Model):
     witnessethID = models.AutoField(primary_key=True)
     whereas = models.TextField()

@@ -47,6 +47,9 @@ urlpatterns = [
     # post moa
     path('create_moa', views.create_moa),
 
+    # get moa
+    path('get_moa_status/<int:pk>/', views.get_moa_status),
+
     # edit moa
     path('edit_moa/<int:moa_id>/', views.edit_moa),
 

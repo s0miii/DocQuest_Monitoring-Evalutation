@@ -499,6 +499,7 @@ Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 {
+    "projectID": 5,
     "partyADescription": "this is partyA description",
     "partyBDescription": "this is partyB description",
     "termination": "ma terminate puhon",
@@ -527,12 +528,34 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
         {
             "effectivity": "epektib karon"
         }
+    ],
+    "firstParty": [
+        {
+            "name": "ATTY. DIONEL O ALBINA",
+            "title": "Chancellor, USTP CDO "
+        }
+    ],
+    "secondParty": [
+        {
+            "name": "ROY ANGELO E. GAZO, Ph.D",
+            "title": "Schools Division Superintendent"
+        }
+    ],
+    "witnesses": [
+        {
+            "name": "DR. ELMER C. CASTILLANO",
+            "title": "Dean, CSM"
+        },
+        {
+            "name": "PHOEBE W. TARUC, PhD",
+            "title": "EPS- Division Journalism Coordinator"
+        }
     ]
 }
 
 ###
 
-PUT http://127.0.0.1:8000/edit_moa/1/
+PUT http://127.0.0.1:8000/edit_moa/9/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
@@ -564,6 +587,28 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
         },
         {
             "effectivity": "edit epektib karon"
+        }
+    ],
+    "firstParty": [
+        {
+            "name": "ATTY. DIONEL O ALBINA",
+            "title": "Chancellor, USTP CDO "
+        }
+    ],
+    "secondParty": [
+        {
+            "name": "ROY ANGELO E. GAZO, Ph.D",
+            "title": "Schools Division Superintendent"
+        }
+    ],
+    "witnesses": [
+        {
+            "name": "DR. Chalbert Reyes",
+            "title": "Dean, CSM"
+        },
+        {
+            "name": "PHOEBE W. TARUC, PhD",
+            "title": "EPS- Division Journalism Coordinator"
         }
     ]
 }
@@ -641,6 +686,13 @@ Content-Type: application/json
 ###
 
 GET http://127.0.0.1:8000/get_project_status/10/
+Content-Type: application/json
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_moa_status/10/
 Content-Type: application/json
 
 {}
