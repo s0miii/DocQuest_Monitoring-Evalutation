@@ -440,6 +440,16 @@ def create_moa(request):
             moa.uniqueCode = f"{moa.moaID}-{moa.dateCreated.strftime('%Y%m%d')}"
         moa.save()
 
+        # Link the MOA to the specified Project
+        project_id = data.get('projectID')
+        if project_id:
+            try:
+                project = Project.objects.get(projectID=project_id)
+                project.moaID = moa  # Assign the MOA instance directly
+                project.save()
+            except Project.DoesNotExist:
+                return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+
         # Get all users with the 'Director' role code
         director_role_code = 'ecrd'  # Assuming 'DIR' is the code for the Director role
         director_users = CustomUser.objects.filter(role__code=director_role_code)
@@ -577,6 +587,34 @@ def create_document_pdf(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def get_users_exclude_roles(request):
+    # Filter users excluding those with role code "ecrd" or "estf"
+    users = CustomUser.objects.exclude(role__code__in=["ecrd", "estf"]).distinct()
+    serializer = GetProponentsSerializer(users, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_agencies(request):
+    agency = PartnerAgency.objects.all()
+
+    agency_serializer = PartnerAgencySerializer(agency, many=True)
+
+    return Response(agency_serializer.data)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_agency(request):
+    agency_serializer = PartnerAgencySerializer(data=request.data)
+
+    if agency_serializer.is_valid():
+        agency_serializer.save()
+        return Response(agency_serializer.data, status=status.HTTP_201_CREATED)
+
+    return Response(agency_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_regions(request):
     # Query all regions
     regions = Region.objects.all()
@@ -639,6 +677,18 @@ def get_project_status(request, pk):
 
     # Serialize the project data
     serializer = GetProjectStatusSerializer(projects, many=True)
+
+    # Return the serialized data as a JSON response
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_moa_status(request, pk):
+    # Get all projects for the user with userID equal to pk
+    moa = MOA.objects.filter(userID=pk)
+
+    # Serialize the project data
+    serializer = GetMoaSerializer(moa, many=True)
 
     # Return the serialized data as a JSON response
     return Response(serializer.data)
