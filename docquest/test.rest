@@ -699,6 +699,14 @@ Content-Type: application/json
 
 ###
 
+GET http://127.0.0.1:8000/get_moa/10/
+Content-Type: application/json
+Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+
+{}
+
+###
+
 GET http://127.0.0.1:8000/test_token
 Content-Type: application/json
 Authorization: Token 4c1073b73c080cb4116094e3ed21895f73f60d47
