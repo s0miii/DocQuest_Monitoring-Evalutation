@@ -47,11 +47,21 @@ urlpatterns = [
     # post moa
     path('create_moa', views.create_moa),
 
+    # get moa
+    path('get_moa_status/<int:pk>/', views.get_moa_status),
+
     # edit moa
     path('edit_moa/<int:moa_id>/', views.edit_moa),
 
     # submit pdf
     path('create_document_pdf', views.create_document_pdf),
+
+    # get all proponents name
+    path('get_users_exclude_roles', views.get_users_exclude_roles),
+
+    # get/create agency
+    path('create_agency', views.create_agency),
+    path('get_agencies', views.get_agencies),
 
     # get address
     path('get_regions', views.get_regions),
