@@ -90,7 +90,13 @@ class SignatoriesSerializer(serializers.ModelSerializer):
 class ProponentsSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = CustomUser
-        fields = ['firstname', 'lastname']
+        fields = ['userID', 'firstname', 'lastname']
+
+class GetProponentsSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(many=True)
+    class Meta(object):
+        model = CustomUser
+        fields = ['userID', 'firstname', 'lastname', 'role']
 
 class NonUserProponentsSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -160,6 +166,11 @@ class MOASerializer(serializers.ModelSerializer):
         model = MOA
         fields = ['moaID', 'partyADescription', 'partyBDescription', 'termination']
 
+class ProjectMoaSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Project
+        fields = ['moaID']
+
 class WitnessethSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Witnesseth
@@ -175,16 +186,35 @@ class EffectivitySerializer(serializers.ModelSerializer):
         model = Effectivity
         fields = ['effectivityID', 'effectivity']
 
+class FirstPartySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = FirstParty
+        fields = ['firstPartyID', 'name', 'title']
+
+class SecondPartySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = SecondParty
+        fields = ['secondPartyID', 'name', 'title']
+
+class WitnessesSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Witnesses
+        fields = ['witnessID', 'name', 'title']
+
 class PostMOASerializer(serializers.ModelSerializer):
     witnesseth = WitnessethSerializer(many=True)
     partyObligation = PartyObligationSerializer(many=True)
     effectivity = EffectivitySerializer(many=True)
+    firstParty = FirstPartySerializer(many=True)
+    secondParty = SecondPartySerializer(many=True)
+    witnesses = WitnessesSerializer(many=True)
 
     class Meta:
         model = MOA
         fields = [
             'moaID', 'partyADescription', 'partyBDescription', 'termination',
-            'witnesseth', 'partyObligation', 'effectivity'
+            'witnesseth', 'partyObligation', 'effectivity', 'firstParty', 'secondParty',
+            'witnesses'
         ]
 
     def create(self, validated_data):
@@ -192,6 +222,9 @@ class PostMOASerializer(serializers.ModelSerializer):
         witnesseth_data = validated_data.pop('witnesseth')
         party_obligation_data = validated_data.pop('partyObligation')
         effectivity_data = validated_data.pop('effectivity')
+        first_party_data = validated_data.pop('firstParty')
+        second_party_data = validated_data.pop('secondParty')
+        witnesses_data = validated_data.pop('witnesses')
 
         # Create MOA instance
         moa = MOA.objects.create(**validated_data)
@@ -205,6 +238,15 @@ class PostMOASerializer(serializers.ModelSerializer):
         
         for effectivity in effectivity_data:
             Effectivity.objects.create(moaID=moa, **effectivity)
+        
+        for first_party in first_party_data:
+            FirstParty.objects.create(moaID=moa, **first_party)
+        
+        for second_party in second_party_data:
+            SecondParty.objects.create(moaID=moa, **second_party)
+        
+        for witnesses in witnesses_data:
+            Witnesses.objects.create(moaID=moa, **witnesses)
 
         return moa
 
@@ -212,18 +254,25 @@ class UpdateMOASerializer(serializers.ModelSerializer):
     witnesseth = WitnessethSerializer(many=True)
     partyObligation = PartyObligationSerializer(many=True)
     effectivity = EffectivitySerializer(many=True)
+    firstParty = FirstPartySerializer(many=True)
+    secondParty = SecondPartySerializer(many=True)
+    witnesses = WitnessesSerializer(many=True)
 
     class Meta:
         model = MOA
         fields = [
             'moaID', 'partyADescription', 'partyBDescription', 'termination',
-            'witnesseth', 'partyObligation', 'effectivity'
+            'witnesseth', 'partyObligation', 'effectivity', 'firstParty', 'secondParty',
+            'witnesses'
         ]
     
     def update(self, instance, validated_data):
         witnesseth_data = validated_data.pop('witnesseth')
         partyObligation_data = validated_data.pop('partyObligation')
         effectivity_data = validated_data.pop('effectivity')
+        first_party_data = validated_data.pop('firstParty')
+        second_party_data = validated_data.pop('secondParty')
+        witnesses_data = validated_data.pop('witnesses')
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -233,6 +282,9 @@ class UpdateMOASerializer(serializers.ModelSerializer):
         instance.witnesseth.all().delete()
         instance.partyObligation.all().delete()
         instance.effectivity.all().delete()
+        instance.firstParty.all().delete()
+        instance.secondParty.all().delete()
+        instance.witnesses.all().delete()
 
         # Create related instances
         for witnesseth in witnesseth_data:
@@ -243,6 +295,15 @@ class UpdateMOASerializer(serializers.ModelSerializer):
         
         for effectivity in effectivity_data:
             Effectivity.objects.create(moaID=instance, **effectivity)
+        
+        for first_party in first_party_data:
+            FirstParty.objects.create(moaID=instance, **first_party)
+        
+        for second_party in second_party_data:
+            SecondParty.objects.create(moaID=instance, **second_party)
+        
+        for witnesses in witnesses_data:
+            Witnesses.objects.create(moaID=instance, **witnesses)
         
         instance.save()
         return instance
@@ -334,7 +395,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
     evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
     monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
     
-    loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
+    loadingOfTrainers = LoadingOfTrainersSerializer(many=True, required=False)
     signatories = SignatoriesSerializer(many=True)
 
     class Meta(object):
@@ -360,7 +421,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
         budgetRequirements_data = validated_data.pop('budgetRequirements')
         evaluationAndMonitorings_data = validated_data.pop('evaluationAndMonitorings')
         monitoringPlanSchedules_data = validated_data.pop('monitoringPlanSchedules')
-        loadingOfTrainers_data = validated_data.pop('loadingOfTrainers')
+        loadingOfTrainers_data = validated_data.pop('loadingOfTrainers', [])
         signatories_data = validated_data.pop('signatories')
         
         project = Project.objects.create(projectLocationID=projectLocationID, **validated_data)
@@ -409,7 +470,7 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
     budgetRequirements = BudgetRequirementsItemsSerializer(many=True)
     evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
     monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
-    loadingOfTrainers = LoadingOfTrainersSerializer(many=True)
+    loadingOfTrainers = LoadingOfTrainersSerializer(many=True, required=False)
     signatories = SignatoriesSerializer(many=True)
 
     class Meta(object):
@@ -434,7 +495,7 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
         budgetRequirements_data = validated_data.pop('budgetRequirements')
         evaluationAndMonitorings_data = validated_data.pop('evaluationAndMonitorings')
         monitoringPlanSchedules_data = validated_data.pop('monitoringPlanSchedules')
-        loadingOfTrainers_data = validated_data.pop('loadingOfTrainers')
+        loadingOfTrainers_data = validated_data.pop('loadingOfTrainers', [])
         signatories_data = validated_data.pop('signatories')
 
         for attr, value in validated_data.items():
@@ -490,7 +551,28 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+class GetNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['firstname', 'lastname']
+
 class GetProjectStatusSerializer(serializers.ModelSerializer):
+    projectUser = GetNameSerializer(source='userID', read_only=True)
     class Meta(object):
         model = Project
-        fields = ['uniqueCode', 'projectTitle', 'dateCreated', 'status']
+        fields = [
+            'projectID', 'uniqueCode', 'projectTitle', 'dateCreated', 'status', 'projectUser'
+        ]
+
+class GetProjectTitleSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Project
+        fields = ['projectTitle']
+
+class GetMoaSerializer(serializers.ModelSerializer):
+    moaUser = GetNameSerializer(source='userID', read_only=True)
+    projectTitles = GetProjectTitleSerializer(source='projectMoa', many=True, read_only=True)
+    
+    class Meta(object):
+        model = MOA
+        fields = ['moaUser', 'moaID', 'uniqueCode', 'dateCreated', 'status', 'projectTitles']
