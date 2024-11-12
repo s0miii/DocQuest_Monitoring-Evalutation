@@ -3,7 +3,6 @@ import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 
 const ProjLeadLecNotes = () => {
-    const [selectedProponent, setSelectedProponent] = useState("");
 
     const submittedFiles = [
         { fileName: "Day 1 Lecture Notes.pdf", submittedBy: "Proponent A", date: "2024-10-10" },

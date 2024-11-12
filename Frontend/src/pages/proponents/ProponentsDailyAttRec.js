@@ -61,11 +61,11 @@ const ProponentsDailyAttRec = () => {
                         {/* Day, Date, and Number of Attendees Inputs */}
                         <div className="grid grid-cols-3 gap-4 mb-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Day</label>
+                                <label className="block text-sm font-medium text-gray-700">Description</label>
                                 <input
                                     type="text"
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Enter Day"
+                                    placeholder="Enter Description"
                                 />
                             </div>
                             <div>
