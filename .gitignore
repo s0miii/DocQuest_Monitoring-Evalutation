@@ -1,5 +1,10 @@
 venv/
 docquest/*.sqlite3
+db.sqlite3
 uploads/
 myvenv/
+venv/
+__pycache__/
+*.pyc
+
 .history/
