@@ -10,14 +10,14 @@ const ProponentsTrainerCVDTR = () => {
             trainerName: "Trainer A", 
             dateSubmitted: "2024-10-10", 
             status: "Approved", 
-            files: ["Day 1 Lecture Notes.pdf", "Day 1 Exercises.pdf"] 
+            files: ["DTR1.pdf", "DTR2.pdf"] 
         },
         { 
             id: 2, 
             trainerName: "Trainer B", 
             dateSubmitted: "2024-10-11", 
             status: "Pending", 
-            files: ["Day 2 Lecture Notes.pdf"] 
+            files: ["DTR3.pdf"] 
         }
     ]);
 

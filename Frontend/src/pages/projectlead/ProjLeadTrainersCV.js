@@ -6,7 +6,7 @@ const ProjLeadTrainersCV = () => {
     const [submittedSubmissions, setSubmittedSubmissions] = useState([
         { 
             id: 1, 
-            files: ["Day 1 Lecture Notes.pdf", "Day 1 Exercises.pdf"], 
+            files: ["DTR1.pdf", "DTR2.pdf"], 
             submittedBy: "Proponent A", 
             dateSubmitted: "2024-10-10", 
             status: "Approved", 
@@ -14,7 +14,7 @@ const ProjLeadTrainersCV = () => {
         },
         { 
             id: 2, 
-            files: ["Day 2 Lecture Notes.pdf"], 
+            files: ["DTR3.pdf"], 
             submittedBy: "Proponent B", 
             dateSubmitted: "2024-10-11", 
             status: "Pending", 
