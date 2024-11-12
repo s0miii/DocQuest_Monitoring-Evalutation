@@ -1,7 +1,7 @@
 from django.db import models
-from docquestapp.models import Project
+from docquestapp.models import Project, LoadingOfTrainers
 from django.urls import reverse
-
+from django.utils import timezone
 # Checklist Model
 class Checklist(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="checklist_items")
@@ -43,7 +43,7 @@ class Progress(models.Model):
 
 # Model for Evaluation Form
 class Evaluation(models.Model):
-    proponents = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluations")
+    trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluations")
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluations")
     attendee_name = models.CharField(max_length=255)
     relevance_of_topics = models.IntegerField(choices=[(i, i) for i in range(6)])
@@ -64,11 +64,13 @@ class Evaluation(models.Model):
     venue_assessment = models.IntegerField(choices=[(i, i) for i in range(6)])
     timeliness = models.IntegerField(choices=[(i, i) for i in range(6)])
     overall_management = models.IntegerField(choices=[(i, i) for i in range(6)])
-    stored_overall_rating = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    stored_overall_rating = models.IntegerField(null=True, blank=True, verbose_name="Overall Rating")
+    submitted_at = models.DateTimeField(default=timezone.now, verbose_name="Date Submitted")
+    evaluation_number = models.IntegerField(null=True, blank=True, verbose_name="No.")
+
 
      
     def calculate_overall_rating(self):
-        # List of all rating fields
         ratings = [
             self.relevance_of_topics,
             self.organizational_flow,
@@ -89,18 +91,30 @@ class Evaluation(models.Model):
         
         # Filter out None values and calculate the average
         total_ratings = [r for r in ratings if r is not None]
-        return sum(total_ratings) / len(total_ratings) if total_ratings else 0  
+        average_rating = sum(total_ratings) / len(total_ratings) if total_ratings else 0 
+        return round(average_rating)
     
     def save(self, *args, **kwargs):
         # Calculate overall_rating before saving
         self.stored_overall_rating = self.calculate_overall_rating()
+
+        if not self.evaluation_number:
+            last_evaluation = Evaluation.objects.filter(
+                trainer=self.trainer, project=self.project
+            ).order_by('evaluation_number').last()
+
+            if last_evaluation and last_evaluation.evaluation_number is not None:
+                self.evaluation_number = last_evaluation.evaluation_number + 1
+            else:
+                self.evaluation_number = 1
+        
         super().save(*args, **kwargs)
    
     def get_absolute_url(self):
         return reverse('evaluation_form', args=[str(self.id)])
 
     def __str__(self):
-        return f"Evaluation for Proponent {self.proponents.id} - Project {self.project.projectID}"
+        return f"Evaluation for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"
 
     
 

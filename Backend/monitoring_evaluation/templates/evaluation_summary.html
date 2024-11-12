@@ -1,0 +1,56 @@
+<h2>Summary of Evaluation</h2>
+
+{% for project_summary in project_summaries %}
+    <h3>Project: {{ project_summary.project.projectTitle }}</h3>
+    {% for trainer_eval in project_summary.trainer_evaluations %}
+        <h4>Trainer: {{ trainer_eval.trainer.faculty }}</h4>
+        
+        <table border="1">
+            <tr>
+                <th>No.</th>
+                <th>Attendee Name</th>
+                <th>Relevance of Topics (I.1)</th>
+                <th>Organizational Flow (I.2)</th>
+                <th>Learning Methods (I.3)</th>
+                <th>Technology Use (I.4)</th>
+                <th>Time Efficiency (I.5)</th>
+                <th>Mastery of Subject (II.1)</th>
+                <th>Preparedness (II.2)</th>
+                <th>Audience Participation (II.3)</th>
+                <th>Interest Level (II.4)</th>
+                <th>Handling Questions (II.5)</th>
+                <th>Voice & Personality (II.6)</th>
+                <th>Visual Aids (II.7)</th>
+                <th>Venue Assessment (IV)</th>
+                <th>Timeliness (V)</th>
+                <th>Overall Management (VI)</th>
+                <th>Overall Rating</th>
+                <th>Date Submitted</th>
+            </tr>
+            
+            {% for evaluation in trainer_eval.evaluations %}
+                <tr>
+                    <td>{{ evaluation.evaluation_number }}</td>
+                    <td>{{ evaluation.attendee_name }}</td>
+                    <td>{{ evaluation.relevance_of_topics }}</td>
+                    <td>{{ evaluation.organizational_flow }}</td>
+                    <td>{{ evaluation.learning_methods }}</td>
+                    <td>{{ evaluation.technology_use }}</td>
+                    <td>{{ evaluation.time_efficiency }}</td>
+                    <td>{{ evaluation.mastery_subject }}</td>
+                    <td>{{ evaluation.preparedness }}</td>
+                    <td>{{ evaluation.audience_participation }}</td>
+                    <td>{{ evaluation.interest_level }}</td>
+                    <td>{{ evaluation.handle_questions }}</td>
+                    <td>{{ evaluation.voice_personality }}</td>
+                    <td>{{ evaluation.visual_aids }}</td>
+                    <td>{{ evaluation.venue_assessment }}</td>
+                    <td>{{ evaluation.timeliness }}</td>
+                    <td>{{ evaluation.overall_management }}</td>
+                    <td>{{ evaluation.stored_overall_rating }}</td>
+                    <td>{{ evaluation.submitted_at|date:"F j, Y, g:i a" }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+{% endfor %}
