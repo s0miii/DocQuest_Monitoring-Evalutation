@@ -4,11 +4,20 @@ import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 
 const ProjLeadLecNotes = () => {
 
-    const submittedFiles = [
-        { fileName: "Day 1 Lecture Notes.pdf", submittedBy: "Proponent A", date: "2024-10-10" },
-        { fileName: "Day 2 Lecture Notes.pdf", submittedBy: "Proponent B", date: "2024-10-11" },
-        { fileName: "Day 3 Lecture Notes.pdf", submittedBy: "Proponent C", date: "2024-10-12" }
-    ];
+    const [submittedSubmissions, setSubmittedSubmissions] = useState([
+        { 
+            id: 1, 
+            files: ["Day 1 Lecture Notes.pdf", "Day 2 Lecture Notes.pdf"], 
+            submittedBy: "Proponent A", 
+            dateSubmitted: "2024-10-10", 
+        },
+        { 
+            id: 2, 
+            files: ["Day 3 Lecture Notes.pdf.pdf"], 
+            submittedBy: "Proponent B", 
+            dateSubmitted: "2024-10-11", 
+        }
+    ]);
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -54,29 +63,38 @@ const ProjLeadLecNotes = () => {
                         </div>
                     </div>
 
+
+                    {/* Submitted Files Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
                         <div className="overflow-x-auto">
                             <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
                                 <thead>
                                     <tr className="bg-gray-100 border-b">
-                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">File Name</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Files</th>
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Submitted By</th>
-                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Date</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Date Submitted</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {submittedFiles.map((file, index) => (
-                                        <tr key={index} className={`border-b ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">{file.fileName}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{file.submittedBy}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{file.date}</td>
+                                    {submittedSubmissions.map((submission) => (
+                                        <tr key={submission.id} className="border-b hover:bg-gray-100">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                                                <ul>
+                                                    {submission.files.map((file, index) => (
+                                                        <li key={index}>{file}</li>
+                                                    ))}
+                                                </ul>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.submittedBy}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.dateSubmitted}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
