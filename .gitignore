@@ -1,8 +1,7 @@
-<<<<<<< HEAD
 venv/
 docquest/*.sqlite3
 uploads/
 myvenv/
-=======
 venv/
->>>>>>> a154f2bebfeae5a2b94b36318130fb2eaf90c3df
+__pycache__/
+*.pyc
