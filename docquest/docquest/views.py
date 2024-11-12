@@ -698,3 +698,17 @@ def get_moa_status(request, pk):
 @permission_classes([IsAuthenticated])
 def test_token(request):
     return Response("passed for {}".format(request.user.email))
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_specific_moa(request, pk): 
+    user = request.user  # Get the authenticated user
+
+    # Try to fetch the project by its ID
+    try:
+        moa = MOA.objects.get(pk=pk)  # Use pk to fetch the project directly
+    except MOA.DoesNotExist:
+        return Response({"detail": "MOA not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    moa_serializer = GetSpecificMoaSerializer(instance=moa)
+    return Response(moa_serializer.data)
