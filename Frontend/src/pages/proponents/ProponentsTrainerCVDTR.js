@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Topbar from "../../components/Topbar";
-import ProjLeadSidebar from "../../components/ProjLeadSideBar";
+import ProponentsSideBar from "../../components/ProponentsSideBar";
 
 const ProponentsTrainerCVDTR = () => {
-    // Simulate previously submitted submissions
+
     const [submittedSubmissions, setSubmittedSubmissions] = useState([
         { 
             id: 1, 
@@ -61,7 +61,7 @@ const ProponentsTrainerCVDTR = () => {
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
-                <ProjLeadSidebar />
+                <ProponentsSideBar />
             </div>
             <div className="flex-1 ml-[20%]">
                 <Topbar />
