@@ -41,6 +41,21 @@ class Progress(models.Model):
         return f"Progress for {self.project.projectTitle} - {self.percentage}%"
     
 
+# Model for Attendance
+class AttendanceRecord(models.Model):
+    # File field for the attendance file upload
+    attendance_file = models.FileField(upload_to='attendance_files/')
+    
+    # Integer field for the total number of attendees
+    total_attendees = models.PositiveIntegerField()
+    
+    # Timestamp for when the record was uploaded
+    upload_date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Attendance Record - {self.upload_date.strftime('%Y-%m-%d')} - {self.total_attendees} Attendees"
+    
+
 # Model for Evaluation Form
 class Evaluation(models.Model):
     trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluations")

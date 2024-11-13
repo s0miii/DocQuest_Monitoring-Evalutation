@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Checklist, Documents, Progress, Evaluation
+from .models import Checklist, Documents, Progress, AttendanceRecord, Evaluation
 
 @admin.register(Checklist)
 class ChecklistAdmin(admin.ModelAdmin):
@@ -19,6 +19,10 @@ class ProgressAdmin(admin.ModelAdmin):
     search_fields = ('project__projectTitle',)
     list_filter = ('percentage',)
 
+@admin.register(AttendanceRecord)
+class AttendanceRecordAdmin(admin.ModelAdmin):
+    list_display = ('upload_date', 'total_attendees')
+
 # Register Evaluation model
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
@@ -33,3 +37,5 @@ class EvaluationAdmin(admin.ModelAdmin):
     def get_date_submitted(self, obj):
         return obj.submitted_at
     get_date_submitted.short_description = 'Date Submitted'
+
+
