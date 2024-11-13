@@ -1,5 +1,11 @@
 from django import forms
-from .models import Evaluation
+from .models import AttendanceRecord, Evaluation
+
+
+class AttendanceRecordForm(forms.ModelForm):
+    class Meta:
+        model = AttendanceRecord
+        fields =['attendance_file', 'total_attendees']
 
 class EvaluationForm(forms.ModelForm):
     class Meta:
