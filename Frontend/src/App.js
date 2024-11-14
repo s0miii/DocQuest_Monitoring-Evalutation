@@ -8,7 +8,8 @@ import LoginPage from "./pages/login/LoginPage";
 import EstaffDashboard from "./pages/estaff/EstaffDashboard";
 //import EstaffViewDocument from "./pages/estaff/EstaffViewDocuments";
 import ProjLeadDashboard from "./pages/projectlead/ProjLeadDashboard";
-import ProjLeadRequirements from "./pages/projectlead/ProjLeadRequirements";
+import ProjLeadProjects from "./pages/projectlead/ProjLeadProjects";
+import ProjLeadProjReq from "./pages/projectlead/ProjLeadProjReq";
 import ProjLeadAccReport from "./pages/projectlead/ProjLeadAccReport";
 import ProjLeadCreateAccReport from "./pages/projectlead/ProjLeadCreateAccReport";
 import ProjLeadDailyAttRec from "./pages/projectlead/ProjLeadDailyAttRec";
@@ -50,14 +51,15 @@ function App() {
       <Route path="/deptoff" element={ <DeptOffDashboard /> } />
       <Route path="/coordinator" element={ <CoordinatorDashboard /> } />
       <Route path="/signatory" element={ <SignatoryDashboard /> } />
-      <Route path="/projlead/requirements" element={<ProjLeadRequirements />} />
-      <Route path="/projlead/req/accomplishment-report" element={<ProjLeadAccReport />} />
-      <Route path="/projlead/req/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
-      <Route path="/projlead/req/daily-attendance" element={<ProjLeadDailyAttRec />} />
-      <Route path="/projlead/req/evaluation-summary" element={<ProjLeadEvalSum />} />
-      <Route path="/projlead/req/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
-      <Route path="/projlead/req/modules-notes" element={<ProjLeadLecNotes />} />
-      <Route path="/projlead/req/others" element={<ProjLeadOthers />} />
+      <Route path="/projlead/proj" element={<ProjLeadProjects />} />
+      <Route path="/projlead/proj/req" element={<ProjLeadProjReq />} />
+      <Route path="/projlead/proj/req/accomplishment-report" element={<ProjLeadAccReport />} />
+      <Route path="/projlead/proj/req/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
+      <Route path="/projlead/proj/req/daily-attendance" element={<ProjLeadDailyAttRec />} />
+      <Route path="/projlead/proj/req/evaluation-summary" element={<ProjLeadEvalSum />} />
+      <Route path="/projlead/proj/req/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
+      <Route path="/projlead/proj/req/modules-notes" element={<ProjLeadLecNotes />} />
+      <Route path="/projlead/proj/req/others" element={<ProjLeadOthers />} />
 
       <Route path="estaff/proj" element={<EStaffProjects />} />
       <Route path="estaff/proj/monitoring" element={<EStaffProjMonitoring />} />

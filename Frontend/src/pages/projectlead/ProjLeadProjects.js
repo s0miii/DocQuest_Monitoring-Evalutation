@@ -4,7 +4,7 @@ import Topbar from "../../components/Topbar";
 import { useNavigate } from 'react-router-dom';
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 
-const ProjLeadRequirements = () => {
+const ProjLeadProjects = () => {
     const navigate = useNavigate();
 
     const handleViewClick = (path) => {
@@ -53,7 +53,7 @@ const ProjLeadRequirements = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">Project Proposal</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Approved</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projlead/req/accomplishment-report')}>
+                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projlead/proj/req')}>
                                                 View
                                             </button>
                                         </td>
@@ -78,4 +78,4 @@ const ProjLeadRequirements = () => {
     );
 }
 
-export default ProjLeadRequirements;
+export default ProjLeadProjects;

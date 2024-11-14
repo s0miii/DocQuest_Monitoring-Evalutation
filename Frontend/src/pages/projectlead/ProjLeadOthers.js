@@ -1,8 +1,15 @@
 import React, {useState} from "react";
 import Topbar from "../../components/Topbar";
+import { useNavigate } from 'react-router-dom';
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
+import { FaArrowLeft } from "react-icons/fa";
 
 const ProjLeadOthers = () => {
+    const navigate = useNavigate();
+
+    const handleViewClick = (path) => {
+        navigate(path);
+    }
 
     const [submittedSubmissions, setSubmittedSubmissions] = useState([
         { 
@@ -29,7 +36,12 @@ const ProjLeadOthers = () => {
             <div className="flex-1 ml-[20%]">
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
-                    <h1 className="text-2xl font-semibold mb-5">Other/s</h1>
+                    <div className="flex items-center mb-5">
+                        <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req')}>
+                            <FaArrowLeft />
+                        </button>
+                        <h1 className="text-2xl font-semibold">Other/s</h1>
+                    </div>
 
                     {/* Project Details and Progress Status Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
