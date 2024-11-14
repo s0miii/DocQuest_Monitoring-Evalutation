@@ -52,8 +52,8 @@ function EStaffSideBar() {
                                 Projects
                             </button>
                             <ul className={`${isProjectsSubMenuVisible ? "" : "hidden"} bg-indigo-900`}>
-                                <li><Link to="/projects/monitoring" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projects/monitoring"]) ? "text-yellow-500" : ""}`}>Monitoring</Link></li>
-                                <li><Link to="/projects/evaluation" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/projects/evaluation"]) ? "text-yellow-500" : ""}`}>Evaluation</Link></li>
+                                <li><Link to="/projects/monitoring" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/estaff/proj/monitoring"]) ? "text-yellow-500" : ""}`}>Monitoring</Link></li>
+                                <li><Link to="/projects/evaluation" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/estaff/proj/evaluation"]) ? "text-yellow-500" : ""}`}>Evaluation</Link></li>
                             </ul>
                         </div>
                     </li>

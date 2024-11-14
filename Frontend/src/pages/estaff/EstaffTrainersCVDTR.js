@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Topbar from "../../components/Topbar";
-import ProjLeadSidebar from "../../components/ProjLeadSideBar";
+import EStaffSideBar from "../../components/EStaffSideBar";
 
-const ProjLeadTrainersCV = () => {
+const EstaffTrainerCVDTR = () => {
     const [submittedSubmissions, setSubmittedSubmissions] = useState([
         { 
             id: 1, 
@@ -22,10 +22,44 @@ const ProjLeadTrainersCV = () => {
         }
     ]);
 
+    const [declineComment, setDeclineComment] = useState({});
+    const [showCommentInput, setShowCommentInput] = useState({});
+
+    const handleApprove = (id) => {
+        setSubmittedSubmissions((prevSubmissions) =>
+            prevSubmissions.map((submission) =>
+                submission.id === id
+                    ? { ...submission, status: "Approved", comment: "" }
+                    : submission
+            )
+        );
+    };
+
+    const handleDecline = (id) => {
+        setShowCommentInput((prevState) => ({ ...prevState, [id]: true }));
+    };
+
+    const handleCommentChange = (id, comment) => {
+        setDeclineComment((prevComments) => ({ ...prevComments, [id]: comment }));
+    };
+
+    const handleSubmitComment = (id) => {
+        const comment = declineComment[id] || "";
+        setSubmittedSubmissions((prevSubmissions) =>
+            prevSubmissions.map((submission) =>
+                submission.id === id
+                    ? { ...submission, status: "Declined", comment }
+                    : submission
+            )
+        );
+        setShowCommentInput((prevState) => ({ ...prevState, [id]: false }));
+        setDeclineComment((prevComments) => ({ ...prevComments, [id]: "" }));
+    };
+
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
-                <ProjLeadSidebar />
+                <EStaffSideBar />
             </div>
             <div className="flex-1 ml-[20%]">
                 <Topbar />
@@ -72,6 +106,7 @@ const ProjLeadTrainersCV = () => {
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Submitted By</th>
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Date Submitted</th>
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -87,7 +122,38 @@ const ProjLeadTrainersCV = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.submittedBy}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.dateSubmitted}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.status}</td>
-                                            
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                                <button
+                                                    onClick={() => handleApprove(submission.id)}
+                                                    className="text-green-500 hover:text-green-700 font-medium"
+                                                >
+                                                    Approve
+                                                </button>
+                                                <span className="mx-2">|</span>
+                                                <button
+                                                    onClick={() => handleDecline(submission.id)}
+                                                    className="text-red-500 hover:text-red-700 font-medium"
+                                                >
+                                                    Decline
+                                                </button>
+                                                {showCommentInput[submission.id] && (
+                                                    <div className="mt-2 flex items-center">
+                                                        <input
+                                                            type="text"
+                                                            value={declineComment[submission.id] || ""}
+                                                            onChange={(e) => handleCommentChange(submission.id, e.target.value)}
+                                                            placeholder="Reason for decline"
+                                                            className="bg-gray-100 rounded-lg p-2 w-3/4 mr-2"
+                                                        />
+                                                        <button
+                                                            onClick={() => handleSubmitComment(submission.id)}
+                                                            className="text-blue-500 hover:text-blue-700 font-medium"
+                                                        >
+                                                            Submit
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -100,4 +166,4 @@ const ProjLeadTrainersCV = () => {
     );
 };
 
-export default ProjLeadTrainersCV;
+export default EstaffTrainerCVDTR;

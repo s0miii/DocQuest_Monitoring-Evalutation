@@ -77,46 +77,7 @@ const EStaffProjects = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">Placeholder Inc.</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Incomplete</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projects/monitoring')}>
-                                                View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="px-6 py-4 whitespace-nowrap">CEA</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Valueno, Rabosa A.</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Tesda Vocational</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">May 2024</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Placeholder Inc.</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Incomplete</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projects/monitoring')}>
-                                                View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="px-6 py-4 whitespace-nowrap">CEA</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Valueno, Rabosa A.</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Tesda Vocational</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">May 2024</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Placeholder Inc.</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Incomplete</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projects/monitoring')}>
-                                                View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="px-6 py-4 whitespace-nowrap">CEA</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Valueno, Rabosa A.</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Tesda Vocational</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">May 2024</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Placeholder Inc.</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Incomplete</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/projects/monitoring')}>
+                                            <button className="text-black underline pr-3" onClick={() => handleViewClick('/estaff/proj/monitoring')}>
                                                 View
                                             </button>
                                         </td>
