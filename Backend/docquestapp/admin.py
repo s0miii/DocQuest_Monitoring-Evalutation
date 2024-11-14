@@ -95,11 +95,11 @@ class LoadingOfTrainersAdmin(admin.ModelAdmin):
 
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(MOA)
-admin.site.register(Proponents, ProponentsAdmin)
+# admin.site.register(Proponents, ProponentsAdmin)
 admin.site.register(LoadingOfTrainers, LoadingOfTrainersAdmin)
 #end of trial
 
-admin.site.register(CustomUser, CustomUserAdmin)
+# admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Roles, RolesAdmin)
 admin.site.register(Region, RegionAdmin)
 admin.site.register(Province, ProvinceAdmin)
@@ -107,5 +107,5 @@ admin.site.register(City, CityAdmin)
 admin.site.register(Barangay, BarangayAdmin)
 admin.site.register(Address, AddressAdmin)
 admin.site.register(PartnerAgency, PartnerAgencyAdmin)
-admin.site.register(CustomUser, CreateUserAdmin)
+# admin.site.register(CustomUser, CreateUserAdmin)
 # admin.site.register(Signatories, SignatoriesAdmin)
