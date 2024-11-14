@@ -25,6 +25,7 @@ import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
 import EStaffProjects from "./pages/estaff/EStaffProjects";
 import EStaffProjMonitoring from "./pages/estaff/EStaffProjMonitoring";
+import EstaffTrainerCVDTR from "./pages/estaff/EstaffTrainersCVDTR";
 import EStaffOP1OP2 from "./pages/estaff/EStaffOP1OP2";
 import ProponentsProjects from "./pages/proponents/ProponentsProjects"
 import ProponentsProjReq from "./pages/proponents/ProponentsProjReq";
@@ -32,6 +33,7 @@ import ProponentsDailyAttRec from "./pages/proponents/ProponentsDailyAttRec";
 import ProponentsEvalSum from "./pages/proponents/ProponentsEvalSum";
 import ProponentsTrainerCVDTR from "./pages/proponents/ProponentsTrainerCVDTR";
 import ProponentsLecNotes from "./pages/proponents/ProponentsLecNotes";
+import ProponentsOther from "./pages/proponents/ProponentsOther";
 
 import EvaluationForm from "./pages/proponents/EvaluationForm";
 
@@ -56,14 +58,18 @@ function App() {
       <Route path="/projlead/req/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
       <Route path="/projlead/req/modules-notes" element={<ProjLeadLecNotes />} />
       <Route path="/projlead/req/others" element={<ProjLeadOthers />} />
-      <Route path="projects" element={<EStaffProjects />} />
-      <Route path="projects/monitoring" element={<EStaffProjMonitoring />} />
+
+      <Route path="estaff/proj" element={<EStaffProjects />} />
+      <Route path="estaff/proj/monitoring" element={<EStaffProjMonitoring />} />
+      <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR/>} />
+
       <Route path="/proponents/projects" element={<ProponentsProjects />} />
       <Route path="/proponents/proj/req" element={<ProponentsProjReq />} />
       <Route path="/proponents/proj/req/daily-attendance" element={<ProponentsDailyAttRec/>} />
       <Route path="/proponents/proj/req/evaluation-summary" element={<ProponentsEvalSum/>} />
       <Route path="/proponents/proj/req/trainer-cv-dtr" element={<ProponentsTrainerCVDTR/>} />
       <Route path="/proponents/proj/req/modules-notes" element={<ProponentsLecNotes/>} />
+      <Route path="/proponents/proj/req/other" element={<ProponentsOther/>} />
       <Route path="/eval" element={<EvaluationForm/>} />
     </Routes>
   );

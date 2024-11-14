@@ -86,46 +86,46 @@ const EStaffProjMonitoring = () => {
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <p>Accomplishment Report</p>
-                                    <p className="text-gray-500 text-sm">1 document attached</p>
+                                    <p>List of Participants/Daily Attendance Sheet</p>
+                                    <p className="text-gray-500 text-sm">0 document attached</p>
                                 </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/evaluation-summary')}>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/estaff/proj/monitoring/daily-attendance')}>
                                     View
                                 </button>
                             </div>
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <p>List of Participants</p>
-                                    <p className="text-gray-500 text-sm">2 documents attached</p>
+                                    <p>Summary of Evaluation/Evaluation Sheets</p>
+                                    <p className="text-gray-500 text-sm">0 document attached</p>
                                 </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/participants-list')}>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/estaff/proj/monitoring/evaluation-summary')}>
                                     View
                                 </button>
                             </div>
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <p>Daily Attendance Record</p>
-                                    <p className="text-gray-500 text-sm">1 document attached</p>
+                                    <p>TrainersCV/DTR</p>
+                                    <p className="text-gray-500 text-sm">0 document attached</p>
                                 </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/daily-attendance')}>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/estaff/proj/monitoring/trainer-cv-dtr')}>
                                     View
                                 </button>
                             </div>
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <p>Additional Documents</p>
-                                    <p className="text-gray-500 text-sm">2 documents attached</p>
+                                    <p>Modules/Lecture Notes</p>
+                                    <p className="text-gray-500 text-sm">0 document attached</p>
                                 </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/additional-documents')}>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/estaff/proj/monitoring/modules-notes')}>
                                     View
                                 </button>
                             </div>
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <p>Summary of Evaluation</p>
-                                    <p className="text-gray-500 text-sm">1 document attached</p>
+                                    <p>Other</p>
+                                    <p className="text-gray-500 text-sm">0 document attached</p>
                                 </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/evaluation-summary')}>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/estaff/proj/monitoring/other')}>
                                     View
                                 </button>
                             </div>

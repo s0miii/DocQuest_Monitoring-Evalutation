@@ -93,6 +93,15 @@ const ProponentsProjReq = () => {
                                     View
                                 </button>
                             </div>
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p>Other</p>
+                                    <p className="text-gray-500 text-sm">0 document attached</p>
+                                </div>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/proponents/proj/req/other')}>
+                                    View
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
