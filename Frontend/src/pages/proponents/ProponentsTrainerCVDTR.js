@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import Topbar from "../../components/Topbar";
+import { useNavigate } from 'react-router-dom';
 import ProponentsSideBar from "../../components/ProponentsSideBar";
+import { FaArrowLeft } from "react-icons/fa";
 
 const ProponentsTrainerCVDTR = () => {
+    const navigate = useNavigate();
+
+    const handleViewClick = (path) => {
+        navigate(path);
+    }
 
     const [submittedSubmissions, setSubmittedSubmissions] = useState([
         { 
@@ -66,7 +73,12 @@ const ProponentsTrainerCVDTR = () => {
             <div className="flex-1 ml-[20%]">
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
-                    <h1 className="text-2xl font-semibold mb-5">Trainers CV/DTR</h1>
+                    <div className="flex items-center mb-5">
+                        <button className="mr-2" onClick={() => handleViewClick('/proponents/proj/req')}>
+                            <FaArrowLeft />
+                        </button>
+                        <h1 className="text-2xl font-semibold">Trainers CV/DTR</h1>
+                    </div>
 
                     {/* Project Details */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
