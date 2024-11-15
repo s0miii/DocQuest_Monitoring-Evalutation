@@ -72,22 +72,20 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 # Evaluation Form View for HTML Form Submission
-def evaluation_form_view(request, trainer_id, project_id):
-    # Retrieve the specific Trainer and Project
-    trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id)
+def evaluation_form_view(request, project_id, trainer_id=None):
     project = get_object_or_404(Project, projectID=project_id)
+    trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id) if trainer_id else None #Set trainer to None if not provided for project-only evaluations
 
     if request.method == 'POST':
         form = EvaluationForm(request.POST)
         if form.is_valid():
             evaluation = form.save(commit=False)
-            evaluation.trainer = trainer
             evaluation.project = project
+            if trainer:
+                evaluation.trainer = trainer
             evaluation.stored_overall_rating = evaluation.calculate_overall_rating()
             evaluation.save()
-
-            print("Stored Overall Rating:", evaluation.stored_overall_rating)
-
+            
             return render(request, 'thank_you.html', {'stored_overall_rating': evaluation.stored_overall_rating})
     else:
         form = EvaluationForm()

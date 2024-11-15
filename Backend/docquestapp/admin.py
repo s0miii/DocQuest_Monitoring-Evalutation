@@ -82,3 +82,6 @@ admin.site.register(Address, AddressAdmin)
 admin.site.register(PartnerAgency, PartnerAgencyAdmin)
 # admin.site.register(CustomUser, CreateUserAdmin)
 # admin.site.register(Signatories, SignatoriesAdmin)
+
+
+# For Testing Evaluation
