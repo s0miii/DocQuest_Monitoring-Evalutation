@@ -72,33 +72,6 @@ class PartnerAgencyAdmin(admin.ModelAdmin):
     fields = ["agencyName", "addressID"]
     list_display = ["agencyID", "agencyName", "addressID"]
 
-
-# additions for trial
-class ProjectAdmin(admin.ModelAdmin):
-    fields = [
-        'projectTitle', 'userID', 'programCategory', 'projectType', 'projectCategory',
-        'researchTitle', 'program', 'accreditationLevel', 'college', 'projectLocationID',
-        'agency', 'targetImplementation', 'totalHours', 'background', 'projectComponent',
-        'beneficiaries', 'totalBudget', 'moaID'
-    ]
-    list_display = ['projectTitle', 'userID', 'programCategory', 'projectType', 'college']
-
-class ProponentsAdmin(admin.ModelAdmin):
-    list_display = ["project", "proponent"]  # Fields to display in the list view
-    list_filter = ["project"]  # Filter by project to easily categorize
-    search_fields = ["proponent", "project__projectTitle"]  # Search fields for ease of navigation
-
-class LoadingOfTrainersAdmin(admin.ModelAdmin):
-    list_display = ["LOTID", "faculty", "hours", "ustpBudget", "agencyBudget", "totalBudgetRequirement", "project"]
-    list_filter = ["project"] 
-    search_fields = ["faculty", "project__projectTitle"]    
-
-admin.site.register(Project, ProjectAdmin)
-admin.site.register(MOA)
-# admin.site.register(Proponents, ProponentsAdmin)
-admin.site.register(LoadingOfTrainers, LoadingOfTrainersAdmin)
-#end of trial
-
 # admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Roles, RolesAdmin)
 admin.site.register(Region, RegionAdmin)
