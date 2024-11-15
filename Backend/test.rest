@@ -23,6 +23,15 @@ Authorization: Token 946d9449e71eee646961e26e1f44206b6ea0bd23
 
 ###
 
+GET http://127.0.0.1:8000/auth/users/me/
+Content-Type: application/json
+Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+
+
+{}
+
+###
+
 GET http://127.0.0.1:8000/get_agencies
 Content-Type: application/json
 
@@ -637,7 +646,9 @@ Authorization: Token 0c621fc934ac3bd947bb970d530b7eda0f53ae40
 # get request inig navigate sa user profile
 GET http://127.0.0.1:8000/get_user_details
 Content-Type: application/json
-Authorization: Token f17c9f447d3e24b919f102815eb536bc5cf62ba0
+Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+
+{}
 
 ###
 
@@ -694,6 +705,14 @@ Content-Type: application/json
 
 GET http://127.0.0.1:8000/get_moa_status/10/
 Content-Type: application/json
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_moa/10/
+Content-Type: application/json
+Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 {}
 
