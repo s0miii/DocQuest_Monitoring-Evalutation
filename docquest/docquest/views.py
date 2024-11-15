@@ -251,7 +251,7 @@ def approve_or_deny_project(request, review_id):
 
         if action == 'approve':
             review.reviewStatus = 'approved'
-            review.comment = None
+            review.comment = comment
             project.status = 'approved'
             message = 'Your project has been approved and ready to print.'
         elif action == 'deny':

@@ -1,9 +1,9 @@
 POST http://127.0.0.1:8000/signup
 Content-Type: application/json
 
-{ "email": "guylord@gmail.com", "password": "testpass", "firstname": "Guylord", "middlename": "Akut",
-    "lastname": "Sagun", "campus": "USTP-CDO", "college": "NO COLLEGE SELECTED", 
-    "department": "NO DEPARTMENT SELECTED", "contactNumber": "NO NUMBER", "role": [9]
+{ "email": "chal@gmail.com", "password": "testpass", "firstname": "Chalbert", "middlename": "Akut",
+    "lastname": "Reyes", "campus": "USTP-CDO", "college": "NO COLLEGE SELECTED", 
+    "department": "NO DEPARTMENT SELECTED", "contactNumber": "NO NUMBER", "role": [4]
 }
 
 ###
@@ -26,7 +26,6 @@ Authorization: Token 946d9449e71eee646961e26e1f44206b6ea0bd23
 GET http://127.0.0.1:8000/auth/users/me/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
-
 
 {}
 
@@ -56,10 +55,10 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 {
     "userID": 10,
-    "programCategory": "I-Share",
+    "programCategory": [1, 2],
     "projectTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
     "projectType": "New Project",
-    "projectCategory": "Skills Training/Capacity Building",
+    "projectCategory": [1, 2],
     "researchTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
     "program": "BSIT and BSDS",
     "accreditationLevel": "IV",
@@ -236,7 +235,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
         },
         {
             "name": "Olivia Taylor",
-            "title": "Accoutant III"
+            "title": "Accountant III"
         },
         {
             "name": "William Thomas",
@@ -302,10 +301,10 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 {
     "userID": 10,
-    "programCategory": "I-Share Edit",
+    "programCategory": [1, 2],
     "projectTitle": "Edited Title",
     "projectType": "New Project Edit",
-    "projectCategory": "Edit Skills Training/Capacity Building",
+    "projectCategory": [1, 2],
     "researchTitle": "Edit E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
     "program": "Edit BSIT and BSDS",
     "accreditationLevel": "Edit IV",
@@ -482,7 +481,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
         },
         {
             "name": "Olivia Taylor",
-            "title": "Accoutant III"
+            "title": "Accountant III"
         },
         {
             "name": "William Thomas",
