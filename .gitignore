@@ -4,6 +4,6 @@ uploads/
 myvenv/
 venv/
 __pycache__/
-*.pyc/
-
+*.pyc
+.vscode
 .history/

@@ -1,10 +1,10 @@
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import Documents, Checklist, Progress, Evaluation
+from .models import Documents, Checklist, Progress, AttendanceRecord, Evaluation
 from docquestapp.models import Project, LoadingOfTrainers
-from .serializers import ChecklistSerializer, DocumentsSerializer, ProgressSerializer, EvaluationSerializer
+from .serializers import ChecklistSerializer, DocumentsSerializer, ProgressSerializer, AttendanceRecordSerializer, EvaluationSerializer
 from .forms import EvaluationForm
 from rest_framework.permissions import IsAuthenticated
 
@@ -38,6 +38,11 @@ class ProgressViewSet(viewsets.ModelViewSet):
         progress = self.get_object()
         serializer = self.get_serializer(progress)
         return Response(serializer.data)
+
+# AttendanceRecord Viewset for Attendance
+class AttendanceRecordListCreateView(generics.ListCreateAPIView):
+    queryset = AttendanceRecord.objects.all()
+    serializer_class = AttendanceRecordSerializer
 
 # Evaluation Viewset for Evaluation Forms
 class EvaluationViewSet(viewsets.ModelViewSet):
