@@ -201,6 +201,22 @@ class WitnessesSerializer(serializers.ModelSerializer):
         model = Witnesses
         fields = ['witnessID', 'name', 'title']
 
+class GetSpecificMoaSerializer(serializers.ModelSerializer):
+    witnesseth = WitnessethSerializer(many=True)
+    partyObligation = PartyObligationSerializer(many=True)
+    effectivity = EffectivitySerializer(many=True)
+    firstParty = FirstPartySerializer(many=True)
+    secondParty = SecondPartySerializer(many=True)
+    witnesses = WitnessesSerializer(many=True)
+    
+    class Meta(object):
+        model = MOA
+        fields = [
+            'moaID', 'partyADescription', 'partyBDescription', 'termination',
+            'witnesseth', 'partyObligation', 'effectivity', 'firstParty', 'secondParty',
+            'witnesses'
+        ]
+
 class PostMOASerializer(serializers.ModelSerializer):
     witnesseth = WitnessethSerializer(many=True)
     partyObligation = PartyObligationSerializer(many=True)
