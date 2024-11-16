@@ -122,6 +122,14 @@ class Effectivity(models.Model):
     effectivity = models.TextField()
     moaID = models.ForeignKey(MOA, related_name='effectivity', on_delete=models.CASCADE)
 
+class ProgramCategory(models.Model):
+    programCategoryID = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=50)
+
+class ProjectCategory(models.Model):
+    projectCategoryID = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=50)
+
 class Project(models.Model):
     STATUS_CHOICES = [
         ('approved', 'Approved'),
@@ -131,10 +139,10 @@ class Project(models.Model):
 
     projectID = models.AutoField(primary_key=True)
     userID = models.ForeignKey(CustomUser, related_name='projectUser', on_delete=models.CASCADE)
-    programCategory = models.CharField(max_length=50) #1
+    programCategory = models.ManyToManyField(ProgramCategory, related_name='programCategory') #1
     projectTitle = models.CharField(max_length=150) #2
     projectType = models.CharField(max_length=50) #3 
-    projectCategory = models.CharField(max_length=100) #4
+    projectCategory = models.ManyToManyField(ProjectCategory, related_name="projectCategory") #4
     researchTitle = models.CharField(max_length=150) #5
     program = models.CharField(max_length=150) #6
     accreditationLevel = models.CharField(max_length=50) #7
