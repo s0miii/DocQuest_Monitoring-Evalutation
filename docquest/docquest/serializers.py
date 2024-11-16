@@ -340,18 +340,44 @@ class UserProjectDeliverablesSerializer(serializers.ModelSerializer):
         fields = ['userID', 'projectID', 'deliverableID']
         list_serializer_class = serializers.ListSerializer  # Use ListSerializer for bulk operations
 
+# class NotificationSerializer(serializers.ModelSerializer):
+#     content_type = serializers.SlugRelatedField(
+#         queryset=ContentType.objects.all(),
+#         slug_field='model'  # Shows the model name as a string (e.g., 'project' or 'moa')
+#     )
+
+#     class Meta:
+#         model = Notification
+#         fields = [
+#             'notificationID', 'userID', 'content_type',
+#             'source_id', 'message', 'status', 'timestamp'
+#         ]
+
 class NotificationSerializer(serializers.ModelSerializer):
-    content_type = serializers.SlugRelatedField(
-        queryset=ContentType.objects.all(),
-        slug_field='model'  # Shows the model name as a string (e.g., 'project' or 'moa')
-    )
+    source_type = serializers.SerializerMethodField()
+    source_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Notification
-        fields = [
-            'notificationID', 'userID', 'content_type',
-            'source_id', 'message', 'status', 'timestamp'
-        ]
+        fields = ['notificationID', 'message', 'status', 'timestamp', 'source_type', 'source_details']
+
+    def get_source_type(self, obj):
+        return obj.content_type.model
+
+    def get_source_details(self, obj):
+        # Return relevant details based on the source type
+        if obj.source:
+            if obj.content_type.model == 'project':
+                return {
+                    'id': obj.source.id,
+                    'title': obj.source.title,  # Adjust based on your Project model
+                }
+            elif obj.content_type.model == 'moa':
+                return {
+                    'id': obj.source.id,
+                    'name': obj.source.name,  # Adjust based on your MOA model
+                }
+        return None
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -371,8 +397,20 @@ class DocumentPDFSerializer(serializers.ModelSerializer):
         model = DocumentPDF
         fields = ['documentID', 'fileData', 'timestamp', 'content_type', 'source_id']
 
+class ProgramCategorySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = ProgramCategory
+        fields = ['programCategoryID', 'title']
+
+class ProjectCategorySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = ProjectCategory
+        fields = ['projectCategoryID', 'title']
+
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
+    programCategory = ProgramCategorySerializer(many=True)
+    projectCategory = ProjectCategorySerializer(many=True)
     proponents = ProponentsSerializer(many=True)
     nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = AddressSerializer()
@@ -400,6 +438,8 @@ class GetProjectSerializer(serializers.ModelSerializer):
 
 class PostProjectSerializer(serializers.ModelSerializer):
     userID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    programCategory = serializers.PrimaryKeyRelatedField(queryset=ProgramCategory.objects.all(), many=True)
+    projectCategory = serializers.PrimaryKeyRelatedField(queryset=ProjectCategory.objects.all(), many=True)
     proponents = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
     nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = PostAddressSerializer()
@@ -427,6 +467,8 @@ class PostProjectSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         proponents_data = validated_data.pop('proponents')
+        programCategory_data = validated_data.pop('programCategory')
+        projectCategory_data = validated_data.pop('projectCategory')
         nonUserProponents_data = validated_data.pop('nonUserProponents')
         address_data = validated_data.pop('projectLocationID')
         projectLocationID = Address.objects.create(**address_data)
@@ -444,6 +486,9 @@ class PostProjectSerializer(serializers.ModelSerializer):
 
         project.agency.set(agency_data)
         project.proponents.set(proponents_data)
+
+        project.programCategory.set(programCategory_data)
+        project.projectCategory.set(projectCategory_data)
 
         for nonUserProponents_data in nonUserProponents_data:
             NonUserProponents.objects.create(project=project, **nonUserProponents_data)
@@ -476,6 +521,8 @@ class PostProjectSerializer(serializers.ModelSerializer):
 
 class UpdateProjectSerializer(serializers.ModelSerializer):
     userID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    programCategory = serializers.PrimaryKeyRelatedField(queryset=ProgramCategory.objects.all(), many=True)
+    projectCategory = serializers.PrimaryKeyRelatedField(queryset=ProjectCategory.objects.all(), many=True)
     proponents = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
     nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = PostAddressSerializer()
@@ -501,6 +548,8 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
         ]
 
     def update(self, instance, validated_data):
+        programCategory_data = validated_data.pop('programCategory')
+        projectCategory_data = validated_data.pop('projectCategory')
         proponents_data = validated_data.pop('proponents')
         nonUserProponents_data = validated_data.pop('nonUserProponents')
         address_data = validated_data.pop('projectLocationID')
@@ -527,6 +576,8 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
             instance.projectLocationID.save()
 
         # Clear existing related data on update
+        instance.programCategory.clear()
+        instance.projectCategory.clear()
         instance.nonUserProponents.all().delete()
         instance.goalsAndObjectives.all().delete()
         instance.projectActivities.all().delete()
@@ -536,6 +587,9 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
         instance.monitoringPlanSchedules.all().delete()
         instance.loadingOfTrainers.all().delete()
         instance.signatories.all().delete()
+
+        instance.programCategory.set(programCategory_data)
+        instance.projectCategory.set(projectCategory_data)
 
         for nonUserProponents_data in nonUserProponents_data:
             NonUserProponents.objects.create(project=instance, **nonUserProponents_data)

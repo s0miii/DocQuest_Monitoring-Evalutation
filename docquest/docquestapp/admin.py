@@ -72,6 +72,14 @@ class PartnerAgencyAdmin(admin.ModelAdmin):
     fields = ["agencyName", "addressID"]
     list_display = ["agencyID", "agencyName", "addressID"]
 
+class ProgramCategoryAdmin(admin.ModelAdmin):
+    fields = ["title"]
+    list_display = ["programCategoryID", "title"]
+
+class ProjectCategoryAdmin(admin.ModelAdmin):
+    fields = ["title"]
+    list_display = ["projectCategoryID", "title"]
+
 # admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Roles, RolesAdmin)
 admin.site.register(Region, RegionAdmin)
@@ -81,4 +89,6 @@ admin.site.register(Barangay, BarangayAdmin)
 admin.site.register(Address, AddressAdmin)
 admin.site.register(PartnerAgency, PartnerAgencyAdmin)
 admin.site.register(CustomUser, CreateUserAdmin)
+admin.site.register(ProgramCategory, ProgramCategoryAdmin)
+admin.site.register(ProjectCategory, ProjectCategoryAdmin)
 # admin.site.register(Signatories, SignatoriesAdmin)
