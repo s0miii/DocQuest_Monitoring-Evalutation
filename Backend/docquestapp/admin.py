@@ -82,3 +82,29 @@ admin.site.register(Address, AddressAdmin)
 admin.site.register(PartnerAgency, PartnerAgencyAdmin)
 admin.site.register(CustomUser, CreateUserAdmin)
 # admin.site.register(Signatories, SignatoriesAdmin)
+
+
+# for testing
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = (
+        'projectID', 'projectTitle', 'userID', 'programCategory', 
+        'projectType', 'projectCategory', 'status', 'dateCreated'
+    )
+    search_fields = ('projectTitle', 'programCategory', 'projectType', 'researchTitle', 'college')
+    list_filter = ('status', 'programCategory', 'projectType', 'college')
+    ordering = ('-dateCreated',)
+    filter_horizontal = ('agency', 'proponents',)
+
+admin.site.register(Project, ProjectAdmin)
+
+class MOAAdmin(admin.ModelAdmin):
+    list_display = (
+        'moaID', 'userID', 'status', 'dateCreated', 'uniqueCode'
+    )
+    search_fields = (
+        'userID__username', 'partyADescription', 'partyBDescription', 'uniqueCode'
+    )
+    list_filter = ('status', 'dateCreated')
+    ordering = ('-dateCreated',)
+
+admin.site.register(MOA, MOAAdmin)
