@@ -10,6 +10,7 @@ import EstaffDashboard from "./pages/estaff/EstaffDashboard";
 import ProjLeadDashboard from "./pages/projectlead/ProjLeadDashboard";
 import ProjLeadProjects from "./pages/projectlead/ProjLeadProjects";
 import ProjLeadProjReq from "./pages/projectlead/ProjLeadProjReq";
+import ProjLeadAssignProponents from "./pages/projectlead/ProjLeadAssignProponents";
 import ProjLeadAccReport from "./pages/projectlead/ProjLeadAccReport";
 import ProjLeadCreateAccReport from "./pages/projectlead/ProjLeadCreateAccReport";
 import ProjLeadDailyAttRec from "./pages/projectlead/ProjLeadDailyAttRec";
@@ -53,6 +54,7 @@ function App() {
       <Route path="/signatory" element={ <SignatoryDashboard /> } />
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
       <Route path="/projlead/proj/req" element={<ProjLeadProjReq />} />
+      <Route path="/projlead/proj/req/assign-proponents" element={<ProjLeadAssignProponents />} />
       <Route path="/projlead/proj/req/accomplishment-report" element={<ProjLeadAccReport />} />
       <Route path="/projlead/proj/req/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
       <Route path="/projlead/proj/req/daily-attendance" element={<ProjLeadDailyAttRec />} />

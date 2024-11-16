@@ -4,12 +4,17 @@ import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar";
 import { FaArrowLeft } from "react-icons/fa";
 
-const EStaffProjMonitoring = () => {
+const EStaffProjMonitoring = ({ totalRequirements, completedRequirements }) => {
     const navigate = useNavigate();
 
     const handleViewClick = (path) => {
         navigate(path);
     }
+
+    // Calculate the progress percentage, ensuring it does not exceed 100%
+    const progressPercentage = totalRequirements > 0 
+        ? Math.min((completedRequirements / totalRequirements) * 100, 100) 
+        : 0;
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -60,30 +65,18 @@ const EStaffProjMonitoring = () => {
 
                         {/* Project Progress Status */}
                         <h2 className="text-xl font-semibold text-center mt-8 mb-4">Project Progress Status</h2>
-                        <div className="mt-4 flex flex-col items-center">
-                            <div className="w-2/3 bg-gray-200 rounded-full h-2.5 mb-4">
-                                <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: "50%" }}></div>
-                            </div>
-                            <div className="w-2/3 flex justify-between text-sm text-gray-600">
-                                <div className="text-center">
-                                    <span className="block">25%</span>
-                                    <span>Day 1</span>
+                            <div className="mt-4 flex flex-col items-center">
+                                <div className="w-2/3 bg-gray-200 rounded-full h-2.5 mb-4">
+                                    <div
+                                        className="bg-yellow-500 h-2.5 rounded-full"
+                                        style={{ width: `${progressPercentage}%` }}
+                                    ></div>
                                 </div>
-                                <div className="text-center">
-                                    <span className="block">50%</span>
-                                    <span>Day 2</span>
-                                </div>
-                                <div className="text-center">
-                                    <span className="block">75%</span>
-                                    <span>Day 3</span>
-                                </div>
-                                <div className="text-center">
-                                    <span className="block">100%</span>
-                                    <span>Day 4</span>
+                                <div className="w-2/3 flex justify-center text-sm text-gray-600">
+                                    <span>{progressPercentage.toFixed(0)}% Completed</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
 
                     {/* Submitted Requirements Section */}
