@@ -10,7 +10,7 @@ import datetime
 
 class Roles(models.Model):
     roleID = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=4)
+    code = models.CharField(max_length=5)
     role = models.CharField(max_length=50, default='NO ROLE')
 
     def __str__(self):
@@ -23,9 +23,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     firstname = models.CharField(max_length=50)
     middlename = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
-    campus = models.CharField(max_length=50, default="NO CAMPUS SELECTED")
-    college = models.CharField(max_length=50, default="NO COLLEGE SELECTED")
-    department = models.CharField(max_length=50, default="NO DEPARTMENT SELECTED")
+    campus = models.CharField(max_length=50, default="USTP-CDO")
+    college = models.CharField(max_length=50, default="NO COLLEGE")
+    department = models.CharField(max_length=50, default="NO DEPARTMENT")
     contactNumber = models.CharField(max_length=15, default="NO NUMBER")
     role = models.ManyToManyField(Roles, related_name='user')
 
@@ -129,6 +129,17 @@ class ProgramCategory(models.Model):
 class ProjectCategory(models.Model):
     projectCategoryID = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
+
+class College(models.Model):
+    collegeID = models.AutoField(primary_key=True)
+    abbreviation = models.CharField(max_length=15)
+    title = models.CharField(100)
+
+class Program(models.Model):
+    programID = models.AutoField(primary_key=True)
+    abbreviation = models.CharField(max_length=15)
+    title = models.CharField(100)
+    collegeID = models.ForeignKey(College, related_name='program', on_delete=models.CASCADE)
 
 class Project(models.Model):
     STATUS_CHOICES = [
