@@ -5,16 +5,12 @@ function EStaffSideBar() {
     const location = useLocation();
 
     const [isUserManagementSubMenuVisible, setIsUserManagementSubMenuVisible] = useState(false);
-    const [isProjectsSubMenuVisible, setIsProjectsSubMenuVisible] = useState(false);
     const [isPREXCSubMenuVisible, setIsPREXCSubMenuVisible] = useState(false);
 
     const toggleUserManagementSubMenu = () => {
         setIsUserManagementSubMenuVisible(!isUserManagementSubMenuVisible);
     };
 
-    const toggleProjectsSubMenu = () => {
-        setIsProjectsSubMenuVisible(!isProjectsSubMenuVisible);
-    };
 
     const togglePREXCSubMenu = () => {
         setIsPREXCSubMenuVisible(!isPREXCSubMenuVisible);
@@ -47,23 +43,10 @@ function EStaffSideBar() {
                         <Link to="/documents" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/documents"]) ? "text-yellow-500" : ""}`}>Documents</Link>
                     </li>
                     <li>
-                        <div className="flex flex-col">
-                            <button onClick={toggleProjectsSubMenu} className={`text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none ${isActive(["/projects"]) ? "text-yellow-500" : ""}`}>
-                                Projects
-                            </button>
-                            <ul className={`${isProjectsSubMenuVisible ? "" : "hidden"} bg-indigo-900`}>
-                                <li><Link to="/projects/monitoring" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/estaff/proj/monitoring"]) ? "text-yellow-500" : ""}`}>Monitoring</Link></li>
-                                <li><Link to="/projects/evaluation" className={`block px-6 py-3 hover:text-yellow-500 ${isActive(["/estaff/proj/evaluation"]) ? "text-yellow-500" : ""}`}>Evaluation</Link></li>
-                            </ul>
-                        </div>
+                        <Link to="/estaff/proj" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/estaff/proj"]) ? "text-yellow-500" : ""}`}>Project Monitoring</Link>
                     </li>
                     <li>
-                        <Link to="/auto-message" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/auto-message"]) ? "text-yellow-500" : ""}`}>
-                            Auto Message
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/email" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/email"]) ? "text-yellow-500" : ""}`}>
+                        <Link to="#" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["#"]) ? "text-yellow-500" : ""}`}>
                             Email
                         </Link>
                     </li>

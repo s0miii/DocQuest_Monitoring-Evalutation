@@ -7,7 +7,6 @@ function ProjLeadSidebar() {
     const isRequirementsPath = location.pathname.startsWith("/projlead/requirements");
 
     const [isSubMenuVisible, setIsSubMenuVisible] = useState(false);
-    const [isRequirementsSubMenuVisible, setIsRequirementsSubMenuVisible] = useState(isRequirementsPath);
 
     const toggleSubMenu = () => {
         setIsSubMenuVisible(!isSubMenuVisible);
@@ -42,7 +41,7 @@ function ProjLeadSidebar() {
                         <Link to="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Create MOA/MOU</Link>
                     </li>
                     <li>
-                        <Link to="/projlead/proj" className="text-lg block px-6 py-3 hover:text-yellow-500">Documentary Requirements</Link>
+                        <Link to="/projlead/proj" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/projlead/proj"]) ? "text-yellow-500" : ""}`}>Documentary Requirements</Link>
                     </li>
                     <li><Link to="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Log out</Link></li>
                 </ul>

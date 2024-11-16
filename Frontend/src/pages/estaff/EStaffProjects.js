@@ -26,17 +26,17 @@ const EStaffProjects = () => {
                         {/* Not Yet Started */}
                         <div className="bg-orange-500 text-white rounded-lg p-6 flex flex-col items-center justify-center">
                             <h2 className="text-lg font-semibold">Not Yet Started</h2>
-                            <h2 className="text-4xl font-bold">07</h2>
+                            <h2 className="text-4xl font-bold">00</h2>
                         </div>
                         {/* Ongoing */}
                         <div className="bg-yellow-400 text-white rounded-lg p-6 flex flex-col items-center justify-center">
                             <h2 className="text-lg font-semibold">Ongoing</h2>
-                            <h2 className="text-4xl font-bold">05</h2>
+                            <h2 className="text-4xl font-bold">01</h2>
                         </div>
                         {/* Completed */}
                         <div className="bg-green-500 text-white rounded-lg p-6 flex flex-col items-center justify-center">
                             <h2 className="text-lg font-semibold">Completed</h2>
-                            <h2 className="text-4xl font-bold">02</h2>
+                            <h2 className="text-4xl font-bold">00</h2>
                         </div>
                     </div>
 
