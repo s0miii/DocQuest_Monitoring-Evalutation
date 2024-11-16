@@ -1,0 +1,233 @@
+# Create a user (Sign Up)
+POST http://127.0.0.1:8000/signup/
+Content-Type: application/json
+
+{
+    "email": "kit@test.com",
+    "password": "testpass123",
+    "firstname": "Keith",
+    "middlename": "C",
+    "lastname": "Tapongot",
+    "campus": "USTP-CDO",
+    "college": "College of Information Technology",
+    "department": "Department of TCM",
+    "contactNumber": "09123456789",
+    "role": [1]
+}
+
+###
+
+# Log in to get token
+POST http://127.0.0.1:8000/auth/token/login/
+Content-Type: application/json
+
+{
+    "email": "kit@test.com",
+    "password": "testpass123"
+}
+
+# Example token: 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# Log out using token
+POST http://127.0.0.1:8000/auth/token/logout/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+{}
+
+###
+
+# Get authenticated user details
+GET http://127.0.0.1:8000/auth/users/me/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+{}
+
+###
+
+# Get all projects
+GET http://127.0.0.1:8000/get_projects/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# Create a project
+POST http://127.0.0.1:8000/create_project/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+{
+    "userID": 1,
+    "programCategory": "I-Share",
+    "projectTitle": "Training and Outreach Program",
+    "projectType": "Capacity Building",
+    "projectCategory": "Skills Training",
+    "researchTitle": "Enhancing Digital Literacy",
+    "program": "BSIT",
+    "accreditationLevel": "Level IV",
+    "college": "CITC",
+    "beneficiaries": "Out-of-School Youth",
+    "targetImplementation": "2024-12-01",
+    "totalHours": 40,
+    "background": "A community-focused digital literacy program.",
+    "projectComponent": "Training and Workshop",
+    "targetScope": "Barangay 1, City",
+    "ustpBudget": 10000,
+    "partnerAgencyBudget": 5000,
+    "totalBudget": 15000,
+    "proponents": [1, 2],
+    "projectLocationID": {
+        "street": "Main Road",
+        "barangayID": 1
+    },
+    "agency": [1],
+    "goalsAndObjectives": [
+        {
+            "goalsAndObjectives":
+                "Increase digital literacy among youth"
+        }
+    ],
+    "nonUserProponents": [
+    {
+      "name": "WYn"
+    }
+  ],
+    "projectActivities": [
+        {
+            "objective": "Conduct workshops for participants",
+            "involved": "Trainers, community leaders",
+            "targetDate": "2024-12-02",
+            "personResponsible": "Keith Tapongot"
+        }
+    ],
+    "projectManagementTeam": [
+        {
+            "name": "Emily Brown",
+            "role": "Team Leader"
+        },
+        {
+            "name": "Michael Johnson",
+            "role": "Technical Support"
+        }
+    ],
+    "budgetRequirements": [
+        {
+            "itemName": "Training Materials",
+            "ustpAmount": 5000,
+            "partnerAmount": 2000,
+            "totalAmount": 7000
+        },
+        {
+            "itemName": "Venue Rental",
+            "ustpAmount": 3000,
+            "partnerAmount": 1000,
+            "totalAmount": 4000
+        }
+    ],
+    "evaluationAndMonitorings": [
+        {
+            "projectSummary": "Assess training impact",
+            "indicators": "Number of participants with improved skills",
+            "meansOfVerification": "Feedback forms",
+            "type": "Outcome"
+        }
+    ],
+    "monitoringPlanSchedules": [
+        {
+            "approach": "Pre-training surveys",
+            "dataGatheringStrategy": "Questionnaires and interviews",
+            "schedule": "2024-11-25",
+            "implementationPhase": "Before Implementation"
+        }
+    ],
+    "signatories": [
+        {
+            "name": "John Doe",
+            "title": "Dean of CITC"
+        },
+        {
+            "name": "Jane Smith",
+            "title": "Chancellor"
+        }
+    ]
+}
+
+
+
+###
+
+# Get a specific project
+GET http://127.0.0.1:8000/get_project/3/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# Update a project
+PUT http://127.0.0.1:8000/edit_project/2/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+{
+    "projectTitle": "Updated Training Program",
+    "totalBudget": 20000
+}
+
+###
+
+# Delete a project
+DELETE http://127.0.0.1:8000/delete_project/1/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# Get accomplishment reports
+GET http://127.0.0.1:8000/monitoring/accomplishment-reports/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# Create an accomplishment report
+POST http://127.0.0.1:8000/monitoring/accomplishment-reports/2/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+{
+    "project": 2,
+    "banner_program_title": "Banner Program",
+    "flagship_program": "Flagship Initiative",
+    "training_modality": "Blended",
+    "actual_implementation_date": "2024-12-10",
+    "total_number_of_days": 3,
+    "submitted_by": 1
+}
+
+###
+
+# Get project narratives
+GET http://127.0.0.1:8000/monitoring/project-narratives/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# Create a project narrative
+POST http://127.0.0.1:8000/monitoring/project-narratives/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+{
+    "project": 3,
+    "phase_description": "Initial Phase",
+    "activities_topics": "Digital Training",
+    "issues_challenges": "Lack of equipment",
+    "participant_engagement_quality": "Very Good",
+    "discussion_comments": "Improved after training",
+    "ways_forward_plans": "Provide more resources"
+}

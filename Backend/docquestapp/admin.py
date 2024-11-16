@@ -84,20 +84,24 @@ admin.site.register(PartnerAgency, PartnerAgencyAdmin)
 # admin.site.register(Signatories, SignatoriesAdmin)
 
 
-# For Testing Evaluation
+# For testing monitoring & evaluation part
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('projectID', 'projectTitle', 'college', 'program','status', 'dateCreated')
-search_fields = ['projectTitle', 'college', 'program',  'status']
+    search_fields = ['projectTitle', 'programCategory', 'projectType', 'researchTitle', 'college', 'program', 'status']
+    list_filter = ('status', 'programCategory', 'projectType', 'college')
+    ordering = ('-dateCreated',)
+    filter_horizontal = ('agency', 'proponents',)
+
 
 class LoadingOfTrainersAdmin(admin.ModelAdmin):
     list_display = ('LOTID', 'faculty', 'hours', 'project')
     search_fields = ['faculty']
+
 class MOAAdmin(admin.ModelAdmin):
     list_display = ('moaID', 'userID', 'status', 'dateCreated', 'uniqueCode')
-    search_fields = ('userID__email', 'status', 'uniqueCode')
+    search_fields = ('userID__username', 'partyADescription', 'partyBDescription', 'uniqueCode')
     list_filter = ('status', 'dateCreated')
-    fields = ('userID', 'partyADescription', 'partyBDescription', 'termination', 'status', 'uniqueCode')
-    readonly_fields = ('dateCreated',)
+    ordering = ('-dateCreated',)
 
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(LoadingOfTrainers, LoadingOfTrainersAdmin)
