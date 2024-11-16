@@ -85,3 +85,20 @@ admin.site.register(PartnerAgency, PartnerAgencyAdmin)
 
 
 # For Testing Evaluation
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = ('projectID', 'projectTitle', 'college', 'program','status', 'dateCreated')
+search_fields = ['projectTitle', 'college', 'program',  'status']
+
+class LoadingOfTrainersAdmin(admin.ModelAdmin):
+    list_display = ('LOTID', 'faculty', 'hours', 'project')
+    search_fields = ['faculty']
+class MOAAdmin(admin.ModelAdmin):
+    list_display = ('moaID', 'userID', 'status', 'dateCreated', 'uniqueCode')
+    search_fields = ('userID__email', 'status', 'uniqueCode')
+    list_filter = ('status', 'dateCreated')
+    fields = ('userID', 'partyADescription', 'partyBDescription', 'termination', 'status', 'uniqueCode')
+    readonly_fields = ('dateCreated',)
+
+admin.site.register(Project, ProjectAdmin)
+admin.site.register(LoadingOfTrainers, LoadingOfTrainersAdmin)
+admin.site.register(MOA, MOAAdmin)
