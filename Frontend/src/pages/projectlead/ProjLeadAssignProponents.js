@@ -16,7 +16,7 @@ const ProjLeadAssignProponents = () => {
             const timer = setTimeout(() => {
                 setNotification("");
             }, 3000);
-            return () => clearTimeout(timer); // Clear the timeout if the component unmounts
+            return () => clearTimeout(timer); 
         }
     }, [notification]);
 
@@ -47,7 +47,6 @@ const ProjLeadAssignProponents = () => {
             rows.map(row => {
                 if (row.id === id) {
                     if (row.isEditing) {
-                        // If going from Edit to Submit, show notification
                         const selectedCheckboxes = row.checkboxes
                             .map((checked, index) => (checked ? getColumnName(index) : null))
                             .filter(Boolean)
