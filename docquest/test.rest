@@ -1,9 +1,9 @@
 POST http://127.0.0.1:8000/signup
 Content-Type: application/json
 
-{ "email": "chal@gmail.com", "password": "testpass", "firstname": "Chalbert", "middlename": "Akut",
+{ "email": "gerald@gmail.com", "password": "testpass", "firstname": "Chalbert", "middlename": "Akut",
     "lastname": "Reyes", "campus": "USTP-CDO", "college": "NO COLLEGE SELECTED", 
-    "department": "NO DEPARTMENT SELECTED", "contactNumber": "NO NUMBER", "role": [4]
+    "department": "NO DEPARTMENT SELECTED", "contactNumber": "NO NUMBER", "role": [10]
 }
 
 ###
