@@ -32,6 +32,12 @@ class CreateUserAdmin(admin.ModelAdmin):
     ]
     list_display = ["userID", "firstname", "lastname", "display_roles"]
 
+    def save_model(self, request, obj, form, change):
+        # Only hash the password if it's a new user or the password has been changed
+        if obj.pk is None or 'password' in form.changed_data:
+            obj.set_password(obj.password)
+        super().save_model(request, obj, form, change)
+
     # Create a method to display roles as a comma-separated string
     def display_roles(self, obj):
         return ", ".join([role.role for role in obj.role.all()])
