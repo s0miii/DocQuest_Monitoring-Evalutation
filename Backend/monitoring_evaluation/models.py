@@ -1,61 +1,182 @@
 from django.db import models
-from docquestapp.models import Project, LoadingOfTrainers
+from docquestapp.models import Project, CustomUser, LoadingOfTrainers
 from django.urls import reverse
 from django.utils import timezone
-# Checklist Model
-class Checklist(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="checklist_items")
-    item_name = models.CharField(max_length=255) # example: "Attendance Sheet", "Images"
-    is_required = models.BooleanField(default=True)
 
-    def __str__(self):
-        return f"{self.item_name} for Project {self.project.projectTitle}"
 
-# Documents Model
-class Documents(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="documents")
-    name = models.CharField(max_length=255)
-    file = models.FileField(upload_to='uploads/')
-    upload_date = models.DateTimeField(auto_now_add=True)
-    checklist_item = models.ForeignKey(Checklist, on_delete=models.CASCADE, related_name="documents")
-    status = models.CharField(max_length=50, choices=[('pending', 'Pending'), ('submitted', 'Submitted'), ('reviewed', 'Reviewed')], default='pending')
+# # Checklist Model
+# class Checklist(models.Model):
+#     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="checklist_items")
+#     item_name = models.CharField(max_length=255) # example: "Attendance Sheet", "Images"
+#     is_required = models.BooleanField(default=True)
 
-    def __str__(self):
-        return f"{self.name} for Project {self.project.projectTitle}"
+#     def __str__(self):
+#         return f"{self.item_name} for Project {self.project.projectTitle}"
 
-# Progress Tracking Model
-class Progress(models.Model):
-    project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name="progress")
-    completed_items = models.IntegerField(default=0)
-    total_items = models.IntegerField(default=0)
-    percentage = models.FloatField(default=0.0)
+# # Documents Model
+# class Documents(models.Model):
+#     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="documents")
+#     name = models.CharField(max_length=255)
+#     file = models.FileField(upload_to='uploads/')
+#     upload_date = models.DateTimeField(auto_now_add=True)
+#     checklist_item = models.ForeignKey(Checklist, on_delete=models.CASCADE, related_name="documents")
+#     status = models.CharField(max_length=50, choices=[('pending', 'Pending'), ('submitted', 'Submitted'), ('reviewed', 'Reviewed')], default='pending')
 
-    def update_progress(self):
-        # Count all checklist items and submitted documents
-        self.total_items = Checklist.objects.filter(project=self.project).count()
-        self.completed_items = Documents.objects.filter(project=self.project, status='submitted').count()
-        self.percentage = (self.completed_items / self.total_items) * 100 if self.total_items > 0 else 0
-        self.save()
+#     def __str__(self):
+#         return f"{self.name} for Project {self.project.projectTitle}"
 
-    def __str__(self):
-        return f"Progress for {self.project.projectTitle} - {self.percentage}%"
-    
+# # Progress Tracking Model
+# class Progress(models.Model):
+#     project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name="progress")
+#     completed_items = models.IntegerField(default=0)
+#     total_items = models.IntegerField(default=0)
+#     percentage = models.FloatField(default=0.0)
+
+#     def update_progress(self):
+#         # Count all checklist items and submitted documents
+#         self.total_items = Checklist.objects.filter(project=self.project).count()
+#         self.completed_items = Documents.objects.filter(project=self.project, status='submitted').count()
+#         self.percentage = (self.completed_items / self.total_items) * 100 if self.total_items > 0 else 0
+#         self.save()
+
+#     def __str__(self):
+#         return f"Progress for {self.project.projectTitle} - {self.percentage}%"
 
 # Model for Attendance
-class AttendanceRecord(models.Model):
-    # File field for the attendance file upload
-    attendance_file = models.FileField(upload_to='attendance_files/')
+# class AttendanceRecord(models.Model):
+#     # File field for the attendance file upload
+#     attendance_file = models.FileField(upload_to='attendance_files/')
     
-    # Integer field for the total number of attendees
-    total_attendees = models.PositiveIntegerField()
+#     # Integer field for the total number of attendees
+#     total_attendees = models.PositiveIntegerField()
     
-    # Timestamp for when the record was uploaded
-    upload_date = models.DateTimeField(auto_now_add=True)
+#     # Timestamp for when the record was uploaded
+#     upload_date = models.DateTimeField(auto_now_add=True)
     
-    def __str__(self):
-        return f"Attendance Record - {self.upload_date.strftime('%Y-%m-%d')} - {self.total_attendees} Attendees"
+#     def __str__(self):
+#         return f"Attendance Record - {self.upload_date.strftime('%Y-%m-%d')} - {self.total_attendees} Attendees"
     
 
+
+# New Models for Document Submission
+
+# Accomplishment Report Model
+class AccomplishmentReport(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='accomplishment_reports')
+
+    # Fields specific to the accomplishment report
+    banner_program_title = models.CharField(max_length=255)
+    flagship_program = models.CharField(max_length=255)
+    training_modality = models.CharField(
+        max_length=50,
+        choices=[("Virtual", 'Virtual'), ("Face to Face", 'Face to Face'), ("Blended", 'Blended')]
+    )
+    actual_implementation_date = models.DateField()
+    total_number_of_days = models.IntegerField()
+    submitted_by = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, related_name='submitted_accomplishments'
+    )
+
+    # Related Models
+    project_narrative = models.OneToOneField(
+        'ProjectNarrative', on_delete=models.CASCADE, null=True, blank=True, related_name="accomplishment_report"
+    )
+
+    # Properties to access fields from the Project model
+    @property
+    def project_title(self):
+        return self.project.projectTitle
+
+    @property
+    def project_type(self):
+        return self.project.projectType
+
+    @property
+    def project_category(self):
+        return self.project.projectCategory
+
+    @property
+    def research_title(self):
+        return self.project.researchTitle
+
+    @property
+    def proponents(self):
+        return self.project.proponents.all()  # Many-to-Many field
+
+    @property
+    def program(self):
+        return self.project.program
+
+    @property
+    def accreditation_level(self):
+        return self.project.accreditationLevel
+
+    @property
+    def college(self):
+        return self.project.college
+
+    @property
+    def target_groups_beneficiaries(self):
+        return self.project.beneficiaries
+
+    @property
+    def project_location(self):
+        return self.project.projectLocationID
+
+    @property
+    def partner_agency(self):
+        return self.project.agency.all()  # Many-to-Many field
+
+    def __str__(self):
+        return f"Accomplishment Report for {self.project.projectTitle}"
+
+# Project Narrative Model
+class ProjectNarrative(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_narratives')
+    phase_description = models.TextField()
+    activities_topics = models.TextField()
+    issues_challenges = models.TextField()
+    participant_engagement_quality = models.TextField()
+    discussion_comments = models.TextField()
+    ways_forward_plans = models.TextField()
+
+    def __str__(self):
+        return f"Project Narrative for {self.project.projectTitle}"
+
+# Daily Attendance Record Model
+class DailyAttendanceRecord(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='daily_attendance_records')
+    uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='daily_attendance_records/', help_text="Upload the attendance record file")
+    total_attendees = models.IntegerField()
+    date_uploaded = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Attendance Record for  {self.project.projectTitle}"
+
+# Modules & Notes Model
+class ModulesNotes(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='modules_notes')
+    file = models.FileField(upload_to='modules_notes/', help_text="Upload the module or note file")
+    title = models.CharField(max_length=255, help_text="Title of the module or note")
+    description = models.TextField(blank=True, help_text="Description or details about the module or note")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.project.projectTitle}"
+    
+# Others Model
+class OtherDocuments(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="other_documents")
+    file = models.FileField(upload_to='other_documents/', help_text="Upload the document file")
+    title = models.CharField(max_length=255, help_text="Title of the document")
+    description = models.TextField(blank=True, help_text="Description or details about the document")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.project.projectTitle}"
+
+    
 # Model for Evaluation Form
 class Evaluation(models.Model):
     trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluations")
