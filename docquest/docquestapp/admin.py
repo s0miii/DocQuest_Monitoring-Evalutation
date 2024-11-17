@@ -86,6 +86,18 @@ class ProjectCategoryAdmin(admin.ModelAdmin):
     fields = ["title"]
     list_display = ["projectCategoryID", "title"]
 
+class CollegeAdmin(admin.ModelAdmin):
+    fields = ["abbreviation", "title"]
+    list_display = ["collegeID", "abbreviation", "title"]
+
+class ProgramAdmin(admin.ModelAdmin):
+    fields = ["abbreviation", "title", "collegeID"]
+    list_display = ["programID", "abbreviation", "title", "collegeID"]
+
+class DeliverablesAdmin(admin.ModelAdmin):
+    fields = ["deliverableName"]
+    list_display = ["deliverableID", "deliverableName"]
+
 # admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Roles, RolesAdmin)
 admin.site.register(Region, RegionAdmin)
@@ -97,4 +109,7 @@ admin.site.register(PartnerAgency, PartnerAgencyAdmin)
 admin.site.register(CustomUser, CreateUserAdmin)
 admin.site.register(ProgramCategory, ProgramCategoryAdmin)
 admin.site.register(ProjectCategory, ProjectCategoryAdmin)
+admin.site.register(College, CollegeAdmin)
+admin.site.register(Program, ProgramAdmin)
+admin.site.register(Deliverables, DeliverablesAdmin)
 # admin.site.register(Signatories, SignatoriesAdmin)
