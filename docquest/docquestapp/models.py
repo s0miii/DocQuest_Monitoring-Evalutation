@@ -228,6 +228,7 @@ class Review(models.Model):
     reviewDate = models.DateTimeField(auto_now_add=True)
     comment = models.TextField(null=True, blank=True)
     approvalCounter = models.IntegerField(default=0)
+    reviewerResponsible = models.CharField(max_length=10, blank=True, null=True)
 
 class GoalsAndObjectives(models.Model): #a5
     GAOID = models.AutoField(primary_key=True)
