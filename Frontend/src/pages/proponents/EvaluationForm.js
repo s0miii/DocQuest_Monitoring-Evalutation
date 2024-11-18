@@ -48,20 +48,10 @@ const EvaluationForm = () => {
     };
 
     return (
-        <div
-            style={{
-                backgroundImage: `url('/Frontend/public/images/bg-login3.png')`, // Directly reference the image in the public folder
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2rem',
-            }}
-        >
-            <form onSubmit={handleSubmit} className="p-8 bg-white rounded-lg shadow-lg max-w-2xl mx-auto">
-                <h2 className="text-2xl font-bold text-center mb-6">Extension Activity Evaluation Form</h2>
+        <div className="flex items-center justify-center min-h-screen bg-cover bg-fixed" style={{ backgroundImage: `url("${process.env.PUBLIC_URL}/images/bg-login3.png")` }}>
+            <div className="overflow-auto h-screen p-8 bg-white rounded-lg shadow-lg max-w-2xl">
+                <form onSubmit={handleSubmit}>
+                    <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Extension Activity Evaluation Form</h2>
 
                 <div className="bg-blue-500 p-3 rounded mb-4">
                     <h3 className="text-black-600 font-bold">Activity Information</h3>
@@ -243,28 +233,29 @@ const EvaluationForm = () => {
                 </div>
             </form>
         </div>
-    );
-};
-
-// Dropdown component for rating
-const RatingDropdown = ({ label, value, onChange }) => {
-    return (
-        <div className="mb-4 flex items-center justify-between">
-            <label className="text-sm font-medium">{label}</label>
-            <select
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="border rounded p-2 ml-4 w-35" 
-            >
-                <option value="">Select Rating</option>
-                {[5, 4, 3, 2, 1, 0].map((num) => (
-                    <option key={num} value={num}>
-                        {num}
-                    </option>
-                ))}
-            </select>
         </div>
     );
 };
+
+    // Dropdown component for rating
+    const RatingDropdown = ({ label, value, onChange }) => {
+        return (
+            <div className="mb-4 flex items-center justify-between">
+                <label className="text-sm font-medium">{label}</label>
+                <select
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="border rounded p-2 ml-4 w-35" 
+                >
+                    <option value="">Select Rating</option>
+                    {[5, 4, 3, 2, 1, 0].map((num) => (
+                        <option key={num} value={num}>
+                            {num}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        );
+    };
 
 export default EvaluationForm;
