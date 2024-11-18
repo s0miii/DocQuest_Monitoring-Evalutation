@@ -89,13 +89,106 @@ def create_project(request):
     serializer = PostProjectSerializer(data=request.data)
 
     if serializer.is_valid():
+        # Create project
         project = serializer.save()
 
         if project.dateCreated and not project.uniqueCode:
             project.uniqueCode = f"{project.projectID}-{project.dateCreated.strftime('%Y%m%d')}"
         project.save()
 
-        return Response({"message": "Project successfuly created"}, status=status.HTTP_201_CREATED)
+        # Create deliverables
+        deliverable_ids = request.data.get('deliverables', [])
+        deliverables_data = [
+            {
+                'userID': request.user.userID,
+                'projectID': project.projectID,
+                'deliverableID': deliverable_id
+            }
+            for deliverable_id in deliverable_ids
+        ]
+
+        deliverables_serializer = UserProjectDeliverablesSerializer(
+            data=deliverables_data, 
+            many=True
+        )
+        
+        if deliverables_serializer.is_valid():
+            deliverables_serializer.save()
+        else:
+            # If deliverables creation fails, delete the project and return error
+            project.delete()
+            return Response(
+                deliverables_serializer.errors, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create review
+        try:
+            content_type = ContentType.objects.get(model='project')
+            director_user = CustomUser.objects.filter(role__code='ecrd').first()
+            
+            if not director_user:
+                project.delete()
+                return Response(
+                    {"error": "No user with the 'director' role found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            review_data = {
+                'contentOwnerID': request.user.userID,
+                'content_type': content_type.id,
+                'source_id': project.projectID,
+                'reviewedByID': director_user.userID,
+                'comment': '',
+                'reviewStatus': 'pending'
+            }
+            
+            review_serializer = ReviewSerializer(data=review_data)
+            if review_serializer.is_valid():
+                review_serializer.save()
+            else:
+                project.delete()
+                return Response(
+                    review_serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        except ContentType.DoesNotExist:
+            project.delete()
+            return Response(
+                {"error": "Invalid content type specified"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create notifications for director and staff
+        try:
+            director_staff_users = CustomUser.objects.filter(
+                role__code__in=['ecrd', 'estf']
+            ).distinct()
+
+            notifications = [
+                Notification(
+                    userID=user, # The current user being notified
+                    content_type=content_type, # The content type object for 'project'
+                    source_id=project.projectID, # ID of the newly created project
+                    message='New project to review'
+                )
+                for user in director_staff_users
+            ]
+
+            Notification.objects.bulk_create(notifications)
+
+        except Exception as e:
+            project.delete()
+            return Response(
+                {"error": f"Error creating notifications: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response({
+            "message": "Project successfully created with deliverables, review, and notifications",
+            "projectID": project.projectID
+        }, status=status.HTTP_201_CREATED)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -113,21 +206,28 @@ def get_project(request, pk):
     project_serializer = GetProjectSerializer(instance=project)
     return Response(project_serializer.data)
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_checklist(request):
+    # Query all regions
+    deliverables = Deliverables.objects.all()
+
+    # Serialize the regions
+    serializer = DeliverablesSerializer(deliverables, many=True)
+
+    return Response(serializer.data)
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def bulk_create_deliverables(request):
-    # Ensure request data is a list
-    if isinstance(request.data, list):
-        serializer = UserProjectDeliverablesSerializer(date=request.data, many=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response(
-            {"error": "Expected a list of items for bulk creation"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+def create_deliverables(request):
+    serializer = UserProjectDeliverablesSerializer(data=request.data)
+
+    if serializer.is_valid():
+        deliverables = serializer.save()
+        return Response({"message": "Deliverables successfuly created"}, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -589,7 +689,7 @@ def create_document_pdf(request):
 @permission_classes([AllowAny])
 def get_users_exclude_roles(request):
     # Filter users excluding those with role code "ecrd" or "estf"
-    users = CustomUser.objects.exclude(role__code__in=["ecrd", "estf"]).distinct()
+    users = CustomUser.objects.exclude(role__code__in=["ecrd", "estf", "vpala"]).distinct()
     serializer = GetProponentsSerializer(users, many=True)
     return Response(serializer.data)
 
@@ -671,6 +771,52 @@ def get_barangays(request, cityID):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def get_programCategory(request):
+    programCategory = ProgramCategory.objects.all()
+    serializer = ProgramCategorySerializer(programCategory, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_projectCategory(request):
+    projectCategory = ProjectCategory.objects.all()
+    serializer = ProjectCategorySerializer(projectCategory, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_colleges(request):
+    # Query all regions
+    colleges = College.objects.all()
+
+    # Serialize the regions
+    college_serializer = CollegeSerializer(colleges, many=True)
+
+    return Response(college_serializer.data)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_programs(request):
+    """
+    Fetch programs for multiple colleges.
+    Expects a POST request with a JSON body containing 'collegeIDs': [list of college IDs].
+    """
+    college_ids = request.data.get('collegeIDs', [])
+    
+    if not isinstance(college_ids, list) or not all(isinstance(id, int) for id in college_ids):
+        return Response(
+            {"detail": "Invalid input. 'collegeIDs' should be a list of integers."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Retrieve programs for the given colleges
+    programs = Program.objects.filter(collegeID__in=college_ids)
+    programs_serializer = ProgramSerializer(programs, many=True)
+
+    return Response(programs_serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_project_status(request, pk):
     # Get all projects for the user with userID equal to pk
     projects = Project.objects.filter(userID=pk)
@@ -694,12 +840,6 @@ def get_moa_status(request, pk):
     return Response(serializer.data)
 
 @api_view(['GET'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def test_token(request):
-    return Response("passed for {}".format(request.user.email))
-
-@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_specific_moa(request, pk): 
     user = request.user  # Get the authenticated user
@@ -712,3 +852,19 @@ def get_specific_moa(request, pk):
 
     moa_serializer = GetSpecificMoaSerializer(instance=moa)
     return Response(moa_serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_review(request):
+    user = request.user
+
+    review = Review.objects.all()
+
+    serializer = ProjectReviewSerializer(review, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def test_token(request):
+    return Response("passed for {}".format(request.user.email))

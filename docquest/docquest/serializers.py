@@ -332,13 +332,12 @@ class GetProjectLeaderSerializer(serializers.ModelSerializer):
 class DeliverablesSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Deliverables
-        fields = ['deliverableName']
+        fields = ['deliverableID', 'deliverableName']
 
 class UserProjectDeliverablesSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = UserProjectDeliverables
         fields = ['userID', 'projectID', 'deliverableID']
-        list_serializer_class = serializers.ListSerializer  # Use ListSerializer for bulk operations
 
 # class NotificationSerializer(serializers.ModelSerializer):
 #     content_type = serializers.SlugRelatedField(
@@ -387,6 +386,39 @@ class ReviewSerializer(serializers.ModelSerializer):
             'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
         ]
 
+class ProjectReviewSerializer(serializers.ModelSerializer):
+    firstname = serializers.SerializerMethodField()
+    lastname = serializers.SerializerMethodField()
+    projectTitle = serializers.SerializerMethodField()
+    dateCreated = serializers.SerializerMethodField()
+    content_type_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = [
+            'reviewID', 'contentOwnerID', 'firstname', 'lastname',
+            'content_type', 'content_type_name', 'source_id', 'projectTitle',
+            'dateCreated', 'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
+        ]
+
+    def get_firstname(self, obj):
+        return obj.contentOwnerID.firstname
+
+    def get_lastname(self, obj):
+        return obj.contentOwnerID.lastname
+
+    def get_projectTitle(self, obj):
+        # Assumes source has a `projectTitle` field if the content type is Project
+        return getattr(obj.source, 'projectTitle', 'N/A')
+
+    def get_dateCreated(self, obj):
+        # Assumes source has a `dateCreated` field
+        return getattr(obj.source, 'dateCreated', None)
+
+    def get_content_type_name(self, obj):
+        # Fetch and return the name of the content type (e.g., 'Project' or 'MOA')
+        return obj.content_type.model
+
 class DocumentPDFSerializer(serializers.ModelSerializer):
     content_type = serializers.SlugRelatedField(
         queryset=ContentType.objects.all(),
@@ -407,10 +439,23 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
         model = ProjectCategory
         fields = ['projectCategoryID', 'title']
 
+class CollegeSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = College
+        fields = ['collegeID', 'abbreviation', 'title']
+
+class ProgramSerializer(serializers.ModelSerializer):
+    college = CollegeSerializer(source='collegeID', read_only=True)
+
+    class Meta(object):
+        model = Program
+        fields = ['programID', 'abbreviation', 'title', 'college']
+
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
     programCategory = ProgramCategorySerializer(many=True)
     projectCategory = ProjectCategorySerializer(many=True)
+    program = ProgramSerializer(many=True)
     proponents = ProponentsSerializer(many=True)
     nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = AddressSerializer()
@@ -428,7 +473,7 @@ class GetProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = [
             'userID', 'programCategory', 'projectTitle', 'projectType',
-            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',  
+            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'beneficiaries',  
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
@@ -440,6 +485,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
     userID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
     programCategory = serializers.PrimaryKeyRelatedField(queryset=ProgramCategory.objects.all(), many=True)
     projectCategory = serializers.PrimaryKeyRelatedField(queryset=ProjectCategory.objects.all(), many=True)
+    program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), many=True)
     proponents = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
     nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = PostAddressSerializer()
@@ -450,7 +496,6 @@ class PostProjectSerializer(serializers.ModelSerializer):
     budgetRequirements = BudgetRequirementsItemsSerializer(many=True)
     evaluationAndMonitorings = EvaluationAndMonitoringSerializer(many=True)
     monitoringPlanSchedules = MonitoringPlanAndScheduleSerializer(many=True)
-    
     loadingOfTrainers = LoadingOfTrainersSerializer(many=True, required=False)
     signatories = SignatoriesSerializer(many=True)
 
@@ -458,7 +503,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = [
             'userID', 'programCategory', 'projectTitle', 'projectType',
-            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',  
+            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'beneficiaries',  
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
@@ -469,6 +514,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
         proponents_data = validated_data.pop('proponents')
         programCategory_data = validated_data.pop('programCategory')
         projectCategory_data = validated_data.pop('projectCategory')
+        program_data = validated_data.pop('program')
         nonUserProponents_data = validated_data.pop('nonUserProponents')
         address_data = validated_data.pop('projectLocationID')
         projectLocationID = Address.objects.create(**address_data)
@@ -489,6 +535,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
 
         project.programCategory.set(programCategory_data)
         project.projectCategory.set(projectCategory_data)
+        project.program.set(program_data)
 
         for nonUserProponents_data in nonUserProponents_data:
             NonUserProponents.objects.create(project=project, **nonUserProponents_data)
@@ -523,6 +570,7 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
     userID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
     programCategory = serializers.PrimaryKeyRelatedField(queryset=ProgramCategory.objects.all(), many=True)
     projectCategory = serializers.PrimaryKeyRelatedField(queryset=ProjectCategory.objects.all(), many=True)
+    program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), many=True)
     proponents = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
     nonUserProponents = NonUserProponentsSerializer(many=True)
     projectLocationID = PostAddressSerializer()
@@ -540,7 +588,7 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = [
             'userID', 'programCategory', 'projectTitle', 'projectType',
-            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'college', 'beneficiaries',  
+            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'beneficiaries',  
             'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
@@ -550,6 +598,7 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         programCategory_data = validated_data.pop('programCategory')
         projectCategory_data = validated_data.pop('projectCategory')
+        program_data = validated_data.pop('program')
         proponents_data = validated_data.pop('proponents')
         nonUserProponents_data = validated_data.pop('nonUserProponents')
         address_data = validated_data.pop('projectLocationID')
@@ -578,6 +627,7 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
         # Clear existing related data on update
         instance.programCategory.clear()
         instance.projectCategory.clear()
+        instance.program.clear()
         instance.nonUserProponents.all().delete()
         instance.goalsAndObjectives.all().delete()
         instance.projectActivities.all().delete()
@@ -590,6 +640,7 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
 
         instance.programCategory.set(programCategory_data)
         instance.projectCategory.set(projectCategory_data)
+        instance.program.set(program_data)
 
         for nonUserProponents_data in nonUserProponents_data:
             NonUserProponents.objects.create(project=instance, **nonUserProponents_data)
