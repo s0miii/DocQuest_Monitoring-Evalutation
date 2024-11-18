@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -333,8 +334,11 @@ def create_review(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def approve_or_deny_project(request, review_id):
-    # Only a user with the "director" role should be able to perform this action
-    if not request.user.role.filter(code='ecrd').exists():
+    # List of roles that can approve/deny projects
+    AUTHORIZED_ROLES = ['prch', 'cldn', 'ecrd']
+    
+    # Check if user has any of the authorized roles
+    if not request.user.role.filter(code__in=AUTHORIZED_ROLES).exists():
         return Response(
             {"error": "You do not have the required permissions to perform this action."},
             status=status.HTTP_403_FORBIDDEN
@@ -345,20 +349,55 @@ def approve_or_deny_project(request, review_id):
         review = Review.objects.get(reviewID=review_id)
         project = Project.objects.get(projectID=review.source_id)
 
+        # Get the user's role code
+        user_role = request.user.role.first().code
+
         # Determine approval or rejection
         action = request.data.get('action')
         comment = request.data.get('comment', '')
 
+        # Initialize notification variables
+        notification_user = None
+        message = ''
+
         if action == 'approve':
             review.reviewStatus = 'approved'
             review.comment = comment
-            project.status = 'approved'
-            message = 'Your project has been approved and ready to print.'
+            # Increment approval counter
+            review.approvalCounter += 1
+            project.approvalCounter += 1
+            
+            # Determine notification recipient and message based on approval counter
+            if review.approvalCounter == 1:
+                review.reviewerResponsible = 'prch'
+                # Notify CLDN role user after first approval (from PRCH)
+                notification_user = CustomUser.objects.filter(role__code='cldn').first()
+                message = f'Project "{project.projectTitle}" requires your review and approval'
+                project.status = 'pending'
+            
+            elif review.approvalCounter == 2:
+                review.reviewerResponsible = 'cldn'
+                # Notify ECRD role user after second approval (from CLDN)
+                notification_user = CustomUser.objects.filter(role__code='ecrd').first()
+                message = f'Project "{project.projectTitle}" requires your final review and approval'
+                project.status = 'pending'
+            
+            elif review.approvalCounter >= 3:
+                review.reviewerResponsible = 'ecrd'
+                # Notify content owner after final approval (from ECRD)
+                notification_user = review.contentOwnerID
+                message = f'Your project "{project.projectTitle}" has been fully approved and is ready to print'
+                project.status = 'approved'
+                
         elif action == 'deny':
             review.reviewStatus = 'rejected'
             review.comment = comment
+            review.approvalCounter = 0  # Reset counter on rejection
+            project.approvalCounter = 0
             project.status = 'rejected'
-            message = 'Your project has been rejected, please revise and resubmit'
+            review.reviewerResponsible = user_role
+            notification_user = review.contentOwnerID
+            message = f'Your project "{project.projectTitle}" has been rejected. Reason: {comment}'
         else:
             return Response(
                 {"error": "Invalid action. Must be 'approve' or 'deny'."},
@@ -369,38 +408,51 @@ def approve_or_deny_project(request, review_id):
         review.save()
         project.save()
 
-        # Create a notification for the content owner
-        notification = Notification.objects.create(
-            userID=review.contentOwnerID,
-            content_type=ContentType.objects.get_for_model(Review),
-            source_id=review.reviewID,
-            message=f"Review status for your project '{project.projectTitle}' has been updated: {review.reviewStatus}",
-            status='Unread'
-        )
+        # Create notification for the appropriate user
+        if notification_user:
+            notification = Notification.objects.create(
+                userID=notification_user,
+                content_type=ContentType.objects.get_for_model(Review),
+                source_id=review.reviewID,
+                message=message,
+                status='Unread'
+            )
+            notification_serializer = NotificationSerializer(notification)
+        else:
+            notification_serializer = None
 
         # Serialize and return the updated review and notification
         review_serializer = ReviewSerializer(review)
-        notification_serializer = NotificationSerializer(notification)
         
-        return Response(
-            {
-                "review": review_serializer.data,
-                "notification": notification_serializer.data,
-                "project_status": project.status
-            },
-            status=status.HTTP_200_OK
-        )
+        response_data = {
+            "review": review_serializer.data,
+            "project_status": project.status,
+            "approval_counter": review.approvalCounter
+        }
+
+        if notification_serializer:
+            response_data["notification"] = notification_serializer.data
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
     except Review.DoesNotExist:
         return Response({"error": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
     except Project.DoesNotExist:
         return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+    except CustomUser.DoesNotExist:
+        return Response(
+            {"error": "Could not find appropriate user to notify."}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def approve_or_deny_moa(request, review_id):
-    # Only a user with the "director" role should be able to perform this action
-    if not request.user.role.filter(code='ecrd').exists():
+    # List of roles that can approve/deny MOAs
+    AUTHORIZED_ROLES = ['vpala', 'ecrd']
+    
+    # Check if user has any of the authorized roles
+    if not request.user.role.filter(code__in=AUTHORIZED_ROLES).exists():
         return Response(
             {"error": "You do not have the required permissions to perform this action."},
             status=status.HTTP_403_FORBIDDEN
@@ -411,70 +463,106 @@ def approve_or_deny_moa(request, review_id):
         review = Review.objects.get(reviewID=review_id)
         moa = MOA.objects.get(moaID=review.source_id)
 
+        # Get the user's role code
+        user_role = request.user.role.first().code
+
         # Determine approval or rejection
         action = request.data.get('action')
         comment = request.data.get('comment', '')
 
+        # Initialize notification variables
+        notification_user = None
+        message = ''
+
         if action == 'approve':
             review.reviewStatus = 'approved'
-            review.comment = None
-            moa.status = 'approved'
-            message = 'MOA has been approved and ready to print.'
-
-            staff_role_code = 'estf'  # Assuming 'DIR' is the code for the Director role
-            staff_users = CustomUser.objects.filter(role__code=staff_role_code)
-
-            # Send notification to each director
-            for staff in staff_users:
-                Notification.objects.create(
-                    userID=staff,
-                    content_type=ContentType.objects.get_for_model(MOA),
-                    source_id=moa.moaID,
-                    message=message
-                )
-
+            review.comment = comment
+            # Increment approval counter
+            review.approvalCounter += 1
+            moa.approvalCounter += 1
+            
+            # Determine notification recipient and message based on approval counter
+            if review.approvalCounter == 1:
+                review.reviewerResponsible = 'vpala'
+                # Notify ECRD role user after first approval (from VPALA)
+                notification_user = CustomUser.objects.filter(role__code='ecrd').first()
+                message = f'MOA requires your final review and approval'
+                moa.status = 'pending'
+            
+            elif review.approvalCounter >= 2:
+                review.reviewerResponsible = 'ecrd'
+                # After ECRD approval, notify staff users
+                moa.status = 'approved'
+                # First notify content owner
+                notification_user = review.contentOwnerID
+                message = f'Your MOA has been fully approved'
+                
+                # Then create notifications for all staff users
+                staff_users = CustomUser.objects.filter(role__code='estf')
+                for staff in staff_users:
+                    Notification.objects.create(
+                        userID=staff,
+                        content_type=ContentType.objects.get_for_model(MOA),
+                        source_id=moa.moaID,
+                        message=f'New MOA has been approved and ready for implementation',
+                        status='Unread'
+                    )
+                
         elif action == 'deny':
             review.reviewStatus = 'rejected'
             review.comment = comment
+            review.approvalCounter = 0  # Reset counter on rejection
+            moa.approvalCounter = 0
             moa.status = 'rejected'
-            message = 'Your MOA has been rejected, please revise and resubmit'
-
+            review.reviewerResponsible = user_role
+            notification_user = review.contentOwnerID
+            message = f'Your MOA has been rejected. Reason: {comment}'
         else:
             return Response(
                 {"error": "Invalid action. Must be 'approve' or 'deny'."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Save changes to the review and project
+        # Save changes to the review and MOA
         review.save()
         moa.save()
 
-        # Create a notification for the content owner
-        notification = Notification.objects.create(
-            userID=review.contentOwnerID,
-            content_type=ContentType.objects.get_for_model(Review),
-            source_id=review.reviewID,
-            message=f"Review status for your MOA has been updated: {review.reviewStatus}",
-            status='Unread'
-        )
+        # Create notification for the appropriate user
+        if notification_user:
+            notification = Notification.objects.create(
+                userID=notification_user,
+                content_type=ContentType.objects.get_for_model(Review),
+                source_id=review.reviewID,
+                message=message,
+                status='Unread'
+            )
+            notification_serializer = NotificationSerializer(notification)
+        else:
+            notification_serializer = None
 
         # Serialize and return the updated review and notification
         review_serializer = ReviewSerializer(review)
-        notification_serializer = NotificationSerializer(notification)
         
-        return Response(
-            {
-                "review": review_serializer.data,
-                "notification": notification_serializer.data,
-                "project_status": moa.status
-            },
-            status=status.HTTP_200_OK
-        )
+        response_data = {
+            "review": review_serializer.data,
+            "moa_status": moa.status,
+            "approval_counter": review.approvalCounter
+        }
+
+        if notification_serializer:
+            response_data["notification"] = notification_serializer.data
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
     except Review.DoesNotExist:
         return Response({"error": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
-    except Project.DoesNotExist:
-        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+    except MOA.DoesNotExist:
+        return Response({"error": "MOA not found."}, status=status.HTTP_404_NOT_FOUND)
+    except CustomUser.DoesNotExist:
+        return Response(
+            {"error": "Could not find appropriate user to notify."}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -857,11 +945,38 @@ def get_specific_moa(request, pk):
 @permission_classes([IsAuthenticated])
 def get_review(request):
     user = request.user
+    user_roles = user.role.all().values_list('code', flat=True)
 
-    review = Review.objects.all()
+    # Initialize an empty Q object for OR conditions
+    review_conditions = Q()
 
-    serializer = ProjectReviewSerializer(review, many=True)
-    return Response(serializer.data)
+    # Add condition for fully approved reviews (counter = 3)
+    review_conditions |= Q(approvalCounter=3, reviewStatus='approved')
+
+    # Add conditions based on user roles
+    for role in user_roles:
+        if role == 'prch':
+            # PRCH sees reviews with counter = 0
+            review_conditions |= Q(approvalCounter=0, reviewStatus='pending')
+        elif role == 'cldn':
+            # CLDN sees reviews with counter = 1
+            review_conditions |= Q(approvalCounter=1, reviewStatus='pending')
+        elif role == 'ecrd':
+            # ECRD sees reviews with counter = 2
+            review_conditions |= Q(approvalCounter=2, reviewStatus='pending')
+
+        # All roles see reviews where they are responsible and counter = 0
+        review_conditions |= Q(reviewerResponsible=role, approvalCounter=0)
+
+    # Get reviews based on the constructed conditions
+    reviews = Review.objects.filter(review_conditions).order_by('-reviewDate')
+
+    serializer = ProjectReviewSerializer(reviews, many=True)
+    return Response({
+        "reviews": serializer.data,
+        "user_roles": list(user_roles),  # Include user roles for debugging
+        "total_count": reviews.count()
+    }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
