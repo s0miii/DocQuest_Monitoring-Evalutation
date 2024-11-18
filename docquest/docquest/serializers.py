@@ -386,6 +386,39 @@ class ReviewSerializer(serializers.ModelSerializer):
             'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
         ]
 
+class ProjectReviewSerializer(serializers.ModelSerializer):
+    firstname = serializers.SerializerMethodField()
+    lastname = serializers.SerializerMethodField()
+    projectTitle = serializers.SerializerMethodField()
+    dateCreated = serializers.SerializerMethodField()
+    content_type_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = [
+            'reviewID', 'contentOwnerID', 'firstname', 'lastname',
+            'content_type', 'content_type_name', 'source_id', 'projectTitle',
+            'dateCreated', 'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
+        ]
+
+    def get_firstname(self, obj):
+        return obj.contentOwnerID.firstname
+
+    def get_lastname(self, obj):
+        return obj.contentOwnerID.lastname
+
+    def get_projectTitle(self, obj):
+        # Assumes source has a `projectTitle` field if the content type is Project
+        return getattr(obj.source, 'projectTitle', 'N/A')
+
+    def get_dateCreated(self, obj):
+        # Assumes source has a `dateCreated` field
+        return getattr(obj.source, 'dateCreated', None)
+
+    def get_content_type_name(self, obj):
+        # Fetch and return the name of the content type (e.g., 'Project' or 'MOA')
+        return obj.content_type.model
+
 class DocumentPDFSerializer(serializers.ModelSerializer):
     content_type = serializers.SlugRelatedField(
         queryset=ContentType.objects.all(),
