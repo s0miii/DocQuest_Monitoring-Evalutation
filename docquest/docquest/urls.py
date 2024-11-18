@@ -41,6 +41,9 @@ urlpatterns = [
     #review post request
     path('create_review', views.create_review),
 
+    # director get reviews
+    path('get_review', views.get_review),
+
     #Director approve or deny project
     path('approve_or_deny_project/<int:review_id>/', views.approve_or_deny_project),
 

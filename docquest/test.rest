@@ -11,7 +11,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
-{ "email": "chalbert@gmail.com", "password": "testpass"}
+{ "email": "guylord@gmail.com", "password": "testpass"}
 
 ###
 
@@ -747,6 +747,14 @@ Content-Type: application/json
 
 GET http://127.0.0.1:8000/get_checklist
 Content-Type: application/json
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_review
+Content-Type: application/json
+Authorization: Token 61da9108b277bc8208692d9241ebe360f7b1e854
 
 {}
 

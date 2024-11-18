@@ -840,12 +840,6 @@ def get_moa_status(request, pk):
     return Response(serializer.data)
 
 @api_view(['GET'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def test_token(request):
-    return Response("passed for {}".format(request.user.email))
-
-@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_specific_moa(request, pk): 
     user = request.user  # Get the authenticated user
@@ -858,3 +852,19 @@ def get_specific_moa(request, pk):
 
     moa_serializer = GetSpecificMoaSerializer(instance=moa)
     return Response(moa_serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_review(request):
+    user = request.user
+
+    review = Review.objects.all()
+
+    serializer = ProjectReviewSerializer(review, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def test_token(request):
+    return Response("passed for {}".format(request.user.email))
