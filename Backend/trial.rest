@@ -61,7 +61,7 @@ Content-Type: application/json
 Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 
 {
-    "userID": 1,
+    "userID": 3,
     "programCategory": "I-Share",
     "projectTitle": "Training and Outreach Program",
     "projectType": "Capacity Building",
@@ -161,20 +161,19 @@ Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 ###
 
 # Get a specific project
-GET http://127.0.0.1:8000/get_project/3/
+GET http://127.0.0.1:8000/get_project/4/
 Content-Type: application/json
 Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 
 ###
 
 # Update a project
-PUT http://127.0.0.1:8000/edit_project/2/
+PUT http://127.0.0.1:8000/edit_project/3/
 Content-Type: application/json
 Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 
 {
-    "projectTitle": "Updated Training Program",
-    "totalBudget": 20000
+    "UserID": 4,
 }
 
 ###
@@ -194,18 +193,19 @@ Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 ###
 
 # Create an accomplishment report
-POST http://127.0.0.1:8000/monitoring/accomplishment-reports/2/
+POST http://127.0.0.1:8000/monitoring/accomplishment-reports/
 Content-Type: application/json
 Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 
 {
-    "project": 2,
+    "project": 4,
     "banner_program_title": "Banner Program",
     "flagship_program": "Flagship Initiative",
     "training_modality": "Blended",
     "actual_implementation_date": "2024-12-10",
     "total_number_of_days": 3,
-    "submitted_by": 1
+    "submitted_by": 4,
+    "project_narrative": 4
 }
 
 ###
@@ -223,11 +223,68 @@ Content-Type: application/json
 Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 
 {
-    "project": 3,
-    "phase_description": "Initial Phase",
+    "project": 4,
+    "phase_description": " PhaseInitial",
     "activities_topics": "Digital Training",
     "issues_challenges": "Lack of equipment",
     "participant_engagement_quality": "Very Good",
     "discussion_comments": "Improved after training",
     "ways_forward_plans": "Provide more resources"
 }
+
+### 
+# Get all checklist assignments
+GET http://127.0.0.1:8000/monitoring/checklist-assignments/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# Get details of a specific checklist assignment
+GET http://127.0.0.1:8000/monitoring/checklist-assignments/3/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# Assign a checklist item to a proponent
+POST http://127.0.0.1:8000/monitoring/checklist-assignments/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+{
+    "project": 4,
+    "proponents": 1,
+    "checklist_item_type": "daily_attendance",
+    "checklist_item_id": 3
+}
+
+###
+
+# Mark a checklist assignment as completed
+POST http://127.0.0.1:8000/monitoring/checklist-assignments/3/mark-completed/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+{}
+
+###
+
+# Calculate progress for a project
+GET http://127.0.0.1:8000/monitoring/checklist-progress/4/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# View proponents assigned to a checklist item
+GET http://127.0.0.1:8000/monitoring/checklist-assignments/3/proponents/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+
+###
+
+# View checklist items assigned to the logged-in proponent
+GET http://127.0.0.1:8000/monitoring/checklist-assignments/my-assignments/
+Content-Type: application/json
+Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
