@@ -133,12 +133,12 @@ class ProjectCategory(models.Model):
 class College(models.Model):
     collegeID = models.AutoField(primary_key=True)
     abbreviation = models.CharField(max_length=15)
-    title = models.CharField(100)
+    title = models.CharField(max_length=100)
 
 class Program(models.Model):
     programID = models.AutoField(primary_key=True)
     abbreviation = models.CharField(max_length=15)
-    title = models.CharField(100)
+    title = models.CharField(max_length=100)
     collegeID = models.ForeignKey(College, related_name='program', on_delete=models.CASCADE)
 
 class Project(models.Model):
@@ -155,9 +155,9 @@ class Project(models.Model):
     projectType = models.CharField(max_length=50) #3 
     projectCategory = models.ManyToManyField(ProjectCategory, related_name="projectCategory") #4
     researchTitle = models.CharField(max_length=150) #5
-    program = models.CharField(max_length=150) #6
+    program = models.ManyToManyField(Program, related_name='projectProgram') #6
     accreditationLevel = models.CharField(max_length=50) #7
-    college = models.CharField(max_length=50) #8
+    # college = models.CharField(max_length=50) #8
     beneficiaries = models.TextField() #9
     targetImplementation = models.DateField() #10
     totalHours = models.FloatField() #11

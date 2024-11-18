@@ -11,7 +11,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
-{ "email": "chalbert@gmail.com", "password": "testpass"}
+{ "email": "guylord@gmail.com", "password": "testpass"}
 
 ###
 
@@ -60,9 +60,8 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
     "projectType": "New Project",
     "projectCategory": [1, 2],
     "researchTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
-    "program": "BSIT and BSDS",
+    "program": [1, 2],
     "accreditationLevel": "IV",
-    "college": "CITC",
     "beneficiaries": "Out of School Youth Development Alliance (OSYDA)",
     "targetImplementation": "2024-08-01",
     "totalHours": 24,
@@ -295,7 +294,7 @@ Authorization: Token 541d546c10c4d03586aa3f3d6d99f0df4344444d
 
 ###
 
-PUT http://127.0.0.1:8000/edit_project/10/
+PUT http://127.0.0.1:8000/edit_project/25/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
@@ -304,11 +303,10 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
     "programCategory": [1, 2],
     "projectTitle": "Edited Title",
     "projectType": "New Project Edit",
-    "projectCategory": [1, 2],
+    "projectCategory": [1],
     "researchTitle": "Edit E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
-    "program": "Edit BSIT and BSDS",
+    "program": [1],
     "accreditationLevel": "Edit IV",
-    "college": "Edit CITC",
     "beneficiaries": "Edit Out of School Youth Development Alliance (OSYDA)",
     "targetImplementation": "2024-08-01",
     "totalHours": 24,
@@ -623,7 +621,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 ###
 
-GET http://127.0.0.1:8000/get_project/10/
+GET http://127.0.0.1:8000/get_project/25/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
@@ -712,6 +710,51 @@ Content-Type: application/json
 GET http://127.0.0.1:8000/get_moa/10/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_programCategory
+Content-Type: application/json
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_projectCategory
+Content-Type: application/json
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_colleges
+Content-Type: application/json
+
+{}
+
+###
+
+POST http://127.0.0.1:8000/get_programs/ 
+Content-Type: application/json
+
+{
+  "collegeIDs": [1, 2]
+}
+
+###
+
+GET http://127.0.0.1:8000/get_checklist
+Content-Type: application/json
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_review
+Content-Type: application/json
+Authorization: Token 61da9108b277bc8208692d9241ebe360f7b1e854
 
 {}
 

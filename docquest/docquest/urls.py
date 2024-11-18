@@ -18,6 +18,12 @@ urlpatterns = [
 
     # create project
     path('create_project', views.create_project),
+    path('get_programCategory', views.get_programCategory),
+    path('get_projectCategory', views.get_projectCategory),
+    path('get_colleges', views.get_colleges),
+    path('get_programs/', views.get_programs),
+    path('get_checklist', views.get_checklist),
+    path('create_deliverables', views.create_deliverables),
 
     re_path(r'^auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
@@ -34,6 +40,9 @@ urlpatterns = [
 
     #review post request
     path('create_review', views.create_review),
+
+    # director get reviews
+    path('get_review', views.get_review),
 
     #Director approve or deny project
     path('approve_or_deny_project/<int:review_id>/', views.approve_or_deny_project),
