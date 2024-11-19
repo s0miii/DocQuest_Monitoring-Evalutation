@@ -361,7 +361,6 @@ def approve_or_deny_project(request, review_id):
         message = ''
 
         if action == 'approve':
-            review.reviewStatus = 'approved'
             review.comment = comment
             # Increment approval counter
             review.approvalCounter += 1
@@ -391,6 +390,7 @@ def approve_or_deny_project(request, review_id):
                 notification_user = review.contentOwnerID
                 message = f'Your project "{project.projectTitle}" has been fully approved and is ready to print'
                 project.status = 'approved'
+                review.reviewStatus = 'approved'
                 
         elif action == 'deny':
             review.reviewStatus = 'rejected'
@@ -479,7 +479,6 @@ def approve_or_deny_moa(request, review_id):
         message = ''
 
         if action == 'approve':
-            review.reviewStatus = 'approved'
             review.comment = comment
             # Increment approval counter
             review.approvalCounter += 1
@@ -499,6 +498,7 @@ def approve_or_deny_moa(request, review_id):
                 review.reviewerResponsible = 'ecrd'
                 # After ECRD approval, notify staff users
                 moa.status = 'approved'
+                review.reviewStatus= 'approved'
                 # First notify content owner
                 notification_user = review.contentOwnerID
                 message = f'Your MOA has been fully approved'
@@ -957,23 +957,34 @@ def get_review(request):
     # Initialize an empty Q object for OR conditions
     review_conditions = Q()
 
-    # Add condition for fully approved reviews (counter = 3)
-    review_conditions |= Q(approvalCounter=3, reviewStatus='approved')
-
-    # Add conditions based on user roles
+    ## Add conditions based on user roles
     for role in user_roles:
         if role == 'prch':
-            # PRCH sees reviews with counter = 0
-            review_conditions |= Q(approvalCounter=0, reviewStatus='pending')
+            # PRCH sees reviews with counter = 0 and content_type_name = 'project'
+            review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='project')
+            review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='project')
+            review_conditions |= Q(reviewStatus='approved', content_type__model='project')
+            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
         elif role == 'cldn':
-            # CLDN sees reviews with counter = 1
-            review_conditions |= Q(approvalCounter=1, reviewStatus='pending')
+            # CLDN sees reviews with counter = 1 and content_type_name = 'project'
+            review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='project')
+            review_conditions |= Q(approvalCounter__gt=1, reviewStatus='pending', content_type__model='project')
+            review_conditions |= Q(reviewStatus='approved', content_type__model='project')
+            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
+        elif role == 'vpala':
+            # VPALA sees reviews with content_type_name = 'moa'
+            review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='moa')
+            review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='moa')
+            review_conditions |= Q(reviewStatus='approved', content_type__model='moa')
+            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='moa')
         elif role == 'ecrd':
-            # ECRD sees reviews with counter = 2
-            review_conditions |= Q(approvalCounter=2, reviewStatus='pending')
-
-        # All roles see reviews where they are responsible and counter = 0
-        review_conditions |= Q(reviewerResponsible=role, approvalCounter=0)
+            # ECRD sees all reviews
+            review_conditions |= Q(approvalCounter=2, reviewStatus='pending', content_type__model='project')
+            review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='moa')
+            review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project')
+            review_conditions |= Q(approvalCounter=2, reviewStatus='approved', content_type__model='moa')
+            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
+            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='moa')
 
     # Get reviews based on the constructed conditions
     reviews = Review.objects.filter(review_conditions).order_by('-reviewDate')
