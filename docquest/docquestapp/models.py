@@ -83,10 +83,13 @@ class MOA(models.Model):
     userID = models.ForeignKey(CustomUser, related_name='moaUser', on_delete=models.CASCADE)
     partyADescription = models.TextField()
     partyBDescription = models.TextField()
+    coverageAndEffectivity = models.TextField()
+    confidentialityClause = models.TextField()
     termination = models.TextField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     dateCreated = models.DateTimeField(auto_now_add=True)
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
+    approvalCounter = models.IntegerField(default=0)
 
 class FirstParty(models.Model):
     firstPartyID = models.AutoField(primary_key=True)
@@ -116,11 +119,6 @@ class PartyObligation(models.Model):
     obligation = models.TextField()
     party = models.TextField()
     moaID = models.ForeignKey(MOA, related_name='partyObligation', on_delete=models.CASCADE)
-
-class Effectivity(models.Model):
-    effectivityID = models.AutoField(primary_key=True)
-    effectivity = models.TextField()
-    moaID = models.ForeignKey(MOA, related_name='effectivity', on_delete=models.CASCADE)
 
 class ProgramCategory(models.Model):
     programCategoryID = models.AutoField(primary_key=True)
@@ -174,7 +172,7 @@ class Project(models.Model):
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     dateCreated = models.DateTimeField(auto_now_add=True)
-
+    approvalCounter = models.IntegerField(default=0)
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
 class Signatories(models.Model):
@@ -229,6 +227,8 @@ class Review(models.Model):
     reviewStatus = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     reviewDate = models.DateTimeField(auto_now_add=True)
     comment = models.TextField(null=True, blank=True)
+    approvalCounter = models.IntegerField(default=0)
+    reviewerResponsible = models.CharField(max_length=10, blank=True, null=True)
 
 class GoalsAndObjectives(models.Model): #a5
     GAOID = models.AutoField(primary_key=True)
