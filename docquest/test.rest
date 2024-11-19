@@ -11,7 +11,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
-{ "email": "john@gmail.com", "password": "testpass"}
+{ "email": "chalbert@gmail.com", "password": "testpass"}
 
 ###
 
@@ -51,12 +51,12 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 # submit created proj
 POST http://127.0.0.1:8000/create_project
 Content-Type: application/json
-Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+Authorization: Token 232e688fe196c62b813720e4ca8b7ec71ee8226d
 
 {
     "userID": 10,
     "programCategory": [1, 2],
-    "projectTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
+    "projectTitle": "CHELL E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
     "projectType": "New Project",
     "projectCategory": [1, 2],
     "researchTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
@@ -273,9 +273,9 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 #     "action": "deny",
 #     "comment": "The project lacks sufficient data to proceed."
 # }
-POST http://127.0.0.1:8000/approve_or_deny_project/35/
+POST http://127.0.0.1:8000/approve_or_deny_project/15/
 Content-Type: application/json
-Authorization: Token c0d2ebdc7a3163963ee1664d4c16e8dadb398907
+Authorization: Token a6ff444cc987e339d5f8c5fcd0b9c6e7c8901dcc
 
 {
     "action": "approve"
@@ -623,7 +623,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 GET http://127.0.0.1:8000/get_project/25/
 Content-Type: application/json
-Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+Authorization: Token 232e688fe196c62b813720e4ca8b7ec71ee8226d
 
 ###
 
@@ -754,7 +754,7 @@ Content-Type: application/json
 
 GET http://127.0.0.1:8000/get_review
 Content-Type: application/json
-Authorization: Token 61da9108b277bc8208692d9241ebe360f7b1e854
+Authorization: Token a6ff444cc987e339d5f8c5fcd0b9c6e7c8901dcc
 
 {}
 
