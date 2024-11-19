@@ -126,9 +126,9 @@ def create_project(request):
         # Create review
         try:
             content_type = ContentType.objects.get(model='project')
-            director_user = CustomUser.objects.filter(role__code='ecrd').first()
+            reviewer_user = CustomUser.objects.filter(role__code='prch').first()
             
-            if not director_user:
+            if not reviewer_user:
                 project.delete()
                 return Response(
                     {"error": "No user with the 'director' role found."},
@@ -139,7 +139,7 @@ def create_project(request):
                 'contentOwnerID': request.user.userID,
                 'content_type': content_type.id,
                 'source_id': project.projectID,
-                'reviewedByID': director_user.userID,
+                'reviewedByID': reviewer_user.userID,
                 'comment': '',
                 'reviewStatus': 'pending'
             }
@@ -369,6 +369,7 @@ def approve_or_deny_project(request, review_id):
             
             # Determine notification recipient and message based on approval counter
             if review.approvalCounter == 1:
+                review.reviewedByID = request.user
                 review.reviewerResponsible = 'prch'
                 # Notify CLDN role user after first approval (from PRCH)
                 notification_user = CustomUser.objects.filter(role__code='cldn').first()
@@ -376,6 +377,7 @@ def approve_or_deny_project(request, review_id):
                 project.status = 'pending'
             
             elif review.approvalCounter == 2:
+                review.reviewedByID = request.user
                 review.reviewerResponsible = 'cldn'
                 # Notify ECRD role user after second approval (from CLDN)
                 notification_user = CustomUser.objects.filter(role__code='ecrd').first()
@@ -383,6 +385,7 @@ def approve_or_deny_project(request, review_id):
                 project.status = 'pending'
             
             elif review.approvalCounter >= 3:
+                review.reviewedByID = request.user
                 review.reviewerResponsible = 'ecrd'
                 # Notify content owner after final approval (from ECRD)
                 notification_user = review.contentOwnerID
@@ -395,6 +398,7 @@ def approve_or_deny_project(request, review_id):
             review.approvalCounter = 0  # Reset counter on rejection
             project.approvalCounter = 0
             project.status = 'rejected'
+            review.reviewedByID = request.user
             review.reviewerResponsible = user_role
             notification_user = review.contentOwnerID
             message = f'Your project "{project.projectTitle}" has been rejected. Reason: {comment}'
@@ -483,6 +487,7 @@ def approve_or_deny_moa(request, review_id):
             
             # Determine notification recipient and message based on approval counter
             if review.approvalCounter == 1:
+                review.reviewedByID = request.user
                 review.reviewerResponsible = 'vpala'
                 # Notify ECRD role user after first approval (from VPALA)
                 notification_user = CustomUser.objects.filter(role__code='ecrd').first()
@@ -490,6 +495,7 @@ def approve_or_deny_moa(request, review_id):
                 moa.status = 'pending'
             
             elif review.approvalCounter >= 2:
+                review.reviewedByID = request.user
                 review.reviewerResponsible = 'ecrd'
                 # After ECRD approval, notify staff users
                 moa.status = 'approved'
@@ -514,6 +520,7 @@ def approve_or_deny_moa(request, review_id):
             review.approvalCounter = 0  # Reset counter on rejection
             moa.approvalCounter = 0
             moa.status = 'rejected'
+            review.reviewedByID = request.user
             review.reviewerResponsible = user_role
             notification_user = review.contentOwnerID
             message = f'Your MOA has been rejected. Reason: {comment}'
@@ -584,11 +591,11 @@ def edit_project(request, project_id):
             project.proponents.set(request.data['proponents'])
 
         # Get all users with the 'Director' role code
-        director_role_code = 'ecrd'  # Assuming 'DIR' is the code for the Director role
-        director_users = CustomUser.objects.filter(role__code=director_role_code)
+        reviewer_role_code = 'prch'  # Assuming 'DIR' is the code for the Director role
+        reviewer_users = CustomUser.objects.filter(role__code=reviewer_role_code)
 
         # Send notification to each director
-        for director in director_users:
+        for director in reviewer_users:
             Notification.objects.create(
                 userID=director,
                 content_type=ContentType.objects.get_for_model(Project),
@@ -597,12 +604,12 @@ def edit_project(request, project_id):
             )
 
         # Assign a director as the reviewer (assuming one director for the review)
-        if director_users.exists():
+        if reviewer_users.exists():
             review = Review.objects.create(
                 contentOwnerID=request.user,
                 content_type=ContentType.objects.get_for_model(Project),
                 source_id=project.projectID,
-                reviewedByID=director_users.first(),  # Assigning the first director found
+                reviewedByID=reviewer_users.first(),  # Assigning the first director found
                 reviewStatus='pending',
                 comment="Project has been edited and is pending approval."
             )
@@ -639,11 +646,11 @@ def create_moa(request):
                 return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Get all users with the 'Director' role code
-        director_role_code = 'ecrd'  # Assuming 'DIR' is the code for the Director role
-        director_users = CustomUser.objects.filter(role__code=director_role_code)
+        reviewer_role_code = 'prch'  # Assuming 'DIR' is the code for the Director role
+        reviewer_users = CustomUser.objects.filter(role__code=reviewer_role_code)
 
         # Create notification
-        for director in director_users:
+        for director in reviewer_users:
             Notification.objects.create(
                 userID=director,
                 content_type=ContentType.objects.get_for_model(MOA),
@@ -652,12 +659,12 @@ def create_moa(request):
             )
 
         # Create a review for this MOA
-        if director_users.exists():
+        if reviewer_users.exists():
             review = Review.objects.create(
                 contentOwnerID=request.user,
                 content_type=ContentType.objects.get_for_model(MOA),
                 source_id=moa.moaID,
-                reviewedByID=director_users.first(),  # Assigning the first director found
+                reviewedByID=reviewer_users.first(),  # Assigning the first director found
                 reviewStatus='pending',
             )
 
@@ -677,11 +684,11 @@ def edit_moa(request, moa_id):
         moa = serializer.save()
 
         # Get all users with the 'Director' role code
-        director_role_code = 'ecrd'  # Assuming 'DIR' is the code for the Director role
-        director_users = CustomUser.objects.filter(role__code=director_role_code)
+        reviewer_role_code = 'prch'  # Assuming 'DIR' is the code for the Director role
+        reviewer_users = CustomUser.objects.filter(role__code=reviewer_role_code)
 
         # Send notification to each director
-        for director in director_users:
+        for director in reviewer_users:
             Notification.objects.create(
                 userID=director,
                 content_type=ContentType.objects.get_for_model(MOA),
@@ -690,12 +697,12 @@ def edit_moa(request, moa_id):
             )
 
         # Assign a director as the reviewer (assuming one director for the review)
-        if director_users.exists():
+        if reviewer_users.exists():
             review = Review.objects.create(
                 contentOwnerID=request.user,
                 content_type=ContentType.objects.get_for_model(MOA),
                 source_id=moa.moaID,
-                reviewedByID=director_users.first(),  # Assigning the first director found
+                reviewedByID=reviewer_users.first(),  # Assigning the first director found
                 reviewStatus='pending',
                 comment="MOA has been edited and is pending approval."
             )
