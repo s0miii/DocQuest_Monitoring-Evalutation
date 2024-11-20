@@ -963,19 +963,19 @@ def get_review(request):
             # PRCH sees reviews with counter = 0 and content_type_name = 'project'
             review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='project')
             review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='project')
-            review_conditions |= Q(reviewStatus='approved', content_type__model='project')
+            review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project')
             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
         elif role == 'cldn':
             # CLDN sees reviews with counter = 1 and content_type_name = 'project'
-            review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='project')
-            review_conditions |= Q(approvalCounter__gt=1, reviewStatus='pending', content_type__model='project')
-            review_conditions |= Q(reviewStatus='approved', content_type__model='project')
+            review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='project')  #pending iya pa review
+            review_conditions |= Q(approvalCounter__gt=1, reviewStatus='pending', content_type__model='project') #pending pero approved na ni cldn
+            review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project') #approved nas tanan
             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
         elif role == 'vpala':
             # VPALA sees reviews with content_type_name = 'moa'
             review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='moa')
             review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='moa')
-            review_conditions |= Q(reviewStatus='approved', content_type__model='moa')
+            review_conditions |= Q(approvalCounter=2, reviewStatus='approved', content_type__model='moa')
             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='moa')
         elif role == 'ecrd':
             # ECRD sees all reviews
