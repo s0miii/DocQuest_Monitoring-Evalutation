@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 from docquestapp.models import Project, CustomUser, LoadingOfTrainers
 from django.urls import reverse
 from django.utils import timezone
@@ -231,7 +232,9 @@ class Evaluation(models.Model):
         return round(average_rating)
     
     def save(self, *args, **kwargs):
-        # Calculate overall_rating before saving
+        if self.project.status != 'approved':
+            raise ValueError(f"Evaluations can only be created for approved projects.")
+
         self.stored_overall_rating = self.calculate_overall_rating()
 
         if not self.evaluation_number:
@@ -251,7 +254,12 @@ class Evaluation(models.Model):
 
     def __str__(self):
         return f"Evaluation for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"
-
+    
+    # This calculates/aggregates the average rating for all trainers sa specific project
+    @staticmethod
+    def get_project_average_rating(project_id):
+        evaluations = Evaluation.objects.filter(project_id=project_id)
+        return evaluations.aggregate(average_rating=Avg('stored_overall_rating'))['average_rating'] or 0
     
 
 

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from .models import Evaluation, AccomplishmentReport, ProjectNarrative
 
 # class ChecklistSerializer(serializers.ModelSerializer):
@@ -25,6 +26,14 @@ class EvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evaluation
         fields = '__all__'
+
+    #I-validate if project is approved before maka evaluate
+    def validate(self, data):
+        project = data.get('project')
+        if project.status != 'approved':
+            raise ValidationError("Evaluations can only be created for approved projects.")
+        return data
+
 
 # Accomplishment Report Serializer
 class AccomplishmentReportSerializer(serializers.ModelSerializer):
