@@ -378,7 +378,8 @@ class ProjectReviewSerializer(serializers.ModelSerializer):
         fields = [
             'reviewID', 'contentOwnerID', 'firstname', 'lastname',
             'content_type', 'content_type_name', 'source_id', 'projectTitle',
-            'dateCreated', 'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
+            'dateCreated', 'reviewedByID', 'reviewStatus', 'reviewDate', 'comment',
+            'approvalCounter', 'reviewerResponsible'
         ]
 
     def get_firstname(self, obj):
