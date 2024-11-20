@@ -1,13 +1,14 @@
+###
 # Create a user (Sign Up)
 POST http://127.0.0.1:8000/signup/
 Content-Type: application/json
 
 {
-    "email": "kit@test.com",
+    "email": "wyn@test.com",
     "password": "testpass123",
-    "firstname": "Keith",
-    "middlename": "C",
-    "lastname": "Tapongot",
+    "firstname": "wyn",
+    "middlename": "Cah",
+    "lastname": "lowes",
     "campus": "USTP-CDO",
     "college": "College of Information Technology",
     "department": "Department of TCM",
@@ -26,14 +27,14 @@ Content-Type: application/json
     "password": "testpass123"
 }
 
-# Example token: 507913917dc791add69b69f15afef7e0373080a7
+# Example token: de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # Log out using token
 POST http://127.0.0.1:8000/auth/token/logout/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {}
 
@@ -42,30 +43,23 @@ Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 # Get authenticated user details
 GET http://127.0.0.1:8000/auth/users/me/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {}
-
-###
-
-# Get all projects
-GET http://127.0.0.1:8000/get_projects/
-Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 
 ###
 
 # Create a project
 POST http://127.0.0.1:8000/create_project/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {
-    "userID": 3,
+    "userID": 2,
     "programCategory": "I-Share",
     "projectTitle": "Training and Outreach Program",
     "projectType": "Capacity Building",
-    "projectCategory": "Skills Training",
+    "projectCategory": 1,
     "researchTitle": "Enhancing Digital Literacy",
     "program": "BSIT",
     "accreditationLevel": "Level IV",
@@ -87,15 +81,14 @@ Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
     "agency": [1],
     "goalsAndObjectives": [
         {
-            "goalsAndObjectives":
-                "Increase digital literacy among youth"
+            "goalsAndObjectives": "Increase digital literacy among youth"
         }
     ],
     "nonUserProponents": [
-    {
-      "name": "WYn"
-    }
-  ],
+        {
+            "name": "WYn"
+        }
+    ],
     "projectActivities": [
         {
             "objective": "Conduct workshops for participants",
@@ -156,46 +149,37 @@ Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
     ]
 }
 
-
-
 ###
 
 # Get a specific project
 GET http://127.0.0.1:8000/get_project/4/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # Update a project
 PUT http://127.0.0.1:8000/edit_project/3/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {
-    "UserID": 4,
+    "userID": 4
 }
-
-###
-
-# Delete a project
-DELETE http://127.0.0.1:8000/delete_project/1/
-Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 
 ###
 
 # Get accomplishment reports
 GET http://127.0.0.1:8000/monitoring/accomplishment-reports/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # Create an accomplishment report
 POST http://127.0.0.1:8000/monitoring/accomplishment-reports/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {
     "project": 4,
@@ -213,18 +197,18 @@ Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 # Get project narratives
 GET http://127.0.0.1:8000/monitoring/project-narratives/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # Create a project narrative
 POST http://127.0.0.1:8000/monitoring/project-narratives/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {
     "project": 4,
-    "phase_description": " PhaseInitial",
+    "phase_description": "Phase Initial",
     "activities_topics": "Digital Training",
     "issues_challenges": "Lack of equipment",
     "participant_engagement_quality": "Very Good",
@@ -232,25 +216,26 @@ Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
     "ways_forward_plans": "Provide more resources"
 }
 
-### 
+###
+
 # Get all checklist assignments
 GET http://127.0.0.1:8000/monitoring/checklist-assignments/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # Get details of a specific checklist assignment
 GET http://127.0.0.1:8000/monitoring/checklist-assignments/3/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # Assign a checklist item to a proponent
 POST http://127.0.0.1:8000/monitoring/checklist-assignments/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {
     "project": 4,
@@ -264,7 +249,7 @@ Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 # Mark a checklist assignment as completed
 POST http://127.0.0.1:8000/monitoring/checklist-assignments/3/mark-completed/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {}
 
@@ -273,18 +258,12 @@ Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
 # Calculate progress for a project
 GET http://127.0.0.1:8000/monitoring/checklist-progress/4/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # View proponents assigned to a checklist item
 GET http://127.0.0.1:8000/monitoring/checklist-assignments/3/proponents/
 Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
-###
-
-# View checklist items assigned to the logged-in proponent
-GET http://127.0.0.1:8000/monitoring/checklist-assignments/my-assignments/
-Content-Type: application/json
-Authorization: Token 507913917dc791add69b69f15afef7e0373080a7

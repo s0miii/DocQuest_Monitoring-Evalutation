@@ -2,6 +2,7 @@ from rest_framework import status, viewsets, generics
 from rest_framework.views import APIView, View
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view
+from rest_framework.permissions import IsAuthenticated
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -18,6 +19,7 @@ class DailyAttendanceUploadView(LoginRequiredMixin, CreateView):
     form_class = DailyAttendanceForm
     template_name = 'monitoring/daily_attendance_form.html'
     success_url = reverse_lazy('monitoring_evaluation:attendance_list')
+    permission_classes = [IsAuthenticated]
 
     def form_valid(self, form):
         form.instance.proponent = self.request.user
@@ -28,6 +30,7 @@ class SummaryOfEvaluationUploadView(LoginRequiredMixin, CreateView):
     form_class = SummaryOfEvaluationForm
     template_name = 'monitoring_evaluation/summary_of_evaluation_form.html'
     success_url = reverse_lazy('monitoring_evaluation:evaluation_list')
+    permission_classes = [IsAuthenticated]
 
     def form_valid(self, form):
         form.instance.proponent = self.request.user
@@ -37,6 +40,7 @@ class ModulesLectureNotesUploadView(LoginRequiredMixin, CreateView):
     form_class = ModulesLectureNotesForm
     template_name = 'monitoring_evaluation/modules_lecture_notes_form.html'
     success_url = reverse_lazy('monitoring_evaluation:lecture_notes_list')
+    permission_classes = [IsAuthenticated]
     
     def form_valid(self, form):
         form.instance.proponent = self.request.user
@@ -47,6 +51,7 @@ class PhotoDocumentationUploadView(LoginRequiredMixin, CreateView):
     form_class = PhotoDocumentationForm
     template_name = 'monitoring_evaluation/photo_documentation_form.html'
     success_url = reverse_lazy('monitoring_evaluation:photo_list')
+    permission_classes = [IsAuthenticated]
     
     def form_valid(self, form):
         form.instance.proponent = self.request.user
@@ -57,6 +62,7 @@ class OtherFilesUploadView(LoginRequiredMixin, CreateView):
     form_class = OtherFilesForm
     template_name = 'monitoring_evaluation/other_files_form.html'
     success_url = reverse_lazy('monitoring_evaluation:other_files_list')
+    permission_classes = [IsAuthenticated]
     
     def form_valid(self, form):
         form.instance.proponent = self.request.user
@@ -75,6 +81,7 @@ class ChecklistAssignmentView(LoginRequiredMixin, CreateView):
         ]
     template_name = 'monitoring_evaluation/checklist_assignment_form.html'
     success_url = reverse_lazy('monitoring_evaluation:assignment_list')
+    permission_classes = [IsAuthenticated]
     
     def form_valid(self, form): 
         form.instance.proponent = self.request.user
@@ -85,11 +92,15 @@ class AccomplishmentReportCreateView(LoginRequiredMixin, CreateView):
     form_class = AccomplishmentReportForm
     template_name = 'monitoring_evaluation/accomplishment_report_form.html'
     success_url = reverse_lazy('monitoring_evaluation:report_list')
+    permission_classes = [IsAuthenticated]
+    
     def form_valid(self, form):
         form.instance.submitted_by = self.request.user
         return super().form_valid(form)
 
 class AccomplishmentReportDetailView(LoginRequiredMixin, View):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, pk):
         report = get_object_or_404(AccomplishmentReport, pk=pk)
         return render(request, 'monitoring_evaluation/accomplishment_report_detail.html', {'report': report})
@@ -99,6 +110,7 @@ class PREXCAchievementCreateView(LoginRequiredMixin, CreateView):
     form_class = PREXCAchievementForm
     template_name = 'monitoring_evaluation/prexc_achievement_form.html'
     success_url = reverse_lazy('monitoring_evaluation:prexc_achievement_list')
+    permission_classes = [IsAuthenticated]
     
     def form_valid(self, form):
         form.instance.submitted_by = self.request.user
@@ -109,6 +121,8 @@ class ProjectNarrativeCreateView(LoginRequiredMixin, CreateView):
     form_class = ProjectNarrativeForm
     template_name = 'monitoring_evaluation/project_narrative_form.html'
     success_url = reverse_lazy('monitoring_evaluation:project_narrative_list')
+    permission_classes = [IsAuthenticated]
+
     def form_valid(self, form):
         form.instance.submitted_by = self.request.user
         return super().form_valid(form)
@@ -117,38 +131,47 @@ class ProjectNarrativeCreateView(LoginRequiredMixin, CreateView):
 class DailyAttendanceRecordViewSet(viewsets.ModelViewSet): 
     queryset = DailyAttendanceRecord.objects.all()
     serializer_class = DailyAttendanceRecordSerializer
+    permission_classes = [IsAuthenticated]
     
 class SummaryOfEvaluationViewSet(viewsets.ModelViewSet):
     queryset = SummaryOfEvaluation.objects.all()
     serializer_class = SummaryOfEvaluationSerializer
+    permission_classes = [IsAuthenticated]
     
 class ModulesLectureNotesViewSet(viewsets.ModelViewSet):
     queryset = ModulesLectureNotes.objects.all()
     serializer_class = ModulesLectureNotesSerializer
+    permission_classes = [IsAuthenticated]
     
 class PhotoDocumentationViewSet(viewsets.ModelViewSet): 
     queryset = PhotoDocumentation.objects.all()
     serializer_class = PhotoDocumentationSerializer
+    permission_classes = [IsAuthenticated]
     
 class OtherFilesViewSet(viewsets.ModelViewSet):
     queryset = OtherFiles.objects.all()
     serializer_class = OtherFilesSerializer
+    permission_classes = [IsAuthenticated]
     
 class ChecklistAssignmentViewSet(viewsets.ModelViewSet):
     queryset = ChecklistAssignment.objects.all()
     serializer_class = ChecklistAssignmentSerializer
+    permission_classes = [IsAuthenticated]
     
 class AccomplishmentReportViewSet(viewsets.ModelViewSet):
     queryset = AccomplishmentReport.objects.all()
     serializer_class = AccomplishmentReportSerializer
+    permission_classes = [IsAuthenticated]
 
 class PREXCAchievementViewSet(viewsets.ModelViewSet):
     queryset = PREXCAchievement.objects.all()
     serializer_class = PREXCAchievementSerializer
+    permission_classes = [IsAuthenticated]
 
 class ProjectNarrativeViewSet(viewsets.ModelViewSet):
     queryset = ProjectNarrative.objects.all()
     serializer_class = ProjectNarrativeSerializer
+    permission_classes = [IsAuthenticated]
 
 # Evaluation Viewset for Evaluation Forms
 class EvaluationViewSet(viewsets.ModelViewSet):

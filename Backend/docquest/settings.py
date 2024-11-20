@@ -173,7 +173,7 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'SERIALIZERS': {
-         'user_create': 'docquestapp.serializer.UserRegistrationSerializer',
+         'user_create': 'docquest.serializers.UserSignupSerializer',
          'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
     }
 }
