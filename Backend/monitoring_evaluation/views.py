@@ -1,7 +1,7 @@
 from rest_framework import status, viewsets, generics
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404, render, redirect
+from rest_framework.decorators import action, api_view
+from django.shortcuts import get_object_or_404, render
 from .models import Evaluation, AccomplishmentReport, ProjectNarrative
 from docquestapp.models import Project, LoadingOfTrainers
 from .serializers import EvaluationSerializer, AccomplishmentReportSerializer, ProjectNarrativeSerializer
@@ -44,10 +44,13 @@ from rest_framework.permissions import IsAuthenticated
 #     queryset = AttendanceRecord.objects.all()
 #     serializer_class = AttendanceRecordSerializer
 
-# Evaluation Viewset for Evaluation Forms
+# Evaluation ViewSet for Evaluation Forms
 class EvaluationViewSet(viewsets.ModelViewSet):
-    queryset = Evaluation.objects.all()
+    # queryset = Evaluation.objects.all()
     serializer_class = EvaluationSerializer
+
+    def get_queryset(self):
+        return Evaluation.objects.filter(project__status='approved')
 
     @action(detail=True, methods=['get'])
     def generate_evaluation_url(self, request, pk=None):
@@ -59,7 +62,6 @@ class EvaluationViewSet(viewsets.ModelViewSet):
 
         project = get_object_or_404(Project, id=project_id)
 
-        # Generate the evaluation URL
         evaluation_url = f"{request.build_absolute_uri('/')[:-1]}/evaluation/{trainer.LOTID}/{project.id}/"
         return Response({"evaluation_url": evaluation_url}, status=status.HTTP_200_OK)
 
