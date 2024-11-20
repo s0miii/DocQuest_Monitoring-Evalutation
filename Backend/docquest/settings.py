@@ -48,8 +48,20 @@ INSTALLED_APPS = [
     'docquestapp',
     "whitenoise.runserver_nostatic",
     'corsheaders',
-    'monitoring_evaluation',
+    'channels',
+    'monitoring_evaluation'
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        # For production, use Redis:
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [('127.0.0.1', 6379)],
+        # },
+    }
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -82,7 +94,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'docquest.wsgi.application'
-
+ASGI_APPLICATION = 'docquest.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -161,7 +173,7 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'SERIALIZERS': {
-         'user_create': 'docquestapp.serializer.UserRegistrationSerializer',
+         'user_create': 'docquest.serializers.UserSignupSerializer',
          'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
     }
 }

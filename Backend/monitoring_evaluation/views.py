@@ -1,48 +1,177 @@
 from rest_framework import status, viewsets, generics
+from rest_framework.views import APIView, View
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view
-from django.shortcuts import get_object_or_404, render
-from .models import Evaluation, AccomplishmentReport, ProjectNarrative
-from docquestapp.models import Project, LoadingOfTrainers
-from .serializers import EvaluationSerializer, AccomplishmentReportSerializer, ProjectNarrativeSerializer
-from .forms import EvaluationForm
 from rest_framework.permissions import IsAuthenticated
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, render, redirect
+from docquestapp.models import Project, LoadingOfTrainers
+from .models import *
+from .forms import *
+from .serializers import *
 
-# # Checklist Viewset
-# class ChecklistViewSet(viewsets.ModelViewSet):
-#     queryset = Checklist.objects.all()
-#     serializer_class = ChecklistSerializer
+## Form Views
 
-# # Document Viewset for Uploads
-# class DocumentViewSet(viewsets.ModelViewSet):
-#     queryset = Documents.objects.all()
-#     serializer_class = DocumentsSerializer
+class DailyAttendanceUploadView(LoginRequiredMixin, CreateView):
+    model = DailyAttendanceRecord
+    form_class = DailyAttendanceForm
+    template_name = 'monitoring/daily_attendance_form.html'
+    success_url = reverse_lazy('monitoring_evaluation:attendance_list')
+    permission_classes = [IsAuthenticated]
 
-#     # Progress is updated automatically when a document is created
-#     def perform_create(self, serializer):
-#         document = serializer.save()
-#         if document.status == 'submitted':
-#             # Update progress
-#             progress, created = Progress.objects.get_or_create(project=document.project)
-#             progress.update_progress()
+    def form_valid(self, form):
+        form.instance.proponent = self.request.user
+        return super().form_valid(form)
 
-# # Progress Viewset for Tracking
-# class ProgressViewSet(viewsets.ModelViewSet):
-#     queryset = Progress.objects.all()
-#     serializer_class = ProgressSerializer
-#     permission_classes = [IsAuthenticated]
+class SummaryOfEvaluationUploadView(LoginRequiredMixin, CreateView):
+    model = SummaryOfEvaluation
+    form_class = SummaryOfEvaluationForm
+    template_name = 'monitoring_evaluation/summary_of_evaluation_form.html'
+    success_url = reverse_lazy('monitoring_evaluation:evaluation_list')
+    permission_classes = [IsAuthenticated]
 
-#     # Action to retrieve specific progress details
-#     @action(detail=True, methods=['get'])
-#     def get_progress(self, request, pk=None):
-#         progress = self.get_object()
-#         serializer = self.get_serializer(progress)
-#         return Response(serializer.data)
+    def form_valid(self, form):
+        form.instance.proponent = self.request.user
+        return super().form_valid(form)
+class ModulesLectureNotesUploadView(LoginRequiredMixin, CreateView):
+    model = ModulesLectureNotes
+    form_class = ModulesLectureNotesForm
+    template_name = 'monitoring_evaluation/modules_lecture_notes_form.html'
+    success_url = reverse_lazy('monitoring_evaluation:lecture_notes_list')
+    permission_classes = [IsAuthenticated]
+    
+    def form_valid(self, form):
+        form.instance.proponent = self.request.user
+        return super().form_valid(form)
 
-# # AttendanceRecord Viewset for Attendance
-# class AttendanceRecordListCreateView(generics.ListCreateAPIView):
-#     queryset = AttendanceRecord.objects.all()
-#     serializer_class = AttendanceRecordSerializer
+class PhotoDocumentationUploadView(LoginRequiredMixin, CreateView):
+    model = PhotoDocumentation
+    form_class = PhotoDocumentationForm
+    template_name = 'monitoring_evaluation/photo_documentation_form.html'
+    success_url = reverse_lazy('monitoring_evaluation:photo_list')
+    permission_classes = [IsAuthenticated]
+    
+    def form_valid(self, form):
+        form.instance.proponent = self.request.user
+        return super().form_valid(form)
+    
+class OtherFilesUploadView(LoginRequiredMixin, CreateView):
+    model = OtherFiles
+    form_class = OtherFilesForm
+    template_name = 'monitoring_evaluation/other_files_form.html'
+    success_url = reverse_lazy('monitoring_evaluation:other_files_list')
+    permission_classes = [IsAuthenticated]
+    
+    def form_valid(self, form):
+        form.instance.proponent = self.request.user
+        return super().form_valid(form)
+    
+class ChecklistAssignmentView(LoginRequiredMixin, CreateView):
+    model = ChecklistAssignment
+    fields = [
+        'project',
+        'proponent',
+        'daily_attendance',
+        'summary_of_evaluation',
+        'modules_lecture_notes',
+        'photo_documentation',
+        'other_files'
+        ]
+    template_name = 'monitoring_evaluation/checklist_assignment_form.html'
+    success_url = reverse_lazy('monitoring_evaluation:assignment_list')
+    permission_classes = [IsAuthenticated]
+    
+    def form_valid(self, form): 
+        form.instance.proponent = self.request.user
+        return super().form_valid(form)
+
+class AccomplishmentReportCreateView(LoginRequiredMixin, CreateView):
+    model = AccomplishmentReport
+    form_class = AccomplishmentReportForm
+    template_name = 'monitoring_evaluation/accomplishment_report_form.html'
+    success_url = reverse_lazy('monitoring_evaluation:report_list')
+    permission_classes = [IsAuthenticated]
+    
+    def form_valid(self, form):
+        form.instance.submitted_by = self.request.user
+        return super().form_valid(form)
+
+class AccomplishmentReportDetailView(LoginRequiredMixin, View):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        report = get_object_or_404(AccomplishmentReport, pk=pk)
+        return render(request, 'monitoring_evaluation/accomplishment_report_detail.html', {'report': report})
+
+class PREXCAchievementCreateView(LoginRequiredMixin, CreateView):
+    model = PREXCAchievement
+    form_class = PREXCAchievementForm
+    template_name = 'monitoring_evaluation/prexc_achievement_form.html'
+    success_url = reverse_lazy('monitoring_evaluation:prexc_achievement_list')
+    permission_classes = [IsAuthenticated]
+    
+    def form_valid(self, form):
+        form.instance.submitted_by = self.request.user
+        return super().form_valid(form)
+    
+class ProjectNarrativeCreateView(LoginRequiredMixin, CreateView):
+    model = ProjectNarrative
+    form_class = ProjectNarrativeForm
+    template_name = 'monitoring_evaluation/project_narrative_form.html'
+    success_url = reverse_lazy('monitoring_evaluation:project_narrative_list')
+    permission_classes = [IsAuthenticated]
+
+    def form_valid(self, form):
+        form.instance.submitted_by = self.request.user
+        return super().form_valid(form)
+    
+# API Views
+class DailyAttendanceRecordViewSet(viewsets.ModelViewSet): 
+    queryset = DailyAttendanceRecord.objects.all()
+    serializer_class = DailyAttendanceRecordSerializer
+    permission_classes = [IsAuthenticated]
+    
+class SummaryOfEvaluationViewSet(viewsets.ModelViewSet):
+    queryset = SummaryOfEvaluation.objects.all()
+    serializer_class = SummaryOfEvaluationSerializer
+    permission_classes = [IsAuthenticated]
+    
+class ModulesLectureNotesViewSet(viewsets.ModelViewSet):
+    queryset = ModulesLectureNotes.objects.all()
+    serializer_class = ModulesLectureNotesSerializer
+    permission_classes = [IsAuthenticated]
+    
+class PhotoDocumentationViewSet(viewsets.ModelViewSet): 
+    queryset = PhotoDocumentation.objects.all()
+    serializer_class = PhotoDocumentationSerializer
+    permission_classes = [IsAuthenticated]
+    
+class OtherFilesViewSet(viewsets.ModelViewSet):
+    queryset = OtherFiles.objects.all()
+    serializer_class = OtherFilesSerializer
+    permission_classes = [IsAuthenticated]
+    
+class ChecklistAssignmentViewSet(viewsets.ModelViewSet):
+    queryset = ChecklistAssignment.objects.all()
+    serializer_class = ChecklistAssignmentSerializer
+    permission_classes = [IsAuthenticated]
+    
+class AccomplishmentReportViewSet(viewsets.ModelViewSet):
+    queryset = AccomplishmentReport.objects.all()
+    serializer_class = AccomplishmentReportSerializer
+    permission_classes = [IsAuthenticated]
+
+class PREXCAchievementViewSet(viewsets.ModelViewSet):
+    queryset = PREXCAchievement.objects.all()
+    serializer_class = PREXCAchievementSerializer
+    permission_classes = [IsAuthenticated]
+
+class ProjectNarrativeViewSet(viewsets.ModelViewSet):
+    queryset = ProjectNarrative.objects.all()
+    serializer_class = ProjectNarrativeSerializer
+    permission_classes = [IsAuthenticated]
 
 # Evaluation ViewSet for Evaluation Forms
 class EvaluationViewSet(viewsets.ModelViewSet):
@@ -120,21 +249,3 @@ def evaluation_summary_view(request):
     context = {'project_summaries': project_summaries}
     return render(request, 'evaluation_summary.html', context)            
 
-
-# Accomplishment Report Views
-class AccomplishmentReportListCreateView(generics.ListCreateAPIView):
-    queryset = AccomplishmentReport.objects.all()
-    serializer_class = AccomplishmentReportSerializer
-
-class AccomplishmentReportDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = AccomplishmentReport.objects.all()
-    serializer_class = AccomplishmentReportSerializer
-
-# Project Narrative Views
-class ProjectNarrativeListCreateView(generics.ListCreateAPIView):
-    queryset = ProjectNarrative.objects.all()
-    serializer_class = ProjectNarrativeSerializer
-
-class ProjectNarrativeDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ProjectNarrative.objects.all()
-    serializer_class = ProjectNarrativeSerializer
