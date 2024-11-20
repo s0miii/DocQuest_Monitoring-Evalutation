@@ -10,7 +10,7 @@ import datetime
 
 class Roles(models.Model):
     roleID = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=4)
+    code = models.CharField(max_length=5)
     role = models.CharField(max_length=50, default='NO ROLE')
 
     def __str__(self):
@@ -23,9 +23,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     firstname = models.CharField(max_length=50)
     middlename = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
-    campus = models.CharField(max_length=50, default="NO CAMPUS SELECTED")
-    college = models.CharField(max_length=50, default="NO COLLEGE SELECTED")
-    department = models.CharField(max_length=50, default="NO DEPARTMENT SELECTED")
+    campus = models.CharField(max_length=50, default="USTP-CDO")
+    college = models.CharField(max_length=50, default="NO COLLEGE")
+    department = models.CharField(max_length=50, default="NO DEPARTMENT")
     contactNumber = models.CharField(max_length=15, default="NO NUMBER")
     role = models.ManyToManyField(Roles, related_name='user')
 
@@ -83,10 +83,13 @@ class MOA(models.Model):
     userID = models.ForeignKey(CustomUser, related_name='moaUser', on_delete=models.CASCADE)
     partyADescription = models.TextField()
     partyBDescription = models.TextField()
+    coverageAndEffectivity = models.TextField()
+    confidentialityClause = models.TextField()
     termination = models.TextField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     dateCreated = models.DateTimeField(auto_now_add=True)
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
+    approvalCounter = models.IntegerField(default=0)
 
 class FirstParty(models.Model):
     firstPartyID = models.AutoField(primary_key=True)
@@ -117,10 +120,24 @@ class PartyObligation(models.Model):
     party = models.TextField()
     moaID = models.ForeignKey(MOA, related_name='partyObligation', on_delete=models.CASCADE)
 
-class Effectivity(models.Model):
-    effectivityID = models.AutoField(primary_key=True)
-    effectivity = models.TextField()
-    moaID = models.ForeignKey(MOA, related_name='effectivity', on_delete=models.CASCADE)
+class ProgramCategory(models.Model):
+    programCategoryID = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=50)
+
+class ProjectCategory(models.Model):
+    projectCategoryID = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=50)
+
+class College(models.Model):
+    collegeID = models.AutoField(primary_key=True)
+    abbreviation = models.CharField(max_length=15)
+    title = models.CharField(max_length=100)
+
+class Program(models.Model):
+    programID = models.AutoField(primary_key=True)
+    abbreviation = models.CharField(max_length=15)
+    title = models.CharField(max_length=100)
+    collegeID = models.ForeignKey(College, related_name='program', on_delete=models.CASCADE)
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -131,14 +148,14 @@ class Project(models.Model):
 
     projectID = models.AutoField(primary_key=True)
     userID = models.ForeignKey(CustomUser, related_name='projectUser', on_delete=models.CASCADE)
-    programCategory = models.CharField(max_length=50) #1
+    programCategory = models.ManyToManyField(ProgramCategory, related_name='programCategory') #1
     projectTitle = models.CharField(max_length=150) #2
     projectType = models.CharField(max_length=50) #3 
-    projectCategory = models.CharField(max_length=100) #4
+    projectCategory = models.ManyToManyField(ProjectCategory, related_name="projectCategory") #4
     researchTitle = models.CharField(max_length=150) #5
-    program = models.CharField(max_length=150) #6
+    program = models.ManyToManyField(Program, related_name='projectProgram') #6
     accreditationLevel = models.CharField(max_length=50) #7
-    college = models.CharField(max_length=50) #8
+    # college = models.CharField(max_length=50) #8
     beneficiaries = models.TextField() #9
     targetImplementation = models.DateField() #10
     totalHours = models.FloatField() #11
@@ -155,7 +172,7 @@ class Project(models.Model):
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     dateCreated = models.DateTimeField(auto_now_add=True)
-
+    approvalCounter = models.IntegerField(default=0)
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
 class Signatories(models.Model):
@@ -210,6 +227,8 @@ class Review(models.Model):
     reviewStatus = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     reviewDate = models.DateTimeField(auto_now_add=True)
     comment = models.TextField(null=True, blank=True)
+    approvalCounter = models.IntegerField(default=0)
+    reviewerResponsible = models.CharField(max_length=10, blank=True, null=True)
 
 class GoalsAndObjectives(models.Model): #a5
     GAOID = models.AutoField(primary_key=True)

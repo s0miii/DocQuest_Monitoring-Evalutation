@@ -1,103 +1,131 @@
-
-
 from django.test import TestCase
-from docquestapp.models import CustomUser
-from .models import Checklist, Documents, Progress, AttendanceRecord, Evaluation
-from django.contrib.auth.models import User
-from datetime import date
+from django.urls import reverse
+from django.contrib.auth import get_user_model
+from .models import (
+    Project, DailyAttendanceRecord, SummaryOfEvaluation, ModulesLectureNotes, 
+    PhotoDocumentation, OtherFiles, ChecklistAssignment, AccomplishmentReport, 
+    PREXCAchievement, ProjectNarrative
+)
+from .forms import DailyAttendanceForm
+from rest_framework.test import APIClient
+from rest_framework import status
 
-class ChecklistModelTest(TestCase):
+class ModelTests(TestCase):
+
     def setUp(self):
-     def setUp(self):
-        self.user = CustomUser.objects.create(email="testuser@example.com")  # Adjust field name if needed
-        self.checklist = Checklist.objects.create(
-            title="Sample Checklist",  # Adjust field name based on your Checklist model
-            description="Sample description"
+        self.user = get_user_model().objects.create_user(
+            username='testuser', password='testpass'
         )
+        self.project = Project.objects.create(projectTitle='Test Project')
 
-    def test_checklist_creation(self):
-        self.assertIsInstance(self.checklist, Checklist)
+    def test_create_daily_attendance_record(self):
+        record = DailyAttendanceRecord.objects.create(
+            project=self.project,
+            proponent=self.user,
+            total_attendees=50
+        )
+        self.assertEqual(record.total_attendees, 50)
+        self.assertEqual(record.project.projectTitle, 'Test Project')
+        self.assertEqual(record.proponent.username, 'testuser')
 
-class DocumentsModelTest(TestCase):
+    def test_create_prexc_achievement(self):
+        achievement = PREXCAchievement.objects.create(
+            project=self.project,
+            persons_trained_weighted_days=10.5,
+            actual_trainees=20,
+            actual_days_training=3,
+            persons_trained=20,
+            satisfactory_trainees=18,
+            rating_percentage=90.0
+        )
+        self.assertEqual(achievement.project.projectTitle, 'Test Project')
+        self.assertEqual(achievement.persons_trained_weighted_days, 10.5)
+
+    def test_create_project_narrative(self):
+        narrative = ProjectNarrative.objects.create(
+            project=self.project,
+            phase_description='Phase 1 description',
+            activities_topics='Activity 1, Activity 2',
+            issues_challenges='Some challenges',
+            participant_engagement_quality='High',
+            discussion_comments='Discussion comments',
+            ways_forward_plans='Plan A, Plan B'
+        )
+        self.assertEqual(narrative.project.projectTitle, 'Test Project')
+        self.assertEqual(narrative.phase_description, 'Phase 1 description')
+
+class ViewTests(TestCase):
+
     def setUp(self):
-        self.checklist = Checklist.objects.create(
-            title="Sample Checklist",  # Adjust field name
-            description="Sample description"
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            username='testuser', password='testpass'
         )
-        self.document = Documents.objects.create(
-            checklist=self.checklist,
-            file="path/to/file.pdf",
-            status="submitted"
-        )
+        self.client.login(username='testuser', password='testpass')
+        self.project = Project.objects.create(projectTitle='Test Project')
 
-    def test_document_creation(self):
-        self.assertIsInstance(self.document, Documents)
+    def test_upload_daily_attendance_record(self):
+        url = reverse('monitoring_evaluation:attendance_upload')
+        data = {
+            'project': self.project.id,
+            'total_attendees': 50
+        }
+        with open('testfile.txt', 'w') as f:
+            f.write('Test content')
+        with open('testfile.txt') as f:
+            data['attendance_file'] = f
+            response = self.client.post(url, data)
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(DailyAttendanceRecord.objects.count(), 1)
+        record = DailyAttendanceRecord.objects.first()
+        self.assertEqual(record.total_attendees, 50)
 
-class ProgressModelTest(TestCase):
+    def test_api_get_daily_attendance(self):
+        url = reverse('dailyattendance-record-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_api_create_daily_attendance(self):
+        url = reverse('dailyattendance-record-list')
+        data = {
+            'project': self.project.id,
+            'total_attendees': 50
+        }
+        with open('testfile.txt', 'w') as f:
+            f.write('Test content')
+        with open('testfile.txt') as f:
+            data['attendance_file'] = f
+            response = self.client.post(url, data)
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(DailyAttendanceRecord.objects.count(), 1)
+        record = DailyAttendanceRecord.objects.first()
+        self.assertEqual(record.total_attendees, 50)
+
+class FormTests(TestCase):
+
     def setUp(self):
-        self.project_id = 1
-        self.checklist = Checklist.objects.create(
-            project_id=self.project_id,
-            item="Test Checklist Item",
-            is_required=True,
+        self.user = get_user_model().objects.create_user(
+            username='testuser', password='testpass'
         )
-        self.progress = Progress.objects.create(
-            project_id=self.project_id,
-            checklist=self.checklist,
-            is_completed=True,
-        )
+        self.project = Project.objects.create(projectTitle='Test Project')
 
-    def test_progress_creation(self):
-        self.assertEqual(self.progress.project_id, self.project_id)
-        self.assertTrue(self.progress.is_completed)
-        self.assertEqual(self.progress.checklist, self.checklist)
-
-
-class AttendanceRecordModelTest(TestCase):
-    def setUp(self):
-        self.attendance_record = AttendanceRecord.objects.create(
-            total_attendees=25,
-            attendance_file="path/to/sample_file.pdf"
-        )
-
-    def test_attendance_record_creation(self):
-        self.assertEqual(self.attendance_record.total_attendees, 25)
-        self.assertEqual(self.attendance_record.attendance_file, "path/to/sample_file.pdf")
-
-class EvaluationModelTest(TestCase):
-    def setUp(self):
-        self.project_id = 1
-        self.user = CustomUser.objects.create(username="trainer1")
-        self.evaluation = Evaluation.objects.create(
-            project_id=self.project_id,
-            trainer=self.user,
-            relevance_of_topics=5,
-            organizational_flow=4,
-            appropriateness_of_methods=3,
-            use_of_tech=5,
-            efficiency=4,
-            mastery_of_subject=5,
-            preparedness=4,
-            audience_participation=3,
-            interesting_activity=5,
-            handle_questions=4,
-            voice_personality=3,
-            visual_aids=5,
-            participant_engagement=4,
-            clarity_of_objectives=5,
-            logistical_support=3,
-            useful_concepts="Concept A, Concept B",
-            improvement_areas="None",
-            additional_comments="Great session",
-            overall_rating=4,
-            remarks="Very well organized",
-            timestamp=date.today(),
-        )
-
-    def test_evaluation_creation(self):
-        self.assertEqual(self.evaluation.project_id, self.project_id)
-        self.assertEqual(self.evaluation.trainer, self.user)
-        self.assertEqual(self.evaluation.relevance_of_topics, 5)
-        self.assertEqual(self.evaluation.overall_rating, 4)
-        self.assertEqual(self.evaluation.remarks, "Very well organized")
-        self.assertIsNotNone(self.evaluation.timestamp)
+    def test_daily_attendance_form_valid(self):
+        with open('testfile.txt', 'w') as f:
+            f.write('Test content')
+        with open('testfile.txt') as f:
+            form = DailyAttendanceForm({
+                'project': self.project.id,
+                'total_attendees': 50,
+            }, {
+                'attendance_file': f
+            })
+            self.assertTrue(form.is_valid())
+    
+    def test_daily_attendance_form_invalid(self):
+        form = DailyAttendanceForm({
+            'project': self.project.id,
+            'total_attendees': 'invalid'
+        })
+        self.assertFalse(form.is_valid())

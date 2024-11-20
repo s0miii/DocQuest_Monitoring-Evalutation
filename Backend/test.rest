@@ -1,9 +1,9 @@
 POST http://127.0.0.1:8000/signup
 Content-Type: application/json
 
-{ "email": "guylord@gmail.com", "password": "testpass", "firstname": "Guylord", "middlename": "Akut",
-    "lastname": "Sagun", "campus": "USTP-CDO", "college": "NO COLLEGE SELECTED", 
-    "department": "NO DEPARTMENT SELECTED", "contactNumber": "NO NUMBER", "role": [9]
+{ "email": "gerald@gmail.com", "password": "testpass", "firstname": "Chalbert", "middlename": "Akut",
+    "lastname": "Reyes", "campus": "USTP-CDO", "college": "NO COLLEGE SELECTED", 
+    "department": "NO DEPARTMENT SELECTED", "contactNumber": "NO NUMBER", "role": [10]
 }
 
 ###
@@ -11,7 +11,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
-{ "email": "chalbert@gmail.com", "password": "testpass"}
+{ "email": "john@gmail.com", "password": "testpass"}
 
 ###
 
@@ -26,7 +26,6 @@ Authorization: Token 946d9449e71eee646961e26e1f44206b6ea0bd23
 GET http://127.0.0.1:8000/auth/users/me/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
-
 
 {}
 
@@ -56,14 +55,13 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 {
     "userID": 10,
-    "programCategory": "I-Share",
+    "programCategory": [1, 2],
     "projectTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
     "projectType": "New Project",
-    "projectCategory": "Skills Training/Capacity Building",
+    "projectCategory": [1, 2],
     "researchTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
-    "program": "BSIT and BSDS",
+    "program": [1, 2],
     "accreditationLevel": "IV",
-    "college": "CITC",
     "beneficiaries": "Out of School Youth Development Alliance (OSYDA)",
     "targetImplementation": "2024-08-01",
     "totalHours": 24,
@@ -236,7 +234,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
         },
         {
             "name": "Olivia Taylor",
-            "title": "Accoutant III"
+            "title": "Accountant III"
         },
         {
             "name": "William Thomas",
@@ -275,9 +273,9 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 #     "action": "deny",
 #     "comment": "The project lacks sufficient data to proceed."
 # }
-POST http://127.0.0.1:8000/approve_or_deny_project/1/
+POST http://127.0.0.1:8000/approve_or_deny_project/35/
 Content-Type: application/json
-Authorization: Token 541d546c10c4d03586aa3f3d6d99f0df4344444d
+Authorization: Token c0d2ebdc7a3163963ee1664d4c16e8dadb398907
 
 {
     "action": "approve"
@@ -296,20 +294,19 @@ Authorization: Token 541d546c10c4d03586aa3f3d6d99f0df4344444d
 
 ###
 
-PUT http://127.0.0.1:8000/edit_project/10/
+PUT http://127.0.0.1:8000/edit_project/25/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 {
     "userID": 10,
-    "programCategory": "I-Share Edit",
+    "programCategory": [1, 2],
     "projectTitle": "Edited Title",
     "projectType": "New Project Edit",
-    "projectCategory": "Edit Skills Training/Capacity Building",
+    "projectCategory": [1],
     "researchTitle": "Edit E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
-    "program": "Edit BSIT and BSDS",
+    "program": [1],
     "accreditationLevel": "Edit IV",
-    "college": "Edit CITC",
     "beneficiaries": "Edit Out of School Youth Development Alliance (OSYDA)",
     "targetImplementation": "2024-08-01",
     "totalHours": 24,
@@ -482,7 +479,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
         },
         {
             "name": "Olivia Taylor",
-            "title": "Accoutant III"
+            "title": "Accountant III"
         },
         {
             "name": "William Thomas",
@@ -624,7 +621,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 ###
 
-GET http://127.0.0.1:8000/get_project/10/
+GET http://127.0.0.1:8000/get_project/25/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
@@ -713,6 +710,51 @@ Content-Type: application/json
 GET http://127.0.0.1:8000/get_moa/10/
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_programCategory
+Content-Type: application/json
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_projectCategory
+Content-Type: application/json
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_colleges
+Content-Type: application/json
+
+{}
+
+###
+
+POST http://127.0.0.1:8000/get_programs/ 
+Content-Type: application/json
+
+{
+  "collegeIDs": [1, 2]
+}
+
+###
+
+GET http://127.0.0.1:8000/get_checklist
+Content-Type: application/json
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_review
+Content-Type: application/json
+Authorization: Token 61da9108b277bc8208692d9241ebe360f7b1e854
 
 {}
 

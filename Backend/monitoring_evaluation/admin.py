@@ -1,13 +1,13 @@
 from django.contrib import admin
-from .models import Checklist, Documents, Progress, AttendanceRecord, Evaluation
+from .models import *
 from django.urls import reverse
 from django.utils.html import format_html
 
-@admin.register(Checklist)
-class ChecklistAdmin(admin.ModelAdmin):
-    list_display = ('item_name', 'project', 'is_required')
-    search_fields = ('item_name', 'project__projectTitle')
-    list_filter = ('is_required',)
+# @admin.register(Checklist)
+# class ChecklistAdmin(admin.ModelAdmin):
+#     list_display = ('item_name', 'project', 'is_required')
+#     search_fields = ('item_name', 'project__projectTitle')
+#     list_filter = ('is_required',)
 
 # @admin.register(Documents)
 # class DocumentsAdmin(admin.ModelAdmin):
@@ -24,6 +24,38 @@ class ChecklistAdmin(admin.ModelAdmin):
 # @admin.register(AttendanceRecord)
 # class AttendanceRecordAdmin(admin.ModelAdmin):
 #     list_display = ('upload_date', 'total_attendees')
+
+# Checklist
+@admin.register(DailyAttendanceRecord)
+class DailyAttendanceRecordAdmin(admin.ModelAdmin):
+    list_display = ('project', 'proponent', 'date_uploaded')
+    search_fields = ('project__title', 'proponent__username')
+
+@admin.register(SummaryOfEvaluation)
+class SummaryOfEvaluationAdmin(admin.ModelAdmin):
+    list_display = ('project', 'proponent', 'date_uploaded')
+    search_fields = ('project__title', 'proponent__username')
+
+@admin.register(ModulesLectureNotes)
+class ModulesLectureNotesAdmin(admin.ModelAdmin):
+    list_display = ('project', 'proponent', 'description', 'date_uploaded')
+    search_fields = ('project__title', 'proponent__username')
+
+@admin.register(PhotoDocumentation)
+class PhotoDocumentationAdmin(admin.ModelAdmin):
+    list_display = ('project', 'proponent', 'description', 'date_uploaded')
+    search_fields = ('project__title', 'proponent__username')
+
+@admin.register(OtherFiles)
+class OtherFilesAdmin(admin.ModelAdmin):
+    list_display = ('project', 'proponent', 'description', 'date_uploaded')
+    search_fields = ('project__title', 'proponent__username')
+
+@admin.register(ChecklistAssignment)
+class ChecklistAssignmentAdmin(admin.ModelAdmin):
+    list_display = ('project', 'proponent', 'is_completed', 'completion_date')
+    search_fields = ('project__title', 'proponent__username')
+    list_filter = ('is_completed',)
 
 # Register Evaluation model
 @admin.register(Evaluation)
