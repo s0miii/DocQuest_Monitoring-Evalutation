@@ -53,6 +53,9 @@ urlpatterns = [
     #edit project
     path('edit_project/<int:project_id>/', views.edit_project),
 
+    # get project review 
+    path('get_project_review/<int:projectID>/', views.get_project_review),
+
     # post moa
     path('create_moa', views.create_moa),
 
