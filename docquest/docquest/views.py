@@ -950,6 +950,19 @@ def get_specific_moa(request, pk):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def get_project_review(request, projectID):
+    user = request.user
+
+    try: 
+        review = Review.objects.get(source_id=projectID)
+    except Review.DoesNotExist:
+        return Response({"detail": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    review_serializer = ProjectReviewSerializer(instance=review)
+    return Response(review_serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_review(request):
     user = request.user
     user_roles = user.role.all().values_list('code', flat=True)
