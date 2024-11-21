@@ -627,6 +627,12 @@ Authorization: Token c2f1e401a8449e8635f5c74f2dd0dda51f008db4
 
 ###
 
+GET http://127.0.0.1:8000/get_project_review/25/
+Content-Type: application/json
+Authorization: Token c2f1e401a8449e8635f5c74f2dd0dda51f008db4
+
+###
+
 GET http://127.0.0.1:8000/get_users_exclude_roles
 Content-Type: application/json
 Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
