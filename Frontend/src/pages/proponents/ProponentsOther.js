@@ -7,38 +7,24 @@ import { FaArrowLeft } from "react-icons/fa";
 const ProponentsOther = () => {
     const navigate = useNavigate();
 
-    const handleViewClick = (path) => {
-        navigate(path);
-    }
+    const today = new Date().toISOString().split('T')[0];
 
-    const [submittedSubmissions, setSubmittedSubmissions] = useState([
-        {
-            id: 1,
-            trainerName: "Trainer A",
-            dateSubmitted: "2024-10-10",
-            files: ["Certificate1.pdf", "Samting2.pdf"]
-        },
-        {
-            id: 2,
-            trainerName: "Trainer B",
-            dateSubmitted: "2024-10-11",
-            files: ["Certificate3.pdf"]
-        }
-    ]);
-
+    const [submittedSubmissions, setSubmittedSubmissions] = useState([]);
     const [attachedFiles, setAttachedFiles] = useState([]);
     const [trainerName, setTrainerName] = useState("");
-    const [submissionDate, setSubmissionDate] = useState("");
+    const [submissionDate, setSubmissionDate] = useState(today);
+    const [description, setDescription] = useState("");
 
-    // Handle file attachments
     const handleFileChange = (event) => {
-        const files = Array.from(event.target.files);
-        setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
+        const files = Array.from(event.target.files).map(file => ({
+            name: file.name,
+            url: URL.createObjectURL(file)
+        }));
+        setAttachedFiles(files); 
     };
 
-    // Handle submission
     const handleSubmit = () => {
-        if (!trainerName || !submissionDate || attachedFiles.length === 0) {
+        if (!trainerName || !submissionDate || attachedFiles.length === 0 || !description) {
             alert("Please complete all fields and attach at least one file.");
             return;
         }
@@ -47,13 +33,15 @@ const ProponentsOther = () => {
             id: submittedSubmissions.length + 1,
             trainerName,
             dateSubmitted: submissionDate,
-            files: attachedFiles.map((file) => file.name)
+            files: attachedFiles,
+            description
         };
 
-        setSubmittedSubmissions((prevSubmissions) => [...prevSubmissions, newSubmission]);
+        setSubmittedSubmissions(prevSubmissions => [...prevSubmissions, newSubmission]);
         setAttachedFiles([]);
         setTrainerName("");
         setSubmissionDate("");
+        setDescription("");
     };
 
     return (
@@ -65,11 +53,12 @@ const ProponentsOther = () => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/proponents/proj/req')}>
+                        <button className="mr-2" onClick={() => navigate('/proponents/proj/req')}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Other/s</h1>
                     </div>
+
 
                     {/* Project Details */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
@@ -110,6 +99,7 @@ const ProponentsOther = () => {
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Trainer Name</th>
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Date Submitted</th>
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Files</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Description</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -120,10 +110,13 @@ const ProponentsOther = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                                 <ul>
                                                     {submission.files.map((file, index) => (
-                                                        <li key={index}>{file}</li>
+                                                        <li key={index}>
+                                                            <a href={file.url} target="_blank" rel="noopener noreferrer">{file.name}</a>
+                                                        </li>
                                                     ))}
                                                 </ul>
                                             </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.description}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -152,12 +145,21 @@ const ProponentsOther = () => {
                                     value={submissionDate}
                                     onChange={(e) => setSubmissionDate(e.target.value)}
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    disabled
                                 />
                             </div>
                         </div>
-
-                        {/* Attach Files */}
-                        <div className="border border-gray-300 rounded-lg p-6 flex flex-col items-center mb-6 relative mt-6">
+                        <div className="mb-4 col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">Description</label>
+                                <input
+                                    type="text"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Enter a brief description"
+                                />
+                            </div>
+                        <div className="border border-gray-300 rounded-lg p-6 flex flex-col items-center mb-6 relative">
                             <h3 className="font-semibold text-center mb-1">Attach Files</h3>
                             <div className="text-gray-400 mb-1">
                                 <span className="block text-center text-5xl">+</span>
@@ -169,15 +171,13 @@ const ProponentsOther = () => {
                                 className="absolute inset-0 opacity-0 cursor-pointer"
                             />
                         </div>
-
-                        {/* Preview of Attached Files */}
                         {attachedFiles.length > 0 && (
                             <div className="grid grid-cols-3 gap-4 mb-6">
                                 {attachedFiles.map((file, index) => (
                                     <div key={index} className="border border-gray-300 rounded-lg p-4">
                                         <img
-                                            src={URL.createObjectURL(file)}
-                                            alt={`attachment-preview-${index}`}
+                                            src={file.url}
+                                            alt={`Preview ${index}`}
                                             className="h-32 w-full object-cover rounded-lg"
                                         />
                                         <p className="text-xs text-center mt-2">{file.name}</p>
@@ -185,13 +185,11 @@ const ProponentsOther = () => {
                                 ))}
                             </div>
                         )}
-
-                        {/* Submit Button */}
                         <div className="flex justify-center">
                             <button
                                 onClick={handleSubmit}
                                 type="button"
-                                className="bg-yellow-500 text-white font-bold py-2 px-12 rounded-lg hover:bg-yellow-600 transition"
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded-lg transition-colors"
                             >
                                 Submit
                             </button>
