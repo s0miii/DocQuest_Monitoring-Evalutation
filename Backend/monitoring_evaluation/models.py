@@ -49,21 +49,18 @@ class OtherFiles(models.Model):
     date_uploaded = models.DateTimeField(auto_now_add=True)
 
 ## Assign Checklist Item
-
 CustomUser = get_user_model()
+
 class ChecklistAssignment(models.Model):
-    
-    # Links checklist items to proponents for a specific project
-    # Each assignment refers to a specific checklist model
     project = models.ForeignKey(Project, related_name="checklist_assignments", on_delete=models.CASCADE)
     proponent = models.ForeignKey(CustomUser, related_name="assigned_checklists", on_delete=models.CASCADE)
 
-    # Relationships to specific checklist models
-    daily_attendance = models.ForeignKey(DailyAttendanceRecord, null=True, blank=True, on_delete=models.SET_NULL)
-    summary_of_evaluation = models.ForeignKey(SummaryOfEvaluation, null=True, blank=True, on_delete=models.SET_NULL)
-    modules_lecture_notes = models.ForeignKey(ModulesLectureNotes, null=True, blank=True, on_delete=models.SET_NULL)
-    other_files = models.ForeignKey(OtherFiles, null=True, blank=True, on_delete=models.SET_NULL)
-    photo_documentation = models.ForeignKey(PhotoDocumentation, null=True, blank=True, on_delete=models.SET_NULL)
+    # Boolean fields to represent the state of each checklist item
+    can_submit_daily_attendance = models.BooleanField(default=False)
+    can_submit_summary_of_evaluation = models.BooleanField(default=False)
+    can_submit_modules_lecture_notes = models.BooleanField(default=False)
+    can_submit_other_files = models.BooleanField(default=False)
+    can_submit_photo_documentation = models.BooleanField(default=False)
 
     is_completed = models.BooleanField(default=False)
     completion_date = models.DateTimeField(null=True, blank=True)
@@ -71,24 +68,6 @@ class ChecklistAssignment(models.Model):
     def __str__(self):
         return f"Checklist Assignment for {self.proponent.firstname + self.proponent.lastname} on {self.project.projectTitle}"
 
-    def mark_as_completed(self):
-        """
-        Marks this assignment as completed and sets the completion date.
-        """
-        from django.utils.timezone import now
-
-        self.is_completed = True
-        self.completion_date = now()
-        self.save()
-
-    @classmethod
-    def calculate_progress(cls, project):
-        """
-        Calculates progress for a project based on completed assignments.
-        """
-        total_items = cls.objects.filter(project=project).count()
-        completed_items = cls.objects.filter(project=project, is_completed=True).count()
-        return (completed_items / total_items) * 100 if total_items > 0 else 0
 
 # Accomplishment Report Model
 class AccomplishmentReport(models.Model):

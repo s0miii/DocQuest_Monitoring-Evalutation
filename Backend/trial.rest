@@ -4,11 +4,11 @@ POST http://127.0.0.1:8000/signup/
 Content-Type: application/json
 
 {
-    "email": "wyn@test.com",
+    "email": "kit@test.com",
     "password": "testpass123",
-    "firstname": "wyn",
-    "middlename": "Cah",
-    "lastname": "lowes",
+    "firstname": "Keith",
+    "middlename": "C",
+    "lastname": "Tapongot",
     "campus": "USTP-CDO",
     "college": "College of Information Technology",
     "department": "Department of TCM",
@@ -49,110 +49,8 @@ Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
-# Create a project
-POST http://127.0.0.1:8000/create_project/
-Content-Type: application/json
-Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
-
-{
-    "userID": 2,
-    "programCategory": "I-Share",
-    "projectTitle": "Training and Outreach Program",
-    "projectType": "Capacity Building",
-    "projectCategory": 1,
-    "researchTitle": "Enhancing Digital Literacy",
-    "program": "BSIT",
-    "accreditationLevel": "Level IV",
-    "college": "CITC",
-    "beneficiaries": "Out-of-School Youth",
-    "targetImplementation": "2024-12-01",
-    "totalHours": 40,
-    "background": "A community-focused digital literacy program.",
-    "projectComponent": "Training and Workshop",
-    "targetScope": "Barangay 1, City",
-    "ustpBudget": 10000,
-    "partnerAgencyBudget": 5000,
-    "totalBudget": 15000,
-    "proponents": [1, 2],
-    "projectLocationID": {
-        "street": "Main Road",
-        "barangayID": 1
-    },
-    "agency": [1],
-    "goalsAndObjectives": [
-        {
-            "goalsAndObjectives": "Increase digital literacy among youth"
-        }
-    ],
-    "nonUserProponents": [
-        {
-            "name": "WYn"
-        }
-    ],
-    "projectActivities": [
-        {
-            "objective": "Conduct workshops for participants",
-            "involved": "Trainers, community leaders",
-            "targetDate": "2024-12-02",
-            "personResponsible": "Keith Tapongot"
-        }
-    ],
-    "projectManagementTeam": [
-        {
-            "name": "Emily Brown",
-            "role": "Team Leader"
-        },
-        {
-            "name": "Michael Johnson",
-            "role": "Technical Support"
-        }
-    ],
-    "budgetRequirements": [
-        {
-            "itemName": "Training Materials",
-            "ustpAmount": 5000,
-            "partnerAmount": 2000,
-            "totalAmount": 7000
-        },
-        {
-            "itemName": "Venue Rental",
-            "ustpAmount": 3000,
-            "partnerAmount": 1000,
-            "totalAmount": 4000
-        }
-    ],
-    "evaluationAndMonitorings": [
-        {
-            "projectSummary": "Assess training impact",
-            "indicators": "Number of participants with improved skills",
-            "meansOfVerification": "Feedback forms",
-            "type": "Outcome"
-        }
-    ],
-    "monitoringPlanSchedules": [
-        {
-            "approach": "Pre-training surveys",
-            "dataGatheringStrategy": "Questionnaires and interviews",
-            "schedule": "2024-11-25",
-            "implementationPhase": "Before Implementation"
-        }
-    ],
-    "signatories": [
-        {
-            "name": "John Doe",
-            "title": "Dean of CITC"
-        },
-        {
-            "name": "Jane Smith",
-            "title": "Chancellor"
-        }
-    ]
-}
-
-###
-
 # Get a specific project
-GET http://127.0.0.1:8000/get_project/4/
+GET http://127.0.0.1:8000/get_project/1/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
@@ -170,44 +68,44 @@ Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 ###
 
 # Get accomplishment reports
-GET http://127.0.0.1:8000/monitoring/accomplishment-reports/
+GET http://127.0.0.1:8000/monitoring/accomplishment_reports/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # Create an accomplishment report
-POST http://127.0.0.1:8000/monitoring/accomplishment-reports/
+POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {
-    "project": 4,
+    "project": 1,
     "banner_program_title": "Banner Program",
     "flagship_program": "Flagship Initiative",
     "training_modality": "Blended",
     "actual_implementation_date": "2024-12-10",
     "total_number_of_days": 3,
     "submitted_by": 4,
-    "project_narrative": 4
+    "project_narrative": 1
 }
 
 ###
 
 # Get project narratives
-GET http://127.0.0.1:8000/monitoring/project-narratives/
+GET http://127.0.0.1:8000/monitoring/project_narratives/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # Create a project narrative
-POST http://127.0.0.1:8000/monitoring/project-narratives/
+POST http://127.0.0.1:8000/monitoring/project_narratives/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {
-    "project": 4,
+    "project": 1,
     "phase_description": "Phase Initial",
     "activities_topics": "Digital Training",
     "issues_challenges": "Lack of equipment",
@@ -219,35 +117,42 @@ Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 ###
 
 # Get all checklist assignments
-GET http://127.0.0.1:8000/monitoring/checklist-assignments/
+GET http://127.0.0.1:8000/monitoring/checklist_assignments/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # Get details of a specific checklist assignment
-GET http://127.0.0.1:8000/monitoring/checklist-assignments/3/
+GET http://127.0.0.1:8000/monitoring/project/1/checklist_item_submissions/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
-# Assign a checklist item to a proponent
-POST http://127.0.0.1:8000/monitoring/checklist-assignments/
+# Assign a checklist item to a proponent de95d63d55190f47cf0ae40ea1c805752686f6a7
+POST http://127.0.0.1:8000/monitoring/assign/checklist_items/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 {
-    "project": 4,
-    "proponents": 1,
-    "checklist_item_type": "daily_attendance",
-    "checklist_item_id": 3
+    "project": 1,
+    "proponent": 1,
+    "checklist_items": {
+        "daily_attendance": true,
+        "summary_of_evaluation": false,
+        "modules_lecture_notes": true,
+        "other_files": true,
+        "photo_documentation": true
+    }
 }
+
+
 
 ###
 
 # Mark a checklist assignment as completed
-POST http://127.0.0.1:8000/monitoring/checklist-assignments/3/mark-completed/
+POST http://127.0.0.1:8000/monitoring_evaluation/checklist_assignments/3/mark-completed/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
@@ -256,14 +161,74 @@ Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 ###
 
 # Calculate progress for a project
-GET http://127.0.0.1:8000/monitoring/checklist-progress/4/
+GET http://127.0.0.1:8000/monitoring_evaluation/checklist-progress/4/
 Content-Type: application/json
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
 ###
 
 # View proponents assigned to a checklist item
-GET http://127.0.0.1:8000/monitoring/checklist-assignments/3/proponents/
+GET http://127.0.0.1:8000/monitoring/checklist_assignments/4/proponents/
 Content-Type: application/json
+Authorization: Token de95d63d55190f47cf0ae40ea
+
+
+### Get Checklist Item Submissions
+GET http://127.0.0.1:8000/monitoring/project/1/checklist_submissions/
 Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
 
+
+### Upload Daily Attendance
+POST http://127.0.0.1:8000/monitoring/upload/attendance/1/
+Content-Type: multipart/form-data
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
+
+{
+    "proponent": 1,
+    "project": 1,
+    "file": "dummy_file.txt"
+}
+
+### Upload Evaluation Summary
+POST http://127.0.0.1:8000/monitoring/upload/evaluation/
+Content-Type: multipart/form-data
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
+
+{
+    "proponent": 1,
+    "project": 1,
+    "summary_file": "dummy_evaluation.pdf"
+}
+
+### Upload Modules/Lecture Notes
+POST http://127.0.0.1:8000/upload/lecture_notes/
+Content-Type: multipart/form-data
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
+
+{
+    "proponent": 1,
+    "project": 1,
+    "module_file": "dummy_notes.pdf"
+}
+
+### Upload Photo Documentation
+POST http://127.0.0.1:8000/upload/photo/
+Content-Type: multipart/form-data
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
+
+{
+    "proponent": 1,
+    "project": 1,
+    "photo": "dummy_photo.jpg"
+}
+
+### Upload Other Files
+POST http://127.0.0.1:8000/upload/other_files/
+Content-Type: multipart/form-data
+Authorization: Token de95d63d55190f47cf0ae40ea1c805752686f6a7
+
+{
+    "proponent": 1,
+    "project": 1,
+    "photo": "nothing.pdf"
+}
