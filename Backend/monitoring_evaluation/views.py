@@ -5,87 +5,282 @@ from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAuthenticated
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from docquestapp.models import Project, LoadingOfTrainers
 from .models import *
 from .forms import *
 from .serializers import *
 
-## Form Views
 
-class DailyAttendanceUploadView(LoginRequiredMixin, CreateView):
-    model = DailyAttendanceRecord
-    form_class = DailyAttendanceForm
-    template_name = 'monitoring/daily_attendance_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:attendance_list')
+class DailyAttendanceUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def form_valid(self, form):
-        form.instance.proponent = self.request.user
-        return super().form_valid(form)
+    def post(self, request, project_id):
+        proponent_id = request.data.get('proponent')
+        file = request.FILES.get('file')
 
-class SummaryOfEvaluationUploadView(LoginRequiredMixin, CreateView):
-    model = SummaryOfEvaluation
-    form_class = SummaryOfEvaluationForm
-    template_name = 'monitoring_evaluation/summary_of_evaluation_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:evaluation_list')
+        proponent = get_object_or_404(CustomUser, id=proponent_id)
+        project = get_object_or_404(Project, id=project_id)
+
+        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=proponent)
+
+        if assignment.can_submit_daily_attendance:
+            daily_attendance = DailyAttendanceRecord.objects.create(
+                project=project,
+                proponent=proponent,
+                attendance_file=file,
+                total_attendees=request.data.get('total_attendees')
+            )
+            serializer = DailyAttendanceRecordSerializer(daily_attendance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
+
+
+class SummaryOfEvaluationUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def form_valid(self, form):
-        form.instance.proponent = self.request.user
-        return super().form_valid(form)
-class ModulesLectureNotesUploadView(LoginRequiredMixin, CreateView):
-    model = ModulesLectureNotes
-    form_class = ModulesLectureNotesForm
-    template_name = 'monitoring_evaluation/modules_lecture_notes_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:lecture_notes_list')
-    permission_classes = [IsAuthenticated]
-    
-    def form_valid(self, form):
-        form.instance.proponent = self.request.user
-        return super().form_valid(form)
+    def post(self, request, project_id):
+        proponent_id = request.data.get('proponent')
+        file = request.FILES.get('summary_file')
 
-class PhotoDocumentationUploadView(LoginRequiredMixin, CreateView):
-    model = PhotoDocumentation
-    form_class = PhotoDocumentationForm
-    template_name = 'monitoring_evaluation/photo_documentation_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:photo_list')
+        proponent = get_object_or_404(CustomUser, id=proponent_id)
+        project = get_object_or_404(Project, id=project_id)
+
+        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=proponent)
+
+        if assignment.can_submit_summary_of_evaluation:
+            summary = SummaryOfEvaluation.objects.create(
+                project=project,
+                proponent=proponent,
+                summary_file=file
+            )
+            serializer = SummaryOfEvaluationSerializer(summary)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
+
+    
+class ModulesLectureNotesUploadView(APIView):
     permission_classes = [IsAuthenticated]
-    
-    def form_valid(self, form):
-        form.instance.proponent = self.request.user
-        return super().form_valid(form)
-    
-class OtherFilesUploadView(LoginRequiredMixin, CreateView):
-    model = OtherFiles
-    form_class = OtherFilesForm
-    template_name = 'monitoring_evaluation/other_files_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:other_files_list')
+
+    def post(self, request, project_id):
+        proponent_id = request.data.get('proponent')
+        file = request.FILES.get('module_file')
+
+        proponent = get_object_or_404(CustomUser, id=proponent_id)
+        project = get_object_or_404(Project, id=project_id)
+
+        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=proponent)
+
+        if assignment.can_submit_modules_lecture_notes:
+            lecture_notes = ModulesLectureNotes.objects.create(
+                project=project,
+                proponent=proponent,
+                module_file=file,
+                description=request.data.get('description')
+            )
+            serializer = ModulesLectureNotesSerializer(lecture_notes)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
+
+class PhotoDocumentationUploadView(APIView):
     permission_classes = [IsAuthenticated]
-    
-    def form_valid(self, form):
-        form.instance.proponent = self.request.user
-        return super().form_valid(form)
-    
-class ChecklistAssignmentView(LoginRequiredMixin, CreateView):
-    model = ChecklistAssignment
-    fields = [
-        'project',
-        'proponent',
-        'daily_attendance',
-        'summary_of_evaluation',
-        'modules_lecture_notes',
-        'photo_documentation',
-        'other_files'
-        ]
-    template_name = 'monitoring_evaluation/checklist_assignment_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:assignment_list')
+
+    def post(self, request, project_id):
+        proponent_id = request.data.get('proponent')
+        file = request.FILES.get('photo')
+
+        proponent = get_object_or_404(CustomUser, id=proponent_id)
+        project = get_object_or_404(Project, id=project_id)
+
+        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=proponent)
+
+        if assignment.can_submit_photo_documentation:
+            photo = PhotoDocumentation.objects.create(
+                project=project,
+                proponent=proponent,
+                photo=file,
+                description=request.data.get('description')
+            )
+            serializer = PhotoDocumentationSerializer(photo)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
+
+class OtherFilesUploadView(APIView):
     permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id):
+        proponent_id = request.data.get('proponent')
+        file = request.FILES.get('file')
+
+        proponent = get_object_or_404(CustomUser, id=proponent_id)
+        project = get_object_or_404(Project, id=project_id)
+
+        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=proponent)
+
+        if assignment.can_submit_other_files:
+            other_file = OtherFiles.objects.create(
+                project=project,
+                proponent=proponent,
+                file=file,
+                description=request.data.get('description')
+            )
+            serializer = OtherFilesSerializer(other_file)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
+
+
+## view all submissions
+class ChecklistSubmissionsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        try:
+            project = Project.objects.get(projectID=project_id)
+            
+            daily_attendance_records = DailyAttendanceRecord.objects.filter(project=project)
+            summary_of_evaluations = SummaryOfEvaluation.objects.filter(project=project)
+            modules_lecture_notes = ModulesLectureNotes.objects.filter(project=project)
+            photo_documentations = PhotoDocumentation.objects.filter(project=project)
+            other_files = OtherFiles.objects.filter(project=project)
+
+            results = {
+                "daily_attendance_records": [
+                    {
+                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
+                        "attendance_file": record.attendance_file.url,
+                        "total_attendees": record.total_attendees,
+                        "date_uploaded": record.date_uploaded
+                    } for record in daily_attendance_records
+                ],
+                "summary_of_evaluations": [
+                    {
+                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
+                        "summary_file": record.summary_file.url,
+                        "date_uploaded": record.date_uploaded
+                    } for record in summary_of_evaluations
+                ],
+                "modules_lecture_notes": [
+                    {
+                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
+                        "module_file": record.module_file.url,
+                        "description": record.description,
+                        "date_uploaded": record.date_uploaded
+                    } for record in modules_lecture_notes
+                ],
+                "photo_documentations": [
+                    {
+                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
+                        "photo": record.photo.url,
+                        "description": record.description,
+                        "date_uploaded": record.date_uploaded
+                    } for record in photo_documentations
+                ],
+                "other_files": [
+                    {
+                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
+                        "file": record.file.url,
+                        "description": record.description,
+                        "date_uploaded": record.date_uploaded
+                    } for record in other_files
+                ]
+            }
+
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Project.DoesNotExist:
+            return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     
-    def form_valid(self, form): 
-        form.instance.proponent = self.request.user
-        return super().form_valid(form)
+# assign checklist
+@method_decorator(csrf_exempt, name='dispatch')
+class AssignChecklistItemsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        project_id = request.data.get('project')
+        proponent_id = request.data.get('proponent')
+        checklist_items = request.data.get('checklist_items', {})
+
+        if not all([project_id, proponent_id]):
+            return Response({"error": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            project = Project.objects.get(projectID=project_id)
+            proponent = get_object_or_404(CustomUser, userID=proponent_id)
+
+            with transaction.atomic():
+                assignment, created = ChecklistAssignment.objects.update_or_create(
+                    project=project,
+                    proponent=proponent,
+                    defaults={
+                        "can_submit_daily_attendance": checklist_items.get("daily_attendance", False),
+                        "can_submit_summary_of_evaluation": checklist_items.get("summary_of_evaluation", False),
+                        "can_submit_modules_lecture_notes": checklist_items.get("modules_lecture_notes", False),
+                        "can_submit_other_files": checklist_items.get("other_files", False),
+                        "can_submit_photo_documentation": checklist_items.get("photo_documentation", False),
+                    }
+                )
+
+            serializer = ChecklistAssignmentSerializer(assignment)
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+            )
+
+        except Project.DoesNotExist:
+            return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Proponent not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# view checklist assignment
+class ChecklistItemSubmissionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        try:
+            project = Project.objects.get(projectID=project_id)
+            assignments = ChecklistAssignment.objects.filter(project=project)
+
+            results = {
+                "daily_attendance": [],
+                "summary_of_evaluation": [],
+                "modules_lecture_notes": [],
+                "other_files": [],
+                "photo_documentation": []
+            }
+
+            for assignment in assignments:
+                proponent_name = f"{assignment.proponent.firstname} {assignment.proponent.lastname}"
+                if assignment.can_submit_daily_attendance:
+                    results["daily_attendance"].append(proponent_name)
+                if assignment.can_submit_summary_of_evaluation:
+                    results["summary_of_evaluation"].append(proponent_name)
+                if assignment.can_submit_modules_lecture_notes:
+                    results["modules_lecture_notes"].append(proponent_name)
+                if assignment.can_submit_other_files:
+                    results["other_files"].append(proponent_name)
+                if assignment.can_submit_photo_documentation:
+                    results["photo_documentation"].append(proponent_name)
+
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Project.DoesNotExist:
+            return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class AccomplishmentReportCreateView(LoginRequiredMixin, CreateView):
     model = AccomplishmentReport
@@ -104,6 +299,11 @@ class AccomplishmentReportDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
         report = get_object_or_404(AccomplishmentReport, pk=pk)
         return render(request, 'monitoring_evaluation/accomplishment_report_detail.html', {'report': report})
+
+class AccomplishmentReportViewSet(viewsets.ModelViewSet):
+    queryset = AccomplishmentReport.objects.all()
+    serializer_class = AccomplishmentReportSerializer
+
 
 class PREXCAchievementCreateView(LoginRequiredMixin, CreateView):
     model = PREXCAchievement

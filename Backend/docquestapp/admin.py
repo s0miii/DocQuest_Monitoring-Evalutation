@@ -116,26 +116,27 @@ admin.site.register(Deliverables, DeliverablesAdmin)
 
 
 # for testing
-# class ProjectAdmin(admin.ModelAdmin):
-#     list_display = (
-#         'projectID', 'projectTitle', 'userID', 'programCategory', 
-#         'projectType', 'projectCategory', 'status', 'dateCreated'
-#     )
-#     search_fields = ('projectTitle', 'programCategory', 'projectType', 'researchTitle', 'college')
-#     list_filter = ('status', 'programCategory', 'projectType', 'college')
-#     ordering = ('-dateCreated',)
-#     filter_horizontal = ('agency', 'proponents',)
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = (
+        'projectID', 'projectTitle', 'userID', 'projectType', 'status', 'dateCreated'
+    )  # Removed many-to-many fields
+    search_fields = ('projectTitle', 'researchTitle')
+    list_filter = ('status', 'projectType')  # Removed 'college'
+    ordering = ('-dateCreated',)
+    filter_horizontal = ('agency', 'proponents',)
 
 # admin.site.register(Project, ProjectAdmin)
 
-# class MOAAdmin(admin.ModelAdmin):
-#     list_display = (
-#         'moaID', 'userID', 'status', 'dateCreated', 'uniqueCode'
-#     )
-#     search_fields = (
-#         'userID__username', 'partyADescription', 'partyBDescription', 'uniqueCode'
-#     )
-#     list_filter = ('status', 'dateCreated')
-#     ordering = ('-dateCreated',)
 
-# admin.site.register(MOA, MOAAdmin)
+class MOAAdmin(admin.ModelAdmin):
+    list_display = (
+        'moaID', 'userID', 'status', 'dateCreated', 'uniqueCode'
+    )
+    search_fields = (
+        'userID__username', 'partyADescription', 'partyBDescription', 'uniqueCode'
+    )
+    list_filter = ('status', 'dateCreated')
+    ordering = ('-dateCreated',)
+
+admin.site.register(MOA, MOAAdmin)
