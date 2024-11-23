@@ -72,7 +72,8 @@ const ProponentsOther = () => {
             dateSubmitted: submissionDate,
             files: attachedFiles,
             description,
-            status: "Pending"
+            status: "Pending",
+            comments: ""
         };
 
         setSubmittedSubmissions(prevSubmissions => [...prevSubmissions, newSubmission]);
@@ -164,9 +165,13 @@ const ProponentsOther = () => {
                                                 </ul>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.description}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.status}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            {/* This part will only show "Remove" if status is not "Approved" */}
+                                                {submission.status}
+                                                {submission.status === "Declined" && submission.comments && (
+                                                    <p className="text-xs text-red-500 mt-1">{submission.comments}</p>  // Smaller font and below the status
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                                 {submission.status !== "Approved" && (
                                                     <button onClick={() => handleRemoveSubmission(submission.id)} className="text-red-500 hover:text-red-700">
                                                         Remove
@@ -176,6 +181,7 @@ const ProponentsOther = () => {
                                         </tr>
                                     ))}
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
