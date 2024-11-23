@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Topbar from "../../components/Topbar";
 import { useNavigate } from 'react-router-dom';
 import ProponentsSideBar from "../../components/ProponentsSideBar";
@@ -6,14 +6,51 @@ import { FaArrowLeft } from "react-icons/fa";
 
 const ProponentsOther = () => {
     const navigate = useNavigate();
-
     const today = new Date().toISOString().split('T')[0];
+
+    const [projectDetails, setProjectDetails] = useState({
+        title: "",
+        leader: "",
+        college: "",
+        targetDate: "",
+        partnerAgency: ""
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const [submittedSubmissions, setSubmittedSubmissions] = useState([]);
     const [attachedFiles, setAttachedFiles] = useState([]);
     const [trainerName, setTrainerName] = useState("");
     const [submissionDate, setSubmissionDate] = useState(today);
     const [description, setDescription] = useState("");
+
+    useEffect(() => {
+        const mockData = {
+            title: "Tesda Vocational",
+            leader: "Tabasan, Wynoah Louis",
+            college: "CEA",
+            targetDate: "May 2024",
+            partnerAgency: "Placeholder Inc."
+        };
+        setProjectDetails(mockData);
+        setLoading(false);
+
+        // const fetchProjectDetails = async () => {
+        //     setLoading(true);
+        //     try {
+        //         const response = await fetch('https://api.samting.com/projects/details');
+        //         if (!response.ok) throw new Error('Network response was not ok');
+        //         const data = await response.json();
+        //         setProjectDetails(data);
+        //     } catch (error) {
+        //         setError('Failed to fetch data: ' + error.message);
+        //     } finally {
+        //         setLoading(false);
+        //     }
+        // };
+
+        // fetchProjectDetails();
+    }, []);
 
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files).map(file => ({
@@ -44,6 +81,9 @@ const ProponentsOther = () => {
         setDescription("");
     };
 
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
+
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
@@ -66,25 +106,25 @@ const ProponentsOther = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Title</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Tesda Vocational</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.title}</p> {/* sample onliiiii */}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Leader</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Tabasan, Wynoah Louis</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.leader}</p>
                             </div>
                         </div>
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">College/Campus</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">CEA</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.college}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Target Date</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">May 2024</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.targetDate}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Partner Agency</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Placeholder Inc.</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.partnerAgency}</p>
                             </div>
                         </div>
                     </div>
