@@ -128,15 +128,22 @@ class ProjectCategory(models.Model):
     projectCategoryID = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
 
+class Campus(models.Model):
+    campusID = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+
 class College(models.Model):
     collegeID = models.AutoField(primary_key=True)
     abbreviation = models.CharField(max_length=15)
     title = models.CharField(max_length=100)
+    # collegeDean = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
+    campusID = models.ForeignKey(Campus, related_name='campus', on_delete=models.CASCADE)
 
 class Program(models.Model):
     programID = models.AutoField(primary_key=True)
     abbreviation = models.CharField(max_length=15)
     title = models.CharField(max_length=100)
+    # programChair = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
     collegeID = models.ForeignKey(College, related_name='program', on_delete=models.CASCADE)
 
 class Project(models.Model):

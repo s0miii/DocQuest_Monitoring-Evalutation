@@ -678,3 +678,8 @@ class GetMoaSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = MOA
         fields = ['moaUser', 'moaID', 'uniqueCode', 'dateCreated', 'status', 'projectTitles']
+
+class GetCampusSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Campus
+        fields = ['campusID', 'name']
