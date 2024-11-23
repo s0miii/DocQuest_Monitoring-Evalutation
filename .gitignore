@@ -9,6 +9,12 @@ __pycache__/
 .vscode
 .history/
 
+# directories
+attendance_records/
+modules/
+photo_documentations/
+staticfiles/
+
 ### front end
 
 # dependencies

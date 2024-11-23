@@ -24,7 +24,7 @@ Content-Type: application/json
 
 {
     "email": "kit@test.com",
-    "password": "testpass123"
+    "password": "testpass"
 }
 
 # Example token: de95d63d55190f47cf0ae40ea1c805752686f6a7
