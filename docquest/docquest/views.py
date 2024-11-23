@@ -1,6 +1,5 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
 from .serializers import *
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -20,13 +19,25 @@ User = get_user_model()
 def signup(request):
     serializer = UserSignupSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        user = User.objects.get(email=request.data['email'])
-        user.set_password(request.data['password'])
-        user.save()
+        try:
+            with transaction.atomic():
+                # Save user through serializer
+                user = serializer.save()
+                
+                # Set password separately as per existing view
+                user.set_password(request.data['password'])
+                user.save()
 
-        return Response({"message": "User created and role assigned",},
-                            status=status.HTTP_201_CREATED)
+                return Response(
+                    {"message": "User created and role assigned"},
+                    status=status.HTTP_201_CREATED
+                )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # inig login mag fetch user name and roles
@@ -880,12 +891,33 @@ def get_projectCategory(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def get_colleges(request):
+def get_campuses(request):
     # Query all regions
-    colleges = College.objects.all()
+    campus = Campus.objects.all()
 
     # Serialize the regions
-    college_serializer = CollegeSerializer(colleges, many=True)
+    campus_serializer = CampusSerializer(campus, many=True)
+
+    return Response(campus_serializer.data)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_colleges(request):
+    """
+    Fetch programs for multiple colleges.
+    Expects a POST request with a JSON body containing 'collegeIDs': [list of college IDs].
+    """
+    campus_ids = request.data.get('campusIDs', [])
+    
+    if not isinstance(campus_ids, list) or not all(isinstance(id, int) for id in campus_ids):
+        return Response(
+            {"detail": "Invalid input. 'campusIDs' should be a list of integers."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Retrieve programs for the given colleges
+    college = College.objects.filter(campusID__in=campus_ids)
+    college_serializer = CollegeSerializer(college, many=True)
 
     return Response(college_serializer.data)
 

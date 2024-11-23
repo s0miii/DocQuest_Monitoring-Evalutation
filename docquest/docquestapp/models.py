@@ -13,6 +13,9 @@ class Roles(models.Model):
     code = models.CharField(max_length=5)
     role = models.CharField(max_length=50, default='NO ROLE')
 
+    class Meta:
+        verbose_name_plural = "Roles"
+
     def __str__(self):
         return self.role
 
@@ -23,9 +26,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     firstname = models.CharField(max_length=50)
     middlename = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
-    campus = models.CharField(max_length=50, default="USTP-CDO")
-    college = models.CharField(max_length=50, default="NO COLLEGE")
-    department = models.CharField(max_length=50, default="NO DEPARTMENT")
     contactNumber = models.CharField(max_length=15, default="NO NUMBER")
     role = models.ManyToManyField(Roles, related_name='user')
 
@@ -39,8 +39,56 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
+    class Meta:
+        verbose_name_plural = "Users"
+
     def __str__(self):
         return self.email
+
+class Campus(models.Model):
+    campusID = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name_plural = "Campuses"
+
+class College(models.Model):
+    collegeID = models.AutoField(primary_key=True)
+    abbreviation = models.CharField(max_length=15)
+    title = models.CharField(max_length=100)
+    collegeDean = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
+    campusID = models.ForeignKey(Campus, related_name='campus', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = "Colleges"
+
+    def __str__(self):
+        return self.title
+
+class Program(models.Model):
+    programID = models.AutoField(primary_key=True)
+    abbreviation = models.CharField(max_length=15)
+    title = models.CharField(max_length=100)
+    programChair = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
+    collegeID = models.ForeignKey(College, related_name='program', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = "Programs"
+
+    def __str__(self):
+        return self.title
+
+class Faculty(models.Model):
+    facultyID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    collegeID = models.ForeignKey(College, on_delete=models.CASCADE)
+    programID = models.ForeignKey(Program, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        verbose_name_plural = "Faculties"
 
 class Region(models.Model):
     regionID = models.AutoField(primary_key=True)
@@ -57,6 +105,9 @@ class City(models.Model):
     postalCode = models.IntegerField()
     provinceID = models.ForeignKey(Province, related_name='city', on_delete=models.CASCADE)
 
+    class Meta:
+        verbose_name_plural = "Cities"
+
 class Barangay(models.Model):
     barangayID = models.AutoField(primary_key=True)
     barangay = models.CharField(max_length=50)
@@ -67,10 +118,16 @@ class Address(models.Model):
     street = models.CharField(max_length=150)
     barangayID = models.ForeignKey(Barangay, related_name='address', on_delete=models.CASCADE)
 
+    class Meta:
+        verbose_name_plural = "Addresses"
+
 class PartnerAgency(models.Model):
     agencyID = models.AutoField(primary_key=True)
     agencyName = models.CharField(max_length=100)
     addressID = models.ForeignKey(Address, related_name='partnerAgency', on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        verbose_name_plural = "Partner Agencies"
 
 class MOA(models.Model):
     STATUS_CHOICES = [
@@ -124,20 +181,15 @@ class ProgramCategory(models.Model):
     programCategoryID = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
 
+    class Meta:
+        verbose_name_plural = "Program Categories"
+
 class ProjectCategory(models.Model):
     projectCategoryID = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
 
-class College(models.Model):
-    collegeID = models.AutoField(primary_key=True)
-    abbreviation = models.CharField(max_length=15)
-    title = models.CharField(max_length=100)
-
-class Program(models.Model):
-    programID = models.AutoField(primary_key=True)
-    abbreviation = models.CharField(max_length=15)
-    title = models.CharField(max_length=100)
-    collegeID = models.ForeignKey(College, related_name='program', on_delete=models.CASCADE)
+    class Meta:
+        verbose_name_plural = "Project Categories"
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -187,6 +239,9 @@ class NonUserProponents(models.Model):
 class Deliverables(models.Model):
     deliverableID = models.AutoField(primary_key=True)
     deliverableName = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural = "Deliverables"
 
 class UserProjectDeliverables(models.Model):
     userID = models.ForeignKey(CustomUser, related_name='userProjectDeliverables', on_delete=models.CASCADE)
