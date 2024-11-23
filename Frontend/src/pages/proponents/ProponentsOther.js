@@ -71,7 +71,8 @@ const ProponentsOther = () => {
             trainerName,
             dateSubmitted: submissionDate,
             files: attachedFiles,
-            description
+            description,
+            status: "Pending"
         };
 
         setSubmittedSubmissions(prevSubmissions => [...prevSubmissions, newSubmission]);
@@ -79,6 +80,10 @@ const ProponentsOther = () => {
         setTrainerName("");
         setSubmissionDate("");
         setDescription("");
+    };
+
+    const handleRemoveSubmission = (id) => {
+        setSubmittedSubmissions(prevSubmissions => prevSubmissions.filter(submission => submission.id !== id));
     };
 
     if (loading) return <p>Loading...</p>;
@@ -140,6 +145,8 @@ const ProponentsOther = () => {
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Date Submitted</th>
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Files</th>
                                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Description</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -157,6 +164,15 @@ const ProponentsOther = () => {
                                                 </ul>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.description}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{submission.status}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            {/* This part will only show "Remove" if status is not "Approved" */}
+                                                {submission.status !== "Approved" && (
+                                                    <button onClick={() => handleRemoveSubmission(submission.id)} className="text-red-500 hover:text-red-700">
+                                                        Remove
+                                                    </button>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
