@@ -30,6 +30,7 @@ class ChecklistAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChecklistAssignment
         fields = '__all__'
+        
 
 class AccomplishmentReportSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(source='project.projectTitle', read_only=True)
