@@ -3,26 +3,83 @@ from docquestapp.models import *
 from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.fields.related import ForeignObjectRel
+from django.db import transaction
 
 # mga nagamit
 class UserSignupSerializer(serializers.ModelSerializer):
     role = serializers.PrimaryKeyRelatedField(many=True, queryset=Roles.objects.all())
-
-    class Meta(object):
+    campus = serializers.PrimaryKeyRelatedField(queryset=Campus.objects.all(), write_only=True, required=False)
+    college = serializers.PrimaryKeyRelatedField(queryset=College.objects.all(), write_only=True, required=False)
+    program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), write_only=True, required=False)
+    
+    class Meta:
         model = CustomUser
         fields = [
             'email', 'password', 'firstname', 'middlename', 'lastname',
-            'campus', 'college', 'department', 'contactNumber', 'role'
+            'campus', 'college', 'program', 'contactNumber', 'role'
         ]
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def create(self, validated_data):
+        # Extract non-user model fields
+        roles = validated_data.pop('role')
+        campus = validated_data.pop('campus', None)
+        college = validated_data.pop('college', None)
+        program = validated_data.pop('program', None)
+
+        # Use transaction to ensure data consistency
+        with transaction.atomic():
+            # Create the user without setting password (since view handles it)
+            password = validated_data.pop('password')  # Remove password from validated_data
+            user = CustomUser(**validated_data)
+            user.save()
+
+            # Add roles
+            user.role.set(roles)
+
+            # If college/program info is provided, create Faculty record
+            if any([college, program]):
+                Faculty.objects.create(
+                    userID=user,
+                    collegeID=college,
+                    programID=program
+                )
+
+        return user
+
+    def validate(self, data):
+        # Validate that if program is provided, college must also be provided
+        if 'program' in data and not 'college' in data:
+            raise serializers.ValidationError(
+                {"college": "College must be provided when program is specified"}
+            )
+
+        # Validate that the program belongs to the specified college
+        if 'program' in data and 'college' in data:
+            if data['program'].collegeID != data['college']:
+                raise serializers.ValidationError(
+                    {"program": "Program must belong to the specified college"}
+                )
+
+        # Validate that the college belongs to the specified campus
+        if 'college' in data and 'campus' in data:
+            if data['college'].campusID != data['campus']:
+                raise serializers.ValidationError(
+                    {"college": "College must belong to the specified campus"}
+                )
+
+        return data
 
 class UserEditProfileSerializer(serializers.ModelSerializer):
-    role = serializers.PrimaryKeyRelatedField(many=True, queryset=Roles.objects.all())
+    # role = serializers.PrimaryKeyRelatedField(many=True, queryset=Roles.objects.all())
 
     class Meta(object):
         model = CustomUser
         fields = [
             'email', 'password', 'firstname', 'middlename', 'lastname',
-            'campus', 'college', 'department', 'contactNumber', 'role'
+            'contactNumber'
         ]
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -420,6 +477,11 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
         model = ProjectCategory
         fields = ['projectCategoryID', 'title']
 
+class CampusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Campus
+        fields = ['campusID', 'name']
+
 class CollegeSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = College
@@ -678,3 +740,8 @@ class GetMoaSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = MOA
         fields = ['moaUser', 'moaID', 'uniqueCode', 'dateCreated', 'status', 'projectTitles']
+
+class GetCampusSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Campus
+        fields = ['campusID', 'name']
