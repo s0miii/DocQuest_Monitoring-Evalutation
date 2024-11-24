@@ -7,10 +7,12 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
+from django.http import HttpResponseForbidden, JsonResponse
 from docquestapp.models import Project, LoadingOfTrainers
 from .models import *
 from .forms import *
 from .serializers import *
+import secrets, json
 
 ## Form Views
 
@@ -175,30 +177,41 @@ class ProjectNarrativeViewSet(viewsets.ModelViewSet):
 
 # Evaluation ViewSet for Evaluation Forms
 class EvaluationViewSet(viewsets.ModelViewSet):
-    # queryset = Evaluation.objects.all()
+    queryset = Evaluation.objects.all()
     serializer_class = EvaluationSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Evaluation.objects.filter(project__status='approved')
 
     @action(detail=True, methods=['get'])
-    def generate_evaluation_url(self, request, pk=None):
-        trainer = get_object_or_404(LoadingOfTrainers, LOTID=pk)
-        project_id = request.query_params.get('project_id')
+    def generate_evaluation_url(self, request, trainer_id, project_id):
+        trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id)
+        project_id = get_object_or_404(Project, projectID=project_id)
 
         if not project_id:
             return Response({"error": "Project ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         project = get_object_or_404(Project, id=project_id)
 
-        evaluation_url = f"{request.build_absolute_uri('/')[:-1]}/evaluation/{trainer.LOTID}/{project.id}/"
+        evaluation, created = Evaluation.objects.get_or_create(
+            trainer=trainer, project=project,
+            defaults={"access_token": secrets.token_urlsafe(16)}
+        )
+
+        evaluation_url = (
+            f"{request.build_absolute_uri('/')[:-1]}"
+            f"/evaluation/{trainer.LOTID}/{project.id}/"
+            f"?access_token={evaluation.access_token}"
+        )    
         return Response({"evaluation_url": evaluation_url}, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
-
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            evaluation = serializer.save()
+            evaluation.access_token = secrets.token_urlsafe(16)
+            evaluation.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -206,6 +219,11 @@ class EvaluationViewSet(viewsets.ModelViewSet):
 def evaluation_form_view(request, project_id, trainer_id=None):
     project = get_object_or_404(Project, projectID=project_id)
     trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id) if trainer_id else None #Set trainer to None if not provided for project-only evaluations
+
+    access_token = request.GET.get("access_token")
+    evaluation = get_object_or_404(Evaluation, project=project, trainer=trainer)
+    if access_token != evaluation.access_token:
+        return HttpResponseForbidden("Invalid or missing access token.")
 
     if request.method == 'POST':
         form = EvaluationForm(request.POST)
@@ -221,7 +239,6 @@ def evaluation_form_view(request, project_id, trainer_id=None):
     else:
         form = EvaluationForm()
 
-    # Render the form with the necessary context
     return render(request, 'evaluation_form.html', {'form': form, 'trainer': trainer, 'project': project})    
 
 def evaluation_summary_view(request):
@@ -249,3 +266,58 @@ def evaluation_summary_view(request):
     context = {'project_summaries': project_summaries}
     return render(request, 'evaluation_summary.html', context)            
 
+
+# Attendance 
+class AttendanceTemplateViewSet(viewsets.ModelViewSet):
+    queryset = AttendanceTemplate.objects.all()
+    serializer_class = AttendanceTemplateSerializer
+
+    def perform_create(self, serializer):
+        # Link the template to the current user/project if needed
+        serializer.save()
+
+def create_attendance_template(request):
+    if request.method == 'POST':
+        project_id = request.POST['project']
+        name = request.POST['name']
+        field_names = request.POST.getlist('field_names')
+        field_types = request.POST.getlist('field_types')
+
+        # fields = {name: field_type for name, field_type in zip(field_names, field_types)}
+        if not project_id:
+            return JsonResponse({'error': 'Project is required.'}, status=400)
+        try:
+            project = Project.objects.get(projectID=project_id)
+        except (ValueError, Project.DoesNotExist):
+            return JsonResponse({'message': 'Template created successfully!'}, status=201)
+        fields = {name: field_type for name, field_type in zip(field_names, field_types)}
+        
+        AttendanceTemplate.objects.create(project=project, name=name, fields=fields)
+        return JsonResponse({'message': 'Template created successfully!'}, status=201)
+
+    projects = Project.objects.all()  # Pass projects to template
+    return render(request, 'attendance_template_form.html', {'projects': projects})
+
+class AttendanceRecordViewSet(viewsets.ModelViewSet):
+    queryset = AttendanceRecord.objects.all()
+    serializer_class = AttendanceRecordSerializer
+
+    def perform_create(self, serializer):
+        # Save attendance record dynamically
+        serializer.save()
+
+def submit_attendance_record(request):
+    if request.method == 'POST':
+        template_id = request.POST['template']
+        data = request.POST['data']
+
+        try:
+            data_json = json.loads(data)  # Validate JSON format
+            template = AttendanceTemplate.objects.get(id=template_id)
+            AttendanceRecord.objects.create(template=template, data=data_json)
+            return JsonResponse({'message': 'Record submitted successfully!'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+
+    templates = AttendanceTemplate.objects.all()  # Pass templates to template
+    return render(request, 'attendance_record_form.html', {'templates': templates})

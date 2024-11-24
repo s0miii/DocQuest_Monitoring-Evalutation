@@ -4,6 +4,7 @@ from docquestapp.models import Project, CustomUser, LoadingOfTrainers
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+import secrets
 
 ### Checklist Items
 
@@ -216,8 +217,7 @@ class Evaluation(models.Model):
     stored_overall_rating = models.IntegerField(null=True, blank=True, verbose_name="Overall Rating")
     submitted_at = models.DateTimeField(default=timezone.now, verbose_name="Date Submitted")
     evaluation_number = models.IntegerField(null=True, blank=True, verbose_name="No.")
-
-
+    access_token = models.CharField(max_length=255, unique=True, blank=True, null=True)
      
     def calculate_overall_rating(self):
         ratings = [
@@ -238,7 +238,6 @@ class Evaluation(models.Model):
             self.overall_management
         ]
         
-        # Filter out None values and calculate the average
         total_ratings = [r for r in ratings if r is not None]
         average_rating = sum(total_ratings) / len(total_ratings) if total_ratings else 0 
         return round(average_rating)
@@ -246,6 +245,9 @@ class Evaluation(models.Model):
     def save(self, *args, **kwargs):
         if self.project.status != 'approved':
             raise ValueError(f"Evaluations can only be created for approved projects.")
+
+        if not self.access_token:
+            self.access_token = secrets.token_urlsafe(16)
 
         self.stored_overall_rating = self.calculate_overall_rating()
 
@@ -262,7 +264,7 @@ class Evaluation(models.Model):
         super().save(*args, **kwargs)
    
     def get_absolute_url(self):
-        return reverse('evaluation_form', args=[str(self.id)])
+        return reverse('evaluation_form', args=[str(self.trainer.id), str(self.project.id)]) + f"?access_token={self.access_token}"
 
     def __str__(self):
         return f"Evaluation for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"
@@ -273,6 +275,21 @@ class Evaluation(models.Model):
         evaluations = Evaluation.objects.filter(project_id=project_id)
         return evaluations.aggregate(average_rating=Avg('stored_overall_rating'))['average_rating'] or 0
     
+# Attendance Template and Attendance Record Model
+class AttendanceTemplate(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attendance_templates")
+    name = models.CharField(max_length=255, default="Attendance Template")
+    fields = models.JSONField(help_text="Define the fields for the attendance dynamically")
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.name} for {self.project.projectTitle}"
 
+class AttendanceRecord(models.Model):
+    template = models.ForeignKey(AttendanceTemplate, on_delete=models.CASCADE, related_name="attendance_records")
+    data = models.JSONField(help_text="Dynamic data filled by attendees")
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Record for {self.template.name} submitted at {self.submitted_at}"
 

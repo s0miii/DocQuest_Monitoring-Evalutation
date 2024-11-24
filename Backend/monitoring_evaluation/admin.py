@@ -57,7 +57,6 @@ class ChecklistAssignmentAdmin(admin.ModelAdmin):
     search_fields = ('project__title', 'proponent__username')
     list_filter = ('is_completed',)
 
-# Register Evaluation model
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
     list_display = ('trainer', 'project', 'attendee_name', 'stored_overall_rating', 'submitted_at', 'evaluation_link')
@@ -147,55 +146,20 @@ class ProjectNarrativeAdmin(admin.ModelAdmin):
     search_fields = ('project__projectTitle', 'phase_description')
     ordering = ('-project__dateCreated',)
 
-@admin.register(AccomplishmentReport)
-class AccomplishmentReportAdmin(admin.ModelAdmin):
-    list_display = (
-        'id', 
-        'project', 
-        'banner_program_title', 
-        'flagship_program', 
-        'training_modality', 
-        'actual_implementation_date', 
-        'total_number_of_days', 
-        'submitted_by', 
-        'project_title', 
-        'project_type', 
-        'project_category', 
-        'research_title', 
-        'proponents', 
-        'program', 
-        'accreditation_level', 
-        'college', 
-        'target_groups_beneficiaries', 
-        'project_location', 
-        'partner_agency',
-    )
-    search_fields = (
-        'banner_program_title', 
-        'flagship_program', 
-        'training_modality', 
-        'project__projectTitle', 
-        'submitted_by__email',
-    )
-    list_filter = (
-        'training_modality', 
-        'actual_implementation_date', 
-        'project__status',
-    )
-    ordering = ('-actual_implementation_date',)
 
-@admin.register(ProjectNarrative)
-class ProjectNarrativeAdmin(admin.ModelAdmin):
-    list_display = (
-        'id', 
-        'project', 
-        'phase_description', 
-        'activities_topics', 
-        'issues_challenges', 
-        'participant_engagement_quality', 
-        'discussion_comments', 
-        'ways_forward_plans',
-    )
-    search_fields = ('project__projectTitle', 'phase_description')
-    ordering = ('-project__dateCreated',)
+@admin.register(AttendanceTemplate)
+class AttendanceTemplateAdmin(admin.ModelAdmin):
+    list_display = ('project', 'name', 'created_at')
+    search_fields = ('project__projectTitle', 'name')
+    list_filter = ('created_at',)
 
+@admin.register(AttendanceRecord)
+class AttendanceRecordAdmin(admin.ModelAdmin):
+    list_display = ('template', 'submitted_at', 'data_preview')
+    search_fields = ('template__name',)
+    list_filter = ('submitted_at',)
+
+    def data_preview(self, obj):
+        # Display a short preview of the data JSON for quick reference
+        return format_html('<pre>{}</pre>', obj.data)
+    data_preview.short_description = 'Preview of Attendance Data'

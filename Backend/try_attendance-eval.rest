@@ -1,0 +1,151 @@
+###
+# Create an Evaluation
+POST http://127.0.0.1:8000/evaluation/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "trainer": 1,
+    "project": 1,
+    "attendee_name": "John Doe",
+    "relevance_of_topics": 5,
+    "organizational_flow": 5,
+    "learning_methods": 4,
+    "technology_use": 5,
+    "time_efficiency": 4,
+    "mastery_subject": 5,
+    "preparedness": 5,
+    "audience_participation": 5,
+    "interest_level": 5,
+    "handle_questions": 4,
+    "voice_personality": 4,
+    "visual_aids": 5,
+    "venue_assessment": 5,
+    "timeliness": 5,
+    "overall_management": 5
+}
+
+###
+
+# Generate Evaluation URL
+GET http://127.0.0.1:8000/monitoring/evaluation/1/generate_evaluation_url/?project_id=1
+#GET http://127.0.0.1:8000/evaluation/<trainer_id>/generate_evaluation_url/?project_id=<project_id>
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+
+# Modified generate Evaluation URL
+GET http://127.0.0.1:8000/127.0.0.1:8000/evaluations/generate/1/1/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+
+# Submit Evaluation Using Form
+POST http://127.0.0.1:8000/evaluation/submit/
+Content-Type: application/json
+
+{
+    "project_id": 1,
+    "trainer_id": 1,
+    "access_token": "<access-token>",
+    "relevance_of_topics": 5,
+    "organizational_flow": 4,
+    "learning_methods": 4,
+    "technology_use": 5,
+    "time_efficiency": 5,
+    "mastery_subject": 4,
+    "preparedness": 4,
+    "audience_participation": 5,
+    "interest_level": 5,
+    "handle_questions": 4,
+    "voice_personality": 4,
+    "visual_aids": 5,
+    "venue_assessment": 5,
+    "timeliness": 4,
+    "overall_management": 5,
+    "useful_concepts": "Effective training methods.",
+    "improvement_areas": "None",
+    "additional_comments": "Great session!"
+}
+
+###
+
+# Get Evaluation Details for a Trainer
+GET http://127.0.0.1:8000/evaluation/1/
+Content-Type: application/json
+Authorization: Token <auth-token>
+
+###
+
+# Get All Evaluations for a Project
+GET http://127.0.0.1:8000/evaluation/project/1/
+Content-Type: application/json
+Authorization: Token <auth-token>
+
+###
+
+# Get Average Rating for a Project
+GET http://127.0.0.1:8000/evaluation/project/1/average-rating/
+Content-Type: application/json
+Authorization: Token <auth-token>
+
+###
+
+# View Evaluation Summary
+GET http://127.0.0.1:8000/evaluation/summary/
+Content-Type: application/json
+Authorization: Token <auth-token>
+
+# -------------------------------------------------------
+
+###
+# Create Attendance Template - working endpoint
+POST http://127.0.0.1:8000/monitoring/attendance_templates/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "project": 2,
+    "name": "Trial Template for Project 2",
+    "fields": {
+        "Name": "text",
+        "Contact Number": "number",
+        "Gender": "text",
+        "College": "text",
+        "Year & Section": "text"
+
+    }
+}
+
+###
+# Retrieve All Attendance Template - working endpoint
+GET http://127.0.0.1:8000/monitoring/attendance_templates/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+# Retrieve Specific Attendance Template - working endpoint
+GET http://127.0.0.1:8000/monitoring/attendance_templates/1/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+# Update an Attendance Template - working endpoint
+PUT http://127.0.0.1:8000/monitoring/attendance_templates/2/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "project": 1,
+    "name": "Updated Template Name",
+    "fields": {
+        "Name": "text",
+        "Email": "text"
+    }
+}
+
+
+###
+# Delete an Attendance Template - working endpoint
+DELETE http://127.0.0.1:8000/monitoring/attendance_templates/2/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
