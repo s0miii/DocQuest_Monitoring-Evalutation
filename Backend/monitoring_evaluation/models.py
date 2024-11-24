@@ -8,45 +8,81 @@ from django.contrib.auth import get_user_model
 
 # Daily Attendance Record
 class DailyAttendanceRecord(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="daily_attendance_records")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="daily_attendance_submissions", null=True)
     attendance_file = models.FileField(upload_to="attendance_records/", null=True, blank=True)
     total_attendees = models.PositiveIntegerField(null=True, blank=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
+    
 
     def __str__(self):
         return f"Attendance Record for {self.project.projectTitle} by {self.proponent.firstname} + {self.proponent.lastname} on {self.date_uploaded.date()}"
 
 # Evaluation Summary
 class SummaryOfEvaluation(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluation_summaries")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="evaluation_submissions", null=True)
     summary_file = models.FileField(upload_to="evaluation_summaries/", null=True, blank=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
 
 # Modules/Lecture Notes
 class ModulesLectureNotes(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="lecture_notes")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="lecture_notes_submissions", null=True)
     module_file = models.FileField(upload_to="modules/", null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
 
 # Photo Documentation
 class PhotoDocumentation(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="photo_documentations")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="photo_documentations", null=True)
     photo = models.ImageField(upload_to="photo_documentations/", null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
 
 # Other FIles
 class OtherFiles(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="other_files")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="other_files_submissions", null=True)
     file = models.FileField(upload_to="other_files/", null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
 
 ## Assign Checklist Item
 CustomUser = get_user_model()

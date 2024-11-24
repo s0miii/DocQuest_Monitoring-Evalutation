@@ -23,7 +23,7 @@ POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
 {
-    "email": "kit@test.com",
+    "email": "wyn@test.com",
     "password": "testpass"
 }
 
