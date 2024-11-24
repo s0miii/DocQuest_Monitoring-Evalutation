@@ -80,3 +80,13 @@ class EvaluationForm(forms.ModelForm):
             'timeliness': forms.RadioSelect(choices=[(i, i) for i in range(6)]),
             'overall_management': forms.RadioSelect(choices=[(i, i) for i in range(6)]),
         }
+
+class AttendanceTemplateForm(forms.ModelForm):
+    class Meta:
+        model = AttendanceTemplate
+        fields = ['project', 'name', 'fields']
+
+class AttendanceRecordForm(forms.ModelForm):
+    class Meta:
+        model = AttendanceRecord
+        fields = ['template', 'data']

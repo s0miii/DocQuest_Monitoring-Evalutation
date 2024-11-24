@@ -118,11 +118,10 @@ admin.site.register(Deliverables, DeliverablesAdmin)
 # For testing
 class ProjectAdmin(admin.ModelAdmin):
     list_display = (
-        'projectID', 'projectTitle', 'userID', 'college',  'programCategory', 'program', 
-        'projectType', 'projectCategory', 'status', 'dateCreated'
+        'projectID', 'projectTitle', 'userID', 'projectType', 'status', 'dateCreated'
     )
-    search_fields = ('projectTitle', 'programCategory', 'projectType', 'researchTitle', 'college', 'program', 'status')
-    list_filter = ('status', 'programCategory', 'projectType', 'college')
+    search_fields = ('projectTitle', 'researchTitle', 'status')
+    list_filter = ('status', 'projectType')
     ordering = ('-dateCreated',)
     filter_horizontal = ('agency', 'proponents',)
 

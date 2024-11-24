@@ -4,14 +4,14 @@ POST http://127.0.0.1:8000/signup/
 Content-Type: application/json
 
 {
-    "email": "wyn@test.com",
+    "email": "eval@test.com",
     "password": "testpass123",
-    "firstname": "wyn",
-    "middlename": "Cah",
-    "lastname": "lowes",
+    "firstname": "Test",
+    "middlename": "The",
+    "lastname": "Eval",
     "campus": "USTP-CDO",
     "college": "College of Information Technology",
-    "department": "Department of TCM",
+    "department": "Department of Data Science",
     "contactNumber": "09123456789",
     "role": [1]
 }
@@ -23,11 +23,12 @@ POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
 {
-    "email": "kit@test.com",
+    "email": "eval@test.com",
     "password": "testpass123"
 }
 
 # Example token: de95d63d55190f47cf0ae40ea1c805752686f6a7
+# c0a3791e899dca9d87c514da017b7ec7bfac9395
 
 ###
 
