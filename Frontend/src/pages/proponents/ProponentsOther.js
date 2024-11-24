@@ -251,7 +251,7 @@ const ProponentsOther = () => {
                             <button
                                 onClick={handleSubmit}
                                 type="button"
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded-lg transition-colors"
+                                className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-12 rounded-lg transition-colors"
                             >
                                 Submit
                             </button>
