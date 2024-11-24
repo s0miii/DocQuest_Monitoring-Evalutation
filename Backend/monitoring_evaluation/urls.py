@@ -32,10 +32,13 @@ urlpatterns = [
     path('upload/photo/<int:project_id>/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
     path('upload/other_files/<int:project_id>/', OtherFilesUploadView.as_view(), name='other_files_upload'),
     # view submissions
-    path('project/<int:project_id>/checklist_submissions/', ChecklistSubmissionsView.as_view(), name='checklist_submissions'),
+    path("project/<int:project_id>/checklist_submissions/", ChecklistSubmissionsView.as_view(), name="view_checklist_submissions"),
     # assign checklist item
     path('assign/checklist_items/', AssignChecklistItemsView.as_view(), name='assign_checklist_items'),
-    
+    #submission status for project leader
+    path("submission/update/<str:model_name>/<int:submission_id>/", UpdateSubmissionStatusView.as_view(), name="update_submission_status"),
+    # submission status for proponent
+    path("submissions/", ProponentSubmissionsView.as_view(), name="proponent_submissions"),
 
     
     # Accomplishment Report

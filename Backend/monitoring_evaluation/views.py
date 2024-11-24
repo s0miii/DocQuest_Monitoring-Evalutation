@@ -176,63 +176,64 @@ class ChecklistSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, project_id):
-        try:
-            project = Project.objects.get(projectID=project_id, status="approved")
-            
-            daily_attendance_records = DailyAttendanceRecord.objects.filter(project=project)
-            summary_of_evaluations = SummaryOfEvaluation.objects.filter(project=project)
-            modules_lecture_notes = ModulesLectureNotes.objects.filter(project=project)
-            photo_documentations = PhotoDocumentation.objects.filter(project=project)
-            other_files = OtherFiles.objects.filter(project=project)
+        submissions = []
 
-            results = {
-                "daily_attendance_records": [
-                    {
-                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
-                        "attendance_file": record.attendance_file.url,
-                        "total_attendees": record.total_attendees,
-                        "date_uploaded": record.date_uploaded
-                    } for record in daily_attendance_records
-                ],
-                "summary_of_evaluations": [
-                    {
-                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
-                        "summary_file": record.summary_file.url,
-                        "date_uploaded": record.date_uploaded
-                    } for record in summary_of_evaluations
-                ],
-                "modules_lecture_notes": [
-                    {
-                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
-                        "module_file": record.module_file.url,
-                        "description": record.description,
-                        "date_uploaded": record.date_uploaded
-                    } for record in modules_lecture_notes
-                ],
-                "photo_documentations": [
-                    {
-                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
-                        "photo": record.photo.url,
-                        "description": record.description,
-                        "date_uploaded": record.date_uploaded
-                    } for record in photo_documentations
-                ],
-                "other_files": [
-                    {
-                        "proponent": f"{record.proponent.firstname} {record.proponent.lastname}",
-                        "file": record.file.url,
-                        "description": record.description,
-                        "date_uploaded": record.date_uploaded
-                    } for record in other_files
-                ]
-            }
+        # Fetch daily attendance records
+        daily_attendance = DailyAttendanceRecord.objects.filter(project__projectID=project_id)
+        for record in daily_attendance:
+            submissions.append({
+                "submission_id": record.id,
+                "submission_type": "Daily Attendance",
+                "status": record.status,
+                "rejection_reason": record.rejection_reason,
+                "date_uploaded": record.date_uploaded,
+            })
 
-            return Response(results, status=status.HTTP_200_OK)
+        # Fetch summary of evaluations
+        evaluations = SummaryOfEvaluation.objects.filter(project__projectID=project_id)
+        for evaluation in evaluations:
+            submissions.append({
+                "submission_id": evaluation.id,
+                "submission_type": "Summary of Evaluations",
+                "status": evaluation.status,
+                "rejection_reason": evaluation.rejection_reason,
+                "date_uploaded": evaluation.date_uploaded,
+            })
 
-        except Project.DoesNotExist:
-            return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        # Fetch modules/lecture notes
+        modules = ModulesLectureNotes.objects.filter(project__projectID=project_id)
+        for module in modules:
+            submissions.append({
+                "submission_id": module.id,
+                "submission_type": "Modules/Lecture Notes",
+                "status": module.status,
+                "rejection_reason": module.rejection_reason,
+                "date_uploaded": module.date_uploaded,
+            })
+
+        # Fetch photo documentation
+        photos = PhotoDocumentation.objects.filter(project__projectID=project_id)
+        for photo in photos:
+            submissions.append({
+                "submission_id": photo.id,
+                "submission_type": "Photo Documentation",
+                "status": photo.status,
+                "rejection_reason": photo.rejection_reason,
+                "date_uploaded": photo.date_uploaded,
+            })
+
+        # Fetch other files
+        other_files = OtherFiles.objects.filter(project__projectID=project_id)
+        for file in other_files:
+            submissions.append({
+                "submission_id": file.id,
+                "submission_type": "Other Files",
+                "status": file.status,
+                "rejection_reason": file.rejection_reason,
+                "date_uploaded": file.date_uploaded,
+            })
+
+        return Response(submissions, status=200)
 
     
 # assign checklist
@@ -314,6 +315,75 @@ class ChecklistItemSubmissionView(APIView):
             return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+# Update file submission status
+MODEL_MAP = {
+    "daily_attendance": DailyAttendanceRecord,
+    "summary_of_evaluation": SummaryOfEvaluation,
+    "modules_lecture_notes": ModulesLectureNotes,
+    "photo_documentation": PhotoDocumentation,
+    "other_files": OtherFiles,
+}
+
+class UpdateSubmissionStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, model_name, submission_id):
+        if model_name not in MODEL_MAP:
+            return Response({"error": "Invalid model name."}, status=status.HTTP_400_BAD_REQUEST)
+
+        Model = MODEL_MAP[model_name]
+
+        try:
+            submission = Model.objects.get(id=submission_id)
+            status_value = request.data.get("status")
+            rejection_reason = request.data.get("rejection_reason", "")
+
+            if status_value not in ["Pending", "Approved", "Rejected"]:
+                return Response({"error": "Invalid status value."}, status=status.HTTP_400_BAD_REQUEST)
+
+            submission.status = status_value
+            if status_value == "Rejected":
+                submission.rejection_reason = rejection_reason
+            else:
+                submission.rejection_reason = None
+            submission.save()
+
+            return Response({"message": "Submission status updated successfully."}, status=status.HTTP_200_OK)
+
+        except Model.DoesNotExist:
+            return Response({"error": "Submission not found."}, status=status.HTTP_404_NOT_FOUND)
+
+# proponent view, display the status and rejection reason
+class ProponentSubmissionsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user  # Get the currently authenticated user
+        submissions = {
+            "daily_attendance": DailyAttendanceRecord.objects.filter(proponent=user),
+            "summary_of_evaluation": SummaryOfEvaluation.objects.filter(proponent=user),
+            "modules_lecture_notes": ModulesLectureNotes.objects.filter(proponent=user),
+            "photo_documentations": PhotoDocumentation.objects.filter(proponent=user),
+            "other_files": OtherFiles.objects.filter(proponent=user),
+        }
+
+        result = {
+            model: [
+                {
+                    "id": submission.id,
+                    "project": submission.project.projectTitle,
+                    "status": submission.status,
+                    "rejection_reason": submission.rejection_reason,
+                    "date_uploaded": submission.date_uploaded,
+                }
+                for submission in queryset
+            ]
+            for model, queryset in submissions.items()
+        }
+
+        return Response(result, status=status.HTTP_200_OK)
+
 
 class AccomplishmentReportCreateView(LoginRequiredMixin, CreateView):
     model = AccomplishmentReport
