@@ -5,13 +5,13 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Copy the application files to the container
-COPY ./Backend /app  # Use "." if your backend is in the root
+COPY ./Backend /app  
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y gcc libpq-dev
 
 # Install Python dependencies
-COPY ./Backend/requirements.txt /app/requirements.txt  # Adjust path if needed
+COPY ./Backend/requirements.txt /app/requirements.txt  
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Collect static files (if you use Whitenoise or similar)
