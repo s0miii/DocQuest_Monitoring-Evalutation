@@ -9,47 +9,52 @@ const ProponentsTrainerCVDTR = () => {
     const today = new Date().toISOString().split('T')[0];
 
     const [projectDetails, setProjectDetails] = useState({
-        title: "",
-        leader: "",
-        college: "",
-        targetDate: "",
-        partnerAgency: ""
+        title: "Tesda Vocational",
+        leader: "Tabasan, Wynoah Louis",
+        college: "CEA",
+        targetDate: "May 2024",
+        partnerAgency: "Placeholder Inc."
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    const [submittedSubmissions, setSubmittedSubmissions] = useState([]);
+    const [submittedSubmissions, setSubmittedSubmissions] = useState([
+        {
+            id: 1,
+            trainerName: "Proponent A",
+            dateSubmitted: "2024-10-10",
+            files: ["DTR.pdf"],
+            status: "Pending",
+            comments: ""
+        },
+        {
+            id: 2,
+            trainerName: "Proponent B",
+            dateSubmitted: "2024-10-12",
+            files: ["DTR2.pdf"],
+            status: "Pending",
+            comments: ""
+        }
+    ]);
     const [attachedFiles, setAttachedFiles] = useState([]);
     const [trainerName, setTrainerName] = useState("");
     const [submissionDate, setSubmissionDate] = useState(today);
 
     useEffect(() => {
-        const mockData = {
-            title: "Tesda Vocational",
-            leader: "Tabasan, Wynoah Louis",
-            college: "CEA",
-            targetDate: "May 2024",
-            partnerAgency: "Placeholder Inc."
-        };
-        setProjectDetails(mockData);
-        setLoading(false);
-
-        // const fetchProjectDetails = async () => {
-        //     setLoading(true);
-        //     try {
-        //         const response = await fetch('https://api.samting.com/projects/details');
-        //         if (!response.ok) throw new Error('Network response was not ok');
-        //         const data = await response.json();
-        //         setProjectDetails(data);
-        //     } catch (error) {
-        //         setError('Failed to fetch data: ' + error.message);
-        //     } finally {
-        //         setLoading(false);
-        //     }
-        // };
-
-        // fetchProjectDetails();
+        fetchProjectDetails();
     }, []);
+
+    const fetchProjectDetails = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('https://api.yourdomain.com/projects/details');
+            const data = await response.json();
+            setProjectDetails(data);
+        } catch (error) {
+            setError('Failed to fetch data: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files).map(file => ({
@@ -59,7 +64,7 @@ const ProponentsTrainerCVDTR = () => {
         setAttachedFiles(files); 
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!trainerName || !submissionDate || attachedFiles.length === 0 ) {
             alert("Please complete all fields and attach at least one file.");
             return;
@@ -74,18 +79,39 @@ const ProponentsTrainerCVDTR = () => {
             comments: ""
         };
 
-        setSubmittedSubmissions(prevSubmissions => [...prevSubmissions, newSubmission]);
-        setAttachedFiles([]);
-        setTrainerName("");
-        setSubmissionDate("");
+        try {
+            const response = await fetch('https://api.yourdomain.com/submissions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newSubmission)
+            });
+            if (!response.ok) throw new Error('Failed to submit');
+            const result = await response.json();
+            setSubmittedSubmissions(prev => [...prev, { ...newSubmission, id: result.id, status: 'Pending' }]);
+            setTrainerName('');
+            setSubmissionDate(today);
+            setAttachedFiles([]);
+        } catch (error) {
+            alert('Error submitting form: ' + error.message);
+        }
     };
 
-    const handleRemoveSubmission = (id) => {
-        setSubmittedSubmissions(prevSubmissions => prevSubmissions.filter(submission => submission.id !== id));
+    const handleRemoveSubmission = async (id) => {
+        try {
+            const response = await fetch(`https://api.yourdomain.com/submissions/${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) throw new Error('Failed to delete');
+            setSubmittedSubmissions(prev => prev.filter(submission => submission.id !== id));
+        } catch (error) {
+            alert('Error deleting submission: ' + error.message);
+        }
     };
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
+    // if (loading) return <p>Loading...</p>;
+    // if (error) return <p>Error: {error}</p>;
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -155,7 +181,7 @@ const ProponentsTrainerCVDTR = () => {
                                                 <ul>
                                                     {submission.files.map((file, index) => (
                                                         <li key={index}>
-                                                            <a href={file.url} target="_blank" rel="noopener noreferrer">{file.name}</a>
+                                                            <a href={'#'} target="_blank" rel="noopener noreferrer">{file}</a>
                                                         </li>
                                                     ))}
                                                 </ul>
