@@ -483,9 +483,11 @@ class CampusSerializer(serializers.ModelSerializer):
         fields = ['campusID', 'name']
 
 class CollegeSerializer(serializers.ModelSerializer):
+    campus = CampusSerializer(source='campusID', read_only=True)
+
     class Meta(object):
         model = College
-        fields = ['collegeID', 'abbreviation', 'title']
+        fields = ['collegeID', 'abbreviation', 'title', 'campus']
 
 class ProgramSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(source='collegeID', read_only=True)
