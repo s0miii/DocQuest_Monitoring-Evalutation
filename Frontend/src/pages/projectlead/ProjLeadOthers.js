@@ -17,7 +17,26 @@ const ProjLeadOthers = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const [submittedSubmissions, setSubmittedSubmissions] = useState([]);
+    const [submittedSubmissions, setSubmittedSubmissions] = useState([
+        {
+            id: 1,
+            submittedBy: "Proponent A",
+            dateSubmitted: "2024-10-10",
+            files: ["TrainingManual.pdf", "WorkshopOutline.docx"],
+            description: "Initial training documents for review.",
+            status: "Pending",
+            comments: ""
+        },
+        {
+            id: 2,
+            submittedBy: "Proponent B",
+            dateSubmitted: "2024-10-12",
+            files: ["Certificate.png"],
+            description: "Certificate from the Partner Agency",
+            status: "Pending",
+            comments: ""
+        }
+    ]);
     const [declineComment, setDeclineComment] = useState({});
     const [showCommentInput, setShowCommentInput] = useState({});
 
