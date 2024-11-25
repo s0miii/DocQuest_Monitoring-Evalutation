@@ -1,66 +1,73 @@
-import React, { useState, useEffect } from "react";
-import Topbar from "../../components/Topbar";
+import React, { useState, useEffect } from 'react';
+import Topbar from '../../components/Topbar';
 import { useNavigate } from 'react-router-dom';
-import ProponentsSideBar from "../../components/ProponentsSideBar";
-import { FaArrowLeft } from "react-icons/fa";
+import ProponentsSideBar from '../../components/ProponentsSideBar';
+import { FaArrowLeft } from 'react-icons/fa';
 
 const ProponentsOther = () => {
     const navigate = useNavigate();
     const today = new Date().toISOString().split('T')[0];
 
     const [projectDetails, setProjectDetails] = useState({
-        title: "",
-        leader: "",
-        college: "",
-        targetDate: "",
-        partnerAgency: ""
+        title: "Tesda Vocational",
+        leader: "Tabasan, Wynoah Louis",
+        college: "CEA",
+        targetDate: "May 2024",
+        partnerAgency: "Placeholder Inc."
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    const [submittedSubmissions, setSubmittedSubmissions] = useState([]);
+    const [submittedSubmissions, setSubmittedSubmissions] = useState([
+        {
+            id: 1,
+            trainerName: "Proponent A",
+            dateSubmitted: "2024-10-10",
+            files: ["TrainingManual.pdf", "WorkshopOutline.docx"],
+            description: "Initial training documents for review.",
+            status: "Pending",
+            comments: ""
+        },
+        {
+            id: 2,
+            trainerName: "Proponent B",
+            dateSubmitted: "2024-10-12",
+            files: ["Certificate.png"],
+            description: "Certificate from the Partner Agency",
+            status: "Pending",
+            comments: ""
+        }
+    ]);
     const [attachedFiles, setAttachedFiles] = useState([]);
     const [trainerName, setTrainerName] = useState("");
     const [submissionDate, setSubmissionDate] = useState(today);
     const [description, setDescription] = useState("");
 
     useEffect(() => {
-        const mockData = {
-            title: "Tesda Vocational",
-            leader: "Tabasan, Wynoah Louis",
-            college: "CEA",
-            targetDate: "May 2024",
-            partnerAgency: "Placeholder Inc."
-        };
-        setProjectDetails(mockData);
-        setLoading(false);
-
-        // const fetchProjectDetails = async () => {
-        //     setLoading(true);
-        //     try {
-        //         const response = await fetch('https://api.samting.com/projects/details');
-        //         if (!response.ok) throw new Error('Network response was not ok');
-        //         const data = await response.json();
-        //         setProjectDetails(data);
-        //     } catch (error) {
-        //         setError('Failed to fetch data: ' + error.message);
-        //     } finally {
-        //         setLoading(false);
-        //     }
-        // };
-
-        // fetchProjectDetails();
+        fetchProjectDetails();
     }, []);
+
+    const fetchProjectDetails = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('https://api.yourdomain.com/projects/details');
+            const data = await response.json();
+            setProjectDetails(data);
+        } catch (error) {
+            setError('Failed to fetch data: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files).map(file => ({
             name: file.name,
             url: URL.createObjectURL(file)
         }));
-        setAttachedFiles(files); 
+        setAttachedFiles(files);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!trainerName || !submissionDate || attachedFiles.length === 0 || !description) {
             alert("Please complete all fields and attach at least one file.");
             return;
@@ -76,19 +83,40 @@ const ProponentsOther = () => {
             comments: ""
         };
 
-        setSubmittedSubmissions(prevSubmissions => [...prevSubmissions, newSubmission]);
-        setAttachedFiles([]);
-        setTrainerName("");
-        setSubmissionDate("");
-        setDescription("");
+        try {
+            const response = await fetch('https://api.yourdomain.com/submissions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newSubmission)
+            });
+            if (!response.ok) throw new Error('Failed to submit');
+            const result = await response.json();
+            setSubmittedSubmissions(prev => [...prev, { ...newSubmission, id: result.id, status: 'Pending' }]);
+            setTrainerName('');
+            setSubmissionDate(today);
+            setDescription('');
+            setAttachedFiles([]);
+        } catch (error) {
+            alert('Error submitting form: ' + error.message);
+        }
     };
 
-    const handleRemoveSubmission = (id) => {
-        setSubmittedSubmissions(prevSubmissions => prevSubmissions.filter(submission => submission.id !== id));
+    const handleRemoveSubmission = async (id) => {
+        try {
+            const response = await fetch(`https://api.yourdomain.com/submissions/${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) throw new Error('Failed to delete');
+            setSubmittedSubmissions(prev => prev.filter(submission => submission.id !== id));
+        } catch (error) {
+            alert('Error deleting submission: ' + error.message);
+        }
     };
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
+    // if (loading) return <p>Loading...</p>;
+    // if (error) return <p>Error: {error}</p>;
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -105,14 +133,13 @@ const ProponentsOther = () => {
                         <h1 className="text-2xl font-semibold">Other/s</h1>
                     </div>
 
-
                     {/* Project Details */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Project Details</h2>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Title</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.title}</p> {/* sample onliiiii */}
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.title}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Leader</label>
@@ -159,7 +186,7 @@ const ProponentsOther = () => {
                                                 <ul>
                                                     {submission.files.map((file, index) => (
                                                         <li key={index}>
-                                                            <a href={file.url} target="_blank" rel="noopener noreferrer">{file.name}</a>
+                                                            <a href={'#'} target="_blank" rel="noopener noreferrer">{file}</a>
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -168,7 +195,7 @@ const ProponentsOther = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                                 {submission.status}
                                                 {submission.status === "Declined" && submission.comments && (
-                                                    <p className="text-xs text-red-500 mt-1">{submission.comments}</p>  // Smaller font and below the status
+                                                    <p className="text-xs text-red-500 mt-1">{submission.comments}</p>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -181,7 +208,6 @@ const ProponentsOther = () => {
                                         </tr>
                                     ))}
                                 </tbody>
-
                             </table>
                         </div>
                     </div>
@@ -212,15 +238,15 @@ const ProponentsOther = () => {
                             </div>
                         </div>
                         <div className="mb-4 col-span-2">
-                                <label className="block text-sm font-medium text-gray-700">Description</label>
-                                <input
-                                    type="text"
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Enter a brief description"
-                                />
-                            </div>
+                            <label className="block text-sm font-medium text-gray-700">Description</label>
+                            <input
+                                type="text"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                placeholder="Enter a brief description"
+                            />
+                        </div>
                         <div className="border border-gray-300 rounded-lg p-6 flex flex-col items-center mb-6 relative">
                             <h3 className="font-semibold text-center mb-1">Attach Files</h3>
                             <div className="text-gray-400 mb-1">

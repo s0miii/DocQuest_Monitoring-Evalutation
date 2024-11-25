@@ -8,14 +8,14 @@ const ProjLeadOthers = () => {
     const navigate = useNavigate();
 
     const [projectDetails, setProjectDetails] = useState({
-        title: "",
-        leader: "",
-        college: "",
-        targetDate: "",
-        partnerAgency: ""
+        title: "Tesda Vocational",
+        leader: "Tabasan, Wynoah Louis",
+        college: "CEA",
+        targetDate: "May 2024",
+        partnerAgency: "Placeholder Inc."
     });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const [submittedSubmissions, setSubmittedSubmissions] = useState([
         {
@@ -41,40 +41,38 @@ const ProjLeadOthers = () => {
     const [showCommentInput, setShowCommentInput] = useState({});
 
     useEffect(() => {
-        const mockData = {
-            title: "Tesda Vocational",
-            leader: "Tabasan, Wynoah Louis",
-            college: "CEA",
-            targetDate: "May 2024",
-            partnerAgency: "Placeholder Inc."
+        const fetchSubmissions = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch('https://api.yourdomain.com/submissions');
+                if (!response.ok) throw new Error('Failed to fetch');
+                const data = await response.json();
+                setSubmittedSubmissions(data);
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
         };
-        setProjectDetails(mockData);
-        setLoading(false);
-
-        // const fetchProjectDetails = async () => {
-        //     setLoading(true);
-        //     try {
-        //         const response = await fetch('https://api.samting.com/projects/details');
-        //         if (!response.ok) throw new Error('Network response was not ok');
-        //         const data = await response.json();
-        //         setProjectDetails(data);
-        //     } catch (error) {
-        //         setError('Failed to fetch data: ' + error.message);
-        //     } finally {
-        //         setLoading(false);
-        //     }
-        // };
-
-        // fetchProjectDetails();
+    
+        fetchSubmissions();
     }, []);
-
-    const handleApprove = (id) => {
-        setSubmittedSubmissions(prevSubmissions =>
-            prevSubmissions.map(submission =>
-                submission.id === id ? { ...submission, status: "Approved", comment: "" } : submission
-            )
-        );
-    };
+    
+    const handleApprove = async (id) => {
+        try {
+            const response = await fetch(`https://api.yourdomain.com/submissions/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: 'Approved' })
+            });
+            if (!response.ok) throw new Error('Failed to update status');
+            setSubmittedSubmissions(prev => prev.map(item => item.id === id ? { ...item, status: 'Approved' } : item));
+        } catch (error) {
+            console.error('Error approving:', error);
+        }
+    };    
 
     const handleDecline = (id) => {
         setShowCommentInput((prevState) => ({ ...prevState, [id]: true }));
