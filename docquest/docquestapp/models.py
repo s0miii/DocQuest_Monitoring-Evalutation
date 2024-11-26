@@ -209,7 +209,9 @@ class Project(models.Model):
     accreditationLevel = models.CharField(max_length=50) #7
     # college = models.CharField(max_length=50) #8
     beneficiaries = models.TextField() #9
-    targetImplementation = models.DateField() #10
+    # targetImplementation = models.DateField() #10
+    targetStartDateImplementation = models.DateField()
+    targetEndDateImplementation = models.DateField()
     totalHours = models.FloatField() #11
     background = models.TextField() #12
     projectComponent = models.TextField() #13
@@ -227,7 +229,7 @@ class Project(models.Model):
     approvalCounter = models.IntegerField(default=0)
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
-class Signatories(models.Model):
+class Signatories(models.Model): #print purpose
     project = models.ForeignKey(Project, related_name='signatories', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
     title = models.CharField(max_length=100, null=True, blank=True)
@@ -336,3 +338,221 @@ class MonitoringPlanAndSchedule(models.Model): #a10
     schedule = models.TextField()
     implementationPhase = models.TextField()
     project = models.ForeignKey(Project, related_name='monitoringPlanSchedules', on_delete=models.CASCADE)
+
+class ProjectApprovalWorkflow(models.Model):
+    """
+    Tracks the entire approval workflow for a project
+    """
+    WORKFLOW_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected')
+    ]
+
+    project = models.OneToOneField(
+        Project, 
+        on_delete=models.CASCADE, 
+        related_name='approval_workflow',
+        primary_key=True
+    )
+    
+    overall_status = models.CharField(
+        max_length=20, 
+        choices=WORKFLOW_STATUS_CHOICES, 
+        default='pending'
+    )
+    
+    # Tracking approval progress
+    total_approvals_required = models.IntegerField(default=0)
+    current_approvals = models.IntegerField(default=0)
+    
+    # Timestamps
+    workflow_started_at = models.DateTimeField(auto_now_add=True)
+    workflow_completed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Approval Workflow for Project {self.project.projectTitle}"
+
+class ProgramChairApproval(models.Model):
+    """
+    Approval step for Program Chairs
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected')
+    ]
+
+    workflow = models.ForeignKey(
+        ProjectApprovalWorkflow, 
+        on_delete=models.CASCADE, 
+        related_name='program_chair_approvals'
+    )
+    
+    program = models.ForeignKey(
+        Program, 
+        on_delete=models.CASCADE, 
+        related_name='program_chair_project_approvals'
+    )
+    
+    program_chair = models.ForeignKey(
+        CustomUser, 
+        on_delete=models.CASCADE, 
+        related_name='program_chair_project_reviews'
+    )
+    
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='pending'
+    )
+    
+    comments = models.TextField(blank=True, null=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ['workflow', 'program', 'program_chair']
+
+    def __str__(self):
+        return f"Program Chair Approval - {self.program.title}"
+
+class CollegeDeanApproval(models.Model):
+    """
+    Approval step for College Deans
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected')
+    ]
+
+    workflow = models.ForeignKey(
+        ProjectApprovalWorkflow, 
+        on_delete=models.CASCADE, 
+        related_name='college_dean_approvals'
+    )
+    
+    college = models.ForeignKey(
+        College, 
+        on_delete=models.CASCADE, 
+        related_name='college_dean_project_approvals'
+    )
+    
+    college_dean = models.ForeignKey(
+        CustomUser, 
+        on_delete=models.CASCADE, 
+        related_name='college_dean_project_reviews'
+    )
+    
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='pending'
+    )
+    
+    comments = models.TextField(blank=True, null=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ['workflow', 'college', 'college_dean']
+
+    def __str__(self):
+        return f"College Dean Approval - {self.college.title}"
+
+def create_project_approval_workflow(project):
+    """
+    Create approval workflow when a project is submitted
+    """
+    # Create the main workflow
+    workflow = ProjectApprovalWorkflow.objects.create(
+        project=project,
+        overall_status='pending'
+    )
+
+    # Track total approvals required
+    total_approvals = 0
+
+    # Create Program Chair Approval Steps
+    for program in project.program.all():
+        # Use the program chair associated with the program
+        if program.programChair:
+            ProgramChairApproval.objects.create(
+                workflow=workflow,
+                program=program,
+                program_chair=program.programChair,
+                status='pending'
+            )
+            total_approvals += 1
+
+    # Create College Dean Approval Steps
+    # Get unique colleges from the programs
+    colleges = College.objects.filter(program__in=project.program.all()).distinct()
+    for college in colleges:
+        # Use the college dean associated with the college
+        if college.collegeDean:
+            CollegeDeanApproval.objects.create(
+                workflow=workflow,
+                college=college,
+                college_dean=college.collegeDean,
+                status='pending'
+            )
+            total_approvals += 1
+
+    # Update total approvals required
+    workflow.total_approvals_required = total_approvals
+    workflow.save()
+
+    return workflow
+
+def update_project_status(workflow):
+    """
+    Update project status based on approval workflow
+    """
+    # Check Program Chair Approvals
+    program_chair_approvals = workflow.program_chair_approvals.all()
+    program_chair_statuses = [approval.status for approval in program_chair_approvals]
+    
+    # Check College Dean Approvals
+    college_dean_approvals = workflow.college_dean_approvals.all()
+    college_dean_statuses = [approval.status for approval in college_dean_approvals]
+    
+    # Combine all statuses
+    all_statuses = program_chair_statuses + college_dean_statuses
+    
+    # Check if any approval is rejected
+    if 'rejected' in all_statuses:
+        workflow.overall_status = 'rejected'
+        workflow.project.status = 'rejected'
+        workflow.workflow_completed_at = timezone.now()
+        
+    # Check if all approvals are approved
+    elif all(status == 'approved' for status in all_statuses):
+        workflow.overall_status = 'approved'
+        workflow.project.status = 'approved'
+        workflow.workflow_completed_at = timezone.now()
+        workflow.current_approvals = workflow.total_approvals_required
+    
+    # Save changes
+    workflow.project.save()
+    workflow.save()
+
+def handle_approval_action(approval_instance, action, comments=None):
+    """
+    Handle approval or rejection of a specific approval step
+    
+    :param approval_instance: Either ProgramChairApproval or CollegeDeanApproval
+    :param action: 'approved' or 'rejected'
+    :param comments: Optional comments for the decision
+    """
+    # Update the specific approval step
+    approval_instance.status = action
+    approval_instance.comments = comments
+    approval_instance.reviewed_at = timezone.now()
+    approval_instance.save()
+    
+    # Get the associated workflow
+    workflow = approval_instance.workflow
+    
+    # Update workflow status
+    update_project_status(workflow)
