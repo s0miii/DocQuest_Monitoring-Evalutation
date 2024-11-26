@@ -107,13 +107,13 @@ Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 {
-    "project": 1,
-    "templateName": "New Template",
+    "project": 2,
+    "templateName": "5th Test: Dapat naa na ang sharable url sa DB",
     "include_attendee_name": true,
     "include_gender": true,
     "include_college": false,
     "include_department": false,
-    "include_year_section": true,
+    "include_year_section": false,
     "include_agency_office": false,
     "include_contact_number": true
 }
@@ -268,11 +268,11 @@ Content-Type: application/json
 }
 
 ###
-#  Retrieve All Attendance Records for a Project
-GET http://127.0.0.1:8000/monitoring/attendance_records/project/<PROJECT_ID>/
-Authorization: Token <your-auth-token>
+#  Retrieve All Attendance Records for a Project - working endpoint
+GET http://127.0.0.1:8000/monitoring/attendance_records/project/1/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 ###
 #  Retrieve a Specific Attendance Record
-GET http://127.0.0.1:8000/monitoring/attendance_records/<RECORD_ID>/
-Authorization: Token <your-auth-token>
+GET http://127.0.0.1:8000/monitoring/attendance_records/4/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
