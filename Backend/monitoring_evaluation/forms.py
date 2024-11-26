@@ -84,9 +84,41 @@ class EvaluationForm(forms.ModelForm):
 class AttendanceTemplateForm(forms.ModelForm):
     class Meta:
         model = AttendanceTemplate
-        fields = ['project', 'name', 'fields']
+        fields = [
+            "project",
+            "templateName",
+            "include_attendee_name",
+            "include_gender",
+            "include_college",
+            "include_department",
+            "include_year_section",
+            "include_agency_office",
+            "include_contact_number",
+        ]
 
-class AttendanceRecordForm(forms.ModelForm):
+class CreatedAttendanceRecordForm(forms.ModelForm):
     class Meta:
-        model = AttendanceRecord
-        fields = ['template', 'data']
+        model = CreatedAttendanceRecord
+        fields = [
+            'project',
+            'template',
+            'attendee_name',
+            'gender',
+            'college',
+            'department',
+            'year_section',
+            'agency_office',
+            'contact_number'
+        ]
+    
+    # Require fields
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Example: Require attendee_name and gender
+        if not cleaned_data.get('attendee_name'):
+            self.add_error('attendee_name', "Attendee name is required.")
+        if not cleaned_data.get('gender'):
+            self.add_error('gender', "Gender is required.")
+
+        return cleaned_data

@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('monitoring/', include('monitoring_evaluation.urls')),
+    path('monitoring/', include('monitoring_evaluation.urls', namespace='monitoring')),
 
     # create role
     path('create_role', views.create_role),
