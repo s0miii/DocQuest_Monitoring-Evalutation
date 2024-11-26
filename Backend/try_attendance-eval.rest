@@ -101,51 +101,178 @@ Authorization: Token <auth-token>
 # -------------------------------------------------------
 
 ###
-# Create Attendance Template - working endpoint
+#  Create Attendance Template -- working endpoint
 POST http://127.0.0.1:8000/monitoring/attendance_templates/
 Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 {
-    "project": 2,
-    "name": "Trial Template for Project 2",
-    "fields": {
-        "Name": "text",
-        "Contact Number": "number",
-        "Gender": "text",
-        "College": "text",
-        "Year & Section": "text"
-
-    }
+    "project": 1,
+    "templateName": "New Template",
+    "include_attendee_name": true,
+    "include_gender": true,
+    "include_college": false,
+    "include_department": false,
+    "include_year_section": true,
+    "include_agency_office": false,
+    "include_contact_number": true
 }
 
-###
-# Retrieve All Attendance Template - working endpoint
+### 
+# Retrieve All Attendance Templates
 GET http://127.0.0.1:8000/monitoring/attendance_templates/
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
-###
-# Retrieve Specific Attendance Template - working endpoint
-GET http://127.0.0.1:8000/monitoring/attendance_templates/1/
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 ###
-# Update an Attendance Template - working endpoint
-PUT http://127.0.0.1:8000/monitoring/attendance_templates/2/
+# Retrieve Specific Attendance Template
+GET http://127.0.0.1:8000/monitoring/attendance_templates/<template_id>/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+###
+# Update an Attendance Template
+PUT http://127.0.0.1:8000/monitoring/attendance_templates/5/
 Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 {
     "project": 1,
-    "name": "Updated Template Name",
-    "fields": {
-        "Name": "text",
-        "Email": "text"
-    }
+    "templateName": "Updated Template",
+    "include_attendee_name": true,
+    "include_gender": true,
+    "include_college": true,
+    "include_department": true,
+    "include_year_section": true,
+    "include_agency_office": false,
+    "include_contact_number": true
 }
 
 
 ###
-# Delete an Attendance Template - working endpoint
-DELETE http://127.0.0.1:8000/monitoring/attendance_templates/2/
+# Delete an Attendance Template
+DELETE http://127.0.0.1:8000/monitoring/attendance_templates/1/
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+# Submit Attendance Record - working endpoint
+POST http://127.0.0.1:8000/monitoring/attendance_records/1/5/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "attendee_name": "To Be Deleted",
+    "gender": "Male",
+    "college": "College of Information Technology & Computing",
+    "department": "Information Technology",
+    "year_section": "4th Year - IT4R6",
+    "contact_number": "1234567890"
+}
+
+###
+# Retrieve All Attendance Record - dapat authenticated ang token di pako sure unsaon but nag try rakog token from other user
+GET http://127.0.0.1:8000/monitoring/attendance_records/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+# Retrieve Attendance Record for a Specific Record ID - dapat authenticated ang token di pako sure unsaon but nag try rakog token from other user
+GET http://127.0.0.1:8000/monitoring/attendance_records/2/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+### 
+# Retrieve All Attendance Records for a Project - working endpoint
+GET http://127.0.0.1:8000/monitoring/attendance_records/project/1/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+###
+# Update an Attendance Record - working endpoint
+PUT http://127.0.0.1:8000/monitoring/attendance_records/2/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "project": 1,
+    "template": 5,
+    "attendee_name": "Wynoah Louis Tabasan",
+    "gender": "Female",
+    "college": "College of Information Technology & Computing",
+    "department": "Information Technology",
+    "year_section": "4th Year - IT4R6",
+    "contact_number": "1234567890"
+}
+
+
+###
+# Delete an Attendance Record - working
+DELETE http://127.0.0.1:8000/monitoring/attendance_records/3/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+# ----mga di pa mugana pero basin needed
+###
+# Generate Attendance Report
+GET http://127.0.0.1:8000/monitoring/attendance_reports/1/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+###
+# Search Attendance Records
+GET http://127.0.0.1:8000/monitoring/attendance_records/search/?attendee_name=Kit
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+# Test for Sharable Link in Attendance
+
+###
+#  Create Attendance Template  - working endpoint with sharable link
+POST http://127.0.0.1:8000/monitoring/attendance_templates/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "project": 1,
+    "templateName": "Template 3 Trial with Link",
+    "include_attendee_name": true,
+    "include_gender": true,
+    "include_college": true,
+    "include_department": true,
+    "include_year_section": true,
+    "include_agency_office": false,
+    "include_contact_number": true
+}
+
+###
+#  List All Templates Created - working endpoint
+GET http://127.0.0.1:8000/monitoring/attendance_templates/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+#  Test Token
+GET http://127.0.0.1:8000/monitoring/attendance/fill/jsu0er-aQmCmfkyJCPvdpw/
+Content-Type: application/json
+
+###
+#  Submit Attendance Record via Sharable Link
+POST http://127.0.0.1:8000/monitoring/attendance/fill/jsu0er-aQmCmfkyJCPvdpw/
+Content-Type: application/json
+
+{
+    "attendee_name": "Clarice Domingo",
+    "gender": "Male",
+    "college": "CITC",
+    "department": "Computer Science",
+    "year_section": "4A",
+    "contact_number": "1234567890"
+
+}
+
+###
+#  Retrieve All Attendance Records for a Project
+GET http://127.0.0.1:8000/monitoring/attendance_records/project/<PROJECT_ID>/
+Authorization: Token <your-auth-token>
+
+###
+#  Retrieve a Specific Attendance Record
+GET http://127.0.0.1:8000/monitoring/attendance_records/<RECORD_ID>/
+Authorization: Token <your-auth-token>

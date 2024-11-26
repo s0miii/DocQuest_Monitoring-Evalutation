@@ -278,18 +278,34 @@ class Evaluation(models.Model):
 # Attendance Template and Attendance Record Model
 class AttendanceTemplate(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attendance_templates")
-    name = models.CharField(max_length=255, default="Attendance Template")
-    fields = models.JSONField(help_text="Define the fields for the attendance dynamically")
+    templateName = models.CharField(max_length=255, default="Attendance Template")
+
+    include_attendee_name = models.BooleanField(default=False)
+    include_gender = models.BooleanField(default=False)
+    include_college = models.BooleanField(default=False)
+    include_department = models.BooleanField(default=False)
+    include_year_section = models.BooleanField(default=False)
+    include_agency_office = models.BooleanField(default=False)
+    include_contact_number = models.BooleanField(default=False)
+    
+    token = models.CharField(max_length=32, unique=True, default=secrets.token_urlsafe(16))
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.name} for {self.project.projectTitle}"
+        return f"{self.templateName} for {self.project.projectTitle}"
 
-class AttendanceRecord(models.Model):
-    template = models.ForeignKey(AttendanceTemplate, on_delete=models.CASCADE, related_name="attendance_records")
-    data = models.JSONField(help_text="Dynamic data filled by attendees")
+# Created attendance record from the template
+class CreatedAttendanceRecord(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    template = models.ForeignKey(AttendanceTemplate, on_delete=models.CASCADE)
+    attendee_name = models.CharField(max_length=255, null=True, blank=True)
+    gender = models.CharField(max_length=50, null=True, blank=True)
+    college = models.CharField(max_length=255, null=True, blank=True)
+    department = models.CharField(max_length=255, null=True, blank=True)
+    year_section = models.CharField(max_length=255, null=True, blank=True)
+    agency_office = models.CharField(max_length=255, null=True, blank=True)
+    contact_number = models.CharField(max_length=50, null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Record for {self.template.name} submitted at {self.submitted_at}"
-
+        return f"Record for {self.project.projectTitle} submitted at {self.submitted_at}"

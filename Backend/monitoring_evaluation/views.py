@@ -2,7 +2,7 @@ from rest_framework import status, viewsets, generics
 from rest_framework.views import APIView, View
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -12,7 +12,7 @@ from docquestapp.models import Project, LoadingOfTrainers
 from .models import *
 from .forms import *
 from .serializers import *
-import secrets, json
+import secrets, logging
 
 ## Form Views
 
@@ -192,7 +192,7 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         if not project_id:
             return Response({"error": "Project ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        project = get_object_or_404(Project, id=project_id)
+        project = get_object_or_404(Project, projectID=project_id)
 
         evaluation, created = Evaluation.objects.get_or_create(
             trainer=trainer, project=project,
@@ -268,56 +268,224 @@ def evaluation_summary_view(request):
 
 
 # Attendance 
+# class AttendanceTemplateViewSet(viewsets.ModelViewSet):
+#     queryset = AttendanceTemplate.objects.all()
+#     serializer_class = AttendanceTemplateSerializer
+
+#     def perform_create(self, serializer):
+#         # Link the template to the current user/project if needed
+#         serializer.save()
+
+# def create_attendance_template(request):
+#     if request.method == 'POST':
+#         project_id = request.POST['project']
+#         name = request.POST['name']
+#         field_names = request.POST.getlist('field_names')
+#         field_types = request.POST.getlist('field_types')
+
+#         # fields = {name: field_type for name, field_type in zip(field_names, field_types)}
+#         if not project_id:
+#             return JsonResponse({'error': 'Project is required.'}, status=400)
+#         try:
+#             project = Project.objects.get(projectID=project_id)
+#         except (ValueError, Project.DoesNotExist):
+#             return JsonResponse({'message': 'Template created successfully!'}, status=201)
+#         fields = {name: field_type for name, field_type in zip(field_names, field_types)}
+        
+#         AttendanceTemplate.objects.create(project=project, name=name, fields=fields)
+#         return JsonResponse({'message': 'Template created successfully!'}, status=201)
+
+#     projects = Project.objects.all()  # Pass projects to template
+#     return render(request, 'attendance_template_form.html', {'projects': projects})
+
+# class AttendanceRecordViewSet(viewsets.ModelViewSet):
+#     queryset = AttendanceRecord.objects.all()
+#     serializer_class = AttendanceRecordSerializer
+
+#     def perform_create(self, serializer):
+#         # Save attendance record dynamically
+#         serializer.save()
+
+# def submit_attendance_record(request):
+#     if request.method == 'POST':
+#         template_id = request.POST['template']
+#         data = request.POST['data']
+
+#         try:
+#             data_json = json.loads(data)  # Validate JSON format
+#             template = AttendanceTemplate.objects.get(id=template_id)
+#             AttendanceRecord.objects.create(template=template, data=data_json)
+#             return JsonResponse({'message': 'Record submitted successfully!'}, status=200)
+#         except json.JSONDecodeError:
+#             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+
+#     templates = AttendanceTemplate.objects.all()  # Pass templates to template
+#     return render(request, 'attendance_record_form.html', {'templates': templates})
+
+
+# ATTENDANCE TEMPLATE -> KATONG CHECKLIST NGA LOGIC
 class AttendanceTemplateViewSet(viewsets.ModelViewSet):
     queryset = AttendanceTemplate.objects.all()
     serializer_class = AttendanceTemplateSerializer
 
-    def perform_create(self, serializer):
-        # Link the template to the current user/project if needed
-        serializer.save()
+    def get_serializer_context(self):
+        # Include the request in the serializer context to generate sharable links
+        return {'request': self.request}
+class CreateAttendanceTemplateView(APIView):
+    permission_classes = [IsAuthenticated]
 
-def create_attendance_template(request):
-    if request.method == 'POST':
-        project_id = request.POST['project']
-        name = request.POST['name']
-        field_names = request.POST.getlist('field_names')
-        field_types = request.POST.getlist('field_types')
+    def post(self, request, project_id):
+        # Validate project
+        project = get_object_or_404(Project, projectID=project_id)
 
-        # fields = {name: field_type for name, field_type in zip(field_names, field_types)}
-        if not project_id:
-            return JsonResponse({'error': 'Project is required.'}, status=400)
-        try:
-            project = Project.objects.get(projectID=project_id)
-        except (ValueError, Project.DoesNotExist):
-            return JsonResponse({'message': 'Template created successfully!'}, status=201)
-        fields = {name: field_type for name, field_type in zip(field_names, field_types)}
-        
-        AttendanceTemplate.objects.create(project=project, name=name, fields=fields)
-        return JsonResponse({'message': 'Template created successfully!'}, status=201)
+        # Extract template fields
+        fields = {
+            "include_attendee_name": request.data.get("include_attendee_name", False),
+            "include_gender": request.data.get("include_gender", False),
+            "include_college": request.data.get("include_college", False),
+            "include_department": request.data.get("include_department", False),
+            "include_year_section": request.data.get("include_year_section", False),
+            "include_agency_office": request.data.get("include_agency_office", False),
+            "include_contact_number": request.data.get("include_contact_number", False),
+        }
 
-    projects = Project.objects.all()  # Pass projects to template
-    return render(request, 'attendance_template_form.html', {'projects': projects})
+        # Create the template
+        attendance_template = AttendanceTemplate.objects.create(project=project, **fields)
+
+        # Generate sharable link
+        sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
+
+        return Response({
+            "template": AttendanceTemplateSerializer(attendance_template).data,
+            "sharable_link": sharable_link
+        }, status=201)
 
 class AttendanceRecordViewSet(viewsets.ModelViewSet):
-    queryset = AttendanceRecord.objects.all()
-    serializer_class = AttendanceRecordSerializer
+    queryset = CreatedAttendanceRecord.objects.all()
+    serializer_class = CreatedAttendanceRecordSerializer
 
-    def perform_create(self, serializer):
-        # Save attendance record dynamically
-        serializer.save()
+    @action(detail=False, methods=['get'], url_path='project/(?P<project_id>[^/.]+)')
+    def get_by_project(self, request, project_id=None):
+        """
+        Fetch all attendance records for a specific project.
+        """
+        records = CreatedAttendanceRecord.objects.filter(project__projectID=project_id)
+        
+        if not records.exists():
+            return Response({"message": "No attendance records found for this project."}, status=404)
+        
+        serializer = self.get_serializer(records, many=True)
+        return Response(serializer.data)
+    
+# Submit Attendance Record (For Authenticated Users Only)
+# This view is retained for scenarios where authenticated users (e.g., staff or project leaders) 
+# might need to submit attendance records programmatically or through internal workflows.
+class SubmitAttendanceRecordView(APIView):
+    permission_classes = [IsAuthenticated]
 
-def submit_attendance_record(request):
-    if request.method == 'POST':
-        template_id = request.POST['template']
-        data = request.POST['data']
+    def post(self, request, project_id, template_id):
+        # Validate project and template
+        project = get_object_or_404(Project, projectID=project_id)
+        template = get_object_or_404(AttendanceTemplate, id=template_id, project=project)
 
-        try:
-            data_json = json.loads(data)  # Validate JSON format
-            template = AttendanceTemplate.objects.get(id=template_id)
-            AttendanceRecord.objects.create(template=template, data=data_json)
-            return JsonResponse({'message': 'Record submitted successfully!'}, status=200)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        # Validate required fields based on the template
+        data = request.data
+        if template.include_attendee_name and not data.get("attendee_name"):
+            return Response({"error": "Attendee's Name is required."}, status=400)
+        if template.include_gender and not data.get("gender"):
+            return Response({"error": "Gender is required."}, status=400)
+        if template.include_college and not data.get("college"):
+            return Response({"error": "College is required."}, status=400)
+        if template.include_department and not data.get("department"):
+            return Response({"error": "Department is required."}, status=400)
+        if template.include_year_section and not data.get("year_section"):
+            return Response({"error": "Year & Section is required."}, status=400)
+        if template.include_agency_office and not data.get("agency_office"):
+            return Response({"error": "Agency/Office is required."}, status=400)
+        if template.include_contact_number and not data.get("contact_number"):
+            return Response({"error": "Contact Number is required."}, status=400)
 
-    templates = AttendanceTemplate.objects.all()  # Pass templates to template
-    return render(request, 'attendance_record_form.html', {'templates': templates})
+        # Create the attendance record
+        attendance_record = CreatedAttendanceRecord.objects.create(
+            project=project,
+            template=template,
+            attendee_name=data.get("attendee_name"),
+            gender=data.get("gender"),
+            college=data.get("college"),
+            department=data.get("department"),
+            year_section=data.get("year_section"),
+            agency_office=data.get("agency_office"),
+            contact_number=data.get("contact_number"),
+        )
+
+        return Response(
+            CreatedAttendanceRecordSerializer(attendance_record).data,
+            status=201
+        )
+
+# This is used for sharable link - anyone outside the system can access the link
+logger = logging.getLogger(__name__)
+class FillAttendanceView(APIView):
+    permission_classes = [AllowAny]  # Allow anyone to access this view without authentication
+
+    def get(self, request, token):
+        template = get_object_or_404(AttendanceTemplate, token=token)
+        print(f"GET request received with token: {token}") #For debugging only
+        # Return the template details so the frontend can generate the form dynamically
+        print(f"Template found: {template}") #For debugging only
+
+        return Response({
+            "templateName": template.templateName,
+            "fields": {
+                "include_attendee_name": template.include_attendee_name,
+                "include_gender": template.include_gender,
+                "include_college": template.include_college,
+                "include_department": template.include_department,
+                "include_year_section": template.include_year_section,
+                "include_agency_office": template.include_agency_office,
+                "include_contact_number": template.include_contact_number,
+            },
+            "project": template.project.projectID
+        })
+    
+
+    def post(self, request, token):
+        # Find the template using the token
+        template = get_object_or_404(AttendanceTemplate, token=token)
+        
+        # Validate required fields dynamically
+        data = request.data
+        errors = {}
+        if template.include_attendee_name and not data.get("attendee_name"):
+            errors["attendee_name"] = "This field is required."
+        if template.include_gender and not data.get("gender"):
+            errors["gender"] = "This field is required."
+        if template.include_college and not data.get("college"):
+            errors["college"] = "This field is required."
+        if template.include_department and not data.get("department"):
+            errors["department"] = "This field is required."
+        if template.include_year_section and not data.get("year_section"):
+            errors["year_section"] = "This field is required."
+        if template.include_contact_number and not data.get("contact_number"):
+            errors["contact_number"] = "This field is required."
+
+        if errors:
+            return Response(errors, status=400)
+
+        # Create the attendance record
+        attendance_record = CreatedAttendanceRecord.objects.create(
+            project=template.project,
+            template=template,
+            attendee_name=data.get("attendee_name"),
+            gender=data.get("gender"),
+            college=data.get("college"),
+            department=data.get("department"),
+            year_section=data.get("year_section"),
+            agency_office=data.get("agency_office"),
+            contact_number=data.get("contact_number"),
+        )
+
+        return Response(
+            CreatedAttendanceRecordSerializer(attendance_record).data,
+            status=201
+        )

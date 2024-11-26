@@ -149,17 +149,9 @@ class ProjectNarrativeAdmin(admin.ModelAdmin):
 
 @admin.register(AttendanceTemplate)
 class AttendanceTemplateAdmin(admin.ModelAdmin):
-    list_display = ('project', 'name', 'created_at')
-    search_fields = ('project__projectTitle', 'name')
-    list_filter = ('created_at',)
+    list_display = ['templateName', 'project', 'created_at']
 
-@admin.register(AttendanceRecord)
-class AttendanceRecordAdmin(admin.ModelAdmin):
-    list_display = ('template', 'submitted_at', 'data_preview')
-    search_fields = ('template__name',)
-    list_filter = ('submitted_at',)
 
-    def data_preview(self, obj):
-        # Display a short preview of the data JSON for quick reference
-        return format_html('<pre>{}</pre>', obj.data)
-    data_preview.short_description = 'Preview of Attendance Data'
+@admin.register(CreatedAttendanceRecord)
+class CreatedAttendanceRecordAdmin(admin.ModelAdmin):
+    list_display = ['id', 'project', 'attendee_name', 'submitted_at']

@@ -60,11 +60,17 @@ class ProjectNarrativeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AttendanceTemplateSerializer(serializers.ModelSerializer):
+    sharable_link = serializers.SerializerMethodField()
     class Meta:
         model = AttendanceTemplate
         fields = '__all__'
 
-class AttendanceRecordSerializer(serializers.ModelSerializer):
+    def get_sharable_link(self, obj):
+        request = self.context.get('request')
+        if request:
+            return f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{obj.token}/"
+        return None
+class CreatedAttendanceRecordSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AttendanceRecord
+        model = CreatedAttendanceRecord
         fields = '__all__'

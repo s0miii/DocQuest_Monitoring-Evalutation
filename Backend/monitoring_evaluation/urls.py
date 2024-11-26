@@ -12,6 +12,7 @@ router = DefaultRouter()
 router.register(r'evaluation', EvaluationViewSet, basename='evaluation')
 router.register(r'attendance_templates', AttendanceTemplateViewSet, basename='attendance_template')
 router.register(r'attendance_records', AttendanceRecordViewSet, basename='attendance_record')
+
 ### Checklist Items
 router.register(r'daily_attendance', DailyAttendanceRecordViewSet)
 router.register(r'evaluations', SummaryOfEvaluationViewSet)
@@ -24,8 +25,15 @@ router.register(r'prexc_achievements', PREXCAchievementViewSet)
 router.register(r'project_narratives', ProjectNarrativeViewSet)
 
 
+
 urlpatterns = [
     path('', include(router.urls)),
+
+    # Attendance
+    path('attendance/fill/<str:token>/', FillAttendanceView.as_view(), name='fill-attendance'),
+    path('attendance_templates/<int:project_id>/', CreateAttendanceTemplateView.as_view(), name='create-attendance-template'),
+    path('attendance_records/<int:projectID>/<int:template_id>/', SubmitAttendanceRecordView.as_view(), name='submit-attendance-record'),
+
     # Checklist
     path('upload/attendance/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),
     path('upload/evaluation/', SummaryOfEvaluationUploadView.as_view(), name='evaluation_upload'),
@@ -51,8 +59,4 @@ urlpatterns = [
     path('evaluation/<int:project_id>/', evaluation_form_view, name='evaluation_form_project_only'),
     path('evaluation_thank_you/', TemplateView.as_view(template_name="thank_you.html"), name='evaluation_thank_you'),
     path('evaluation_summary/', evaluation_summary_view, name='evaluation_summary'),
-
-    # Attendance
-    path('test/create-template/', create_attendance_template, name='create_attendance_template'),
-    path('test/submit-record/', submit_attendance_record, name='submit_attendance_record'),
 ]
