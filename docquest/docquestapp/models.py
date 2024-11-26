@@ -209,7 +209,9 @@ class Project(models.Model):
     accreditationLevel = models.CharField(max_length=50) #7
     # college = models.CharField(max_length=50) #8
     beneficiaries = models.TextField() #9
-    targetImplementation = models.DateField() #10
+    # targetImplementation = models.DateField() #10
+    targetStartDateImplementation = models.DateField()
+    targetEndDateImplementation = models.DateField()
     totalHours = models.FloatField() #11
     background = models.TextField() #12
     projectComponent = models.TextField() #13
@@ -227,7 +229,7 @@ class Project(models.Model):
     approvalCounter = models.IntegerField(default=0)
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
-class Signatories(models.Model):
+class Signatories(models.Model): #print purpose
     project = models.ForeignKey(Project, related_name='signatories', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
     title = models.CharField(max_length=100, null=True, blank=True)

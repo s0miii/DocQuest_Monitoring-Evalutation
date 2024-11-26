@@ -517,13 +517,12 @@ class GetProjectSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Project
         fields = [
-            'userID', 'programCategory', 'projectTitle', 'projectType',
-            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'beneficiaries',  
-            'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
-            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
-            'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
-            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 'dateCreated',
-            'status'
+            'userID', 'programCategory', 'projectTitle', 'projectType', 'projectCategory', 'researchTitle', 'program', 
+            'accreditationLevel', 'beneficiaries', 'targetStartDateImplementation', 'targetEndDateImplementation', 'totalHours',
+            'background', 'projectComponent', 'targetScope', 'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 
+            'nonUserProponents', 'projectLocationID', 'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 
+            'budgetRequirements', 'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 
+            'dateCreated', 'status'
         ]
 
 class PostProjectSerializer(serializers.ModelSerializer):
@@ -549,7 +548,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
         fields = [
             'userID', 'programCategory', 'projectTitle', 'projectType',
             'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'beneficiaries',  
-            'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
+            'targetStartDateImplementation', 'targetEndDateImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
             'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories' 
