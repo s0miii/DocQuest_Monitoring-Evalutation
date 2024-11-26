@@ -278,7 +278,7 @@ class Evaluation(models.Model):
 # Attendance Template and Attendance Record Model
 class AttendanceTemplate(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attendance_templates")
-    templateName = models.CharField(max_length=255, default="Attendance Template")
+    templateName = models.CharField(max_length=255, default="Attendance Template")    
 
     include_attendee_name = models.BooleanField(default=False)
     include_gender = models.BooleanField(default=False)
@@ -288,11 +288,19 @@ class AttendanceTemplate(models.Model):
     include_agency_office = models.BooleanField(default=False)
     include_contact_number = models.BooleanField(default=False)
     
+    sharable_link = models.URLField(max_length=500, blank=True, null=True)
     token = models.CharField(max_length=32, unique=True, default=secrets.token_urlsafe(16))
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.templateName} for {self.project.projectTitle}"
+    
+    def save(self, *args, **kwargs):
+        # Generate the sharable link if it does not exist
+        if not self.sharable_link:
+            base_url = "http://127.0.0.1:8000/monitoring/attendance/fill"
+            self.sharable_link = f"{base_url}/{self.token}/"
+        super().save(*args, **kwargs)
 
 # Created attendance record from the template
 class CreatedAttendanceRecord(models.Model):

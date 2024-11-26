@@ -355,6 +355,10 @@ class CreateAttendanceTemplateView(APIView):
         # Generate sharable link
         sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
 
+        # Save the sharable link sa database mismo -> added feature lang
+        attendance_template.sharable_link = sharable_link
+        attendance_template.save()
+
         return Response({
             "template": AttendanceTemplateSerializer(attendance_template).data,
             "sharable_link": sharable_link
