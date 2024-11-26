@@ -1042,6 +1042,27 @@ def get_review(request):
     }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_college_dean(request, pk):
+    try:
+        college = College.objects.get(pk=pk)
+        serializer = GetCollegeDeanSerializer(college)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except College.DoesNotExist:
+        return Response({"error": "College not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_program_chair(request, pk):
+    try:
+        program = Program.objects.get(pk=pk)
+        serializer = GetProgramChairSerializer(program)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Program.DoesNotExist:
+        return Response({"error": "Program not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def test_token(request):

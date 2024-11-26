@@ -25,6 +25,8 @@ urlpatterns = [
     path('get_programs/', views.get_programs),
     path('get_checklist', views.get_checklist),
     path('create_deliverables', views.create_deliverables),
+    path('college/<int:pk>/dean/', views.get_college_dean),
+    path('program/<int:pk>/chair/', views.get_program_chair),
 
     re_path(r'^auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),

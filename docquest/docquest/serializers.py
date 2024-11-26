@@ -746,3 +746,19 @@ class GetCampusSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Campus
         fields = ['campusID', 'name']
+
+class GetCollegeDeanSerializer(serializers.ModelSerializer):
+    collegeDean = GetNameSerializer(read_only=True)
+
+    class Meta:
+        model = College
+        fields = ['collegeDean']
+
+
+# Serializer to fetch program chair's name
+class GetProgramChairSerializer(serializers.ModelSerializer):
+    programChair = GetNameSerializer(read_only=True)
+
+    class Meta:
+        model = Program
+        fields = ['programChair']
