@@ -5,30 +5,30 @@ const EvaluationForm = () => {
         title: '',
         date: '',
         speaker: '',
-        evaluator: '',
+        attendee_name: '',
         venue: '',
         activityRatings: {
-            relevanceOfTopics: '',
-            organizationalFlow: '',
-            appropriatenessOfMethods: '',
-            useOfTech: '',
-            efficiency: '',
+            relevance_of_topics: '',
+            organizational_flow: '',
+            learning_methods: '',
+            technology_use: '',
+            time_efficiency: '',
         },
         speakerRatings: {
-            masteryOfSubject: '',
+            mastery_subject: '',
             preparedness: '',
-            audienceParticipation: '',
-            interestingActivity: '',
-            handleQuestions: '',
-            voicePersonality: '',
-            visualAids: '',
+            audience_participation: '',
+            interest_level: '',
+            handle_questions: '',
+            voice_personality: '',
+            visual_aids: '',
         },
-        venueRating: '',
-        serviceTimeliness: '',
-        overallManagement: '',
-        usefulConcepts: '',
-        leastUsefulConcepts: '',
-        otherComments: '',
+        venue_assessment: '',
+        timeliness: '',
+        overall_management: '',
+        useful_concepts: '',
+        improvement_areas: '',
+        additional_comments: '',
     });
 
     const handleInputChange = (e) => {
@@ -93,11 +93,11 @@ const EvaluationForm = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-2">Name of Evaluator</label>
+                        <label className="block text-sm font-medium mb-2">Name of attendee_name</label>
                         <input
                             type="text"
-                            name="evaluator"
-                            value={formData.evaluator}
+                            name="attendee_name"
+                            value={formData.attendee_name}
                             onChange={handleInputChange}
                             className="w-full border rounded p-2"
                             required
@@ -137,11 +137,11 @@ const EvaluationForm = () => {
                 {/* I: Activity Ratings */}
                 <h3 className="text-lg font-semibold mt-6 mb-2">I. Activity</h3>
                 {[
-                    { key: 'relevanceOfTopics', label: '1. Relevance of Topics Covered' },
-                    { key: 'organizationalFlow', label: '2. Organizational Flow of Topics' },
-                    { key: 'appropriatenessOfMethods', label: '3. Appropriateness of Learning Methods Used' },
-                    { key: 'useOfTech', label: '4. Use of Technology and Aids' },
-                    { key: 'efficiency', label: '5. Efficiency of Time Used in Conducting the Activity' },
+                    { key: 'relevance_of_topics', label: '1. Relevance of Topics Covered' },
+                    { key: 'organizational_flow', label: '2. Organizational Flow of Topics' },
+                    { key: 'learning_methods', label: '3. Appropriateness of Learning Methods Used' },
+                    { key: 'technology_use', label: '4. Use of Technology and Aids' },
+                    { key: 'time_efficiency', label: '5. Efficiency of Time Used in Conducting the Activity' },
                 ].map((item) => (
                     <div className="ml-5" key={item.key}>
                         <RatingDropdown
@@ -155,13 +155,13 @@ const EvaluationForm = () => {
                 {/* II: Speaker/Trainer/Facilitator Ratings */}
                 <h3 className="text-lg font-semibold mt-6 mb-2">II. Speaker/Trainer/Facilitator</h3>
                 {[
-                    { key: 'masteryOfSubject', label: '1. Mastery of the Subject Matter' },
+                    { key: 'mastery_subject', label: '1. Mastery of the Subject Matter' },
                     { key: 'preparedness', label: '2. Preparedness/Organization' },
-                    { key: 'audienceParticipation', label: '3. Ability to Draw Audience Participation' },
-                    { key: 'interestingActivity', label: '4. Ability to Make the Activity Interesting' },
-                    { key: 'handleQuestions', label: "5. Ability to Handle Participants' Questions" },
-                    { key: 'voicePersonality', label: '6. Voice Personality' },
-                    { key: 'visualAids', label: '7. Trainer’s Use of Visual Aids or Choice of Activities' },
+                    { key: 'audience_participation', label: '3. Ability to Draw Audience Participation' },
+                    { key: 'interest_level', label: '4. Ability to Make the Activity Interesting' },
+                    { key: 'handle_questions', label: "5. Ability to Handle Participants' Questions" },
+                    { key: 'voice_personality', label: '6. Voice Personality' },
+                    { key: 'visual_aids', label: '7. Trainer’s Use of Visual Aids or Choice of Activities' },
                 ].map((item) => (
                     <div className="ml-5" key={item.key}>
                         <RatingDropdown
@@ -177,8 +177,8 @@ const EvaluationForm = () => {
                 <div className="ml-5 mb-4">
                     <label className="block text-sm font-medium mb-2">1. Which concept/information/activity did you find useful in your organization?</label>
                     <textarea
-                        name="usefulConcepts"
-                        value={formData.usefulConcepts}
+                        name="useful_concepts"
+                        value={formData.useful_concepts}
                         onChange={handleInputChange}
                         className="w-full border rounded p-2"
                     />
@@ -186,8 +186,8 @@ const EvaluationForm = () => {
                 <div className="ml-5 mb-4">
                     <label className="block text-sm font-medium mb-2">2. Which concept/information/activities were least useful? How can they be improved?</label>
                     <textarea
-                        name="leastUsefulConcepts"
-                        value={formData.leastUsefulConcepts}
+                        name="improvement_areas"
+                        value={formData.improvement_areas}
                         onChange={handleInputChange}
                         className="w-full border rounded p-2"
                     />
@@ -195,8 +195,8 @@ const EvaluationForm = () => {
                 <div className="ml-5 mb-4">
                     <label className="block text-sm font-medium mb-2">3. Other comments/suggestions</label>
                     <textarea
-                        name="otherComments"
-                        value={formData.otherComments}
+                        name="additional_comments"
+                        value={formData.additional_comments}
                         onChange={handleInputChange}
                         className="w-full border rounded p-2"
                     />
@@ -207,18 +207,18 @@ const EvaluationForm = () => {
                 <div className="ml-5">
                     <RatingDropdown
                         label="IV. How do you assess the venue used during the activity?"
-                        value={formData.venueRating}
-                        onChange={(value) => handleRatingChange(null, 'venueRating', value)}
+                        value={formData.venue_assessment}
+                        onChange={(value) => handleRatingChange(null, 'venue_assessment', value)}
                     />
                     <RatingDropdown
                         label="V. Timeliness of Service Delivery"
-                        value={formData.serviceTimeliness}
-                        onChange={(value) => handleRatingChange(null, 'serviceTimeliness', value)}
+                        value={formData.timeliness}
+                        onChange={(value) => handleRatingChange(null, 'timeliness', value)}
                     />
                     <RatingDropdown
                         label="VI. Overall Management of the Activity"
-                        value={formData.overallManagement}
-                        onChange={(value) => handleRatingChange(null, 'overallManagement', value)}
+                        value={formData.overall_management}
+                        onChange={(value) => handleRatingChange(null, 'overall_management', value)}
                     />
                 </div>
 
