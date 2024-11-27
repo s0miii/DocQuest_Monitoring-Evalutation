@@ -93,7 +93,7 @@ const EvaluationForm = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-2">Name of attendee_name</label>
+                        <label className="block text-sm font-medium mb-2">Name of Attendee</label>
                         <input
                             type="text"
                             name="attendee_name"
