@@ -416,11 +416,12 @@ class NotificationSerializer(serializers.ModelSerializer):
         return None
 
 class ReviewSerializer(serializers.ModelSerializer):
-    class Meta(object):
+    class Meta:
         model = Review
         fields = [
             'reviewID', 'contentOwnerID', 'content_type', 'source_id',
-            'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
+            'reviewedByID', 'reviewStatus', 'reviewDate', 'comment',
+            'collegeID', 'sequence'
         ]
 
 class ProjectReviewSerializer(serializers.ModelSerializer):
@@ -482,19 +483,26 @@ class CampusSerializer(serializers.ModelSerializer):
         model = Campus
         fields = ['campusID', 'name']
 
+class GetNameAndIDSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = CustomUser
+        fields = ['userID', 'firstname', 'lastname']
+
 class CollegeSerializer(serializers.ModelSerializer):
     campus = CampusSerializer(source='campusID', read_only=True)
+    collegeDean = GetNameAndIDSerializer(read_only=True)
 
     class Meta(object):
         model = College
-        fields = ['collegeID', 'abbreviation', 'title', 'campus']
+        fields = ['collegeID', 'abbreviation', 'title', 'collegeDean', 'campus']
 
 class ProgramSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(source='collegeID', read_only=True)
+    programChair = GetNameAndIDSerializer(read_only=True)
 
     class Meta(object):
         model = Program
-        fields = ['programID', 'abbreviation', 'title', 'college']
+        fields = ['programID', 'abbreviation', 'title', 'programChair', 'college']
 
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
@@ -746,3 +754,18 @@ class GetCampusSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Campus
         fields = ['campusID', 'name']
+
+class GetCollegeDeanSerializer(serializers.ModelSerializer):
+    collegeDean = GetNameAndIDSerializer(read_only=True)
+
+    class Meta:
+        model = College
+        fields = ['collegeDean']
+
+# Serializer to fetch program chair's name
+class GetProgramChairSerializer(serializers.ModelSerializer):
+    programChair = GetNameAndIDSerializer(read_only=True)
+
+    class Meta:
+        model = Program
+        fields = ['programChair']
