@@ -97,31 +97,43 @@ def create_role(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_projects_to_review(request):
+def get_review(request):
     user = request.user
 
-    # Fetch all pending reviews assigned to the user
-    reviews = Review.objects.filter(
+    # Fetch reviews with related content type
+    eligible_reviews = Review.objects.filter(
         reviewedByID=user,
         reviewStatus='pending'
-    )
+    ).select_related('content_type')
 
-    review_data = []
-    for review in reviews:
-        # Resolve the associated source object using GenericForeignKey
-        related_object = review.source  # Resolves the `GenericForeignKey`
+    # Filter for project reviews and sort by sequence
+    project_reviews = []
+    for review in eligible_reviews:
+        # Check if the source is a Project using content_type
+        if review.content_type.model == 'project':
+            try:
+                project = Project.objects.filter(projectID=review.source_id).first()
+                
+                if not project:
+                    continue  # Skip if no project found
+                
+                # Previous review check logic
+                previous_reviews = Review.objects.filter(
+                    source_id=review.source_id,
+                    sequence__lt=review.sequence,
+                    reviewStatus__in=['pending', 'rejected']
+                )
 
-        # Add project details if the related object exists and is a project
-        if related_object and isinstance(related_object, Project):  # Assuming `Project` is the related model
-            review_data.append({
-                "reviewID": review.reviewID,
-                "projectID": related_object.projectID,
-                "projectTitle": related_object.projectTitle,  # Assuming `Project` has `projectTitle`
-                "reviewStatus": review.reviewStatus,
-                "sequence": review.sequence,
-            })
+                if not previous_reviews.exists() or all(r.reviewStatus == 'approved' for r in previous_reviews):
+                    review.source = project  # Attach the project to the review
+                    project_reviews.append(review)
 
-    return Response(review_data, status=status.HTTP_200_OK)
+            except Project.DoesNotExist:
+                continue  # Skip if project does not exist
+
+    # Serialize the filtered reviews
+    serializer = ProjectReviewSerializer(project_reviews, many=True)
+    return Response({"reviews": serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -1111,53 +1123,53 @@ def get_project_review(request, projectID):
     review_serializer = ProjectReviewSerializer(instance=review)
     return Response(review_serializer.data)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_review(request):
-    user = request.user
-    user_roles = user.role.all().values_list('code', flat=True)
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def get_review(request):
+#     user = request.user
+#     user_roles = user.role.all().values_list('code', flat=True)
 
-    # Initialize an empty Q object for OR conditions
-    review_conditions = Q()
+#     # Initialize an empty Q object for OR conditions
+#     review_conditions = Q()
 
-    ## Add conditions based on user roles
-    for role in user_roles:
-        if role == 'prch':
-            # PRCH sees reviews with counter = 0 and content_type_name = 'project'
-            review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='project')
-            review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='project')
-            review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project')
-            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
-        elif role == 'cldn':
-            # CLDN sees reviews with counter = 1 and content_type_name = 'project'
-            review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='project')  #pending iya pa review
-            review_conditions |= Q(approvalCounter__gt=1, reviewStatus='pending', content_type__model='project') #pending pero approved na ni cldn
-            review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project') #approved nas tanan
-            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
-        elif role == 'vpala':
-            # VPALA sees reviews with content_type_name = 'moa'
-            review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='moa')
-            review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='moa')
-            review_conditions |= Q(approvalCounter=2, reviewStatus='approved', content_type__model='moa')
-            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='moa')
-        elif role == 'ecrd':
-            # ECRD sees all reviews
-            review_conditions |= Q(approvalCounter=2, reviewStatus='pending', content_type__model='project')
-            review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='moa')
-            review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project')
-            review_conditions |= Q(approvalCounter=2, reviewStatus='approved', content_type__model='moa')
-            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
-            review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='moa')
+#     ## Add conditions based on user roles
+#     for role in user_roles:
+#         if role == 'prch':
+#             # PRCH sees reviews with counter = 0 and content_type_name = 'project'
+#             review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='project')
+#             review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
+#         elif role == 'cldn':
+#             # CLDN sees reviews with counter = 1 and content_type_name = 'project'
+#             review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='project')  #pending iya pa review
+#             review_conditions |= Q(approvalCounter__gt=1, reviewStatus='pending', content_type__model='project') #pending pero approved na ni cldn
+#             review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project') #approved nas tanan
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
+#         elif role == 'vpala':
+#             # VPALA sees reviews with content_type_name = 'moa'
+#             review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter=2, reviewStatus='approved', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='moa')
+#         elif role == 'ecrd':
+#             # ECRD sees all reviews
+#             review_conditions |= Q(approvalCounter=2, reviewStatus='pending', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=2, reviewStatus='approved', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='moa')
 
-    # Get reviews based on the constructed conditions
-    reviews = Review.objects.filter(review_conditions).order_by('-reviewDate')
+#     # Get reviews based on the constructed conditions
+#     reviews = Review.objects.filter(review_conditions).order_by('-reviewDate')
 
-    serializer = ProjectReviewSerializer(reviews, many=True)
-    return Response({
-        "reviews": serializer.data,
-        "user_roles": list(user_roles),  # Include user roles for debugging
-        "total_count": reviews.count()
-    }, status=status.HTTP_200_OK)
+#     serializer = ProjectReviewSerializer(reviews, many=True)
+#     return Response({
+#         "reviews": serializer.data,
+#         "user_roles": list(user_roles),  # Include user roles for debugging
+#         "total_count": reviews.count()
+#     }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
