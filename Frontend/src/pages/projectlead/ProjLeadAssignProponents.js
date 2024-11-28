@@ -6,7 +6,7 @@ import { FaArrowLeft } from "react-icons/fa";
 
 const ProjLeadAssignProponents = () => {
     const navigate = useNavigate();
-    const [activeTraining, setActiveTraining] = useState("Dle Training");
+    const [activeTraining, setActiveTraining] = useState("Training");
     const [trainingRows, setTrainingRows] = useState([{ id: 1, isEditing: true, proponent: "Select Proponent", checkboxes: [false, false, false, false, false] }]);
     const [dleTrainingRows, setDleTrainingRows] = useState([{ id: 1, isEditing: true, proponent: "Select Proponent", checkboxes: [false, false] }]);
     const [notification, setNotification] = useState("");
@@ -90,7 +90,7 @@ const ProjLeadAssignProponents = () => {
     };
 
     const getColumnName = (index) => {
-        const trainingColumns = ["List of Participants/Daily Attendance Sheet", "Evaluation Sheets/Summary of Evaluation (in Excel form)", "Trainers CV/DTR*", "Modules/Lecture Notes", "Other"];
+        const trainingColumns = ["List of Participants/Daily Attendance Sheet", "Evaluation Sheets/Summary of Evaluation (in Excel form)", "Trainers CV/DTR", "Modules/Lecture Notes", "Other"];
         const dleColumns = ["Modules/Lecture Notes", "Other"];
         return activeTraining === "Training" ? trainingColumns[index] : dleColumns[index];
     };
@@ -144,7 +144,7 @@ const ProjLeadAssignProponents = () => {
                                         <>
                                             <th className="border border-gray-300 p-2 text-center font-semibold">List of Participants/Daily Attendance Sheet</th>
                                             <th className="border border-gray-300 p-2 text-center font-semibold">Evaluation Sheets/Summary of Evaluation (in Excel form)</th>
-                                            <th className="border border-gray-300 p-2 text-center font-semibold">Trainers CV/DTR*</th>
+                                            <th className="border border-gray-300 p-2 text-center font-semibold">Trainers CV/DTR</th>
                                         </>
                                     )}
                                     <th className="border border-gray-300 p-2 text-center font-semibold">Modules/Lecture Notes</th>

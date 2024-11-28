@@ -62,33 +62,8 @@ const ProjLeadAccReport = () => {
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">Placeholder Inc.</p>
                             </div>
                         </div>
-
-                        {/* Project Progress Status */}
-                        <h2 className="text-xl font-semibold text-center mt-8 mb-4">Project Progress Status</h2>
-                        <div className="mt-4 flex flex-col items-center">
-                            <div className="w-2/3 bg-gray-200 rounded-full h-2.5 mb-4">
-                                <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: "50%" }}></div>
-                            </div>
-                            <div className="w-2/3 flex justify-between text-sm text-gray-600">
-                                <div className="text-center">
-                                    <span className="block">25%</span>
-                                    <span>Day 1</span>
-                                </div>
-                                <div className="text-center">
-                                    <span className="block">50%</span>
-                                    <span>Day 2</span>
-                                </div>
-                                <div className="text-center">
-                                    <span className="block">75%</span>
-                                    <span>Day 3</span>
-                                </div>
-                                <div className="text-center">
-                                    <span className="block">100%</span>
-                                    <span>Day 4</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
+
 
                     {/* Records Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6 flex justify-center items-center h-48">
