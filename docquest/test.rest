@@ -51,7 +51,7 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 # submit created proj
 POST http://127.0.0.1:8000/create_project
 Content-Type: application/json
-Authorization: Token 36b758464cbf969b55826b39fa2d695ab370eeb0
+Authorization: Token e6e6593e6d04309abb793f4b5f32494093226458
 
 {
     "userID": 10,
@@ -716,7 +716,7 @@ Content-Type: application/json
 
 GET http://127.0.0.1:8000/get_moa/10/
 Content-Type: application/json
-Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
 
 {}
 
@@ -764,6 +764,22 @@ Content-Type: application/json
 GET http://127.0.0.1:8000/get_review
 Content-Type: application/json
 Authorization: Token 6e868e702d9863622ba0b85dac36ba11dc4391d8
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/college/1/dean/
+Content-Type: application/json
+Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/program/1/chair/
+Content-Type: application/json
+Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
 
 {}
 

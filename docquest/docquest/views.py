@@ -127,35 +127,51 @@ def create_project(request):
         if deliverables_serializer.is_valid():
             deliverables_serializer.save()
         else:
-            # If deliverables creation fails, delete the project and return error
             project.delete()
             return Response(
                 deliverables_serializer.errors, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Create review
+        # Create reviews for all colleges and approvers
         try:
             content_type = ContentType.objects.get(model='project')
-            reviewer_user = CustomUser.objects.filter(role__code='prch').first()
-            
-            if not reviewer_user:
-                project.delete()
-                return Response(
-                    {"error": "No user with the 'director' role found."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+            colleges = request.data.get('approvers', [])
 
-            review_data = {
-                'contentOwnerID': request.user.userID,
-                'content_type': content_type.id,
-                'source_id': project.projectID,
-                'reviewedByID': reviewer_user.userID,
-                'comment': '',
-                'reviewStatus': 'pending'
-            }
-            
-            review_serializer = ReviewSerializer(data=review_data)
+            review_data = []
+            sequence_counter = 1
+
+            for college in colleges:
+                collegeID = college.get('collegeID')
+                program_chair_ids = college.get('programChairs', [])
+                dean_id = college.get('collegeDean')
+
+                # Add reviews for program chairs
+                for chair_id in program_chair_ids:
+                    review_data.append({
+                        'contentOwnerID': request.user.userID,
+                        'content_type': content_type.id,
+                        'source_id': project.projectID,
+                        'reviewedByID': chair_id,
+                        'collegeID': collegeID,
+                        'reviewStatus': 'pending',
+                        'sequence': sequence_counter,
+                    })
+
+                # Add review for college dean
+                review_data.append({
+                    'contentOwnerID': request.user.userID,
+                    'content_type': content_type.id,
+                    'source_id': project.projectID,
+                    'reviewedByID': dean_id,
+                    'collegeID': collegeID,
+                    'reviewStatus': 'pending',
+                    'sequence': sequence_counter,  # Same sequence for program chairs and dean
+                })
+
+                sequence_counter += 1  # Increment sequence for the next college
+
+            review_serializer = ReviewSerializer(data=review_data, many=True)
             if review_serializer.is_valid():
                 review_serializer.save()
             else:
@@ -180,9 +196,9 @@ def create_project(request):
 
             notifications = [
                 Notification(
-                    userID=user, # The current user being notified
-                    content_type=content_type, # The content type object for 'project'
-                    source_id=project.projectID, # ID of the newly created project
+                    userID=user,
+                    content_type=content_type,
+                    source_id=project.projectID,
                     message='New project to review'
                 )
                 for user in director_staff_users
@@ -1041,6 +1057,53 @@ def get_review(request):
         "total_count": reviews.count()
     }, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_college_dean(request, pk):
+    try:
+        college = College.objects.get(pk=pk)
+        serializer = GetCollegeDeanSerializer(college)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except College.DoesNotExist:
+        return Response({"error": "College not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_program_chair(request, pk):
+    try:
+        program = Program.objects.get(pk=pk)
+        serializer = GetProgramChairSerializer(program)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Program.DoesNotExist:
+        return Response({"error": "Program not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def approve_review(request, review_id):
+    review = get_object_or_404(Review, reviewID=review_id)
+    review.reviewStatus = 'approved'
+    review.save()
+
+    # Check if all reviews in the current sequence are approved
+    pending_reviews = Review.objects.filter(
+        sequence=review.sequence,
+        collegeID=review.collegeID,
+        reviewStatus='pending'
+    )
+
+    if not pending_reviews.exists():
+        # Unlock the next sequence
+        next_reviews = Review.objects.filter(
+            sequence=review.sequence + 1,
+            source_id=review.source_id
+        )
+        for next_review in next_reviews:
+            next_review.reviewStatus = 'pending'
+            next_review.save()
+
+    return Response({"message": "Review approved successfully."}, status=status.HTTP_200_OK)
+    
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
