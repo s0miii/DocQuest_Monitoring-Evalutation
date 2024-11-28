@@ -107,8 +107,8 @@ Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 {
-    "project": 2,
-    "templateName": "5th Test: Dapat naa na ang sharable url sa DB",
+    "project": 1,
+    "templateName": "Test Template Try",
     "include_attendee_name": true,
     "include_gender": true,
     "include_college": false,
@@ -231,8 +231,8 @@ Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 {
-    "project": 1,
-    "templateName": "Template 3 Trial with Link",
+    "project": 2,
+    "templateName": "Trial kay mutanaw si kit",
     "include_attendee_name": true,
     "include_gender": true,
     "include_college": true,
@@ -249,20 +249,21 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 ###
 #  Test Token
-GET http://127.0.0.1:8000/monitoring/attendance/fill/jsu0er-aQmCmfkyJCPvdpw/
+GET http://127.0.0.1:8000/monitoring/attendance/fill/Dzi4-0ehtGCftiBdOxPffw/
 Content-Type: application/json
 
 ###
 #  Submit Attendance Record via Sharable Link
-POST http://127.0.0.1:8000/monitoring/attendance/fill/jsu0er-aQmCmfkyJCPvdpw/
+POST http://127.0.0.1:8000/monitoring/attendance/fill/Dzi4-0ehtGCftiBdOxPffw/
 Content-Type: application/json
 
 {
-    "attendee_name": "Clarice Domingo",
+    "attendee_name": "Test if mudawat ug kulang",
     "gender": "Male",
     "college": "CITC",
     "department": "Computer Science",
-    "year_section": "4A",
+    "year_section": "4R6",
+    "agency_office": "test",
     "contact_number": "1234567890"
 
 }
