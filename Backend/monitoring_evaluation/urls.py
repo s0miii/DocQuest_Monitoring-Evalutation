@@ -24,6 +24,10 @@ router.register(r'project_narratives', ProjectNarrativeViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+
+    ### User Role
+    path('user/roles/', get_user_roles, name='get_user_roles'),
+
     ### Checklist & items
     # upload
     path('upload/attendance/<int:project_id>/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),

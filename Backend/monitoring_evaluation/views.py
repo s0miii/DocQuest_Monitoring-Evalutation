@@ -1,7 +1,7 @@
 from rest_framework import status, viewsets, generics
 from rest_framework.views import APIView, View
 from rest_framework.response import Response
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -14,6 +14,18 @@ from docquestapp.models import Project, LoadingOfTrainers
 from .models import *
 from .forms import *
 from .serializers import *
+from .decorators import role_required
+
+### Role Based Access
+
+# expose user roles
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_roles(request):
+    """Fetch roles of the authenticated user."""
+    roles = request.user.roles.values_list('code', flat=True)
+    return Response({"roles": list(roles)})
+
 
 
 class DailyAttendanceUploadView(APIView):
@@ -172,6 +184,7 @@ class OtherFilesUploadView(APIView):
         return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
 
 ## view all submissions
+@role_required(allowed_role_codes=["PJLD"])
 class ChecklistSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -234,6 +247,7 @@ class ChecklistSubmissionsView(APIView):
             })
 
         return Response(submissions, status=200)
+        
 
     
 # assign checklist
@@ -241,6 +255,7 @@ class ChecklistSubmissionsView(APIView):
 class AssignChecklistItemsView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @role_required(allowed_role_codes=["PJLD"])
     def post(self, request):
         project_id = request.data.get('project')
         proponent_id = request.data.get('proponent')
@@ -283,6 +298,7 @@ class AssignChecklistItemsView(APIView):
 class ChecklistItemSubmissionView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @role_required(["PJLD"])
     def get(self, request, project_id):
         try:
             project = Project.objects.get(projectID=project_id, status="approved")
@@ -328,6 +344,7 @@ MODEL_MAP = {
 class UpdateSubmissionStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @role_required(["PJLD"])
     def post(self, request, model_name, submission_id):
         if model_name not in MODEL_MAP:
             return Response({"error": "Invalid model name."}, status=status.HTTP_400_BAD_REQUEST)
@@ -358,6 +375,7 @@ class UpdateSubmissionStatusView(APIView):
 class ProponentSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @role_required(["PJLD"])
     def get(self, request):
         user = request.user  # Get the currently authenticated user
         submissions = {
