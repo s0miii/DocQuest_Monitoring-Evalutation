@@ -104,7 +104,7 @@ Authorization: Token <auth-token>
 #  Create Attendance Template -- working endpoint
 POST http://127.0.0.1:8000/monitoring/attendance_templates/
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
 
 {
     "project": 1,
@@ -121,7 +121,7 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 ### 
 # Retrieve All Attendance Templates
 GET http://127.0.0.1:8000/monitoring/attendance_templates/
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
 
 
 ###
@@ -267,13 +267,14 @@ Content-Type: application/json
 
 ###
 #  Submit Attendance Record via Sharable Link
-POST http://127.0.0.1:8000/monitoring/attendance/fill/KVX9V9_YYRFlO7QRdMAcPw/
+POST http://127.0.0.1:8000/monitoring/attendance/fill/9fxt3582Ote3dMu8SQlcPA/
 Content-Type: application/json
 
 {
     "attendee_name": "8 - 1 day",
     "gender": "Female",
-    "contact_number": "1234567890"
+    "contact_number": "1234567890",
+    "college": "oten",
 
 }
 
@@ -292,5 +293,5 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 #Calculate Number of Attendees per Project
 POST http://127.0.0.1:8000/monitoring/calculate_attendees/3/
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
 

@@ -10,7 +10,7 @@ const LoginPage = () => {
   const [lastname, setLastname] = useState('');
   const [roles, setRoles] = useState([]);
 
-  const navigate =  useNavigate();
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,56 +18,60 @@ const LoginPage = () => {
     // Post the credentials to log in
     axios({
       method: 'post',
-      url: 'https://docquest-production.up.railway.app/auth/token/login/',
+      url: 'http://127.0.0.1:8000/auth/token/login/',
       data: {
         email: email,
         password: password,
       }
     })
-    .then(function (response) {
-      // Extract the token from the response
-      const token = response.data.auth_token;
+      .then(function (response) {
+        // Extract the token from the response
+        const token = response.data.auth_token;
 
-      // Use the token to make the second request
-      return axios({
-        method: 'get',
-        url: 'https://docquest-production.up.railway.app/name_and_roles',
-        headers: {
-          'Authorization': `Token ${token}`,
+        localStorage.setItem('authToken', token);
+
+        // Use the token to make the second request
+        return axios({
+          method: 'get',
+          url: 'http://127.0.0.1:8000/name_and_roles',
+          headers: {
+            'Authorization': `Token ${token}`,
+          }
+        });
+      })
+      .then(function (response) {
+        // Extract firstname, lastname, and roles from the response
+        const { firstname, lastname, roles } = response.data;
+
+        // Set the state for firstname, lastname, and roles
+        setFirstname(firstname);
+        setLastname(lastname);
+
+        // Extract roles into a list of strings
+        const rolesList = roles.map(roleObj => roleObj.role);
+        setRoles(rolesList);
+        console.log("State updated with user data:", { firstname, lastname, rolesList });
+
+        if (rolesList.includes('Proponent')) {
+          navigate('/proponents/projects'); // Redirect proponents to their dashboard
+        } else if (
+          rolesList.includes('program chair') ||
+          rolesList.includes('college dean') ||
+          rolesList.includes('ECR director') ||
+          rolesList.includes('VCAA') ||
+          rolesList.includes('VCRI') ||
+          rolesList.includes('accountant') ||
+          rolesList.includes('chancellor')
+        ) {
+          navigate('/signatory'); // Redirect signatories
+        } else {
+          alert('No valid role found! Please contact the admin.');
         }
+      })
+      .catch(function (error) {
+        // Handle any errors from both requests
+        console.log(error);
       });
-    })
-    .then(function (response) {
-      // Extract firstname, lastname, and roles from the response
-      const { firstname, lastname, roles } = response.data;
-
-      // Set the state for firstname, lastname, and roles
-      setFirstname(firstname);
-      setLastname(lastname);
-
-      // Extract roles into a list of strings
-      const rolesList = roles.map(roleObj => roleObj.role);
-      setRoles(rolesList);
-      console.log("State updated with user data:", { firstname, lastname, rolesList });
-
-      if (rolesList.includes('regular')) {
-        navigate('/user');
-      } else if (
-        rolesList.includes('program chair') | 
-        rolesList.includes('college dean') |
-        rolesList.includes('ECR director') |
-        rolesList.includes('VCAA') |
-        rolesList.includes('VCRI') |
-        rolesList.includes('accountant') |
-        rolesList.includes('chancellor')
-      ) {
-        navigate('/signatory');
-      }
-    })
-    .catch(function (error) {
-      // Handle any errors from both requests
-      console.log(error);
-    });
   };
 
   return (

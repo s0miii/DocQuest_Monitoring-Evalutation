@@ -41,7 +41,7 @@ const ProponentsProjReq = () => {
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">Valueno, Rabosa A.</p>
                             </div>
                         </div>
-                        
+
                         {/* College/Campus, Target Date, Partner Agency */}
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
@@ -68,7 +68,7 @@ const ProponentsProjReq = () => {
                                     <p>List of Participants/Daily Attendance Sheet</p>
                                     <p className="text-gray-500 text-sm">0 document attached</p>
                                 </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/proponents/proj/req/daily-attendance')}>
+                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/proponents/project/:project_id/daily-attendance')}>
                                     View
                                 </button>
                             </div>

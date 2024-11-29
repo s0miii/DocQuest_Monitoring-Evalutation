@@ -29,6 +29,30 @@ router.register(r'project_narratives', ProjectNarrativeViewSet)
 urlpatterns = [
     path('', include(router.urls)),
 
+    ### User Role
+    path('user/roles/', get_user_roles, name='get_user_roles'),
+
+    # view all projects
+    path("user-projects/", UserProjectsView.as_view(), name="user-projects"),
+
+    ### Checklist & items
+    # upload
+    path('upload/attendance/<int:project_id>/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),
+    path('upload/evaluation/<int:project_id>/', SummaryOfEvaluationUploadView.as_view(), name='evaluation_upload'),
+    path('upload/lecture_notes/<int:project_id>/', ModulesLectureNotesUploadView.as_view(), name='lecture_notes_upload'),
+    path('upload/photo/<int:project_id>/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
+    path('upload/other_files/<int:project_id>/', OtherFilesUploadView.as_view(), name='other_files_upload'),
+    # view all submissions of all items
+    path("project/<int:project_id>/checklist_submissions/", ChecklistSubmissionsView.as_view(), name="view_checklist_submissions"),
+    # view submission for a specific item
+    path("project/<int:project_id>/checklist_item/<str:checklist_item_name>/submissions/", ChecklistSubmissionsView.as_view(), name="checklist_item_submissions",),
+    # assign checklist item
+    path('assign/checklist_items/', AssignChecklistItemsView.as_view(), name='assign_checklist_items'),
+    #submission status for project leader
+    path("submission/update/<str:model_name>/<int:submission_id>/", UpdateSubmissionStatusView.as_view(), name="update_submission_status"),
+    # submission status for proponent
+    path("submissions/", ProponentSubmissionsView.as_view(), name="proponent_submissions"),
+
     # Attendance
     path('attendance/fill/<str:token>/', FillAttendanceView.as_view(), name='fill-attendance'),
     path('attendance_templates/<int:project_id>/', CreateAttendanceTemplateView.as_view(), name='create-attendance-template'),
@@ -36,15 +60,6 @@ urlpatterns = [
     # path('attendance/calculate_total/<int:project_id>/', CalculateTotalAttendeesView.as_view(), name='calculate-total-attendees'),
     path('calculate_attendees/<int:project_id>/', CalculateTotalAttendeesView.as_view(), name='calculate-attendees'),
 
-
-    # Checklist
-    path('upload/attendance/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),
-    path('upload/evaluation/', SummaryOfEvaluationUploadView.as_view(), name='evaluation_upload'),
-    path('upload/lecture_notes/', ModulesLectureNotesUploadView.as_view(), name='lecture_notes_upload'),
-    path('upload/photo/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
-    path('upload/other_files/', OtherFilesUploadView.as_view(), name='other_files_upload'),
-    path('assign/checklist/', ChecklistAssignmentView.as_view(), name='checklist_assignment'),
-    
     # Accomplishment Report
     path('create/report/', AccomplishmentReportCreateView.as_view(), name='report_create'),
     path('report/<int:pk>/', AccomplishmentReportDetailView.as_view(), name='report_detail'),
