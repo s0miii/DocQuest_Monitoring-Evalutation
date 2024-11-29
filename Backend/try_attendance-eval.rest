@@ -231,15 +231,15 @@ Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 {
-    "project": 1,
-    "templateName": "Trial #2 for expiration and count functions",
+    "project": 4,
+    "templateName": "Day 2: Multi Day Project Attendance for Project 4",
     "include_attendee_name": true,
     "include_gender": true,
     "include_college": false,
     "include_department": false,
     "include_year_section": false,
     "include_agency_office": false,
-    "include_contact_number": false,
+    "include_contact_number": true,
     "expiration_date": "2024-11-30"
 }
 
@@ -255,7 +255,7 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 
 ###
-#  List All Templates Created - working endpoint
+#  List All Templates Created for specific template- working endpoint
 GET http://127.0.0.1:8000/monitoring/attendance_templates/
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
@@ -266,16 +266,12 @@ Content-Type: application/json
 
 ###
 #  Submit Attendance Record via Sharable Link
-POST http://127.0.0.1:8000/monitoring/attendance/fill/Kxj6cJBdfZ3iKJYWAnMHLQ/
+POST http://127.0.0.1:8000/monitoring/attendance/fill/KVX9V9_YYRFlO7QRdMAcPw/
 Content-Type: application/json
 
 {
-    "attendee_name": "Test for expired link",
-    "gender": "Male",
-    "college": "CITC",
-    "department": "Computer Science",
-    "year_section": "4R6",
-    "agency_office": "test",
+    "attendee_name": "7 - 1 day",
+    "gender": "Female",
     "contact_number": "1234567890"
 
 }
@@ -291,9 +287,9 @@ GET http://127.0.0.1:8000/monitoring/attendance_records/4/
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 ###
-#Calculate Number of Attendees per Project
-POST http://127.0.0.1:8000/monitoring/calculate_attendees/1/
 # POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/
+#Calculate Number of Attendees per Project
+POST http://127.0.0.1:8000/monitoring/calculate_attendees/3/
 Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
