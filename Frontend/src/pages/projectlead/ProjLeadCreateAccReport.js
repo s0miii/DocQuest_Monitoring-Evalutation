@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import { FaArrowLeft } from "react-icons/fa";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
-import axios from "axios";
 
 const ProjLeadCreateAccReport = () => {
     const [formData, setFormData] = useState({
@@ -59,15 +58,8 @@ const ProjLeadCreateAccReport = () => {
         setPhotos(newPhotos);
     };
 
-<<<<<<< HEAD
-    const handleFileChange = (index, file) => {
-        const newPhotos = [...photos];
-        newPhotos[index].file = file;
-        setPhotos(newPhotos);
-=======
     const handlePhotoClick = (url) => {
         setModalPhoto(url);
->>>>>>> 50d8e4089be3c284c727c5cf0ff36e2bee451fd6
     };
 
     const handleDescriptionChange = (index, description) => {
@@ -93,11 +85,7 @@ const ProjLeadCreateAccReport = () => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-<<<<<<< HEAD
-                        <button className="my-5 mr-3" onClick={() => handleViewClick('/projlead/proj/req/accomplishment-report')}>
-=======
                         <button className="my-5 mr-3" onClick={() => navigate('/projlead/proj/req/accomplishment-report')}>
->>>>>>> 50d8e4089be3c284c727c5cf0ff36e2bee451fd6
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold text-left">Create Accomplishment Report</h1>
