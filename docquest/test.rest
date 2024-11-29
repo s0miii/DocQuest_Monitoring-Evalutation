@@ -11,7 +11,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
-{ "email": "bsitchair@gmail.com", "password": "testpass"}
+{ "email": "chalbert@gmail.com", "password": "testpass"}
 
 ###
 
@@ -51,12 +51,12 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 # submit created proj
 POST http://127.0.0.1:8000/create_project
 Content-Type: application/json
-Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
+Authorization: Token da9a4ba5f34ece2c626ab030f7dc9a08ecb3dea8
 
 {
     "userID": 10,
     "programCategory": [1, 2],
-    "projectTitle": "TestTest sakit E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
+    "projectTitle": "again TestTest sakit E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
     "projectType": "New Project",
     "projectCategory": [1, 2],
     "researchTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
@@ -650,18 +650,6 @@ Authorization: Token 82df2da1fc75d66af76d7d9bfc187077474a7a95
 
 ###
 
-POST http://127.0.0.1:8000/review_project
-Content-Type: application/json
-Authorization: Token 82df2da1fc75d66af76d7d9bfc187077474a7a95
-
-{
-    "reviewID": 56,
-    "action": "approve",
-    "comment": "Looks good!"
-}
-
-###
-
 GET http://127.0.0.1:8000/get_users_exclude_roles
 Content-Type: application/json
 Authorization: Token e6e6593e6d04309abb793f4b5f32494093226458
@@ -792,7 +780,15 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
-{ "email": "mike@gmail.com", "password": "testpass"}
+{ "email": "citcdean@gmail.com", "password": "testpass"}
+
+###
+
+GET http://127.0.0.1:8000/get_reviews_with_projectID/53/
+Content-Type: application/json
+Authorization: Token da9a4ba5f34ece2c626ab030f7dc9a08ecb3dea8
+
+{}
 
 ###
 
@@ -814,7 +810,7 @@ Authorization: Token e5fbb4553d71f2788316021c0446ed513404e355
 
 GET http://127.0.0.1:8000/get_review
 Content-Type: application/json
-Authorization: Token 37926de499ce5674b7ad9f051cf6a41f464cc8be
+Authorization: Token fa217666e813475f2ce3f4113b3aeea25841d9ec
 
 {}
 
@@ -827,6 +823,18 @@ Authorization: Token ba2d68181619cceeea9c58c5e60e38c36c66685d
 {}
 
 ###director
+
+POST http://127.0.0.1:8000/review_project
+Content-Type: application/json
+Authorization: Token ba2d68181619cceeea9c58c5e60e38c36c66685d
+
+{
+    "reviewID": 71,
+    "action": "approve",
+    "comment": "Looks good!"
+}
+
+###
 
 GET http://127.0.0.1:8000/college/1/dean/
 Content-Type: application/json

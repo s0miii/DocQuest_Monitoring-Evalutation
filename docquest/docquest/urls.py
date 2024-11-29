@@ -41,6 +41,8 @@ urlpatterns = [
     #mag review
     path('review_project', views.review_project),
 
+    path('get_reviews_with_projectID/<int:pk>/', views.get_reviews_with_projectID),
+
     # update signatory sa project
     # path('update_signatory_status/<int:signatory_id>/', views.update_signatory_status),
 
