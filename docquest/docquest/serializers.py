@@ -277,7 +277,7 @@ class PostMOASerializer(serializers.ModelSerializer):
     class Meta:
         model = MOA
         fields = [
-            'moaID', 'partyADescription', 'partyBDescription', 'coverageAndEffectivity', 'confidentialityClause',
+            'moaID', 'partyDescription', 'coverageAndEffectivity', 'confidentialityClause',
             'termination', 'witnesseth', 'partyObligation', 'firstParty', 'secondParty', 'witnesses'
         ]
 
