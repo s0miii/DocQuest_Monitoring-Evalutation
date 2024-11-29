@@ -270,7 +270,7 @@ POST http://127.0.0.1:8000/monitoring/attendance/fill/KVX9V9_YYRFlO7QRdMAcPw/
 Content-Type: application/json
 
 {
-    "attendee_name": "7 - 1 day",
+    "attendee_name": "8 - 1 day",
     "gender": "Female",
     "contact_number": "1234567890"
 
@@ -289,7 +289,7 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 ###
 # POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/
 #Calculate Number of Attendees per Project
-POST http://127.0.0.1:8000/monitoring/calculate_attendees/3/
+POST http://127.0.0.1:8000/monitoring/calculate_attendees/6/
 Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
