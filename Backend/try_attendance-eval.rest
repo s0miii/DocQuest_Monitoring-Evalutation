@@ -1,0 +1,296 @@
+###
+# Create an Evaluation
+POST http://127.0.0.1:8000/evaluation/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "trainer": 1,
+    "project": 1,
+    "attendee_name": "John Doe",
+    "relevance_of_topics": 5,
+    "organizational_flow": 5,
+    "learning_methods": 4,
+    "technology_use": 5,
+    "time_efficiency": 4,
+    "mastery_subject": 5,
+    "preparedness": 5,
+    "audience_participation": 5,
+    "interest_level": 5,
+    "handle_questions": 4,
+    "voice_personality": 4,
+    "visual_aids": 5,
+    "venue_assessment": 5,
+    "timeliness": 5,
+    "overall_management": 5
+}
+
+###
+
+# Generate Evaluation URL
+GET http://127.0.0.1:8000/monitoring/evaluation/1/generate_evaluation_url/?project_id=1
+#GET http://127.0.0.1:8000/evaluation/<trainer_id>/generate_evaluation_url/?project_id=<project_id>
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+
+# Modified generate Evaluation URL
+GET http://127.0.0.1:8000/127.0.0.1:8000/evaluations/generate/1/1/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+
+# Submit Evaluation Using Form
+POST http://127.0.0.1:8000/evaluation/submit/
+Content-Type: application/json
+
+{
+    "project_id": 1,
+    "trainer_id": 1,
+    "access_token": "<access-token>",
+    "relevance_of_topics": 5,
+    "organizational_flow": 4,
+    "learning_methods": 4,
+    "technology_use": 5,
+    "time_efficiency": 5,
+    "mastery_subject": 4,
+    "preparedness": 4,
+    "audience_participation": 5,
+    "interest_level": 5,
+    "handle_questions": 4,
+    "voice_personality": 4,
+    "visual_aids": 5,
+    "venue_assessment": 5,
+    "timeliness": 4,
+    "overall_management": 5,
+    "useful_concepts": "Effective training methods.",
+    "improvement_areas": "None",
+    "additional_comments": "Great session!"
+}
+
+###
+
+# Get Evaluation Details for a Trainer
+GET http://127.0.0.1:8000/evaluation/1/
+Content-Type: application/json
+Authorization: Token <auth-token>
+
+###
+
+# Get All Evaluations for a Project
+GET http://127.0.0.1:8000/evaluation/project/1/
+Content-Type: application/json
+Authorization: Token <auth-token>
+
+###
+
+# Get Average Rating for a Project
+GET http://127.0.0.1:8000/evaluation/project/1/average-rating/
+Content-Type: application/json
+Authorization: Token <auth-token>
+
+###
+
+# View Evaluation Summary
+GET http://127.0.0.1:8000/evaluation/summary/
+Content-Type: application/json
+Authorization: Token <auth-token>
+
+# -------------------------------------------------------
+
+###
+#  Create Attendance Template -- working endpoint
+POST http://127.0.0.1:8000/monitoring/attendance_templates/
+Content-Type: application/json
+Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
+
+{
+    "project": 1,
+    "templateName": "Test Template Try",
+    "include_attendee_name": true,
+    "include_gender": true,
+    "include_college": false,
+    "include_department": false,
+    "include_year_section": false,
+    "include_agency_office": false,
+    "include_contact_number": true
+}
+
+### 
+# Retrieve All Attendance Templates
+GET http://127.0.0.1:8000/monitoring/attendance_templates/
+Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
+
+
+###
+# Retrieve Specific Attendance Template
+GET http://127.0.0.1:8000/monitoring/attendance_templates/18/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+###
+# Update an Attendance Template
+PUT http://127.0.0.1:8000/monitoring/attendance_templates/5/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "project": 1,
+    "templateName": "Updated Template",
+    "include_attendee_name": true,
+    "include_gender": true,
+    "include_college": true,
+    "include_department": true,
+    "include_year_section": true,
+    "include_agency_office": false,
+    "include_contact_number": true
+}
+
+
+###
+# Delete an Attendance Template
+DELETE http://127.0.0.1:8000/monitoring/attendance_templates/1/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+# Submit Attendance Record - working endpoint
+POST http://127.0.0.1:8000/monitoring/attendance_records/1/5/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "attendee_name": "To Be Deleted",
+    "gender": "Male",
+    "college": "College of Information Technology & Computing",
+    "department": "Information Technology",
+    "year_section": "4th Year - IT4R6",
+    "contact_number": "1234567890"
+}
+
+###
+# Retrieve All Attendance Record - dapat authenticated ang token di pako sure unsaon but nag try rakog token from other user
+GET http://127.0.0.1:8000/monitoring/attendance_records/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+# Retrieve Attendance Record for a Specific Record ID - dapat authenticated ang token di pako sure unsaon but nag try rakog token from other user
+GET http://127.0.0.1:8000/monitoring/attendance_records/2/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+### 
+# Retrieve All Attendance Records for a Project - working endpoint
+GET http://127.0.0.1:8000/monitoring/attendance_records/project/1/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+###
+# Update an Attendance Record - working endpoint
+PUT http://127.0.0.1:8000/monitoring/attendance_records/2/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "project": 1,
+    "template": 5,
+    "attendee_name": "Wynoah Louis Tabasan",
+    "gender": "Female",
+    "college": "College of Information Technology & Computing",
+    "department": "Information Technology",
+    "year_section": "4th Year - IT4R6",
+    "contact_number": "1234567890"
+}
+
+
+###
+# Delete an Attendance Record - working
+DELETE http://127.0.0.1:8000/monitoring/attendance_records/3/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+# ----mga di pa mugana pero basin needed
+###
+# Generate Attendance Report
+GET http://127.0.0.1:8000/monitoring/attendance_reports/1/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+###
+# Search Attendance Records
+GET http://127.0.0.1:8000/monitoring/attendance_records/search/?attendee_name=Kit
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+# Test for Sharable Link in Attendance
+
+###
+#  Create Attendance Template  - working endpoint with sharable link
+POST http://127.0.0.1:8000/monitoring/attendance_templates/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "project": 4,
+    "templateName": "Day 2: Multi Day Project Attendance for Project 4",
+    "include_attendee_name": true,
+    "include_gender": true,
+    "include_college": false,
+    "include_department": false,
+    "include_year_section": false,
+    "include_agency_office": false,
+    "include_contact_number": true,
+    "expiration_date": "2024-11-30"
+}
+
+###
+# Update other fields --> change expiration date for testing"
+PATCH http://127.0.0.1:8000/monitoring/attendance_templates/18/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "expiration_date": "2024-01-01"
+}
+
+
+###
+#  List All Templates Created for specific template- working endpoint
+GET http://127.0.0.1:8000/monitoring/attendance_templates/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+#  Test Token
+GET http://127.0.0.1:8000/monitoring/attendance/fill/Kxj6cJBdfZ3iKJYWAnMHLQ/
+Content-Type: application/json
+
+###
+#  Submit Attendance Record via Sharable Link
+POST http://127.0.0.1:8000/monitoring/attendance/fill/9fxt3582Ote3dMu8SQlcPA/
+Content-Type: application/json
+
+{
+    "attendee_name": "8 - 1 day",
+    "gender": "Female",
+    "contact_number": "1234567890",
+    "college": "oten",
+
+}
+
+###
+#  Retrieve All Attendance Records for a Project - working endpoint
+GET http://127.0.0.1:8000/monitoring/attendance_records/project/1/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+#  Retrieve a Specific Attendance Record
+GET http://127.0.0.1:8000/monitoring/attendance_records/4/
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+# POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/
+#Calculate Number of Attendees per Project
+POST http://127.0.0.1:8000/monitoring/calculate_attendees/1/
+Content-Type: application/json
+Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
+

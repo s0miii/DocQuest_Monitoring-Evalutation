@@ -1,8 +1,11 @@
-from django.db import models
+from django.db import models, IntegrityError
+from django.db.models import Avg
 from docquestapp.models import Project, CustomUser, LoadingOfTrainers
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+import secrets
+from datetime import date
 
 ### Checklist Items
 
@@ -231,8 +234,7 @@ class Evaluation(models.Model):
     stored_overall_rating = models.IntegerField(null=True, blank=True, verbose_name="Overall Rating")
     submitted_at = models.DateTimeField(default=timezone.now, verbose_name="Date Submitted")
     evaluation_number = models.IntegerField(null=True, blank=True, verbose_name="No.")
-
-
+    access_token = models.CharField(max_length=255, unique=True, blank=True, null=True)
      
     def calculate_overall_rating(self):
         ratings = [
@@ -253,13 +255,17 @@ class Evaluation(models.Model):
             self.overall_management
         ]
         
-        # Filter out None values and calculate the average
         total_ratings = [r for r in ratings if r is not None]
         average_rating = sum(total_ratings) / len(total_ratings) if total_ratings else 0 
         return round(average_rating)
     
     def save(self, *args, **kwargs):
-        # Calculate overall_rating before saving
+        if self.project.status != 'approved':
+            raise ValueError(f"Evaluations can only be created for approved projects.")
+
+        if not self.access_token:
+            self.access_token = secrets.token_urlsafe(16)
+
         self.stored_overall_rating = self.calculate_overall_rating()
 
         if not self.evaluation_number:
@@ -275,12 +281,83 @@ class Evaluation(models.Model):
         super().save(*args, **kwargs)
    
     def get_absolute_url(self):
-        return reverse('evaluation_form', args=[str(self.id)])
+        return reverse('evaluation_form', args=[str(self.trainer.id), str(self.project.id)]) + f"?access_token={self.access_token}"
 
     def __str__(self):
         return f"Evaluation for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"
-
     
+    # This calculates/aggregates the average rating for all trainers sa specific project
+    @staticmethod
+    def get_project_average_rating(project_id):
+        evaluations = Evaluation.objects.filter(project_id=project_id)
+        return evaluations.aggregate(average_rating=Avg('stored_overall_rating'))['average_rating'] or 0
+    
+# Attendance Template and Attendance Record Model
+class AttendanceTemplate(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attendance_templates")
+    templateName = models.CharField(max_length=255, default="Attendance Template")    
 
+    include_attendee_name = models.BooleanField(default=False)
+    include_gender = models.BooleanField(default=False)
+    include_college = models.BooleanField(default=False)
+    include_department = models.BooleanField(default=False)
+    include_year_section = models.BooleanField(default=False)
+    include_agency_office = models.BooleanField(default=False)
+    include_contact_number = models.BooleanField(default=False)
+    
+    sharable_link = models.URLField(max_length=500, blank=True, null=True)
+    token = models.CharField(max_length=32, unique=True, default=secrets.token_urlsafe(16))
+    expiration_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def is_valid(self):
+        """Check if the template is still valid based on the expiration date."""
+        if self.expiration_date:
+            return date.today() <= self.expiration_date
+        return True
 
+    def __str__(self):
+        return f"{self.templateName} for {self.project.projectTitle}"    
+    
+    def save(self, *args, **kwargs):
+        # Generate a unique token if wala pa
+        if not self.token:
+            self.token = secrets.token_urlsafe(16)
+
+        while True: 
+            try:
+                # Save the record
+                super().save(*args, **kwargs)
+                break
+            except IntegrityError:  # If a duplicate token error occurs, regenerate the token
+                self.token = secrets.token_urlsafe(16)
+
+        # Generate the sharable link if it does not exist
+        if not self.sharable_link:
+            base_url = "http://127.0.0.1:8000/monitoring/attendance/fill"
+            self.sharable_link = f"{base_url}/{self.token}/"
+class TotalAttendees(models.Model):
+    project = models.OneToOneField('docquestapp.Project', on_delete=models.CASCADE, related_name="total_attendees")
+    total_attendees = models.PositiveIntegerField(default=0)
+    average_attendees = models.FloatField(default=0.0)
+    num_templates = models.PositiveIntegerField(default=0)
+    calculated_at = models.DateTimeField(auto_now=True) 
+
+    def __str__(self):
+        return f"Total Attendees for {self.project.projectTitle}: {self.total_attendees}"       
+
+# Created attendance record from the template
+class CreatedAttendanceRecord(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    template = models.ForeignKey(AttendanceTemplate, on_delete=models.CASCADE)
+    attendee_name = models.CharField(max_length=255, null=True, blank=True)
+    gender = models.CharField(max_length=50, null=True, blank=True)
+    college = models.CharField(max_length=255, null=True, blank=True)
+    department = models.CharField(max_length=255, null=True, blank=True)
+    year_section = models.CharField(max_length=255, null=True, blank=True)
+    agency_office = models.CharField(max_length=255, null=True, blank=True)
+    contact_number = models.CharField(max_length=50, null=True, blank=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Record for {self.project.projectTitle} submitted at {self.submitted_at}"

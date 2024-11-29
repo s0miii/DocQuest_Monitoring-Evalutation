@@ -9,8 +9,11 @@ router = DefaultRouter()
 # router.register(r'checklists', ChecklistViewSet)
 # router.register(r'documents', DocumentViewSet)
 # router.register(r'progress', ProgressViewSet)
-router.register(r'evaluation', EvaluationViewSet)
-### Checklist & Items
+router.register(r'evaluation', EvaluationViewSet, basename='evaluation')
+router.register(r'attendance_templates', AttendanceTemplateViewSet, basename='attendance_template')
+router.register(r'attendance_records', AttendanceRecordViewSet, basename='attendance_record')
+
+### Checklist Items
 router.register(r'daily_attendance', DailyAttendanceRecordViewSet)
 router.register(r'evaluations', SummaryOfEvaluationViewSet)
 router.register(r'lecture_notes', ModulesLectureNotesViewSet)
@@ -20,6 +23,7 @@ router.register(r'checklist_assignments', ChecklistAssignmentViewSet)
 router.register(r'accomplishment_reports', AccomplishmentReportViewSet)
 router.register(r'prexc_achievements', PREXCAchievementViewSet)
 router.register(r'project_narratives', ProjectNarrativeViewSet)
+
 
 
 urlpatterns = [
@@ -49,7 +53,13 @@ urlpatterns = [
     # submission status for proponent
     path("submissions/", ProponentSubmissionsView.as_view(), name="proponent_submissions"),
 
-    
+    # Attendance
+    path('attendance/fill/<str:token>/', FillAttendanceView.as_view(), name='fill-attendance'),
+    path('attendance_templates/<int:project_id>/', CreateAttendanceTemplateView.as_view(), name='create-attendance-template'),
+    path('attendance_records/<int:projectID>/<int:template_id>/', SubmitAttendanceRecordView.as_view(), name='submit-attendance-record'),
+    # path('attendance/calculate_total/<int:project_id>/', CalculateTotalAttendeesView.as_view(), name='calculate-total-attendees'),
+    path('calculate_attendees/<int:project_id>/', CalculateTotalAttendeesView.as_view(), name='calculate-attendees'),
+
     # Accomplishment Report
     path('create/report/', AccomplishmentReportCreateView.as_view(), name='report_create'),
     path('report/<int:pk>/', AccomplishmentReportDetailView.as_view(), name='report_detail'),
@@ -57,8 +67,14 @@ urlpatterns = [
     path('create/project_narrative/', ProjectNarrativeCreateView.as_view(), name='project_narrative_create'),
 
     # Evaluation
+    # path(
+    #     "evaluation/generate/<int:trainer_id>/<int:project_id>/",
+    #     EvaluationViewSet.generate_evaluation_url,
+    #     name="generate_evaluation_url",
+    # ),
+    path('evaluation/generate_evaluation_url/', EvaluationViewSet.as_view({'get': 'generate_evaluation_url'})),
     path('evaluation/<int:trainer_id>/<int:project_id>/', evaluation_form_view, name='evaluation_form'),
+    path('evaluation/<int:project_id>/', evaluation_form_view, name='evaluation_form_project_only'),
     path('evaluation_thank_you/', TemplateView.as_view(template_name="thank_you.html"), name='evaluation_thank_you'),
     path('evaluation_summary/', evaluation_summary_view, name='evaluation_summary'),
-
 ]
