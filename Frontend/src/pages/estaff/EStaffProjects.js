@@ -19,10 +19,11 @@ const EStaffProjects = () => {
             <div className="flex-1 ml-[20%]"> 
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
+
                     <h1 className="text-2xl font-semibold mb-5">Projects Overview</h1>
 
                     {/* Approved, Pending, Rejected UI */}
-                    <div className="grid grid-cols-3 gap-4 mb-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
                         {/* Not Yet Started */}
                         <div className="bg-orange-500 text-white rounded-lg p-6 flex flex-col items-center justify-center">
                             <h2 className="text-lg font-semibold">Not Yet Started</h2>
@@ -64,7 +65,7 @@ const EStaffProjects = () => {
                                         <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Title</th>
                                         <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Target Date</th>
                                         <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Partner Agency</th>
-                                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Status of Accomplishment Report</th>
+                                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Project Progress</th>
                                         <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase"> </th>
                                     </tr>
                                 </thead>
@@ -75,7 +76,7 @@ const EStaffProjects = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">Tesda Vocational</td>
                                         <td className="px-6 py-4 whitespace-nowrap">May 2024</td>
                                         <td className="px-6 py-4 whitespace-nowrap">Placeholder Inc.</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">Incomplete</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">0 %</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <button className="text-black underline pr-3" onClick={() => handleViewClick('/estaff/proj/monitoring')}>
                                                 View
@@ -99,6 +100,7 @@ const EStaffProjects = () => {
                 </div>
             </div>
         </div>
+
     );
 }
 

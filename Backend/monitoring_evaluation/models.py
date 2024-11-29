@@ -11,62 +11,96 @@ from datetime import date
 
 # Daily Attendance Record
 class DailyAttendanceRecord(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="daily_attendance_records")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="daily_attendance_submissions", null=True)
     attendance_file = models.FileField(upload_to="attendance_records/", null=True, blank=True)
     total_attendees = models.PositiveIntegerField(null=True, blank=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
+    
 
     def __str__(self):
         return f"Attendance Record for {self.project.projectTitle} by {self.proponent.firstname} + {self.proponent.lastname} on {self.date_uploaded.date()}"
 
 # Evaluation Summary
 class SummaryOfEvaluation(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluation_summaries")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="evaluation_submissions", null=True)
     summary_file = models.FileField(upload_to="evaluation_summaries/", null=True, blank=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
 
 # Modules/Lecture Notes
 class ModulesLectureNotes(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="lecture_notes")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="lecture_notes_submissions", null=True)
     module_file = models.FileField(upload_to="modules/", null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
 
 # Photo Documentation
 class PhotoDocumentation(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="photo_documentations")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="photo_documentations", null=True)
     photo = models.ImageField(upload_to="photo_documentations/", null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
 
 # Other FIles
 class OtherFiles(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="other_files")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="other_files_submissions", null=True)
     file = models.FileField(upload_to="other_files/", null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
 
 ## Assign Checklist Item
-
 CustomUser = get_user_model()
+
 class ChecklistAssignment(models.Model):
-    
-    # Links checklist items to proponents for a specific project
-    # Each assignment refers to a specific checklist model
     project = models.ForeignKey(Project, related_name="checklist_assignments", on_delete=models.CASCADE)
     proponent = models.ForeignKey(CustomUser, related_name="assigned_checklists", on_delete=models.CASCADE)
 
-    # Relationships to specific checklist models
-    daily_attendance = models.ForeignKey(DailyAttendanceRecord, null=True, blank=True, on_delete=models.SET_NULL)
-    summary_of_evaluation = models.ForeignKey(SummaryOfEvaluation, null=True, blank=True, on_delete=models.SET_NULL)
-    modules_lecture_notes = models.ForeignKey(ModulesLectureNotes, null=True, blank=True, on_delete=models.SET_NULL)
-    other_files = models.ForeignKey(OtherFiles, null=True, blank=True, on_delete=models.SET_NULL)
-    photo_documentation = models.ForeignKey(PhotoDocumentation, null=True, blank=True, on_delete=models.SET_NULL)
+    # Boolean fields to represent the state of each checklist item
+    can_submit_daily_attendance = models.BooleanField(default=False)
+    can_submit_summary_of_evaluation = models.BooleanField(default=False)
+    can_submit_modules_lecture_notes = models.BooleanField(default=False)
+    can_submit_other_files = models.BooleanField(default=False)
+    can_submit_photo_documentation = models.BooleanField(default=False)
 
     is_completed = models.BooleanField(default=False)
     completion_date = models.DateTimeField(null=True, blank=True)
@@ -74,24 +108,6 @@ class ChecklistAssignment(models.Model):
     def __str__(self):
         return f"Checklist Assignment for {self.proponent.firstname + self.proponent.lastname} on {self.project.projectTitle}"
 
-    def mark_as_completed(self):
-        """
-        Marks this assignment as completed and sets the completion date.
-        """
-        from django.utils.timezone import now
-
-        self.is_completed = True
-        self.completion_date = now()
-        self.save()
-
-    @classmethod
-    def calculate_progress(cls, project):
-        """
-        Calculates progress for a project based on completed assignments.
-        """
-        total_items = cls.objects.filter(project=project).count()
-        completed_items = cls.objects.filter(project=project, is_completed=True).count()
-        return (completed_items / total_items) * 100 if total_items > 0 else 0
 
 # Accomplishment Report Model
 class AccomplishmentReport(models.Model):

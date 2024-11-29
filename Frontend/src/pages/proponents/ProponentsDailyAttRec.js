@@ -3,19 +3,72 @@ import Topbar from "../../components/Topbar";
 import { useNavigate } from 'react-router-dom';
 import ProponentsSideBar from "../../components/ProponentsSideBar";
 import { FaArrowLeft } from "react-icons/fa";
+import { useParams } from 'react-router-dom';
 
 const ProponentsDailyAttRec = () => {
     const navigate = useNavigate();
+    const { project_id } = useParams(); // Extract project_id from the URL
 
-    const handleViewClick = (path) => {
-        navigate(path);
-    }
+    // Form states
+    const [date, setDate] = useState('');
+    const [description, setDescription] = useState("");
+    const [totalAttendees, setAttendees] = useState(0);
+    const [attachedFiles, setAttachedFiles] = useState([]); // Array to handle multiple files
 
-    const [attachedFiles, setAttachedFiles] = useState([]);
-
+    // Handle file selection
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
+    };
+
+    // Function for submission
+    const handleSubmit = async () => {
+        const token = localStorage.getItem("authToken"); // Retrieve token for authentication
+
+        if (!token) {
+            alert("User not logged in or invalid session.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('description', description); // Append description
+        formData.append('total_attendees', totalAttendees); // Append total attendees
+        formData.append('date', date); // Append date
+
+        // Append files to form data
+        attachedFiles.forEach((file, index) => {
+            formData.append(`attendance_file_${index}`, file);
+        });
+
+        try {
+            // Send POST request to the backend
+            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/attendance/${project_id}/`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Token ${token}`, // Include token for authentication
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Submission successful:", data);
+                alert("Submission successful!");
+            } else {
+                const errorData = await response.json();
+                console.error("Submission failed:", errorData);
+                alert(`Error: ${errorData.error || "Submission failed!"}`);
+            }
+        } catch (error) {
+            console.error("Error during submission:", error);
+            alert("An error occurred. Please try again later.");
+        }
+    };
+
+
+    // Navigation handler
+    const handleViewClick = (path) => {
+        navigate(path);
     };
 
     return (
@@ -32,7 +85,7 @@ const ProponentsDailyAttRec = () => {
                         <button className="mr-2" onClick={() => handleViewClick('/proponents/proj/req')}>
                             <FaArrowLeft />
                         </button>
-                        <h1 className="text-2xl font-semibold">Daily Attendance Record</h1>
+                        <h1 className="text-2xl font-semibold">Daily Attendance Record {project_id}</h1>
                     </div>
                     {/* Project Details and Progress Status Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
@@ -48,7 +101,7 @@ const ProponentsDailyAttRec = () => {
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">Tabasan, Wynoah Louis</p>
                             </div>
                         </div>
-                        
+
                         {/* College/Campus, Target Date, Partner Agency */}
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
@@ -78,6 +131,8 @@ const ProponentsDailyAttRec = () => {
                                     type="text"
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
                                     placeholder="Enter Description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
                                 />
                             </div>
                             <div>
@@ -85,6 +140,8 @@ const ProponentsDailyAttRec = () => {
                                 <input
                                     type="date"
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
                                 />
                             </div>
                             <div>
@@ -93,6 +150,8 @@ const ProponentsDailyAttRec = () => {
                                     type="number"
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
                                     placeholder="Number of Attendees"
+                                    value={totalAttendees}
+                                    onChange={(e) => setAttendees(e.target.value)}
                                 />
                             </div>
                         </div>
@@ -131,10 +190,12 @@ const ProponentsDailyAttRec = () => {
                         <div className="flex justify-center">
                             <button
                                 type="button"
+                                onClick={handleSubmit}
                                 className="bg-yellow-500 text-white font-bold py-2 px-12 rounded-lg hover:bg-yellow-600 transition"
                             >
                                 Submit
                             </button>
+
                         </div>
                     </div>
                 </div>

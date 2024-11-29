@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar";
@@ -7,11 +7,18 @@ import { FaArrowLeft } from "react-icons/fa";
 const EStaffProjMonitoring = ({ totalRequirements, completedRequirements }) => {
     const navigate = useNavigate();
 
+    const [projectDetails, setProjectDetails] = useState({
+        title: "Tesda Vocational",
+        leader: "Tabasan, Wynoah Louis",
+        college: "CEA",
+        targetDate: "May 2024",
+        partnerAgency: "Placeholder Inc."
+    });
+
     const handleViewClick = (path) => {
         navigate(path);
     }
 
-    // Calculate the progress percentage, ensuring it does not exceed 100%
     const progressPercentage = totalRequirements > 0 
         ? Math.min((completedRequirements / totalRequirements) * 100, 100) 
         : 0;
@@ -35,36 +42,33 @@ const EStaffProjMonitoring = ({ totalRequirements, completedRequirements }) => {
 
                     {/* Project Details and Progress Status Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-center mb-4">Project Details</h2>
                         <div className="grid grid-cols-2 gap-4">
-                            {/* Project Title and Leader */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Title</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Tesda Vocational</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.title}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Leader</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Valueno, Rabosa A.</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.leader}</p>
                             </div>
                         </div>
-                        
-                        {/* College/Campus, Target Date, Partner Agency */}
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">College/Campus</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">CEA</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.college}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Target Date</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">May 2024</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.targetDate}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Partner Agency</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Placeholder Inc.</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.partnerAgency}</p>
                             </div>
                         </div>
-
-                        {/* Project Progress Status */}
-                        <h2 className="text-xl font-semibold text-center mt-8 mb-4">Project Progress Status</h2>
+                            {/* Project Progress Status */}
+                            <h2 className="text-xl font-semibold text-center mt-8 mb-4">Project Progress Status</h2>
                             <div className="mt-4 flex flex-col items-center">
                                 <div className="w-2/3 bg-gray-200 rounded-full h-2.5 mb-4">
                                     <div
@@ -77,7 +81,6 @@ const EStaffProjMonitoring = ({ totalRequirements, completedRequirements }) => {
                                 </div>
                             </div>
                         </div>
-
 
                     {/* Submitted Requirements Section */}
                     <h2 className="text-xl font-semibold mb-5">Submitted Requirements</h2>
