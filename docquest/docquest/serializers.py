@@ -774,6 +774,13 @@ class GetProgramChairSerializer(serializers.ModelSerializer):
         model = Program
         fields = ['programChair']
 
+class GetAllProjectsSerializer(serializers.ModelSerializer):
+    program = ProgramSerializer(many=True)
+
+    class Meta:
+        model = Project
+        fields = ['status', 'dateCreated', 'program']
+
 class GetReviewsWithProjectIDSerializer(serializers.ModelSerializer):
     reviewedByID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
     college = serializers.SerializerMethodField()

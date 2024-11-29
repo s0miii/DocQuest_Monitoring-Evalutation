@@ -67,6 +67,8 @@ urlpatterns = [
     # get project review 
     path('get_project_review/<int:projectID>/', views.get_project_review),
 
+    path('get_all_projects', views.get_all_projects),
+
     # post moa
     path('create_moa', views.create_moa),
 
