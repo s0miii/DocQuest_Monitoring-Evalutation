@@ -35,11 +35,13 @@ urlpatterns = [
     path('get_project/<int:pk>/', views.get_project),
     path('get_project_status/<int:pk>/', views.get_project_status),
 
-    # get mga i review
-    path('get_projects_to_review', views.get_projects_to_review),
+    # # get mga i review
+    # path('get_projects_to_review', views.get_projects_to_review),
 
     #mag review
     path('review_project', views.review_project),
+
+    path('get_reviews_with_projectID/<int:pk>/', views.get_reviews_with_projectID),
 
     # update signatory sa project
     # path('update_signatory_status/<int:signatory_id>/', views.update_signatory_status),
