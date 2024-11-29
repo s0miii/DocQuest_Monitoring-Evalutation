@@ -1270,6 +1270,18 @@ def approve_review(request, review_id):
             next_review.save()
 
     return Response({"message": "Review approved successfully."}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_projects(request):
+    # Query all projects from the database
+    projects = Project.objects.all()
+
+    # Serialize the projects using GetAllProjectsSerializer
+    serializer = GetAllProjectsSerializer(projects, many=True)
+
+    # Return the serialized data as a JSON response
+    return Response(serializer.data)
     
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
