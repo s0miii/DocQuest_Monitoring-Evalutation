@@ -556,22 +556,38 @@ class CalculateTotalAttendeesView(APIView):
         num_templates = attendance_templates.count()
 
         for template in attendance_templates:
-            count = template.CreatedAttendanceRecord_set.cont()
+            count = template.createdattendancerecord_set.count()
             total_attendees += count
-            number_of_templates += 1
+            print(f"Template ID {template.id} has {count} attendees")
 
-        if number_of_templates > 0:
-            average_attendees = round(total_attendees / number_of_templates)
+        # if num_templates > 0:
+        #     average_attendees = round(total_attendees / num_templates)
 
+        # else:
+        #     average_attendees = 0    
+
+        if num_templates > 1: #Multiple-days Project
+            average_attendees = round(total_attendees/ num_templates)
+        elif num_templates == 1: #Single-day Project
+            average_attendees = total_attendees
         else:
-            average_attendees = 0        
+            average_attendees = 0  #No templates or attendees      
 
 
         # Save total attendees
         total, _ = TotalAttendees.objects.get_or_create(project=project)
-        total.total = total_attendees
+        total.total_attendees = total_attendees
+        total.average_attendees = average_attendees
+        total.num_templates = num_templates
         total.save()
 
-        return Response({"total_attendees": total_attendees, "average_attendees": average_attendees}, status=200)
+        return Response(
+            {
+                "total_attendees": total_attendees, 
+                "average_attendees": average_attendees,
+                "num_templates": num_templates,
+            }, 
+            status=200
+        )
 
         

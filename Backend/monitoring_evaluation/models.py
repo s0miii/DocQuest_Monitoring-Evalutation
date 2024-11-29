@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, IntegrityError
 from django.db.models import Avg
 from docquestapp.models import Project, CustomUser, LoadingOfTrainers
 from django.urls import reverse
@@ -304,20 +304,31 @@ class AttendanceTemplate(models.Model):
         return f"{self.templateName} for {self.project.projectTitle}"    
     
     def save(self, *args, **kwargs):
+        # Generate a unique token if wala pa
+        if not self.token:
+            self.token = secrets.token_urlsafe(16)
+
+        while True: 
+            try:
+                # Save the record
+                super().save(*args, **kwargs)
+                break
+            except IntegrityError:  # If a duplicate token error occurs, regenerate the token
+                self.token = secrets.token_urlsafe(16)
+
         # Generate the sharable link if it does not exist
         if not self.sharable_link:
             base_url = "http://127.0.0.1:8000/monitoring/attendance/fill"
             self.sharable_link = f"{base_url}/{self.token}/"
-        super().save(*args, **kwargs)
-
 class TotalAttendees(models.Model):
     project = models.OneToOneField('docquestapp.Project', on_delete=models.CASCADE, related_name="total_attendees")
-    total = models.PositiveIntegerField(default=0)
-    average = models.FloatField(default=0.0)
+    total_attendees = models.PositiveIntegerField(default=0)
+    average_attendees = models.FloatField(default=0.0)
+    num_templates = models.PositiveIntegerField(default=0)
     calculated_at = models.DateTimeField(auto_now=True) 
 
     def __str__(self):
-        return f"Total Attendees for {self.project.projectTitle}: {self.total}"       
+        return f"Total Attendees for {self.project.projectTitle}: {self.total_attendees}"       
 
 # Created attendance record from the template
 class CreatedAttendanceRecord(models.Model):
