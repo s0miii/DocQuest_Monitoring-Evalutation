@@ -33,6 +33,9 @@ urlpatterns = [
     path('attendance/fill/<str:token>/', FillAttendanceView.as_view(), name='fill-attendance'),
     path('attendance_templates/<int:project_id>/', CreateAttendanceTemplateView.as_view(), name='create-attendance-template'),
     path('attendance_records/<int:projectID>/<int:template_id>/', SubmitAttendanceRecordView.as_view(), name='submit-attendance-record'),
+    # path('attendance/calculate_total/<int:project_id>/', CalculateTotalAttendeesView.as_view(), name='calculate-total-attendees'),
+    path('calculate_attendees/<int:project_id>/', CalculateTotalAttendeesView.as_view(), name='calculate-attendees'),
+
 
     # Checklist
     path('upload/attendance/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),

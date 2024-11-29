@@ -13,6 +13,7 @@ from .models import *
 from .forms import *
 from .serializers import *
 import secrets, logging
+from django.utils.dateparse import parse_date
 
 ## Form Views
 
@@ -349,8 +350,26 @@ class CreateAttendanceTemplateView(APIView):
             "include_contact_number": request.data.get("include_contact_number", False),
         }
 
+        # expiration_date_str = request.data.get("expiration_date")
+        # if not expiration_date_str:
+        #     return Response({"error": "Expiration date is required."})
+        
+        # expiration_date = parse_date(expiration_date_str)
+        # if not expiration_date or expiration_date <= date.today().date():
+        #     return Response({"error": "Invalid expiration date."}, status=400)
+
+        expiration_date = request.data.get("expiration_date")
+        if not expiration_date:
+            return Response({"error": "Expiration date is required."}, status=400)
+
+        try:
+            expiration_date = datetime.strptime(expiration_date, "%Y-%m-%d").date()
+        except ValueError:
+            return Response({"error": "Invalid date format. Use 'YYYY-MM-DD'."}, status=400)
+        
+
         # Create the template
-        attendance_template = AttendanceTemplate.objects.create(project=project, **fields)
+        attendance_template = AttendanceTemplate.objects.create(project=project, expiration_date=expiration_date, **fields)
 
         # Generate sharable link
         sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
@@ -392,6 +411,10 @@ class SubmitAttendanceRecordView(APIView):
         project = get_object_or_404(Project, projectID=project_id)
         template = get_object_or_404(AttendanceTemplate, id=template_id, project=project)
 
+        #I-check if valid pa ang template and wa pa nilapas sa expiration
+        if not template.is_valid():
+            return Response({"error": "THis attendance template has expired"}, status=400)
+
         # Validate required fields based on the template
         data = request.data
         if template.include_attendee_name and not data.get("attendee_name"):
@@ -432,65 +455,31 @@ logger = logging.getLogger(__name__)
 class FillAttendanceView(APIView):
     permission_classes = [AllowAny]  # Allow anyone to access this view without authentication
 
-    def get(self, request, token):
-        template = get_object_or_404(AttendanceTemplate, token=token)
-        print(f"GET request received with token: {token}") #For debugging only
-        # Return the template details so the frontend can generate the form dynamically
-        print(f"Template found: {template}") #For debugging only
-
-        return Response({
-            "templateName": template.templateName,
-            "fields": {
-                "include_attendee_name": template.include_attendee_name,
-                "include_gender": template.include_gender,
-                "include_college": template.include_college,
-                "include_department": template.include_department,
-                "include_year_section": template.include_year_section,
-                "include_agency_office": template.include_agency_office,
-                "include_contact_number": template.include_contact_number,
-            },
-            "project": template.project.projectID
-        })
-    
-
-    # def post(self, request, token):
-    #     # Find the template using the token
+    # def get(self, request, token):
     #     template = get_object_or_404(AttendanceTemplate, token=token)
-        
-    #     # Validate required fields dynamically
-    #     data = request.data
-    #     errors = {}
-    #     if template.include_attendee_name and not data.get("attendee_name"):
-    #         errors["attendee_name"] = "This field is required."
-    #     if template.include_gender and not data.get("gender"):
-    #         errors["gender"] = "This field is required."
-    #     if template.include_college and not data.get("college"):
-    #         errors["college"] = "This field is required."
-    #     if template.include_department and not data.get("department"):
-    #         errors["department"] = "This field is required."
-    #     if template.include_year_section and not data.get("year_section"):
-    #         errors["year_section"] = "This field is required."
-    #     if template.include_contact_number and not data.get("contact_number"):
-    #         errors["contact_number"] = "This field is required."
+    #     print(f"GET request received with token: {token}") #For debugging only
+    #     # Return the template details so the frontend can generate the form dynamically
+    #     print(f"Template found: {template}") #For debugging only
 
-    #     if errors:
-    #         return Response(errors, status=400)
-
-    # # Create the attendance record
-        # attendance_record = CreatedAttendanceRecord.objects.create(
-        #     project=template.project,
-        #     template=template,
-        #     attendee_name=data.get("attendee_name"),
-        #     gender=data.get("gender"),
-        #     college=data.get("college"),
-        #     department=data.get("department"),
-        #     year_section=data.get("year_section"),
-        #     agency_office=data.get("agency_office"),
-        #     contact_number=data.get("contact_number"),
-        # )
+    #     return Response({
+    #         "templateName": template.templateName,
+    #         "fields": {
+    #             "include_attendee_name": template.include_attendee_name,
+    #             "include_gender": template.include_gender,
+    #             "include_college": template.include_college,
+    #             "include_department": template.include_department,
+    #             "include_year_section": template.include_year_section,
+    #             "include_agency_office": template.include_agency_office,
+    #             "include_contact_number": template.include_contact_number,
+    #         },
+    #         "project": template.project.projectID
+    #     })
 
     def get(self, request, token):
         template = get_object_or_404(AttendanceTemplate, token=token)
+
+        if not template.is_valid():
+            return Response({"error": "This attendance link has already expired."}, status=400)
 
         return Response({
             "templateName": template.templateName,
@@ -509,6 +498,8 @@ class FillAttendanceView(APIView):
     def post(self, request, token):
         # Find the template using the token
         template = get_object_or_404(AttendanceTemplate, token=token)
+        if not template.is_valid():
+            return Response({"error": "This attendance link has expired."}, status=400)
 
         # Define allowed fields based on the template
         allowed_fields = {
@@ -552,4 +543,35 @@ class FillAttendanceView(APIView):
             CreatedAttendanceRecordSerializer(attendance_record).data,
             status=201
         )    
-       
+    
+class CalculateTotalAttendeesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id):
+        project = get_object_or_404(Project, projectID=project_id)
+        attendance_templates = project.attendance_templates.all()
+
+        # Calculate total attendees
+        total_attendees = 0
+        num_templates = attendance_templates.count()
+
+        for template in attendance_templates:
+            count = template.CreatedAttendanceRecord_set.cont()
+            total_attendees += count
+            number_of_templates += 1
+
+        if number_of_templates > 0:
+            average_attendees = round(total_attendees / number_of_templates)
+
+        else:
+            average_attendees = 0        
+
+
+        # Save total attendees
+        total, _ = TotalAttendees.objects.get_or_create(project=project)
+        total.total = total_attendees
+        total.save()
+
+        return Response({"total_attendees": total_attendees, "average_attendees": average_attendees}, status=200)
+
+        
