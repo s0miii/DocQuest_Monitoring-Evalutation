@@ -126,7 +126,7 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 ###
 # Retrieve Specific Attendance Template
-GET http://127.0.0.1:8000/monitoring/attendance_templates/<template_id>/
+GET http://127.0.0.1:8000/monitoring/attendance_templates/18/
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 
@@ -231,16 +231,28 @@ Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 {
-    "project": 2,
-    "templateName": "Trial kay mutanaw si kit",
+    "project": 1,
+    "templateName": "Trial #2 for expiration and count functions",
     "include_attendee_name": true,
     "include_gender": true,
-    "include_college": true,
-    "include_department": true,
-    "include_year_section": true,
+    "include_college": false,
+    "include_department": false,
+    "include_year_section": false,
     "include_agency_office": false,
-    "include_contact_number": true
+    "include_contact_number": false,
+    "expiration_date": "2024-11-30"
 }
+
+###
+# Update other fields --> change expiration date for testing"
+PATCH http://127.0.0.1:8000/monitoring/attendance_templates/18/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+{
+    "expiration_date": "2024-01-01"
+}
+
 
 ###
 #  List All Templates Created - working endpoint
@@ -249,16 +261,16 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 ###
 #  Test Token
-GET http://127.0.0.1:8000/monitoring/attendance/fill/Dzi4-0ehtGCftiBdOxPffw/
+GET http://127.0.0.1:8000/monitoring/attendance/fill/Kxj6cJBdfZ3iKJYWAnMHLQ/
 Content-Type: application/json
 
 ###
 #  Submit Attendance Record via Sharable Link
-POST http://127.0.0.1:8000/monitoring/attendance/fill/Dzi4-0ehtGCftiBdOxPffw/
+POST http://127.0.0.1:8000/monitoring/attendance/fill/Kxj6cJBdfZ3iKJYWAnMHLQ/
 Content-Type: application/json
 
 {
-    "attendee_name": "Test if mudawat ug kulang",
+    "attendee_name": "Test for expired link",
     "gender": "Male",
     "college": "CITC",
     "department": "Computer Science",
@@ -277,3 +289,11 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 #  Retrieve a Specific Attendance Record
 GET http://127.0.0.1:8000/monitoring/attendance_records/4/
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+###
+#Calculate Number of Attendees per Project
+POST http://127.0.0.1:8000/monitoring/calculate_attendees/1/
+# POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+

@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 import secrets
+from datetime import date
 
 ### Checklist Items
 
@@ -290,10 +291,17 @@ class AttendanceTemplate(models.Model):
     
     sharable_link = models.URLField(max_length=500, blank=True, null=True)
     token = models.CharField(max_length=32, unique=True, default=secrets.token_urlsafe(16))
+    expiration_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def is_valid(self):
+        """Check if the template is still valid based on the expiration date."""
+        if self.expiration_date:
+            return date.today() <= self.expiration_date
+        return True
+
     def __str__(self):
-        return f"{self.templateName} for {self.project.projectTitle}"
+        return f"{self.templateName} for {self.project.projectTitle}"    
     
     def save(self, *args, **kwargs):
         # Generate the sharable link if it does not exist
@@ -301,6 +309,15 @@ class AttendanceTemplate(models.Model):
             base_url = "http://127.0.0.1:8000/monitoring/attendance/fill"
             self.sharable_link = f"{base_url}/{self.token}/"
         super().save(*args, **kwargs)
+
+class TotalAttendees(models.Model):
+    project = models.OneToOneField('docquestapp.Project', on_delete=models.CASCADE, related_name="total_attendees")
+    total = models.PositiveIntegerField(default=0)
+    average = models.FloatField(default=0.0)
+    calculated_at = models.DateTimeField(auto_now=True) 
+
+    def __str__(self):
+        return f"Total Attendees for {self.project.projectTitle}: {self.total}"       
 
 # Created attendance record from the template
 class CreatedAttendanceRecord(models.Model):
