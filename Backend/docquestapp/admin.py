@@ -115,28 +115,27 @@ admin.site.register(Deliverables, DeliverablesAdmin)
 # admin.site.register(Signatories, SignatoriesAdmin)
 
 
-# for testing
-@admin.register(Project)
+# For testing
 class ProjectAdmin(admin.ModelAdmin):
     list_display = (
         'projectID', 'projectTitle', 'userID', 'projectType', 'status', 'dateCreated'
-    )  # Removed many-to-many fields
-    search_fields = ('projectTitle', 'researchTitle')
-    list_filter = ('status', 'projectType')  # Removed 'college'
+    )
+    search_fields = ('projectTitle', 'researchTitle', 'status')
+    list_filter = ('status', 'projectType')
     ordering = ('-dateCreated',)
     filter_horizontal = ('agency', 'proponents',)
 
-# admin.site.register(Project, ProjectAdmin)
 
+class LoadingOfTrainersAdmin(admin.ModelAdmin):
+    list_display = ('LOTID', 'faculty', 'hours', 'project')
+    search_fields = ['faculty']
 
 class MOAAdmin(admin.ModelAdmin):
-    list_display = (
-        'moaID', 'userID', 'status', 'dateCreated', 'uniqueCode'
-    )
-    search_fields = (
-        'userID__username', 'partyADescription', 'partyBDescription', 'uniqueCode'
-    )
+    list_display = ('moaID', 'userID', 'status', 'dateCreated', 'uniqueCode')
+    search_fields = ('userID__username', 'partyADescription', 'partyBDescription', 'uniqueCode')
     list_filter = ('status', 'dateCreated')
     ordering = ('-dateCreated',)
 
+admin.site.register(Project, ProjectAdmin)
+admin.site.register(LoadingOfTrainers, LoadingOfTrainersAdmin)
 admin.site.register(MOA, MOAAdmin)
