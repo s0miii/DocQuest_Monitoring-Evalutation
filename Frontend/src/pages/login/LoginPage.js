@@ -18,7 +18,7 @@ const LoginPage = () => {
     // Post the credentials to log in
     axios({
       method: 'post',
-      url: 'http://127.0.0.1:8000/auth/token/login/', // change when deploying
+      url: 'http://127.0.0.1:8000/auth/token/login/',
       data: {
         email: email,
         password: password,
@@ -28,10 +28,12 @@ const LoginPage = () => {
         // Extract the token from the response
         const token = response.data.auth_token;
 
+        localStorage.setItem('authToken', token);
+
         // Use the token to make the second request
         return axios({
           method: 'get',
-          url: 'http://127.0.0.1:8000/name_and_roles', // change when deploying
+          url: 'http://127.0.0.1:8000/name_and_roles',
           headers: {
             'Authorization': `Token ${token}`,
           }
@@ -50,13 +52,21 @@ const LoginPage = () => {
         setRoles(rolesList);
         console.log("State updated with user data:", { firstname, lastname, rolesList });
 
-        if (rolesList.includes('regular')) {
-          navigate('/user'); // Redirect to ProjLeadDashboard
+        if (rolesList.includes('Proponent')) {
+          navigate('/proponents/projects'); // Redirect proponents to their dashboard
+        } else if (
+          rolesList.includes('program chair') ||
+          rolesList.includes('college dean') ||
+          rolesList.includes('ECR director') ||
+          rolesList.includes('VCAA') ||
+          rolesList.includes('VCRI') ||
+          rolesList.includes('accountant') ||
+          rolesList.includes('chancellor')
+        ) {
+          navigate('/signatory'); // Redirect signatories
         } else {
-          navigate('/user'); // Redirect all roles to ProjLeadDashboard for now
+          alert('No valid role found! Please contact the admin.');
         }
-
-
       })
       .catch(function (error) {
         // Handle any errors from both requests

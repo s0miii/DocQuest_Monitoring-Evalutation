@@ -18,6 +18,7 @@ class DailyAttendanceRecord(models.Model):
     attendance_file = models.FileField(upload_to="attendance_records/", null=True, blank=True)
     total_attendees = models.PositiveIntegerField(null=True, blank=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     rejection_reason = models.TextField(null=True, blank=True)
     

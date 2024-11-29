@@ -28,6 +28,9 @@ urlpatterns = [
     ### User Role
     path('user/roles/', get_user_roles, name='get_user_roles'),
 
+    # view all projects
+    path("user-projects/", UserProjectsView.as_view(), name="user-projects"),
+
     ### Checklist & items
     # upload
     path('upload/attendance/<int:project_id>/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),
@@ -35,8 +38,10 @@ urlpatterns = [
     path('upload/lecture_notes/<int:project_id>/', ModulesLectureNotesUploadView.as_view(), name='lecture_notes_upload'),
     path('upload/photo/<int:project_id>/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
     path('upload/other_files/<int:project_id>/', OtherFilesUploadView.as_view(), name='other_files_upload'),
-    # view submissions
+    # view all submissions of all items
     path("project/<int:project_id>/checklist_submissions/", ChecklistSubmissionsView.as_view(), name="view_checklist_submissions"),
+    # view submission for a specific item
+    path("project/<int:project_id>/checklist_item/<str:checklist_item_name>/submissions/", ChecklistSubmissionsView.as_view(), name="checklist_item_submissions",),
     # assign checklist item
     path('assign/checklist_items/', AssignChecklistItemsView.as_view(), name='assign_checklist_items'),
     #submission status for project leader

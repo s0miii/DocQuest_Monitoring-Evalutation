@@ -1,5 +1,5 @@
 import React from "react";
-import {BrowserRouter, Routers, Routes, Route, Navigate} from  "react-router-dom";
+import { BrowserRouter, Routers, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
 // import CoordinatorTab from "./pages/coordinator/CoordinatorTab";
 // import UserList from "./pages/estaff/UserList";
@@ -45,13 +45,13 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" />} />
-      <Route path="/login" element={ <LoginPage /> } />
-      <Route path="/user" element={ <ProjLeadDashboard /> } />
-      <Route path="/estaff" element={ <EstaffDashboard /> } />
-      <Route path="/estaff/prexc/op1-op2" element={ <EStaffOP1OP2 /> } />
-      <Route path="/deptoff" element={ <DeptOffDashboard /> } />
-      <Route path="/coordinator" element={ <CoordinatorDashboard /> } />
-      <Route path="/signatory" element={ <SignatoryDashboard /> } />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/user" element={<ProjLeadDashboard />} />
+      <Route path="/estaff" element={<EstaffDashboard />} />
+      <Route path="/estaff/prexc/op1-op2" element={<EStaffOP1OP2 />} />
+      <Route path="/deptoff" element={<DeptOffDashboard />} />
+      <Route path="/coordinator" element={<CoordinatorDashboard />} />
+      <Route path="/signatory" element={<SignatoryDashboard />} />
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
       <Route path="/projlead/proj/req" element={<ProjLeadProjReq />} />
       <Route path="/projlead/proj/req/assign-proponents" element={<ProjLeadAssignProponents />} />
@@ -65,16 +65,16 @@ function App() {
 
       <Route path="estaff/proj" element={<EStaffProjects />} />
       <Route path="estaff/proj/monitoring" element={<EStaffProjMonitoring />} />
-      <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR/>} />
+      <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR />} />
 
       <Route path="/proponents/projects" element={<ProponentsProjects />} />
       <Route path="/proponents/proj/req" element={<ProponentsProjReq />} />
-      <Route path="/proponents/proj/req/daily-attendance" element={<ProponentsDailyAttRec/>} />
-      <Route path="/proponents/proj/req/evaluation-summary" element={<ProponentsEvalSum/>} />
-      <Route path="/proponents/proj/req/trainer-cv-dtr" element={<ProponentsTrainerCVDTR/>} />
-      <Route path="/proponents/proj/req/modules-notes" element={<ProponentsLecNotes/>} />
-      <Route path="/proponents/proj/req/other" element={<ProponentsOther/>} />
-      <Route path="/eval" element={<EvaluationForm/>} />
+      <Route path="/proponents/project/:project_id/daily-attendance" element={<ProponentsDailyAttRec />} />
+      <Route path="/proponents/proj/req/evaluation-summary" element={<ProponentsEvalSum />} />
+      <Route path="/proponents/proj/req/trainer-cv-dtr" element={<ProponentsTrainerCVDTR />} />
+      <Route path="/proponents/proj/req/modules-notes" element={<ProponentsLecNotes />} />
+      <Route path="/proponents/proj/req/other" element={<ProponentsOther />} />
+      <Route path="/eval" element={<EvaluationForm />} />
     </Routes>
   );
 }
