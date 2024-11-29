@@ -1,6 +1,7 @@
 ### back end
 venv/
 docquest/*.sqlite3
+Backend/*.sqlite3
 uploads/
 myvenv/
 venv/
