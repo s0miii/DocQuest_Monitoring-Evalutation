@@ -836,6 +836,14 @@ Authorization: Token ba2d68181619cceeea9c58c5e60e38c36c66685d
 
 ###
 
+GET http://127.0.0.1:8000/get_all_projects
+Content-Type: application/json
+Authorization: Token 79b93dfa6895ace1548b60b94473726c05ddf787
+
+{}
+
+###director
+
 GET http://127.0.0.1:8000/college/1/dean/
 Content-Type: application/json
 Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
