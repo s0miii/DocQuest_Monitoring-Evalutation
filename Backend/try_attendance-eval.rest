@@ -243,6 +243,7 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
     "expiration_date": "2024-11-30"
 }
 
+
 ###
 # Update other fields --> change expiration date for testing"
 PATCH http://127.0.0.1:8000/monitoring/attendance_templates/18/
@@ -289,7 +290,7 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 ###
 # POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/
 #Calculate Number of Attendees per Project
-POST http://127.0.0.1:8000/monitoring/calculate_attendees/6/
+POST http://127.0.0.1:8000/monitoring/calculate_attendees/3/
 Content-Type: application/json
 Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
