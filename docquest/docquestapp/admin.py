@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db import transaction
+from django.utils.safestring import mark_safe
 
 from .forms import *
 from .models import *
@@ -29,20 +30,25 @@ from .models import *
 
 class CustomUserAdmin(admin.ModelAdmin):
     form = CustomUserForm
-    
+
     list_display = ["userID", "email", "firstname", "lastname", "display_roles", "display_college", "display_program"]
     list_filter = ["role", "faculty__collegeID", "faculty__programID"]
     search_fields = ["email", "firstname", "lastname", "faculty__collegeID__title", "faculty__programID__title"]
-    
+
     fieldsets = (
         (None, {
-            'fields': ('email', 'password')
+            'fields': ('email', 'password'),
         }),
         ('Personal Information', {
-            'fields': ('firstname', 'middlename', 'lastname', 'contactNumber')
+            'fields': ('firstname', 'middlename', 'lastname', 'contactNumber'),
         }),
         ('Roles and Assignments', {
-            'fields': ('role', 'campus', 'college', 'program')
+            'fields': ('role', 'campus', 'college', 'program'),
+            'description': mark_safe(
+                "<p style='color: red; font-weight: bold;'>"
+                "Note: Only one user can have the role 'Director, Extension & Community Relations' with code 'ecrd' at a time."
+                "</p>"
+            ),
         }),
         ('Permissions', {
             'fields': ('is_active', 'is_staff', 'is_superuser'),
