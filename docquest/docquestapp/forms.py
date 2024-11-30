@@ -57,3 +57,17 @@ class CustomUserForm(forms.ModelForm):
             raise forms.ValidationError("Selected college must belong to the selected campus")
 
         return cleaned_data
+    
+    def clean_role(self):
+        roles = self.cleaned_data.get("role")
+        unique_role_code = "ecrd"  # Code for the unique role
+        unique_role = Roles.objects.filter(code=unique_role_code).first()
+
+        if unique_role and unique_role in roles:
+            # Check if the unique role is already assigned to another user
+            conflicting_users = CustomUser.objects.filter(role=unique_role).exclude(pk=self.instance.pk)
+            if conflicting_users.exists():
+                raise ValidationError(
+                    f"The role 'Director, Extension & Community Relations' (code: {unique_role_code}) is already assigned to another user."
+                )
+        return roles
