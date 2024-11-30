@@ -12,9 +12,15 @@ const ProponentsProjects = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const projectsPerPage = 5;
 
-    const handleViewClick = (path) => {
-        navigate(path);
-    }
+    const handleViewClick = (project) => {
+        if (project.role === "proponent") {
+            navigate(`/proponents/proj/req/${project.projectID}`);
+        } else if (project.role === "leader") {
+            navigate(`/projlead/proj/req/${project.projectID}`);
+        } else {
+            alert("Invalid role detected.");
+        }
+    };
 
     // Fetch projects dynamically
     useEffect(() => {
@@ -139,8 +145,10 @@ const ProponentsProjects = () => {
                                                 <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">{project.targetImplementation}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <button className="text-black underline pr-3"
-                                                        onClick={() => handleViewClick(`/proponents/proj/req/${project.projectID}`)}>
+                                                    <button
+                                                        className="text-black underline pr-3"
+                                                        onClick={() => handleViewClick(project)}
+                                                    >
                                                         View
                                                     </button>
                                                 </td>

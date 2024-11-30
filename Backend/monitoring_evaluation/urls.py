@@ -35,6 +35,15 @@ urlpatterns = [
     # view all projects
     path("user-projects/", UserProjectsView.as_view(), name="user-projects"),
 
+    # document count
+    path("project/<int:project_id>/document_counts/", attached_documents_count, name="attached_documents_count"),
+
+    # View Proponent Project Details
+    path('projects/<int:project_id>/details/', ProponentProjectDetailsView.as_view(), name='proponent_project_details'),
+
+    # project progress
+    path('project/<int:project_id>/progress/', project_progress, name='project_progress'),
+
     ### Checklist & items
     # upload
     path('upload/attendance/<int:project_id>/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),

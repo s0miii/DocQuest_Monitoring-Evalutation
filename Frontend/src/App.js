@@ -53,7 +53,7 @@ function App() {
       <Route path="/coordinator" element={<CoordinatorDashboard />} />
       <Route path="/signatory" element={<SignatoryDashboard />} />
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
-      <Route path="/projlead/proj/req" element={<ProjLeadProjReq />} />
+      <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
       <Route path="/projlead/proj/req/assign-proponents" element={<ProjLeadAssignProponents />} />
       <Route path="/projlead/proj/req/accomplishment-report" element={<ProjLeadAccReport />} />
       <Route path="/projlead/proj/req/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
@@ -68,7 +68,7 @@ function App() {
       <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR />} />
 
       <Route path="/proponents/projects" element={<ProponentsProjects />} />
-      <Route path="/proponents/proj/req" element={<ProponentsProjReq />} />
+      <Route path="/proponents/proj/req/:projectID" element={<ProponentsProjReq />} />
       <Route path="/proponents/project/:project_id/daily-attendance" element={<ProponentsDailyAttRec />} />
       <Route path="/proponents/proj/req/evaluation-summary" element={<ProponentsEvalSum />} />
       <Route path="/proponents/proj/req/trainer-cv-dtr" element={<ProponentsTrainerCVDTR />} />

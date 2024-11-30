@@ -60,7 +60,7 @@ class UserProjectsView(APIView):
                         "projectID": project.projectID,
                         "projectTitle": project.projectTitle,
                         "background": project.background,
-                        "targetImplementation": project.targetImplementation,
+                        "targetImplementation": f"{project.targetStartDateImplementation or 'N/A'} - {project.targetEndDateImplementation or 'N/A'}",
                         "role": config["role"],  # Dynamically add the role
                     })
 
@@ -69,6 +69,109 @@ class UserProjectsView(APIView):
             return Response({"message": "No projects found for the user"}, status=200)
 
         return Response(combined_projects, status=200)
+    
+# Proponent Project Details
+@role_required(allowed_role_codes=["PPNT"])
+class ProponentProjectDetailsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        try:
+            # Fetch project details
+            project = Project.objects.get(projectID=project_id, status="approved")
+            
+            # Fetch project leader details
+            project_leader_name = f"{project.userID.firstname} {project.userID.lastname}"
+
+            # Prepare project details
+            project_details = {
+                "projectTitle": project.projectTitle,
+                "college": project.program.all().first().collegeID.title if project.program.exists() else "N/A",
+                "targetDate": f"{project.targetStartDateImplementation or 'N/A'} - {project.targetEndDateImplementation or 'N/A'}",
+                "partnerAgency": ", ".join([agency.agencyName for agency in project.agency.all()]),
+                "projectLeader": project_leader_name,
+            }
+
+            # Fetch assigned documentary requirements for the current proponent
+            assignments = ChecklistAssignment.objects.filter(
+                project=project,
+                proponent=request.user
+            )
+
+            assigned_requirements = []
+            for assignment in assignments:
+                if assignment.can_submit_daily_attendance:
+                    assigned_requirements.append("Daily Attendance")
+                if assignment.can_submit_summary_of_evaluation:
+                    assigned_requirements.append("Summary of Evaluation")
+                if assignment.can_submit_modules_lecture_notes:
+                    assigned_requirements.append("Modules/Lecture Notes")
+                if assignment.can_submit_other_files:
+                    assigned_requirements.append("Other Files")
+                if assignment.can_submit_photo_documentation:
+                    assigned_requirements.append("Photo Documentation")
+
+            return Response({
+                "projectDetails": project_details,
+                "assignedRequirements": assigned_requirements,
+            }, status=status.HTTP_200_OK)
+
+        except Project.DoesNotExist:
+            return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Project Leader not found."}, status=status.HTTP_404_NOT_FOUND)
+
+# document count for checklist item
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def attached_documents_count(request, project_id):
+    try:
+        # Fetch the project
+        project = get_object_or_404(Project, projectID=project_id, status="approved")
+
+        # Initialize a dictionary to store counts
+        document_counts = {
+            "Daily Attendance": DailyAttendanceRecord.objects.filter(project=project).count(),
+            "Summary of Evaluation": SummaryOfEvaluation.objects.filter(project=project).count(),
+            "Modules/Lecture Notes": ModulesLectureNotes.objects.filter(project=project).count(),
+            "Other Files": OtherFiles.objects.filter(project=project).count(),
+            "Photo Documentation": PhotoDocumentation.objects.filter(project=project).count(),
+        }
+
+        return Response(document_counts, status=status.HTTP_200_OK)
+
+    except Project.DoesNotExist:
+        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# project progress
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def project_progress(request, project_id):
+    try:
+        # Fetch the total checklist assignments for the project
+        total_assignments = ChecklistAssignment.objects.filter(project__projectID=project_id).count()
+
+        # Count all approved submissions linked to the project
+        approved_submissions_count = 0
+
+        approved_submissions_count += DailyAttendanceRecord.objects.filter(project__projectID=project_id, status="Approved").count()
+        approved_submissions_count += SummaryOfEvaluation.objects.filter(project__projectID=project_id, status="Approved").count()
+        approved_submissions_count += ModulesLectureNotes.objects.filter(project__projectID=project_id, status="Approved").count()
+        approved_submissions_count += OtherFiles.objects.filter(project__projectID=project_id, status="Approved").count()
+        approved_submissions_count += PhotoDocumentation.objects.filter(project__projectID=project_id, status="Approved").count()
+
+        # Avoid division by zero
+        if total_assignments == 0:
+            return Response({"progress": 0}, status=status.HTTP_200_OK)
+
+        # Calculate progress percentage
+        progress = (approved_submissions_count / total_assignments) * 100
+
+        return Response({"progress": progress}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 ### Role Based Access
@@ -79,7 +182,6 @@ def get_user_roles(request):
     """Fetch roles of the authenticated user."""
     roles = request.user.roles.values_list('code', flat=True)
     return Response({"roles": list(roles)})
-
 
 
 ### upload files
