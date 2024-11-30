@@ -320,7 +320,7 @@ class UpdateMOASerializer(serializers.ModelSerializer):
     class Meta:
         model = MOA
         fields = [
-            'moaID', 'partyDescription' 'coverageAndEffectivity', 'confidentialityClause',
+            'moaID', 'partyDescription', 'coverageAndEffectivity', 'confidentialityClause',
             'termination', 'witnesseth', 'partyObligation', 'firstParty', 'secondParty', 'witnesses'
         ]
     
@@ -819,4 +819,4 @@ class GetProgramUsingFacultySerializer(serializers.ModelSerializer):
 class GetProjectsCountUsingProgram(serializers.ModelSerializer):
     class Meta(object):
         model = Project
-        fields = ['status']
+        fields = ['status', 'uniqueCode', 'projectTitle', 'dateCreated']
