@@ -7,6 +7,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 import datetime
+from django.core.exceptions import ValidationError
 
 class Roles(models.Model):
     roleID = models.AutoField(primary_key=True)
@@ -15,6 +16,27 @@ class Roles(models.Model):
 
     class Meta:
         verbose_name_plural = "Roles"
+    
+    def save(self, *args, **kwargs):
+        # Define the role and code combination that should be unique
+        unique_role = "Director, Extension & Community Relations"
+        unique_code = "ecrd"
+        
+        # Check if the current role and code match the unique combination
+        if self.role == unique_role and self.code == unique_code:
+            # Check if another instance with the same unique combination exists
+            existing_role = Roles.objects.filter(
+                role=unique_role, 
+                code=unique_code
+            ).exclude(roleID=self.roleID).exists()
+            
+            if existing_role:
+                raise ValidationError(
+                    f"The role '{unique_role}' with code '{unique_code}' must be unique. Only 1 Director can exist at a time."
+                )
+        
+        # Proceed to save the instance if no conflict
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.role
@@ -41,6 +63,22 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         verbose_name_plural = "Users"
+    
+    def save(self, *args, **kwargs):
+        # Check if the user is being assigned the unique role
+        unique_role_code = "ecrd"
+        unique_role = Roles.objects.filter(code=unique_role_code).first()
+        
+        if unique_role and self.pk:  # If the role exists and user instance is being saved
+            if unique_role in self.role.all():  # If the user has the unique role
+                # Check if any other user already has this role
+                conflicting_users = CustomUser.objects.filter(role=unique_role).exclude(userID=self.userID)
+                if conflicting_users.exists():
+                    raise ValidationError(
+                        _("The role 'Director, Extension & Community Relations' with code 'ecrd' is already assigned to another user.")
+                    )
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.email
@@ -83,7 +121,7 @@ class Program(models.Model):
 
 class Faculty(models.Model):
     facultyID = models.AutoField(primary_key=True)
-    userID = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    userID = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     collegeID = models.ForeignKey(College, on_delete=models.CASCADE)
     programID = models.ForeignKey(Program, on_delete=models.SET_NULL, null=True)
 
