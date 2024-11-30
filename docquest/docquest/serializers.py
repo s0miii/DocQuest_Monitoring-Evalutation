@@ -819,4 +819,4 @@ class GetProgramUsingFacultySerializer(serializers.ModelSerializer):
 class GetProjectsCountUsingProgram(serializers.ModelSerializer):
     class Meta(object):
         model = Project
-        fields = ['status', 'uniqueCode', 'projectTitle', 'dateCreated']
+        fields = ['status', 'uniqueCode', 'projectTitle', 'dateCreated', 'program']

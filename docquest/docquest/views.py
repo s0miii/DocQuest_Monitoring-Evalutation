@@ -1299,7 +1299,7 @@ def get_all_projects_of_program(request):
     program_id = program_serializer.data['programID']
 
     # Step 3: Query projects for the program
-    projects = Project.objects.filter(program__id=program_id)  # Adjust filter as per your model relationships
+    projects = Project.objects.filter(program__programID=program_id)  # Adjust filter as per your model relationships
 
     # Step 4: Serialize the projects
     project_serializer = GetProjectsCountUsingProgram(projects, many=True)
