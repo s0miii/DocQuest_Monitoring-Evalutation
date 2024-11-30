@@ -810,3 +810,13 @@ class GetReviewsWithProjectIDSerializer(serializers.ModelSerializer):
         # Concatenate the reviewer's full name
         reviewer = obj.reviewedByID
         return f"{reviewer.firstname} {reviewer.middlename} {reviewer.lastname}".strip()
+
+class GetProgramUsingFacultySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Faculty
+        fields = ['programID']
+
+class GetProjectsCountUsingProgram(serializers.ModelSerializer):
+    class Meta(object):
+        model = Project
+        fields = ['status']
