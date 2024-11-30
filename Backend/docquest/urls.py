@@ -21,10 +21,13 @@ urlpatterns = [
     path('create_project', views.create_project),
     path('get_programCategory', views.get_programCategory),
     path('get_projectCategory', views.get_projectCategory),
-    path('get_colleges', views.get_colleges),
+    path('get_campuses', views.get_campuses),
+    path('get_colleges/', views.get_colleges),
     path('get_programs/', views.get_programs),
     path('get_checklist', views.get_checklist),
     path('create_deliverables', views.create_deliverables),
+    path('college/<int:pk>/dean/', views.get_college_dean),
+    path('program/<int:pk>/chair/', views.get_program_chair),
 
     re_path(r'^auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
@@ -32,6 +35,14 @@ urlpatterns = [
     # get project
     path('get_project/<int:pk>/', views.get_project),
     path('get_project_status/<int:pk>/', views.get_project_status),
+
+    # # get mga i review
+    # path('get_projects_to_review', views.get_projects_to_review),
+
+    #mag review
+    path('review_project', views.review_project),
+
+    path('get_reviews_with_projectID/<int:pk>/', views.get_reviews_with_projectID),
 
     # update signatory sa project
     # path('update_signatory_status/<int:signatory_id>/', views.update_signatory_status),
@@ -53,6 +64,11 @@ urlpatterns = [
 
     #edit project
     path('edit_project/<int:project_id>/', views.edit_project),
+
+    # get project review 
+    path('get_project_review/<int:projectID>/', views.get_project_review),
+
+    path('get_all_projects', views.get_all_projects),
 
     # post moa
     path('create_moa', views.create_moa),

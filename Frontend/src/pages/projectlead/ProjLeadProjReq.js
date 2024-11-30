@@ -12,9 +12,9 @@ const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
     }
 
     // Calculate the progress percentage, ensuring it does not exceed 100%
-    const progressPercentage = totalRequirements > 0 
-    ? Math.min((completedRequirements / totalRequirements) * 100, 100) 
-    : 0;
+    const progressPercentage = totalRequirements > 0
+        ? Math.min((completedRequirements / totalRequirements) * 100, 100)
+        : 0;
 
 
     return (
@@ -47,7 +47,7 @@ const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">Valueno, Rabosa A.</p>
                             </div>
                         </div>
-                        
+
                         {/* College/Campus, Target Date, Partner Agency */}
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
@@ -65,24 +65,24 @@ const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
                         </div>
                         {/* Project Progress Status */}
                         <h2 className="text-xl font-semibold text-center mt-8 mb-4">Project Progress Status</h2>
-                            <div className="mt-4 flex flex-col items-center">
-                                <div className="w-2/3 bg-gray-200 rounded-full h-2.5 mb-4">
-                                    <div
-                                        className="bg-yellow-500 h-2.5 rounded-full"
-                                        style={{ width: `${progressPercentage}%` }}
-                                    ></div>
-                                </div>
-                                <div className="w-2/3 flex justify-center text-sm text-gray-600">
-                                    <span>{progressPercentage.toFixed(0)}% Completed</span>
-                                </div>
+                        <div className="mt-4 flex flex-col items-center">
+                            <div className="w-2/3 bg-gray-200 rounded-full h-2.5 mb-4">
+                                <div
+                                    className="bg-yellow-500 h-2.5 rounded-full"
+                                    style={{ width: `${progressPercentage}%` }}
+                                ></div>
+                            </div>
+                            <div className="w-2/3 flex justify-center text-sm text-gray-600">
+                                <span>{progressPercentage.toFixed(0)}% Completed</span>
                             </div>
                         </div>
+                    </div>
 
                     {/* Assigned Requirements Section */}
                     <div className="flex justify-between items-center mb-5">
                         <h2 className="text-xl font-semibold">Documentary Requirements</h2>
-                        <button 
-                            className="text-blue-500 text-sm" 
+                        <button
+                            className="text-blue-500 text-sm"
                             onClick={() => handleViewClick('/projlead/proj/req/assign-proponents')}
                         >
                             Assign Proponents

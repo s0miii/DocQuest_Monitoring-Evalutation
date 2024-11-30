@@ -1,6 +1,5 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
 from .serializers import *
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -20,13 +19,25 @@ User = get_user_model()
 def signup(request):
     serializer = UserSignupSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        user = User.objects.get(email=request.data['email'])
-        user.set_password(request.data['password'])
-        user.save()
+        try:
+            with transaction.atomic():
+                # Save user through serializer
+                user = serializer.save()
+                
+                # Set password separately as per existing view
+                user.set_password(request.data['password'])
+                user.save()
 
-        return Response({"message": "User created and role assigned",},
-                            status=status.HTTP_201_CREATED)
+                return Response(
+                    {"message": "User created and role assigned"},
+                    status=status.HTTP_201_CREATED
+                )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # inig login mag fetch user name and roles
@@ -84,6 +95,132 @@ def create_role(request):
 
     return Response(role_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_review(request):
+    user = request.user
+
+    # Fetch reviews with related content type
+    eligible_reviews = Review.objects.filter(
+        reviewedByID=user,
+        sequence__gt=0
+    ).select_related('content_type')
+
+    # Filter for project reviews and sort by sequence
+    project_reviews = []
+    for review in eligible_reviews:
+        # Check if the source is a Project using content_type
+        if review.content_type.model == 'project':
+            try:
+                project = Project.objects.filter(projectID=review.source_id).first()
+                
+                if not project:
+                    continue  # Skip if no project found
+                
+                # Previous review check logic
+                previous_reviews = Review.objects.filter(
+                    source_id=review.source_id,
+                    sequence__lt=review.sequence,
+                )
+
+                # Check if all previous reviews are approved
+                if previous_reviews.exists():
+                    all_approved = all(r.reviewStatus == 'approved' for r in previous_reviews)
+                else:
+                    # If no previous reviews, it means the first review, so it's automatically available
+                    all_approved = True
+
+                # Add the review to the list only if all prior reviews are approved
+                if all_approved:
+                    review.source = project  # Attach project details to the review
+                    project_reviews.append(review)
+
+            except Project.DoesNotExist:
+                continue  # Skip if project does not exist
+
+    # Serialize the filtered reviews
+    serializer = ProjectReviewSerializer(project_reviews, many=True)
+    return Response({"reviews": serializer.data}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def review_project(request):
+    try:
+        review_id = request.data.get('reviewID')
+        action = request.data.get('action')  # 'approve' or 'deny'
+        comment = request.data.get('comment', '')  # Optional comment
+
+        # Validate input
+        if action not in ['approve', 'deny']:
+            return Response({"error": "Invalid action specified"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch the review
+        review = Review.objects.get(reviewID=review_id, reviewedByID=request.user)
+
+        # Update review status
+        if action == 'approve':
+            review.reviewStatus = 'approved'
+        elif action == 'deny':
+            review.reviewStatus = 'rejected'
+
+        review.comment = comment
+        review.save()
+
+        # Handle project status based on review action
+        project = review.source  # Assuming 'source' is a ForeignKey to Project model
+
+        # Assuming the role code for the director is 'director'
+        if action == 'approve':
+            # Check if the reviewer is a director (based on role code)
+            user_roles = request.user.role.all()
+            if 'ecrd' in [role.code for role in user_roles]:
+                project.status = 'approved'
+                project.save()
+
+            # Check if all reviews in the current sequence are approved
+            current_sequence_reviews = Review.objects.filter(
+                source_id=review.source_id,
+                content_type=review.content_type,
+                sequence=review.sequence
+            )
+            if all(r.reviewStatus == 'approved' for r in current_sequence_reviews):
+                # Activate the next sequence of reviews
+                next_sequence_reviews = Review.objects.filter(
+                    source_id=review.source_id,
+                    content_type=review.content_type,
+                    sequence=review.sequence + 1,
+                    reviewStatus='pending'
+                )
+                next_sequence_reviews.update(reviewStatus='pending')
+
+                # Notify the next reviewers
+                for next_review in next_sequence_reviews:
+                    Notification.objects.create(
+                        userID=next_review.reviewedByID,
+                        content_type=next_review.content_type,
+                        source_id=next_review.source_id,
+                        message='A project is ready for your review.'
+                    )
+
+        elif action == 'deny':
+            # Set the project status to 'rejected'
+            project.status = 'rejected'
+            project.save()
+
+            Notification.objects.create(
+                        userID=review.contentOwnerID,
+                        content_type=review.content_type,
+                        source_id=review.source_id,
+                        message='Your project has been rejected.'
+                    )
+
+        return Response({"message": f"Review successfully {action}ed."}, status=status.HTTP_200_OK)
+
+    except Review.DoesNotExist:
+        return Response({"error": "Review not found or not assigned to you"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_project(request):
@@ -116,35 +253,67 @@ def create_project(request):
         if deliverables_serializer.is_valid():
             deliverables_serializer.save()
         else:
-            # If deliverables creation fails, delete the project and return error
             project.delete()
             return Response(
                 deliverables_serializer.errors, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Create review
+        # Create reviews for all colleges and approvers
         try:
             content_type = ContentType.objects.get(model='project')
-            reviewer_user = CustomUser.objects.filter(role__code='prch').first()
-            
-            if not reviewer_user:
-                project.delete()
-                return Response(
-                    {"error": "No user with the 'director' role found."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+            colleges = request.data.get('approvers', [])
 
-            review_data = {
-                'contentOwnerID': request.user.userID,
-                'content_type': content_type.id,
-                'source_id': project.projectID,
-                'reviewedByID': reviewer_user.userID,
-                'comment': '',
-                'reviewStatus': 'pending'
-            }
-            
-            review_serializer = ReviewSerializer(data=review_data)
+            review_data = []
+            sequence_counter = 1
+
+            for college in colleges:
+                collegeID = college.get('collegeID')
+                program_chair_ids = college.get('programChairs', [])
+                dean_id = college.get('collegeDean')
+
+                # Add reviews for program chairs (same sequence)
+                for chair_id in program_chair_ids:
+                    review_data.append({
+                        'contentOwnerID': request.user.userID,
+                        'content_type': content_type.id,
+                        'source_id': project.projectID,
+                        'reviewedByID': chair_id,
+                        'collegeID': collegeID,
+                        'reviewStatus': 'pending',
+                        'sequence': sequence_counter,  # Sequence for program chairs
+                    })
+
+                # Add review for college dean (next sequence after chairs)
+                review_data.append({
+                    'contentOwnerID': request.user.userID,
+                    'content_type': content_type.id,
+                    'source_id': project.projectID,
+                    'reviewedByID': dean_id,
+                    'collegeID': collegeID,
+                    'reviewStatus': 'pending',
+                    'sequence': sequence_counter + 1,  # Sequence for dean after chairs
+                })
+
+                sequence_counter += 2  # Increment sequence for the next college
+
+            # Add director as the last reviewer
+            director = CustomUser.objects.filter(
+                role__code='ecrd'
+            ).first()  # There's only one director
+
+            if director:
+                review_data.append({
+                    'contentOwnerID': request.user.userID,
+                    'content_type': content_type.id,
+                    'source_id': project.projectID,
+                    'reviewedByID': director.userID,
+                    'collegeID': None,  # Director is not tied to a specific college
+                    'reviewStatus': 'pending',
+                    'sequence': sequence_counter,  # Last sequence in the review workflow
+                })
+
+            review_serializer = ReviewSerializer(data=review_data, many=True)
             if review_serializer.is_valid():
                 review_serializer.save()
             else:
@@ -161,23 +330,39 @@ def create_project(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Create notifications for director and staff
+        # Create notifications for the first reviewer in the sequence
         try:
-            director_staff_users = CustomUser.objects.filter(
-                role__code__in=['ecrd', 'estf']
-            ).distinct()
+            # Identify the first reviewer for the project
+            first_review = Review.objects.filter(
+                source_id=project.projectID, 
+                sequence=1,  # First sequence in the review workflow
+                reviewStatus='pending'  # Ensure it targets pending reviews
+            ).first()
 
-            notifications = [
-                Notification(
-                    userID=user, # The current user being notified
-                    content_type=content_type, # The content type object for 'project'
-                    source_id=project.projectID, # ID of the newly created project
-                    message='New project to review'
+            if first_review:
+                # Notify the first reviewer
+                Notification.objects.create(
+                    userID=first_review.reviewedByID,
+                    content_type=content_type,
+                    source_id=project.projectID,
+                    message='A new project is awaiting your review.'
                 )
-                for user in director_staff_users
-            ]
+            else:
+                # Fallback: Notify admin/staff if no first reviewer found
+                director_staff_users = CustomUser.objects.filter(
+                    role__code__in=['ecrd', 'estf']
+                ).distinct()
 
-            Notification.objects.bulk_create(notifications)
+                notifications = [
+                    Notification(
+                        userID=user,
+                        content_type=content_type,
+                        source_id=project.projectID,
+                        message='No reviewers found for the project. Please assign one.'
+                    )
+                    for user in director_staff_users
+                ]
+                Notification.objects.bulk_create(notifications)
 
         except Exception as e:
             project.delete()
@@ -361,7 +546,6 @@ def approve_or_deny_project(request, review_id):
         message = ''
 
         if action == 'approve':
-            review.reviewStatus = 'approved'
             review.comment = comment
             # Increment approval counter
             review.approvalCounter += 1
@@ -391,6 +575,7 @@ def approve_or_deny_project(request, review_id):
                 notification_user = review.contentOwnerID
                 message = f'Your project "{project.projectTitle}" has been fully approved and is ready to print'
                 project.status = 'approved'
+                review.reviewStatus = 'approved'
                 
         elif action == 'deny':
             review.reviewStatus = 'rejected'
@@ -479,7 +664,6 @@ def approve_or_deny_moa(request, review_id):
         message = ''
 
         if action == 'approve':
-            review.reviewStatus = 'approved'
             review.comment = comment
             # Increment approval counter
             review.approvalCounter += 1
@@ -499,6 +683,7 @@ def approve_or_deny_moa(request, review_id):
                 review.reviewerResponsible = 'ecrd'
                 # After ECRD approval, notify staff users
                 moa.status = 'approved'
+                review.reviewStatus= 'approved'
                 # First notify content owner
                 notification_user = review.contentOwnerID
                 message = f'Your MOA has been fully approved'
@@ -880,12 +1065,33 @@ def get_projectCategory(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def get_colleges(request):
+def get_campuses(request):
     # Query all regions
-    colleges = College.objects.all()
+    campus = Campus.objects.all()
 
     # Serialize the regions
-    college_serializer = CollegeSerializer(colleges, many=True)
+    campus_serializer = CampusSerializer(campus, many=True)
+
+    return Response(campus_serializer.data)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_colleges(request):
+    """
+    Fetch programs for multiple colleges.
+    Expects a POST request with a JSON body containing 'collegeIDs': [list of college IDs].
+    """
+    campus_ids = request.data.get('campusIDs', [])
+    
+    if not isinstance(campus_ids, list) or not all(isinstance(id, int) for id in campus_ids):
+        return Response(
+            {"detail": "Invalid input. 'campusIDs' should be a list of integers."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Retrieve programs for the given colleges
+    college = College.objects.filter(campusID__in=campus_ids)
+    college_serializer = CollegeSerializer(college, many=True)
 
     return Response(college_serializer.data)
 
@@ -950,41 +1156,133 @@ def get_specific_moa(request, pk):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_review(request):
+def get_project_review(request, projectID):
     user = request.user
-    user_roles = user.role.all().values_list('code', flat=True)
 
-    # Initialize an empty Q object for OR conditions
-    review_conditions = Q()
+    try: 
+        review = Review.objects.get(source_id=projectID)
+    except Review.DoesNotExist:
+        return Response({"detail": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    review_serializer = ProjectReviewSerializer(instance=review)
+    return Response(review_serializer.data)
 
-    # Add condition for fully approved reviews (counter = 3)
-    review_conditions |= Q(approvalCounter=3, reviewStatus='approved')
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def get_review(request):
+#     user = request.user
+#     user_roles = user.role.all().values_list('code', flat=True)
 
-    # Add conditions based on user roles
-    for role in user_roles:
-        if role == 'prch':
-            # PRCH sees reviews with counter = 0
-            review_conditions |= Q(approvalCounter=0, reviewStatus='pending')
-        elif role == 'cldn':
-            # CLDN sees reviews with counter = 1
-            review_conditions |= Q(approvalCounter=1, reviewStatus='pending')
-        elif role == 'ecrd':
-            # ECRD sees reviews with counter = 2
-            review_conditions |= Q(approvalCounter=2, reviewStatus='pending')
+#     # Initialize an empty Q object for OR conditions
+#     review_conditions = Q()
 
-        # All roles see reviews where they are responsible and counter = 0
-        review_conditions |= Q(reviewerResponsible=role, approvalCounter=0)
+#     ## Add conditions based on user roles
+#     for role in user_roles:
+#         if role == 'prch':
+#             # PRCH sees reviews with counter = 0 and content_type_name = 'project'
+#             review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='project')
+#             review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
+#         elif role == 'cldn':
+#             # CLDN sees reviews with counter = 1 and content_type_name = 'project'
+#             review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='project')  #pending iya pa review
+#             review_conditions |= Q(approvalCounter__gt=1, reviewStatus='pending', content_type__model='project') #pending pero approved na ni cldn
+#             review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project') #approved nas tanan
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
+#         elif role == 'vpala':
+#             # VPALA sees reviews with content_type_name = 'moa'
+#             review_conditions |= Q(approvalCounter=0, reviewStatus='pending', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter__gt=0, reviewStatus='pending', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter=2, reviewStatus='approved', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='moa')
+#         elif role == 'ecrd':
+#             # ECRD sees all reviews
+#             review_conditions |= Q(approvalCounter=2, reviewStatus='pending', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=1, reviewStatus='pending', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter=3, reviewStatus='approved', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=2, reviewStatus='approved', content_type__model='moa')
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='project')
+#             review_conditions |= Q(approvalCounter=0, reviewedByID=user, reviewStatus='rejected', content_type__model='moa')
 
-    # Get reviews based on the constructed conditions
-    reviews = Review.objects.filter(review_conditions).order_by('-reviewDate')
+#     # Get reviews based on the constructed conditions
+#     reviews = Review.objects.filter(review_conditions).order_by('-reviewDate')
 
-    serializer = ProjectReviewSerializer(reviews, many=True)
-    return Response({
-        "reviews": serializer.data,
-        "user_roles": list(user_roles),  # Include user roles for debugging
-        "total_count": reviews.count()
-    }, status=status.HTTP_200_OK)
+#     serializer = ProjectReviewSerializer(reviews, many=True)
+#     return Response({
+#         "reviews": serializer.data,
+#         "user_roles": list(user_roles),  # Include user roles for debugging
+#         "total_count": reviews.count()
+#     }, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_college_dean(request, pk):
+    try:
+        college = College.objects.get(pk=pk)
+        serializer = GetCollegeDeanSerializer(college)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except College.DoesNotExist:
+        return Response({"error": "College not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_program_chair(request, pk):
+    try:
+        program = Program.objects.get(pk=pk)
+        serializer = GetProgramChairSerializer(program)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Program.DoesNotExist:
+        return Response({"error": "Program not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_reviews_with_projectID(request, pk):
+    reviews = Review.objects.filter(source_id=pk)  # Filter by projectID (or adjust as needed)
+    if reviews.exists():
+        serializer = GetReviewsWithProjectIDSerializer(reviews, many=True)  # Use `many=True` for queryset
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"error": "No reviews found for the given projectID"}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def approve_review(request, review_id):
+    review = get_object_or_404(Review, reviewID=review_id)
+    review.reviewStatus = 'approved'
+    review.save()
+
+    # Check if all reviews in the current sequence are approved
+    pending_reviews = Review.objects.filter(
+        sequence=review.sequence,
+        collegeID=review.collegeID,
+        reviewStatus='pending'
+    )
+
+    if not pending_reviews.exists():
+        # Unlock the next sequence
+        next_reviews = Review.objects.filter(
+            sequence=review.sequence + 1,
+            source_id=review.source_id
+        )
+        for next_review in next_reviews:
+            next_review.reviewStatus = 'pending'
+            next_review.save()
+
+    return Response({"message": "Review approved successfully."}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_projects(request):
+    # Query all projects from the database
+    projects = Project.objects.all()
+
+    # Serialize the projects using GetAllProjectsSerializer
+    serializer = GetAllProjectsSerializer(projects, many=True)
+
+    # Return the serialized data as a JSON response
+    return Response(serializer.data)
+    
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
