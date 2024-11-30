@@ -115,11 +115,6 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
         return <div>Project not found.</div>;
     }
 
-    // Calculate the progress percentage, ensuring it does not exceed 100%
-    const progressPercentage = totalRequirements > 0
-        ? Math.min((completedRequirements / totalRequirements) * 100, 100)
-        : 0;
-
     return (
         <div className="bg-gray-200 min-h-screen flex">
             {/* Sidebar with fixed width */}
@@ -172,11 +167,11 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
                             <div className="w-2/3 bg-gray-200 rounded-full h-2.5 mb-4">
                                 <div
                                     className="bg-yellow-500 h-2.5 rounded-full"
-                                    style={{ width: `${projectProgress}%` }}
+                                    style={{ width: `${Math.min(projectProgress, 100)}%`, }}
                                 ></div>
                             </div>
                             <div className="w-2/3 flex justify-center text-sm text-gray-600">
-                                <span>{projectProgress.toFixed(2)}% Completed</span>
+                                <span>{Math.min(projectProgress, 100).toFixed(2)}% Completed</span>
                             </div>
                         </div>
                     </div>

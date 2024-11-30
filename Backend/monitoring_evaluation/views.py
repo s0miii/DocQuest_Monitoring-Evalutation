@@ -150,29 +150,39 @@ def attached_documents_count(request, project_id):
 @permission_classes([IsAuthenticated])
 def project_progress(request, project_id):
     try:
-        # Fetch the total checklist assignments for the project
+        # Total assigned checklist items across all proponents
         total_assignments = ChecklistAssignment.objects.filter(project__projectID=project_id).count()
 
-        # Count all approved submissions linked to the project
-        approved_submissions_count = 0
+        # Count unique approved submissions per checklist item
+        approved_submissions_count = DailyAttendanceRecord.objects.filter(
+            project__projectID=project_id, status="Approved"
+        ).values("checklist_item", "proponent").distinct().count()
 
-        approved_submissions_count += DailyAttendanceRecord.objects.filter(project__projectID=project_id, status="Approved").count()
-        approved_submissions_count += SummaryOfEvaluation.objects.filter(project__projectID=project_id, status="Approved").count()
-        approved_submissions_count += ModulesLectureNotes.objects.filter(project__projectID=project_id, status="Approved").count()
-        approved_submissions_count += OtherFiles.objects.filter(project__projectID=project_id, status="Approved").count()
-        approved_submissions_count += PhotoDocumentation.objects.filter(project__projectID=project_id, status="Approved").count()
+        approved_submissions_count += SummaryOfEvaluation.objects.filter(
+            project__projectID=project_id, status="Approved"
+        ).values("checklist_item", "proponent").distinct().count()
+
+        approved_submissions_count += ModulesLectureNotes.objects.filter(
+            project__projectID=project_id, status="Approved"
+        ).values("checklist_item", "proponent").distinct().count()
+
+        approved_submissions_count += PhotoDocumentation.objects.filter(
+            project__projectID=project_id, status="Approved"
+        ).values("checklist_item", "proponent").distinct().count()
+
+        approved_submissions_count += OtherFiles.objects.filter(
+            project__projectID=project_id, status="Approved"
+        ).values("checklist_item", "proponent").distinct().count()
 
         # Avoid division by zero
         if total_assignments == 0:
             return Response({"progress": 0}, status=status.HTTP_200_OK)
 
-        # Calculate progress percentage
+        # Calculate progress
         progress = (approved_submissions_count / total_assignments) * 100
-
-        return Response({"progress": progress}, status=status.HTTP_200_OK)
+        return Response({"progress": min(progress, 100)}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 ### Role Based Access
 # expose user roles
@@ -190,7 +200,6 @@ class DailyAttendanceUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, project_id):
-
         # Extract authenticated user
         user = request.user
 
@@ -198,16 +207,12 @@ class DailyAttendanceUploadView(APIView):
         if not user:
             return Response({"error": "Invalid user session or token."}, status=status.HTTP_401_UNAUTHORIZED)
 
-
         # Extract and validate fields
-        proponent_id = request.data.get('proponent')
         file = request.FILES.get('attendance_file')
         total_attendees = request.data.get('total_attendees')
         description = request.data.get('description')
 
         # Validate each field
-        if not proponent_id:
-            return Response({"error": "Proponent ID is required."}, status=status.HTTP_400_BAD_REQUEST)
         if not file:
             return Response({"error": "Attendance file is required."}, status=status.HTTP_400_BAD_REQUEST)
         if not total_attendees:
@@ -221,9 +226,8 @@ class DailyAttendanceUploadView(APIView):
             return Response({"error": "Total attendees must be a valid number."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Fetch required objects
-        proponent = get_object_or_404(CustomUser, userID=proponent_id)
         project = get_object_or_404(Project, projectID=project_id, status="approved")
-        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=proponent)
+        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=user)
 
         # Check permissions to submit
         if not assignment.can_submit_daily_attendance:
@@ -232,7 +236,7 @@ class DailyAttendanceUploadView(APIView):
         # Create attendance record
         daily_attendance = DailyAttendanceRecord.objects.create(
             project=project,
-            proponent=proponent,
+            proponent=user,
             attendance_file=file,
             total_attendees=total_attendees,
             description=description,
@@ -353,78 +357,70 @@ class OtherFilesUploadView(APIView):
 
         return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
 
+# Deletee submission
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_submission(request, submission_id):
+    try:
+        # Fetch the submission
+        submission = DailyAttendanceRecord.objects.get(id=submission_id)
+        
+        # Check if the current user is the one who submitted it
+        if submission.proponent != request.user:
+            return Response({"error": "Unauthorized action"}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Delete the submission
+        submission.delete()
+        return Response({"message": "Submission deleted successfully"}, status=status.HTTP_200_OK)
+    
+    except DailyAttendanceRecord.DoesNotExist:
+        return Response({"error": "Submission not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 ## view all submissions
 @role_required(allowed_role_codes=["PJLD", "PPNT"])
-class ChecklistSubmissionsView(APIView):
+class ChecklistItemSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, project_id, checklist_item_name=None):
-        submissions = []
+    def get(self, request, project_id, checklist_item_name):
+        try:
+            # Get the authenticated user
+            user = request.user
 
-        # Fetch daily attendance records
-        daily_attendance = DailyAttendanceRecord.objects.filter(project__projectID=project_id)
-        for record in daily_attendance:
-            submissions.append({
-                "submission_id": record.id,
-                "submission_type": "Daily Attendance",
-                "status": record.status,
-                "rejection_reason": record.rejection_reason,
-                "date_uploaded": record.date_uploaded,
-                "submitted_by": f"{record.proponent.firstname} {record.proponent.lastname}",
-            })
+            # Initialize a list to store submissions
+            submissions = []
 
-        # Fetch summary of evaluations
-        evaluations = SummaryOfEvaluation.objects.filter(project__projectID=project_id)
-        for evaluation in evaluations:
-            submissions.append({
-                "submission_id": evaluation.id,
-                "submission_type": "Summary of Evaluations",
-                "status": evaluation.status,
-                "rejection_reason": evaluation.rejection_reason,
-                "date_uploaded": evaluation.date_uploaded,
-                "submitted_by": f"{evaluation.proponent.firstname} {evaluation.proponent.lastname}",
-            })
+            # Filter submissions based on the checklist item
+            if checklist_item_name == "Daily Attendance":
+                records = DailyAttendanceRecord.objects.filter(project__projectID=project_id, proponent=user)
+            elif checklist_item_name == "Summary of Evaluation":
+                records = SummaryOfEvaluation.objects.filter(project__projectID=project_id, proponent=user)
+            elif checklist_item_name == "Modules/Lecture Notes":
+                records = ModulesLectureNotes.objects.filter(project__projectID=project_id, proponent=user)
+            elif checklist_item_name == "Photo Documentation":
+                records = PhotoDocumentation.objects.filter(project__projectID=project_id, proponent=user)
+            elif checklist_item_name == "Other Files":
+                records = OtherFiles.objects.filter(project__projectID=project_id, proponent=user)
+            else:
+                return Response({"error": "Invalid checklist item name."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Fetch modules/lecture notes
-        modules = ModulesLectureNotes.objects.filter(project__projectID=project_id)
-        for module in modules:
-            submissions.append({
-                "submission_id": module.id,
-                "submission_type": "Modules/Lecture Notes",
-                "status": module.status,
-                "rejection_reason": module.rejection_reason,
-                "date_uploaded": module.date_uploaded,
-                "submitted_by": f"{module.proponent.firstname} {module.proponent.lastname}",
-            })
+            # Serialize submissions dynamically
+            for record in records:
+                submissions.append({
+                    "submission_id": record.id,
+                    "status": record.status,
+                    "rejection_reason": record.rejection_reason,
+                    "date_uploaded": record.date_uploaded,
+                    "description": getattr(record, "description", "N/A"),  # Optional field
+                    "file_name": record.attendance_file.name if hasattr(record, 'attendance_file') else None,  # Handle files dynamically
+                })
 
-        # Fetch photo documentation
-        photos = PhotoDocumentation.objects.filter(project__projectID=project_id)
-        for photo in photos:
-            submissions.append({
-                "submission_id": photo.id,
-                "submission_type": "Photo Documentation",
-                "status": photo.status,
-                "rejection_reason": photo.rejection_reason,
-                "date_uploaded": photo.date_uploaded,
-                "submitted_by": f"{photo.proponent.firstname} {photo.proponent.lastname}",
-            })
+            return Response({"submissions": submissions}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Fetch other files
-        other_files = OtherFiles.objects.filter(project__projectID=project_id)
-        for file in other_files:
-            submissions.append({
-                "submission_id": file.id,
-                "submission_type": "Other Files",
-                "status": file.status,
-                "rejection_reason": file.rejection_reason,
-                "date_uploaded": file.date_uploaded,
-                "submitted_by": f"{file.proponent.firstname} {file.proponent.lastname}",
-            })
-
-        return Response(submissions, status=200)
-
-
-        
 
     
 ### assign checklist
