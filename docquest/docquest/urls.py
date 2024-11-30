@@ -91,6 +91,10 @@ urlpatterns = [
     path('create_agency', views.create_agency),
     path('get_agencies', views.get_agencies),
 
+    # coordinator
+    # get all projects using programID
+    path('get_all_projects_of_program', views.get_all_projects_of_program),
+
     # get address
     path('get_regions', views.get_regions),
     path('get_provinces/<int:regionID>/', views.get_provinces),
