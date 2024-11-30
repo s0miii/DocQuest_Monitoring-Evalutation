@@ -69,7 +69,7 @@ function App() {
 
       <Route path="/proponents/projects" element={<ProponentsProjects />} />
       <Route path="/proponents/proj/req/:projectID" element={<ProponentsProjReq />} />
-      <Route path="/proponents/project/:project_id/daily-attendance" element={<ProponentsDailyAttRec />} />
+      <Route path="/proponents/project/:projectID/daily-attendance" element={<ProponentsDailyAttRec />} />
       <Route path="/proponents/proj/req/evaluation-summary" element={<ProponentsEvalSum />} />
       <Route path="/proponents/proj/req/trainer-cv-dtr" element={<ProponentsTrainerCVDTR />} />
       <Route path="/proponents/proj/req/modules-notes" element={<ProponentsLecNotes />} />
