@@ -1282,7 +1282,30 @@ def get_all_projects(request):
 
     # Return the serialized data as a JSON response
     return Response(serializer.data)
-    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_projects_of_program(request):
+    user = request.user
+
+    # Step 1: Fetch Faculty instance for the user
+    try:
+        faculty = Faculty.objects.get(userID=user)
+    except Faculty.DoesNotExist:
+        return Response({"error": "Faculty not found"}, status=404)
+
+    # Step 2: Serialize programID
+    program_serializer = GetProgramUsingFacultySerializer(faculty)
+    program_id = program_serializer.data['programID']
+
+    # Step 3: Query projects for the program
+    projects = Project.objects.filter(program__programID=program_id)  # Adjust filter as per your model relationships
+
+    # Step 4: Serialize the projects
+    project_serializer = GetProjectsCountUsingProgram(projects, many=True)
+
+    return Response(project_serializer.data)
+
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
