@@ -10,6 +10,7 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
+from rest_framework.exceptions import PermissionDenied
 
 User = get_user_model()
 
@@ -75,12 +76,20 @@ def edit_profile(request, pk):
     try:
         instance = CustomUser.objects.get(pk=pk)
     except CustomUser.DoesNotExist:
-        return Response({"error": "Object not found."}),
+        return Response({"error": "Object not found."}, status=status.HTTP_404_NOT_FOUND)
 
+    # Use partial updates via serializer
     serializer = UserEditProfileSerializer(instance, data=request.data, partial=True)
 
     if serializer.is_valid():
-        serializer.save()
+        # Check if the password field is in the request
+        if 'password' in request.data:
+            password = request.data['password']
+            instance.set_password(password)  # Hash and save the password
+            instance.save()
+        else:
+            serializer.save()  # Save other fields without password processing
+
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1284,6 +1293,15 @@ def get_all_projects(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
+def coordinator_get_roles(request):
+    """
+    Get roles with code 'rglr' or 'pjlr'.
+    """
+    roles = Roles.objects.filter(code__in=['rglr', 'pjlr'])
+    serializer = RoleSerializer(roles, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_projects_of_program(request):
     user = request.user
@@ -1305,6 +1323,35 @@ def get_all_projects_of_program(request):
     project_serializer = GetProjectsCountUsingProgram(projects, many=True)
 
     return Response(project_serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_users_by_program(request):
+    # Get the logged-in user
+    user = request.user
+
+    # Check if the user has the "coord" role
+    if not user.role.filter(code='coord').exists():
+        raise PermissionDenied("You do not have permission to access this data.")
+    
+    # Get the current user's programID
+    try:
+        faculty = Faculty.objects.get(userID=user)
+    except Faculty.DoesNotExist:
+        return Response({"error": "User is not associated with a faculty."}, status=400)
+    
+    program_id = faculty.programID
+
+    # Get all users with the same programID and role codes "rglr" or "pjlr"
+    users = CustomUser.objects.filter(
+        role__code__in=['rglr', 'pjlr'],
+        faculty__programID=program_id,
+        is_active = 1  
+    ).distinct()
+
+    # Serialize and return the data
+    serializer = UsersByProgramSerializer(users, many=True)
+    return Response(serializer.data)
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
