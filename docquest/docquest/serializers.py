@@ -320,7 +320,7 @@ class UpdateMOASerializer(serializers.ModelSerializer):
     class Meta:
         model = MOA
         fields = [
-            'moaID', 'partyDescription' 'coverageAndEffectivity', 'confidentialityClause',
+            'moaID', 'partyDescription', 'coverageAndEffectivity', 'confidentialityClause',
             'termination', 'witnesseth', 'partyObligation', 'firstParty', 'secondParty', 'witnesses'
         ]
     
@@ -817,6 +817,25 @@ class GetProgramUsingFacultySerializer(serializers.ModelSerializer):
         fields = ['programID']
 
 class GetProjectsCountUsingProgram(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+
     class Meta(object):
         model = Project
-        fields = ['status']
+        fields = ['status', 'uniqueCode', 'projectTitle', 'dateCreated', 'program',
+            'fullname', 'projectID'
+        ]
+    
+    def get_fullname(self, obj):
+        # Concatenate the reviewer's full name
+        projectLeader = obj.userID
+        return f"{projectLeader.firstname} {projectLeader.lastname}".strip()
+
+class UsersByProgramSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(many=True)
+
+    class Meta(object):
+        model = CustomUser
+        fields = ['userID', 'email', 'firstname',
+            'middlename', 'lastname', 'contactNumber', 'role',
+            'is_active'
+        ]
