@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Topbar from '../../components/Topbar';
 import ProjLeadSidebar from '../../components/ProjLeadSideBar';
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaCopy } from 'react-icons/fa';
 
 const ProjLeadDailyAttRec = () => {
     const navigate = useNavigate();
@@ -126,117 +126,82 @@ const ProjLeadDailyAttRec = () => {
                     </div>
 
                     {/* Generated Attendance Links Section */}
-                    <div ref={linksSectionRef} className='bg-white shadow-lg rounded-lg p-6 mb-6'>
-                        <h2 className='text-xl font-semibold text-center mb-4'>Generated Attendance Links</h2>
-                        <table className='min-w-full table-auto border-collapse'>
-                            <thead>
-                                <tr className='border-b'>
-                                    <th className='p-2 text-left'>Template Name</th>
-                                    <th className='p-2 text-left'>Link</th>
-                                    <th className='p-2 text-left'>Date Created</th>
-                                    <th className='p-2 text-left'>Expiration Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {templates.map((template, index) => (
-                                    <tr key={index} className='border-b'>
-                                        <td className='p-2'>{template.templateName}</td>
-                                        <td className='p-2'>
-                                            <button onClick={() => handleCopyLink(template.sharable_link)} className='text-blue-500'>
-                                                Copy Link
-                                            </button>
-                                        </td>
-                                        <td className='p-2'>{new Date(template.created_at).toLocaleDateString()}</td>
-                                        <td className='p-2'>{template.expiration_date || 'N/A'}</td>
+                    <div ref={linksSectionRef} className='bg-white shadow-md rounded-lg p-6 mb-6'>
+                        <h2 className='text-2xl font-semibold text-center mb-4'>Generated Attendance Links</h2>
+                        <div className='overflow-x-auto'>
+                            <table className='w-full border border-gray-200'>
+                                <thead>
+                                    <tr className='bg-gray-50'>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Template Name</th>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Link</th>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Date Created</th>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Expiration Date</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {templates.map((template, index) => (
+                                        <tr key={index} className='border-t'>
+                                            <td className='p-3 text-gray-600'>{template.templateName}</td>
+                                            <td className='p-3'>
+                                                <button onClick={() => handleCopyLink(template.sharable_link)} className='text-blue-500 flex items-center'>
+                                                    <FaCopy className='mr-1' /> Copy Link
+                                                </button>
+                                            </td>
+                                            <td className='p-3 text-gray-600'>{new Date(template.created_at).toLocaleDateString()}</td>
+                                            <td className='p-3 text-gray-600'>{template.expiration_date || 'N/A'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     {/* Template Creation Section */}
-                    <div className='bg-white shadow-lg rounded-lg p-6 mb-6'>
-                        <h2 className='text-xl font-semibold text-center mb-4'>Create New Attendance Template</h2>
-                        <div className='grid grid-cols-2 gap-4'>
+                    <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
+                        <h2 className='text-2xl font-semibold text-center mb-4'>Create New Attendance Template</h2>
+                        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
                             <div>
-                                <label className='block text-sm font-medium text-gray-700'>Template Name</label>
+                                <label className='block text-sm font-medium text-gray-600'>Template Name</label>
                                 <input
                                     type='text'
                                     value={templateName}
                                     onChange={(e) => setTemplateName(e.target.value)}
-                                    className='bg-gray-100 rounded-lg p-3 mt-1 w-full'
+                                    className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
                                 />
                             </div>
                             <div>
-                                <label className='block text-sm font-medium text-gray-700'>Expiration Date</label>
+                                <label className='block text-sm font-medium text-gray-600'>Expiration Date</label>
                                 <input
                                     type='date'
                                     value={expirationDate}
                                     onChange={(e) => setExpirationDate(e.target.value)}
-                                    className='bg-gray-100 rounded-lg p-3 mt-1 w-full'
+                                    className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
                                 />
                             </div>
                         </div>
-                        <div className='mt-4'>
-                            <div>
-                                <input
-                                    type='checkbox'
-                                    checked={includeAttendeeName}
-                                    onChange={() => setIncludeAttendeeName(!includeAttendeeName)}
-                                />
-                                <label className='ml-2 text-sm text-gray-700'>Include Attendee Name</label>
-                            </div>
-                            <div>
-                                <input
-                                    type='checkbox'
-                                    checked={includeGender}
-                                    onChange={() => setIncludeGender(!includeGender)}
-                                />
-                                <label className='ml-2 text-sm text-gray-700'>Include Gender</label>
-                            </div>
-                            <div>
-                                <input
-                                    type='checkbox'
-                                    checked={includeCollege}
-                                    onChange={() => setIncludeCollege(!includeCollege)}
-                                />
-                                <label className='ml-2 text-sm text-gray-700'>Include College</label>
-                            </div>
-                            <div>
-                                <input
-                                    type='checkbox'
-                                    checked={includeDepartment}
-                                    onChange={() => setIncludeDepartment(!includeDepartment)}
-                                />
-                                <label className='ml-2 text-sm text-gray-700'>Include Department</label>
-                            </div>
-                            <div>
-                                <input
-                                    type='checkbox'
-                                    checked={includeYearSection}
-                                    onChange={() => setIncludeYearSection(!includeYearSection)}
-                                />
-                                <label className='ml-2 text-sm text-gray-700'>Include Year/Section</label>
-                            </div>
-                            <div>
-                                <input
-                                    type='checkbox'
-                                    checked={includeAgencyOffice}
-                                    onChange={() => setIncludeAgencyOffice(!includeAgencyOffice)}
-                                />
-                                <label className='ml-2 text-sm text-gray-700'>Include Agency/Office</label>
-                            </div>
-                            <div>
-                                <input
-                                    type='checkbox'
-                                    checked={includeContactNumber}
-                                    onChange={() => setIncludeContactNumber(!includeContactNumber)}
-                                />
-                                <label className='ml-2 text-sm text-gray-700'>Include Contact Number</label>
-                            </div>
+                        <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mt-4'>
+                            {[
+                                { label: 'Include Attendee Name', state: includeAttendeeName, setState: setIncludeAttendeeName },
+                                { label: 'Include Gender', state: includeGender, setState: setIncludeGender },
+                                { label: 'Include College', state: includeCollege, setState: setIncludeCollege },
+                                { label: 'Include Department', state: includeDepartment, setState: setIncludeDepartment },
+                                { label: 'Include Year/Section', state: includeYearSection, setState: setIncludeYearSection },
+                                { label: 'Include Agency/Office', state: includeAgencyOffice, setState: setIncludeAgencyOffice },
+                                { label: 'Include Contact Number', state: includeContactNumber, setState: setIncludeContactNumber },
+                            ].map((item, idx) => (
+                                <div key={idx} className='flex items-center'>
+                                    <input
+                                        type='checkbox'
+                                        checked={item.state}
+                                        onChange={() => item.setState(!item.state)}
+                                        className='mr-2'
+                                    />
+                                    <label className='text-sm text-gray-700'>{item.label}</label>
+                                </div>
+                            ))}
                         </div>
                         <div className='mt-6 text-center'>
-                            <button onClick={handleCreateTemplate} className='px-6 py-2 text-white bg-blue-500 rounded-lg'>
+                            <button onClick={handleCreateTemplate} className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'>
                                 Create Template
                             </button>
                         </div>
