@@ -36,7 +36,8 @@ urlpatterns = [
     path("user-projects/", UserProjectsView.as_view(), name="user-projects"),
 
     # document count
-    path("project/<int:project_id>/document_counts/", attached_documents_count, name="attached_documents_count"),
+    # path("project/<int:project_id>/document_counts/", DocumentCountsView.as_view(), name="document_counts"),
+    path("project/<int:project_id>/document_counts/", document_counts, name="document_counts"),
 
     # View Proponent Project Details
     path('projects/<int:project_id>/details/', ProponentProjectDetailsView.as_view(), name='proponent_project_details'),

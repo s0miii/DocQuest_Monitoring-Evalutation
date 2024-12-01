@@ -3,11 +3,12 @@ import Topbar from "../../components/Topbar";
 import { useNavigate } from 'react-router-dom';
 import ProponentsSideBar from "../../components/ProponentsSideBar";
 import { FaArrowLeft } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 
 const ProponentsLecNotes = () => {
     const navigate = useNavigate();
     const today = new Date().toISOString().split('T')[0];
-
+    const { projectID } = useParams();
     const [projectDetails, setProjectDetails] = useState({
         title: "Tesda Vocational",
         leader: "Tabasan, Wynoah Louis",
@@ -44,6 +45,10 @@ const ProponentsLecNotes = () => {
         fetchProjectDetails();
     }, []);
 
+    const handleViewClick = (path) => {
+        navigate(path.replace(":projectID", projectID));
+    };
+
     const fetchProjectDetails = async () => {
         setLoading(true);
         try {
@@ -62,11 +67,11 @@ const ProponentsLecNotes = () => {
             name: file.name,
             url: URL.createObjectURL(file)
         }));
-        setAttachedFiles(files); 
+        setAttachedFiles(files);
     };
 
     const handleSubmit = async () => {
-        if (!trainerName || !submissionDate || attachedFiles.length === 0 ) {
+        if (!trainerName || !submissionDate || attachedFiles.length === 0) {
             alert("Please complete all fields and attach at least one file.");
             return;
         }
@@ -123,7 +128,7 @@ const ProponentsLecNotes = () => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => navigate('/proponents/proj/req')}>
+                        <button className="mr-2" onClick={() => handleViewClick("/proponents/proj/req/:projectID")}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Modules/Lecture Notes</h1>

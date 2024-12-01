@@ -15,6 +15,7 @@ const ProponentsDailyAttRec = () => {
     const [attachedFiles, setAttachedFiles] = useState([]); // Array to handle multiple files
     const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
+    const [isProjectLeader, setIsProjectLeader] = useState(false);
     const currentUser = localStorage.getItem("userFullName");
 
     const handleViewClick = (path) => {
@@ -51,6 +52,7 @@ const ProponentsDailyAttRec = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setProjectDetails(data.projectDetails);
+                    setIsProjectLeader(data.isProjectLeader);
                 } else {
                     console.error("Failed to fetch project details.");
                 }
@@ -184,6 +186,7 @@ const ProponentsDailyAttRec = () => {
         }
     };
 
+
     if (loading) {
         return <div>Loading project details...</div>;
     }
@@ -260,6 +263,83 @@ const ProponentsDailyAttRec = () => {
                                     {projectDetails.partnerAgency}
                                 </p>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Submitted Files Section */}
+                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
+                        <div
+                            className="overflow-y-auto"
+                            style={{
+                                maxHeight: "300px", // Limit the table height
+                            }}
+                        >
+                            <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
+                                <thead className="sticky top-0 bg-gray-100 z-10">
+                                    <tr className="border-b">
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                            File Name
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                            Date Submitted
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider w-2/5">
+                                            Description
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {submissions.map((submission) => (
+                                        <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                                <a
+                                                    href={submission.file_url || "#"}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:underline truncate block text-center"
+                                                    style={{ maxWidth: "200px" }}
+                                                    title={submission.file_name?.replace("attendance_records/", "") || "No File"}
+                                                >
+                                                    {submission.file_name?.replace("attendance_records/", "").length > 20
+                                                        ? `${submission.file_name?.replace("attendance_records/", "").slice(0, 17)}...`
+                                                        : submission.file_name?.replace("attendance_records/", "") || "No File"}
+                                                </a>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                {new Date(submission.date_uploaded).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
+                                                {submission.description || "No Description"}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                {submission.status}
+                                                {submission.status === "Rejected" && submission.rejection_reason && (
+                                                    <p className="text-xs text-red-500 mt-1">{submission.rejection_reason}</p>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                {submission.status === "Approved" ? (
+                                                    <span className="text-gray-500">Cannot Remove</span>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleDelete(submission.submission_id)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -373,69 +453,6 @@ const ProponentsDailyAttRec = () => {
                             >
                                 Submit
                             </button>
-                        </div>
-
-                        {/* Uploaded Submissions Section */}
-                        <div className="bg-white shadow-lg rounded-lg p-8 mt-6">
-                            <h2 className="text-xl font-semibold text-center mb-6">Your Daily Attendance Records</h2>
-                            {submissions.length > 0 ? (
-                                <div className="grid grid-cols-3 gap-4">
-                                    {submissions.map((submission) => {
-                                        // Remove "attendance_records/" prefix
-                                        const processedFileName = submission.file_name?.replace("attendance_records/", "") || "N/A";
-
-                                        // Truncate long file names
-                                        const displayFileName =
-                                            processedFileName.length > 20
-                                                ? `${processedFileName.substring(0, 17)}...`
-                                                : processedFileName;
-
-                                        return (
-                                            <div key={submission.submission_id} className="border border-gray-300 rounded-lg p-4 relative">
-                                                {/* Delete button */}
-                                                <button
-                                                    className="absolute top-2 right-2 text-gray-700 font-bold"
-                                                    onClick={() => handleDelete(submission.submission_id)}
-                                                >
-                                                    X
-                                                </button>
-                                                <p className="font-medium">
-                                                    Status:{" "}
-                                                    <span
-                                                        className={
-                                                            submission.status === "Approved"
-                                                                ? "text-green-500"
-                                                                : submission.status === "Rejected"
-                                                                    ? "text-red-500"
-                                                                    : "text-blue-500"
-                                                        }
-                                                    >
-                                                        {submission.status}
-                                                    </span>
-                                                </p>
-                                                {submission.rejection_reason && submission.status === "Rejected" && (
-                                                    <p className="text-black">Rejection Reason: {submission.rejection_reason}</p>
-                                                )}
-                                                <p className="text-gray-500 text-sm">
-                                                    Uploaded On: {new Date(submission.date_uploaded).toLocaleString()}
-                                                </p>
-                                                {submission.file_name && (
-                                                    <p className="text-sm text-gray-700 mt-2">
-                                                        File Name: <span className="font-mono">{displayFileName}</span>
-                                                    </p>
-                                                )}
-                                                {submission.description && (
-                                                    <p className="text-gray-600 text-sm mt-2">
-                                                        Description: {submission.description}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ) : (
-                                <p className="text-gray-500 text-center">You have not uploaded any submissions yet.</p>
-                            )}
                         </div>
 
                     </div>
