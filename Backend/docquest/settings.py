@@ -177,5 +177,3 @@ DJOSER = {
          'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
     }
 }
-
-FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://127.0.0.1:3000')
