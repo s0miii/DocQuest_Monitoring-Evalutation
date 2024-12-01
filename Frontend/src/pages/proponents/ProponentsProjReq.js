@@ -129,7 +129,7 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
                         <button className="mr-2" onClick={() => handleViewClick('/proponents/projects')}>
                             <FaArrowLeft />
                         </button>
-                        <h1 className="text-2xl font-semibold">Project Details</h1>
+                        <h1 className="text-2xl font-semibold">{projectDetails.projectTitle} Details</h1>
                     </div>
 
                     {/* Project Details and Progress Status Section */}

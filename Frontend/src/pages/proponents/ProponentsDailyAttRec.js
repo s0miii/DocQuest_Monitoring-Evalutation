@@ -277,7 +277,7 @@ const ProponentsDailyAttRec = () => {
                                 <input
                                     type="text"
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Enter Description"
+                                    placeholder="Enter a Short Description"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                 />
