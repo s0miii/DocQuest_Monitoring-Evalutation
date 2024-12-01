@@ -38,7 +38,7 @@ import ProponentsLecNotes from "./pages/proponents/ProponentsLecNotes";
 import ProponentsOther from "./pages/proponents/ProponentsOther";
 
 import EvaluationForm from "./pages/proponents/EvaluationForm";
-import FillAttendanceForm from "./pages/proponents/FillAttendanceForm";
+
 
 
 function App() {
@@ -75,7 +75,6 @@ function App() {
       <Route path="/proponents/proj/req/modules-notes" element={<ProponentsLecNotes />} />
       <Route path="/proponents/proj/req/other" element={<ProponentsOther />} />
       <Route path="/eval" element={<EvaluationForm />} />
-      <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
     </Routes>
   );
 }
