@@ -93,6 +93,13 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = CustomUser
         fields = ['userID', 'firstname', 'lastname', 'roles']
+
+class EditUserRoleSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(many=True, source='role')
+
+    class Meta(object):
+        model = CustomUser
+        fields = ['role']
     
 class GoalsAndObjectivesSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -320,7 +327,7 @@ class UpdateMOASerializer(serializers.ModelSerializer):
     class Meta:
         model = MOA
         fields = [
-            'moaID', 'partyDescription' 'coverageAndEffectivity', 'confidentialityClause',
+            'moaID', 'partyDescription', 'coverageAndEffectivity', 'confidentialityClause',
             'termination', 'witnesseth', 'partyObligation', 'firstParty', 'secondParty', 'witnesses'
         ]
     
@@ -817,6 +824,32 @@ class GetProgramUsingFacultySerializer(serializers.ModelSerializer):
         fields = ['programID']
 
 class GetProjectsCountUsingProgram(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+
     class Meta(object):
         model = Project
-        fields = ['status']
+        fields = ['status', 'uniqueCode', 'projectTitle', 'dateCreated', 'program',
+            'fullname', 'projectID'
+        ]
+    
+    def get_fullname(self, obj):
+        # Concatenate the reviewer's full name
+        projectLeader = obj.userID
+        return f"{projectLeader.firstname} {projectLeader.lastname}".strip()
+
+class UsersByProgramSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(many=True)
+
+    class Meta(object):
+        model = CustomUser
+        fields = ['userID', 'email', 'firstname',
+            'middlename', 'lastname', 'contactNumber', 'role',
+            'is_active'
+        ]
+
+class CoordinatorProgramToCampus(serializers.ModelSerializer):
+    programID = ProgramSerializer()
+
+    class Meta(object):
+        model = Faculty
+        fields = ['programID']

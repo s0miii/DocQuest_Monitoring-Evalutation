@@ -22,7 +22,7 @@ from django.utils.dateparse import parse_date
 
 
 # retrieve projects based on user role each project
-@role_required(allowed_role_codes=["PJLD", "PPNT"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
 class UserProjectsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -36,11 +36,11 @@ class UserProjectsView(APIView):
 
         # Dynamic Role-Query Mappings
         role_query_mapping = {
-            "PJLD": {
+            "pjld": {
                 "queryset": Project.objects.filter(userID=user.userID, status="approved"),
                 "role": "leader",
             },
-            "PPNT": {
+            "ppnt": {
                 "queryset": Project.objects.filter(proponents__userID=user.userID, status="approved"),
                 "role": "proponent",
             },
@@ -71,7 +71,7 @@ class UserProjectsView(APIView):
         return Response(combined_projects, status=200)
     
 # Proponent Project Details
-@role_required(allowed_role_codes=["PPNT"])
+@role_required(allowed_role_codes=["ppnt"])
 class ProponentProjectDetailsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -122,28 +122,38 @@ class ProponentProjectDetailsView(APIView):
             return Response({"error": "Project Leader not found."}, status=status.HTTP_404_NOT_FOUND)
 
 # document count for checklist item
-@api_view(["GET"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def attached_documents_count(request, project_id):
-    try:
-        # Fetch the project
-        project = get_object_or_404(Project, projectID=project_id, status="approved")
+def document_counts(request, project_id):
+    user = request.user
+    project = get_object_or_404(Project, projectID=project_id, status="approved")
 
-        # Initialize a dictionary to store counts
-        document_counts = {
-            "Daily Attendance": DailyAttendanceRecord.objects.filter(project=project).count(),
-            "Summary of Evaluation": SummaryOfEvaluation.objects.filter(project=project).count(),
-            "Modules/Lecture Notes": ModulesLectureNotes.objects.filter(project=project).count(),
-            "Other Files": OtherFiles.objects.filter(project=project).count(),
-            "Photo Documentation": PhotoDocumentation.objects.filter(project=project).count(),
-        }
+    # Check if the user is the project leader for this project
+    is_project_leader = project.userID == user
 
-        return Response(document_counts, status=status.HTTP_200_OK)
+    # Initialize counts dictionary
+    document_counts = {}
 
-    except Project.DoesNotExist:
-        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # Define a list of tuples containing the model and the corresponding checklist item name
+    checklist_items = [
+        (DailyAttendanceRecord, 'Daily Attendance'),
+        (SummaryOfEvaluation, 'Summary of Evaluation'),
+        (ModulesLectureNotes, 'Modules/Lecture Notes'),
+        (PhotoDocumentation, 'Photo Documentation'),
+        (OtherFiles, 'Other Files'),
+    ]
+
+    for model, item_name in checklist_items:
+        if is_project_leader:
+            count = model.objects.filter(project=project).count()
+        else:
+            count = model.objects.filter(project=project, proponent=user).count()
+        document_counts[item_name] = count
+
+    return Response({"document_counts": document_counts}, status=status.HTTP_200_OK)
+
+
 
 # project progress
 @api_view(["GET"])
@@ -195,7 +205,7 @@ def get_user_roles(request):
 
 
 ### upload files
-@role_required(allowed_role_codes=["PJLD", "PPNT"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
 class DailyAttendanceUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -247,7 +257,7 @@ class DailyAttendanceUploadView(APIView):
 
 
 
-@role_required(allowed_role_codes=["PJLD", "PPNT"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
 class SummaryOfEvaluationUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -273,7 +283,7 @@ class SummaryOfEvaluationUploadView(APIView):
 
         return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
 
-@role_required(allowed_role_codes=["PJLD", "PPNT"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
 class ModulesLectureNotesUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -301,7 +311,7 @@ class ModulesLectureNotesUploadView(APIView):
 
         return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
 
-@role_required(allowed_role_codes=["PJLD", "PPNT"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
 class PhotoDocumentationUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -329,7 +339,7 @@ class PhotoDocumentationUploadView(APIView):
 
         return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
 
-@role_required(allowed_role_codes=["PJLD", "PPNT"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
 class OtherFilesUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -365,8 +375,14 @@ def delete_submission(request, submission_id):
         # Fetch the submission
         submission = DailyAttendanceRecord.objects.get(id=submission_id)
         
-        # Check if the current user is the one who submitted it
-        if submission.proponent != request.user:
+        # Fetch the project from the submission
+        project = submission.project
+
+        # Check if the current user is the project leader for the project
+        is_project_leader = project.userID == request.user  # Check project leader based on userID
+
+        # Allow deletion only if the user is the project leader or the proponent who submitted it
+        if not (is_project_leader or submission.proponent == request.user):
             return Response({"error": "Unauthorized action"}, status=status.HTTP_403_FORBIDDEN)
         
         # Delete the submission
@@ -379,8 +395,9 @@ def delete_submission(request, submission_id):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
 ## view all submissions
-@role_required(allowed_role_codes=["PJLD", "PPNT"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
 class ChecklistItemSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -424,7 +441,7 @@ class ChecklistItemSubmissionsView(APIView):
 
     
 ### assign checklist
-@role_required(allowed_role_codes=["PJLD"])
+@role_required(allowed_role_codes=["pjld"])
 @method_decorator(csrf_exempt, name='dispatch')
 class AssignChecklistItemsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -468,7 +485,7 @@ class AssignChecklistItemsView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 ## View checklist assignments by project
-@role_required(allowed_role_codes=["PJLD", "PPNT"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
 class ChecklistItemSubmissionView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -478,10 +495,10 @@ class ChecklistItemSubmissionView(APIView):
             project = Project.objects.get(projectID=project_id, status="approved")
 
             # Check the role and filter assignments accordingly
-            if "PJLD" in [role.code for role in request.auth.role.all()]:
+            if "pjld" in [role.code for role in request.auth.role.all()]:
                 # Project leaders see all assignments for the project
                 assignments = ChecklistAssignment.objects.filter(project=project)
-            elif "PPNT" in [role.code for role in request.auth.role.all()]:
+            elif "ppnt" in [role.code for role in request.auth.role.all()]:
                 # Proponents see only their own assignments
                 assignments = ChecklistAssignment.objects.filter(
                     project=project, proponent__userID=request.auth.user.userID
@@ -524,7 +541,7 @@ MODEL_MAP = {
     "photo_documentation": PhotoDocumentation,
     "other_files": OtherFiles,
 }
-@role_required(allowed_role_codes=["PJLD"])
+@role_required(allowed_role_codes=["pjld"])
 class UpdateSubmissionStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -555,7 +572,7 @@ class UpdateSubmissionStatusView(APIView):
             return Response({"error": "Submission not found."}, status=status.HTTP_404_NOT_FOUND)
 
 # proponent view, display the status and rejection reason
-@role_required(allowed_role_codes=["PJLD", "PPNT"])
+@role_required(allowed_role_codes=["pjld", "ppnt"])
 class ProponentSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 

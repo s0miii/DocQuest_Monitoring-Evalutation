@@ -11,7 +11,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
-{ "email": "chalbert@gmail.com", "password": "testpass"}
+{ "email": "bsitcoord@gmail.com", "password": "testpass"}
 
 ###
 
@@ -673,9 +673,9 @@ Authorization: Token e6e6593e6d04309abb793f4b5f32494093226458
 ###
 
 # patch request inig edit user
-PATCH http://127.0.0.1:8000/edit_user_details/2/
+PATCH http://127.0.0.1:8000/edit_user_details/23/
 Content-Type: application/json
-Authorization: Token f17c9f447d3e24b919f102815eb536bc5cf62ba0
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
 
 {"firstname": "Chalbeee"}
 
@@ -777,16 +777,32 @@ Content-Type: application/json
 
 ###
 
+GET http://127.0.0.1:8000/get_all_projects_of_program
+Content-Type: application/json
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/users_by_program
+Content-Type: application/json
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
+
+{}
+
+###
+
 POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
-{ "email": "citcdean@gmail.com", "password": "testpass"}
+{ "email": "bsitcoord@gmail.com", "password": "testpass"}
 
 ###
 
 GET http://127.0.0.1:8000/get_reviews_with_projectID/53/
 Content-Type: application/json
-Authorization: Token da9a4ba5f34ece2c626ab030f7dc9a08ecb3dea8
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
 
 {}
 
@@ -855,6 +871,22 @@ Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
 GET http://127.0.0.1:8000/program/1/chair/
 Content-Type: application/json
 Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/coordinator_get_roles
+Content-Type: application/json
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_program_to_campus
+Content-Type: application/json
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
 
 {}
 

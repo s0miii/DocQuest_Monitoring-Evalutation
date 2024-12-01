@@ -86,7 +86,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 
     def display_college(self, obj):
         try:
-            faculty = obj.faculty_set.first()
+            faculty = Faculty.objects.filter(userID=obj).select_related('collegeID').first()
             return faculty.collegeID.title if faculty and faculty.collegeID else '-'
         except:
             return '-'
@@ -94,14 +94,14 @@ class CustomUserAdmin(admin.ModelAdmin):
 
     def display_program(self, obj):
         try:
-            faculty = obj.faculty_set.first()
+            faculty = Faculty.objects.filter(userID=obj).select_related('programID').first()
             return faculty.programID.title if faculty and faculty.programID else '-'
         except:
             return '-'
     display_program.short_description = 'Program'
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('role', 'faculty_set__collegeID', 'faculty_set__programID')
+        return super().get_queryset(request).prefetch_related('role', 'faculty__collegeID', 'faculty__programID')
 
 class FacultyAdmin(admin.ModelAdmin):
     list_display = ['facultyID', 'userID', 'collegeID', 'programID']

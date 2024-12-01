@@ -60,25 +60,6 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
                 setProjectDetails(projectData.projectDetails);
                 setAssignedRequirements(projectData.assignedRequirements);
 
-                // Fetch document counts
-                const countsResponse = await fetch(
-                    `http://127.0.0.1:8000/monitoring/project/${projectID}/document_counts/`,
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Token ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-
-                if (!countsResponse.ok) {
-                    throw new Error("Failed to fetch document counts.");
-                }
-
-                const countsData = await countsResponse.json();
-                setDocumentCounts(countsData);
-
                 // Fetch project progress
                 const progressResponse = await fetch(
                     `http://127.0.0.1:8000/monitoring/project/${projectID}/progress/`,
@@ -104,7 +85,41 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
             }
         };
 
+        const fetchDocumentCounts = async () => {
+            const token = localStorage.getItem("authToken");
+
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
+            try {
+                const countsResponse = await fetch(
+                    `http://127.0.0.1:8000/monitoring/project/${projectID}/document_counts/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (!countsResponse.ok) {
+                    throw new Error("Failed to fetch document counts.");
+                }
+
+                const countsData = await countsResponse.json();
+                setDocumentCounts(countsData.document_counts);
+            } catch (error) {
+                console.error("Error fetching document counts:", error);
+            }
+        };
+
+
         fetchProjectDetails();
+        fetchDocumentCounts();
     }, [projectID]);
 
     if (loading) {
@@ -126,7 +141,7 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/proponents/projects')}>
+                        <button className="mr-2" onClick={() => handleViewClick('/projects-dashboard')}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">{projectDetails.projectTitle} Details</h1>
@@ -188,7 +203,9 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
                                         <div key={index} className="flex justify-between items-center">
                                             <div>
                                                 <p>{requirement}</p>
-                                                <p className="text-gray-500 text-sm">{documentCounts[requirement] || 0} document attached</p>
+                                                <p className="text-gray-500 text-sm">
+                                                    {documentCounts[requirement] || 0} document(s) attached
+                                                </p>
                                             </div>
                                             <button
                                                 className="text-black underline ml-auto pr-3"
