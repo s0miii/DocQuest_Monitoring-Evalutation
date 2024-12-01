@@ -93,6 +93,13 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = CustomUser
         fields = ['userID', 'firstname', 'lastname', 'roles']
+
+class EditUserRoleSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(many=True, source='role')
+
+    class Meta(object):
+        model = CustomUser
+        fields = ['role']
     
 class GoalsAndObjectivesSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -839,3 +846,10 @@ class UsersByProgramSerializer(serializers.ModelSerializer):
             'middlename', 'lastname', 'contactNumber', 'role',
             'is_active'
         ]
+
+class CoordinatorProgramToCampus(serializers.ModelSerializer):
+    programID = ProgramSerializer()
+
+    class Meta(object):
+        model = Faculty
+        fields = ['programID']

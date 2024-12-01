@@ -41,6 +41,91 @@ def signup(request):
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def coordinator_create_user(request):
+    try:
+        with transaction.atomic():
+            # Extract user data from the request
+            email = request.data.get('email')
+            password = request.data.get('password')
+            firstname = request.data.get('firstname')
+            middlename = request.data.get('middlename', "")
+            lastname = request.data.get('lastname')
+            contact_number = request.data.get('contactNumber', "NO NUMBER")
+            role_ids = request.data.get('role', [])  # Expecting a list of role IDs
+            college_id = request.data.get('college')  # College ID
+            program_id = request.data.get('program')  # Program ID
+            is_staff = request.data.get('is_staff', False)
+            is_superuser = request.data.get('is_superuser', False)
+            is_active = request.data.get('is_active', True)
+            
+            # Step 1: Validate email and password
+            if not email:
+                return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+            if not password:
+                return Response({"error": "Password is required."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Step 2: Check for unique role constraint
+            unique_role_code = "ecrd"
+            unique_role = Roles.objects.filter(code=unique_role_code).first()
+            if unique_role and unique_role.roleID in role_ids:
+                if CustomUser.objects.filter(role=unique_role).exists():
+                    return Response(
+                        {"error": f"The role '{unique_role_code}' is already assigned to another user."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Step 3: Create the user instance
+            try:
+                user = CustomUser(
+                    email=email,
+                    firstname=firstname,
+                    middlename=middlename,
+                    lastname=lastname,
+                    contactNumber=contact_number,
+                    is_staff=is_staff,
+                    is_superuser=is_superuser,
+                    is_active=is_active,
+                )
+                user.set_password(password)  # Hash the password
+                user.save()  # Save the user
+            except Exception as e:
+                return Response({"error": f"Error creating user: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            # Step 4: Assign roles
+            try:
+                roles = Roles.objects.filter(roleID__in=role_ids)
+                user.role.set(roles)
+            except Exception as e:
+                return Response({"error": f"Error assigning roles: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Step 5: Handle faculty information
+            try:
+                if college_id or program_id:
+                    college = College.objects.filter(collegeID=college_id).first()
+                    program = Program.objects.filter(programID=program_id).first()
+                    if college_id and not college:
+                        return Response({"error": "Invalid college ID provided."}, status=status.HTTP_400_BAD_REQUEST)
+                    if program_id and not program:
+                        return Response({"error": "Invalid program ID provided."}, status=status.HTTP_400_BAD_REQUEST)
+                    
+                    Faculty.objects.update_or_create(
+                        userID=user,
+                        defaults={
+                            'collegeID': college,
+                            'programID': program,
+                        }
+                    )
+            except Exception as e:
+                return Response({"error": f"Error updating faculty information: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            return Response({"message": "User created successfully.", "userID": user.userID}, status=status.HTTP_201_CREATED)
+    
+    except Exception as e:
+        return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 # inig login mag fetch user name and roles
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -1293,6 +1378,7 @@ def get_all_projects(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def coordinator_get_roles(request):
     """
     Get roles with code 'rglr' or 'pjlr'.
@@ -1300,6 +1386,35 @@ def coordinator_get_roles(request):
     roles = Roles.objects.filter(code__in=['rglr', 'pjlr'])
     serializer = RoleSerializer(roles, many=True)
     return Response(serializer.data)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def coordinator_edit_user_role(request):
+    user_id = request.data.get('userID')
+    role_ids = request.data.get('role')  # Expecting an array of role IDs
+
+    if not user_id or not role_ids:
+        return Response({"error": "userID and role fields are required."}, status=400)
+
+    try:
+        user = CustomUser.objects.get(userID=user_id)
+    except CustomUser.DoesNotExist:
+        return Response({"error": "User not found."}, status=404)
+
+    try:
+        # Use roleID instead of id for filtering
+        roles = Roles.objects.filter(roleID__in=role_ids)
+        if len(roles) != len(role_ids):
+            return Response({"error": "One or more roles are invalid."}, status=400)
+        
+        # Update the user's roles
+        user.role.set(roles)
+        
+        return Response({"message": "User roles updated successfully."}, status=200)
+    except ValidationError as e:
+        return Response({"error": str(e)}, status=400)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -1352,6 +1467,22 @@ def get_users_by_program(request):
     # Serialize and return the data
     serializer = UsersByProgramSerializer(users, many=True)
     return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_program_to_campus(request):
+    user = request.user
+
+    # Step 1: Fetch Faculty instance for the user
+    try:
+        faculty = Faculty.objects.get(userID=user)
+    except Faculty.DoesNotExist:
+        return Response({"error": "Faculty not found"}, status=404)
+
+    # Step 2: Serialize programID
+    program_serializer = CoordinatorProgramToCampus(faculty)
+
+    return Response(program_serializer.data)
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])

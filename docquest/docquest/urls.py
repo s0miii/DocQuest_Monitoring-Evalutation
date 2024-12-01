@@ -98,6 +98,9 @@ urlpatterns = [
     path('users_by_program', views.get_users_by_program),
     # get roles
     path('coordinator_get_roles', views.coordinator_get_roles),
+    path('coordinator_edit_user_role', views.coordinator_edit_user_role),
+    path('get_program_to_campus', views.get_program_to_campus),
+    path('coordinator_create_user/', views.coordinator_create_user),
 
     # get address
     path('get_regions', views.get_regions),
