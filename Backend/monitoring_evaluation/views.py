@@ -19,7 +19,7 @@ from .decorators import role_required
 from django.http import HttpResponseForbidden, JsonResponse
 import secrets, logging, datetime
 from django.utils.dateparse import parse_date
-
+from django.conf import settings
 
 # retrieve projects based on user role each project
 @role_required(allowed_role_codes=["PJLD", "PPNT"])
@@ -876,8 +876,12 @@ class CreateAttendanceTemplateView(APIView):
         # Create the template
         attendance_template = AttendanceTemplate.objects.create(project=project, expiration_date=expiration_date, **fields)
 
-        # Generate sharable link
-        sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
+        # # Generate sharable link
+        # sharable_link = f"{settings.FRONTEND_BASE_URL}/attendance/fill/{attendance_template.token}/"
+        
+        # Use the frontend base URL for the sharable link
+        frontend_base_url = settings.FRONTEND_BASE_URL  # Retrieve the frontend URL from settings
+        sharable_link = f"{frontend_base_url}/attendance/fill/{attendance_template.token}/"
 
         # Save the sharable link sa database mismo -> added feature lang
         attendance_template.sharable_link = sharable_link
