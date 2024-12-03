@@ -15,6 +15,7 @@ const ProponentsDailyAttRec = () => {
     const [attachedFiles, setAttachedFiles] = useState([]); // Array to handle multiple files
     const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const currentUser = localStorage.getItem("userFullName");
 
@@ -186,10 +187,33 @@ const ProponentsDailyAttRec = () => {
         }
     };
 
+    // Function to handle sorting
+    const handleSort = (key) => {
+        let direction = "asc";
+        if (sortConfig.key === key && sortConfig.direction === "asc") {
+            direction = "desc";
+        }
+        setSortConfig({ key, direction });
+
+        const sortedData = [...submissions].sort((a, b) => {
+            if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
+            if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+            return 0;
+        });
+
+        setSubmissions(sortedData);
+    };
 
     if (loading) {
-        return <div>Loading project details...</div>;
+        return (
+            <div className="p-4">
+                <div className="bg-gray-200 animate-pulse h-6 w-3/4 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-1/2 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-full rounded"></div>
+            </div>
+        );
     }
+
 
     if (!projectDetails) {
         return <div>Project not found.</div>;
@@ -278,17 +302,32 @@ const ProponentsDailyAttRec = () => {
                             <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
                                 <thead className="sticky top-0 bg-gray-100 z-10">
                                     <tr className="border-b">
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                        <th
+                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                            onClick={() => handleSort("file_name")}
+                                        >
                                             File Name
+                                            {sortConfig.key === "file_name" &&
+                                                (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                        </th>
+                                        <th
+                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                            onClick={() => handleSort("date_uploaded")}
+                                        >
+                                            Date Submitted
+                                            {sortConfig.key === "date_uploaded" &&
+                                                (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                                         </th>
                                         <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            Date Submitted
-                                        </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider w-2/5">
                                             Description
                                         </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                        <th
+                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                            onClick={() => handleSort("status")}
+                                        >
                                             Status
+                                            {sortConfig.key === "status" &&
+                                                (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                                         </th>
                                         <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
                                             Actions
@@ -318,10 +357,21 @@ const ProponentsDailyAttRec = () => {
                                             <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
                                                 {submission.description || "No Description"}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                {submission.status}
+                                            <td className="px-6 py-4 text-center">
+                                                <p
+                                                    className={` ${submission.status === "Approved"
+                                                        ? "text-green-600"
+                                                        : submission.status === "Pending"
+                                                            ? "text-yellow-500"
+                                                            : submission.status === "Rejected"
+                                                                ? "text-red-600"
+                                                                : "text-gray-600"
+                                                        }`}
+                                                >
+                                                    {submission.status}
+                                                </p>
                                                 {submission.status === "Rejected" && submission.rejection_reason && (
-                                                    <p className="text-xs text-red-500 mt-1">{submission.rejection_reason}</p>
+                                                    <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">

@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost', 
     'docquest-production.up.railway.app'
+    'docquestmonitoring-evalutation-production.up.railway.app'
 ]
 
 
@@ -129,6 +130,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Media Files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

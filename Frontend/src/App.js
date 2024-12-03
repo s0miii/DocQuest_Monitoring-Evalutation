@@ -50,6 +50,7 @@ function App() {
       <Route path="/user" element={<ProjLeadDashboard />} />
       <Route path="/estaff" element={<EstaffDashboard />} />
       <Route path="/estaff/prexc/op1-op2" element={<EStaffOP1OP2 />} />
+      <Route path="/estaff/proj" element={<EStaffProjMonitoring />} />
       <Route path="/deptoff" element={<DeptOffDashboard />} />
       <Route path="/coordinator" element={<CoordinatorDashboard />} />
       <Route path="/signatory" element={<SignatoryDashboard />} />
@@ -77,6 +78,7 @@ function App() {
       <Route path="/proponents/project/:projectID/other" element={<ProponentsOther />} />
       <Route path="/eval" element={<EvaluationForm />} />
     </Routes>
+
   );
 }
 
