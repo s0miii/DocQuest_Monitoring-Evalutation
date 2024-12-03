@@ -130,9 +130,9 @@ const ProjectsDashboard = () => {
                                 <table className="min-w-full table-auto">
                                     <thead className="bg-gray-100">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Project ID</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Project Role</th>
                                             <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Title</th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Project Role</th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Project ID</th>
                                             <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Target Date</th>
                                             <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase"> </th>
                                         </tr>
@@ -140,9 +140,9 @@ const ProjectsDashboard = () => {
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {currentProjects.map((project) => (
                                             <tr key={project.projectID}>
-                                                <td className="px-6 py-4 whitespace-nowrap">{project.projectID}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{project.role.charAt(0).toUpperCase() + project.role.slice(1)}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">{project.role.charAt(0).toUpperCase() + project.role.slice(1)}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">{project.projectID}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">{project.targetImplementation}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <button
@@ -161,7 +161,7 @@ const ProjectsDashboard = () => {
 
                         {/* Pagination */}
                         <div className="mt-4 flex justify-between items-center">
-                            <div>Showing page {currentPage} out of {totalPages} pages</div>
+                            <div>Showing page {currentPage} out of {totalPages}</div>
                             <div className="flex space-x-2">
                                 <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                                     Previous
