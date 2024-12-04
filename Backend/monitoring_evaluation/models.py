@@ -52,7 +52,7 @@ class ModulesLectureNotes(models.Model):
     ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="lecture_notes")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="lecture_notes_submissions", null=True)
-    module_file = models.FileField(upload_to="modules/", null=True, blank=True)
+    module_file = models.FileField(upload_to="lecture_notes/", null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")

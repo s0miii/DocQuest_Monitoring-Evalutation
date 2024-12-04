@@ -50,11 +50,11 @@ urlpatterns = [
     path('upload/attendance/<int:project_id>/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),
     path('upload/evaluation/<int:project_id>/', SummaryOfEvaluationUploadView.as_view(), name='evaluation_upload'),
     path('upload/lecture_notes/<int:project_id>/', ModulesLectureNotesUploadView.as_view(), name='lecture_notes_upload'),
-    path('upload/photo/<int:project_id>/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
+    path('upload/photo_documentation/<int:project_id>/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
     path('upload/other_files/<int:project_id>/', OtherFilesUploadView.as_view(), name='other_files_upload'),
     
     # Delete submission
-    path('submissions/<int:submission_id>/', delete_submission, name='delete_submission'),
+    path("submissions/<str:model_name>/<int:submission_id>/", delete_submission, name="delete_submission"),
 
     
     # view all submissions from a checklist item

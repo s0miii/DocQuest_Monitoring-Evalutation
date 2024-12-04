@@ -79,7 +79,7 @@ const ProponentsDailyAttRec = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Daily Attendance/submissions/`,
+                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Daily%20Attendance/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -164,8 +164,10 @@ const ProponentsDailyAttRec = () => {
         if (!confirmDelete) return;
 
         try {
+            // Adjust model_name to "daily_attendance"
+            const modelName = "daily_attendance";
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/${submissionId}/`,
+                `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
                 {
                     method: "DELETE",
                     headers: {
@@ -186,6 +188,7 @@ const ProponentsDailyAttRec = () => {
             alert("An error occurred. Please try again.");
         }
     };
+
 
     // Function to handle sorting
     const handleSort = (key) => {
