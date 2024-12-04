@@ -24,7 +24,7 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
                 return `/proponents/project/${projectID}/daily-attendance`;
             case "Summary of Evaluation":
                 return `/proponents/project/${projectID}/evaluation-summary`;
-            case "Modules/Lecture Notes":
+            case "Lecture Notes":
                 return `/proponents/project/${projectID}/modules-notes`;
             case "Other Files":
                 return `/proponents/project/${projectID}/other`;
@@ -123,7 +123,13 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
     }, [projectID]);
 
     if (loading) {
-        return <div>Loading...</div>; // Show a loading spinner or text
+        return (
+            <div className="p-4">
+                <div className="bg-gray-200 animate-pulse h-6 w-3/4 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-1/2 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-full rounded"></div>
+            </div>
+        );
     }
 
     if (!projectDetails) {

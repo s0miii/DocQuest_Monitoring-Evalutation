@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import transaction
-from django.db.models import Value, CharField
+from django.db.models import F, ExpressionWrapper, IntegerField, Sum
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.decorators import method_decorator
@@ -105,7 +105,7 @@ class ProponentProjectDetailsView(APIView):
                 if assignment.can_submit_summary_of_evaluation:
                     assigned_requirements.append("Summary of Evaluation")
                 if assignment.can_submit_modules_lecture_notes:
-                    assigned_requirements.append("Modules/Lecture Notes")
+                    assigned_requirements.append("Lecture Notes")
                 if assignment.can_submit_other_files:
                     assigned_requirements.append("Other Files")
                 if assignment.can_submit_photo_documentation:
@@ -139,7 +139,7 @@ def document_counts(request, project_id):
     checklist_items = [
         (DailyAttendanceRecord, 'Daily Attendance'),
         (SummaryOfEvaluation, 'Summary of Evaluation'),
-        (ModulesLectureNotes, 'Modules/Lecture Notes'),
+        (ModulesLectureNotes, 'Lecture Notes'),
         (PhotoDocumentation, 'Photo Documentation'),
         (OtherFiles, 'Other Files'),
     ]
@@ -160,29 +160,41 @@ def document_counts(request, project_id):
 @permission_classes([IsAuthenticated])
 def project_progress(request, project_id):
     try:
-        # Total assigned checklist items across all proponents
-        total_assignments = ChecklistAssignment.objects.filter(project__projectID=project_id).count()
+        # Get all checklist assignments for the given project
+        checklist_assignments = ChecklistAssignment.objects.filter(project__projectID=project_id)
 
-        # Count unique approved submissions per checklist item
+        # Calculate total assigned checklist items across all proponents
+        total_assignments = ChecklistAssignment.objects.annotate(
+            checklist_total=ExpressionWrapper(
+                F("can_submit_daily_attendance")
+                + F("can_submit_summary_of_evaluation")
+                + F("can_submit_modules_lecture_notes")
+                + F("can_submit_other_files")
+                + F("can_submit_photo_documentation"),
+                output_field=IntegerField(),  # Specify the output type
+            )
+        ).aggregate(total=Sum("checklist_total"))["total"] or 0
+
+        # Calculate the count of approved submissions across all categories
         approved_submissions_count = DailyAttendanceRecord.objects.filter(
             project__projectID=project_id, status="Approved"
-        ).values("checklist_item", "proponent").distinct().count()
+        ).distinct().count()
 
         approved_submissions_count += SummaryOfEvaluation.objects.filter(
             project__projectID=project_id, status="Approved"
-        ).values("checklist_item", "proponent").distinct().count()
+        ).distinct().count()
 
         approved_submissions_count += ModulesLectureNotes.objects.filter(
             project__projectID=project_id, status="Approved"
-        ).values("checklist_item", "proponent").distinct().count()
+        ).distinct().count()
 
         approved_submissions_count += PhotoDocumentation.objects.filter(
             project__projectID=project_id, status="Approved"
-        ).values("checklist_item", "proponent").distinct().count()
+        ).distinct().count()
 
         approved_submissions_count += OtherFiles.objects.filter(
             project__projectID=project_id, status="Approved"
-        ).values("checklist_item", "proponent").distinct().count()
+        ).distinct().count()
 
         # Avoid division by zero
         if total_assignments == 0:
@@ -193,6 +205,7 @@ def project_progress(request, project_id):
         return Response({"progress": min(progress, 100)}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 ### Role Based Access
 # expose user roles
@@ -288,28 +301,30 @@ class ModulesLectureNotesUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, project_id):
-        proponent_id = request.data.get('proponent')
+        user = request.user
+
         file = request.FILES.get('module_file')
         description = request.data.get('description')
 
         if not file:
             return Response({"error": "Module file is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Fetch objects
-        proponent = get_object_or_404(CustomUser, userID=proponent_id)
         project = get_object_or_404(Project, projectID=project_id, status="approved")
-        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=proponent)
+        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=user)
 
-        if assignment.can_submit_modules_lecture_notes:
-            lecture_notes = ModulesLectureNotes.objects.create(
-                project=project,
-                proponent=proponent,
-                module_file=file,
-                description=description
-            )
-            return Response(ModulesLectureNotesSerializer(lecture_notes).data, status=status.HTTP_201_CREATED)
+        if not assignment.can_submit_modules_lecture_notes:
+            return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
 
-        return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
+        # Save the uploaded file
+        lecture_notes = ModulesLectureNotes.objects.create(
+            project=project,
+            proponent=user,
+            module_file=file,  # File gets saved to the 'lecture_notes/' folder
+            description=description,
+        )
+
+        return Response(ModulesLectureNotesSerializer(lecture_notes).data, status=status.HTTP_201_CREATED)
+
 
 @role_required(allowed_role_codes=["pjld", "ppnt"])
 class PhotoDocumentationUploadView(APIView):
@@ -344,55 +359,69 @@ class OtherFilesUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, project_id):
+        print("FILES:", request.FILES)  # Debug: Log incoming files
+        print("DATA:", request.data)   # Debug: Log incoming data
+
         proponent_id = request.data.get('proponent')
-        file = request.FILES.get('other_files')
+        file = request.FILES.get('other_files')  # Match this with FormData key
         description = request.data.get('description')
 
         if not file:
             return Response({"error": "File is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Fetch objects
-        proponent = get_object_or_404(CustomUser, userID=proponent_id)
-        project = get_object_or_404(Project, projectID=project_id, status="approved")
-        assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=proponent)
+        try:
+            proponent = get_object_or_404(CustomUser, userID=proponent_id)
+            project = get_object_or_404(Project, projectID=project_id, status="approved")
+            assignment = get_object_or_404(ChecklistAssignment, project=project, proponent=proponent)
 
-        if assignment.can_submit_other_files:
-            other_file = OtherFiles.objects.create(
-                project=project,
-                proponent=proponent,
-                file=file,
-                description=description
-            )
-            return Response(OtherFilesSerializer(other_file).data, status=status.HTTP_201_CREATED)
+            if assignment.can_submit_other_files:
+                other_file = OtherFiles.objects.create(
+                    project=project,
+                    proponent=proponent,
+                    file=file,
+                    description=description
+                )
+                return Response(OtherFilesSerializer(other_file).data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response({"error": "You are not assigned to submit this item."}, status=status.HTTP_403_FORBIDDEN)
 
 # Deletee submission
+MODEL_MAP = {
+    "daily_attendance": DailyAttendanceRecord,
+    "summary_of_evaluation": SummaryOfEvaluation,
+    "modules_lecture_notes": ModulesLectureNotes,
+    "photo_documentation": PhotoDocumentation,
+    "other_files": OtherFiles,
+}
+
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
-def delete_submission(request, submission_id):
+def delete_submission(request, model_name, submission_id):
+    if model_name not in MODEL_MAP:
+        return Response({"error": "Invalid model name."}, status=status.HTTP_400_BAD_REQUEST)
+
+    Model = MODEL_MAP[model_name]
+
     try:
-        # Fetch the submission
-        submission = DailyAttendanceRecord.objects.get(id=submission_id)
-        
-        # Fetch the project from the submission
+        submission = Model.objects.get(id=submission_id)
         project = submission.project
+        is_project_leader = project.userID == request.user
 
-        # Check if the current user is the project leader for the project
-        is_project_leader = project.userID == request.user  # Check project leader based on userID
-
-        # Allow deletion only if the user is the project leader or the proponent who submitted it
         if not (is_project_leader or submission.proponent == request.user):
             return Response({"error": "Unauthorized action"}, status=status.HTTP_403_FORBIDDEN)
-        
-        # Delete the submission
+
         submission.delete()
         return Response({"message": "Submission deleted successfully"}, status=status.HTTP_200_OK)
-    
-    except DailyAttendanceRecord.DoesNotExist:
+
+    except Model.DoesNotExist:
         return Response({"error": "Submission not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 
@@ -414,7 +443,7 @@ class ChecklistItemSubmissionsView(APIView):
                 records = DailyAttendanceRecord.objects.filter(project__projectID=project_id, proponent=user)
             elif checklist_item_name == "Summary of Evaluation":
                 records = SummaryOfEvaluation.objects.filter(project__projectID=project_id, proponent=user)
-            elif checklist_item_name == "Modules/Lecture Notes":
+            elif checklist_item_name == "Lecture Notes":
                 records = ModulesLectureNotes.objects.filter(project__projectID=project_id, proponent=user)
             elif checklist_item_name == "Photo Documentation":
                 records = PhotoDocumentation.objects.filter(project__projectID=project_id, proponent=user)
@@ -431,7 +460,14 @@ class ChecklistItemSubmissionsView(APIView):
                     "rejection_reason": record.rejection_reason,
                     "date_uploaded": record.date_uploaded,
                     "description": getattr(record, "description", "N/A"),  # Optional field
-                    "file_name": record.attendance_file.name if hasattr(record, 'attendance_file') else None,  # Handle files dynamically
+                    "file_name": (
+                        getattr(record, 'attendance_file', None).name if getattr(record, 'attendance_file', None) else
+                        getattr(record, 'summary_file', None).name if getattr(record, 'summary_file', None) else
+                        getattr(record, 'module_file', None).name if getattr(record, 'module_file', None) else
+                        getattr(record, 'photo', None).name if getattr(record, 'photo', None) else
+                        getattr(record, 'file', None).name if getattr(record, 'file', None) else
+                        None
+                    )  
                 })
 
             return Response({"submissions": submissions}, status=status.HTTP_200_OK)
@@ -465,7 +501,7 @@ class AssignChecklistItemsView(APIView):
                     defaults={
                         "can_submit_daily_attendance": checklist_items.get("daily_attendance", False),
                         "can_submit_summary_of_evaluation": checklist_items.get("summary_of_evaluation", False),
-                        "can_submit_modules_lecture_notes": checklist_items.get("modules_lecture_notes", False),
+                        "can_submit_modules_lecture_notes": checklist_items.get("lecture_notes", False),
                         "can_submit_other_files": checklist_items.get("other_files", False),
                         "can_submit_photo_documentation": checklist_items.get("photo_documentation", False),
                     }
@@ -486,7 +522,7 @@ class AssignChecklistItemsView(APIView):
 
 ## View checklist assignments by project
 @role_required(allowed_role_codes=["pjld", "ppnt"])
-class ChecklistItemSubmissionView(APIView):
+class ChecklistItemSubmissionView(APIView): ## this is a different class from the first one above!!!!
     permission_classes = [IsAuthenticated]
 
     def get(self, request, project_id):
@@ -581,7 +617,7 @@ class ProponentSubmissionsView(APIView):
         submissions = {
             "daily_attendance": DailyAttendanceRecord.objects.filter(proponent=user),
             "summary_of_evaluation": SummaryOfEvaluation.objects.filter(proponent=user),
-            "modules_lecture_notes": ModulesLectureNotes.objects.filter(proponent=user),
+            "lecture_notes": ModulesLectureNotes.objects.filter(proponent=user),
             "photo_documentations": PhotoDocumentation.objects.filter(proponent=user),
             "other_files": OtherFiles.objects.filter(proponent=user),
         }

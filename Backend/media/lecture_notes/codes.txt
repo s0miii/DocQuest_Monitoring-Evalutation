@@ -1,0 +1,802 @@
+models.py:
+
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser
+from django.utils.translation import gettext_lazy as _
+from .managers import CustomUserManager
+from django.utils import timezone
+from django.contrib.auth.models import PermissionsMixin
+
+class Roles(models.Model):
+    roleID = models.AutoField(primary_key=True)
+    code = models.CharField(max_length=4)
+    role = models.CharField(max_length=50, default='NO ROLE')
+
+    def __str__(self):
+        return self.role
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    userID = models.AutoField(primary_key=True)
+    email = models.EmailField(_("email address"), unique=True)
+    password = models.CharField(max_length=100)
+    firstname = models.CharField(max_length=50)
+    middlename = models.CharField(max_length=50)
+    lastname = models.CharField(max_length=50)
+    campus = models.CharField(max_length=50, default="NO CAMPUS SELECTED")
+    college = models.CharField(max_length=50, default="NO COLLEGE SELECTED")
+    department = models.CharField(max_length=50, default="NO DEPARTMENT SELECTED")
+    contactNumber = models.CharField(max_length=15, default="NO NUMBER")
+    role = models.ManyToManyField(Roles, related_name='user')
+
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return self.email
+
+class Region(models.Model):
+    regionID = models.AutoField(primary_key=True)
+    region = models.CharField(max_length=50)
+
+class Province(models.Model):
+    provinceID = models.AutoField(primary_key=True)
+    province = models.CharField(max_length=50)
+    regionID = models.ForeignKey(Region, related_name='province', on_delete=models.CASCADE)
+
+class City(models.Model):
+    cityID = models.AutoField(primary_key=True)
+    city = models.CharField(max_length=50)
+    postalCode = models.IntegerField()
+    provinceID = models.ForeignKey(Province, related_name='city', on_delete=models.CASCADE)
+
+class Barangay(models.Model):
+    barangayID = models.AutoField(primary_key=True)
+    barangay = models.CharField(max_length=50)
+    cityID = models.ForeignKey(City, related_name='barangay', on_delete=models.CASCADE)
+
+class Address(models.Model):
+    addressID = models.AutoField(primary_key=True)
+    street = models.CharField(max_length=150)
+    barangayID = models.ForeignKey(Barangay, related_name='address', on_delete=models.CASCADE)
+
+class PartnerAgency(models.Model):
+    agencyID = models.AutoField(primary_key=True)
+    agencyName = models.CharField(max_length=100)
+    addressID = models.ForeignKey(Address, related_name='partnerAgency', on_delete=models.CASCADE)
+
+class MOA(models.Model):
+    moaID = models.AutoField(primary_key=True)
+    partyADescription = models.TextField()
+    partyBDescription = models.TextField()
+    termination = models.TextField()
+
+class Witnesseth(models.Model):
+    witnessethID = models.AutoField(primary_key=True)
+    whereas = models.TextField()
+    moaID = models.ForeignKey(MOA, related_name='witnesseth', on_delete=models.CASCADE)
+
+class PartyObligation(models.Model):
+    poID = models.AutoField(primary_key=True)
+    obligation = models.TextField()
+    party = models.TextField()
+    moaID = models.ForeignKey(MOA, related_name='partyObligation', on_delete=models.CASCADE)
+
+class Effectivity(models.Model):
+    effectivityID = models.AutoField(primary_key=True)
+    effectivity = models.TextField()
+    moaID = models.ForeignKey(MOA, related_name='effectivity', on_delete=models.CASCADE)
+
+class Project(models.Model):
+    projectID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(CustomUser, related_name='projectUser', on_delete=models.CASCADE)
+    programCategory = models.CharField(max_length=50)
+    projectTitle = models.CharField(max_length=150)
+    projectType = models.CharField(max_length=50)
+    projectCategory = models.CharField(max_length=100)
+    researchTitle = models.CharField(max_length=150)
+    program = models.CharField(max_length=150)
+    accreditationLevel = models.CharField(max_length=50)
+    college = models.CharField(max_length=50)
+    projectLocationID = models.ForeignKey(Address, related_name='projectLocation', on_delete=models.CASCADE) 
+    agency = models.ManyToManyField(PartnerAgency, related_name='projectAgency')
+    targetImplementation = models.DateField()
+    totalHours = models.FloatField()
+    background = models.TextField()
+    projectComponent = models.TextField()
+    beneficiaries = models.TextField()
+    totalBudget = models.IntegerField()
+    moaID = models.ForeignKey(MOA, related_name='projectMoa', on_delete=models.CASCADE, null=True)
+
+class Signatories(models.Model):
+    project = models.ForeignKey(Project, related_name='signatoryProject', on_delete=models.CASCADE)
+    userID = models.ForeignKey(CustomUser, related_name='signatoryUser', on_delete=models.CASCADE)
+    approvalStatus = models.BooleanField(default=False)
+
+class Proponents(models.Model):
+    project = models.ForeignKey(Project, related_name='proponent', on_delete=models.CASCADE)
+    proponent = models.CharField(max_length=50)
+
+class TargetGroup(models.Model):
+    targetGroupID = models.AutoField(primary_key=True)
+    targetGroup = models.CharField(max_length=200)
+    project = models.ForeignKey(Project, related_name='targetGroup', on_delete=models.CASCADE)
+
+class GoalsAndObjectives(models.Model):
+    GAOID = models.AutoField(primary_key=True)
+    goalsAndObjectives = models.TextField()
+    project = models.ForeignKey(Project, related_name='goalsAndObjectives', on_delete=models.CASCADE)
+
+class LoadingOfTrainers(models.Model):
+    LOTID = models.AutoField(primary_key=True)
+    faculty = models.CharField(max_length=50)
+    trainingLoad = models.TextField()
+    hours = models.FloatField()
+    ustpBudget = models.IntegerField()
+    agencyBudget = models.IntegerField()
+    totalBudgetRequirement = models.IntegerField()
+    project = models.ForeignKey(Project, related_name='loadingOfTrainers', on_delete=models.CASCADE)
+
+class ProjectActivities(models.Model):
+    projectActivitiesID = models.AutoField(primary_key=True)
+    objective = models.TextField()
+    involved = models.TextField()
+    targetDate = models.DateField()
+    personResponsible = models.CharField(max_length=50)
+    project = models.ForeignKey(Project, related_name='projectActivities', on_delete=models.CASCADE)
+
+class BudgetRequirementsItems(models.Model):
+    itemID = models.AutoField(primary_key=True)
+    itemName = models.CharField(max_length=50)
+    ustpAmount = models.IntegerField()
+    partnerAmount = models.IntegerField()
+    totalAmount = models.IntegerField()
+    project = models.ForeignKey(Project, related_name='budgetRequirements', on_delete=models.CASCADE)
+
+class EvaluationAndMonitoring(models.Model):
+    EAMID = models.AutoField(primary_key=True)
+    projectSummary = models.TextField()
+    indicators = models.TextField()
+    meansOfVerification = models.TextField()
+    risksAssumptions = models.TextField()
+    type = models.CharField(max_length=100)
+    project = models.ForeignKey(Project, related_name='evalAndMonitoring', on_delete=models.CASCADE)
+
+class MonitoringPlanAndSchedule(models.Model):
+    MPASID = models.AutoField(primary_key=True)
+    approach = models.TextField()
+    dataGatheringStrategy = models.TextField()
+    schedule = models.TextField()
+    implementationPhase = models.TextField()
+    project = models.ForeignKey(Project, related_name='monitoringPlanSched', on_delete=models.CASCADE)
+
+serializers.py
+
+from rest_framework import serializers
+from docquestapp.models import *
+from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
+
+# mga nagamit
+class UserRegistrationSerializer(BaseUserRegistrationSerializer):
+    class Meta(BaseUserRegistrationSerializer.Meta):
+        fields = (
+            'email', 'password', 'firstname', 'middlename', 'lastname',
+            'campus', 'college', 'department', 'contactNumber', 'role',
+        )
+
+class UserSignupSerializer(serializers.ModelSerializer):
+    role = serializers.PrimaryKeyRelatedField(many=True, queryset=Roles.objects.all())
+
+    class Meta(object):
+        model = CustomUser
+        fields = [
+            'email', 'password', 'firstname', 'middlename', 'lastname',
+            'campus', 'college', 'department', 'contactNumber', 'role'
+        ]
+
+class UserEditProfileSerializer(serializers.ModelSerializer):
+    role = serializers.PrimaryKeyRelatedField(many=True, queryset=Roles.objects.all())
+
+    class Meta(object):
+        model = CustomUser
+        fields = [
+            'email', 'password', 'firstname', 'middlename', 'lastname',
+            'campus', 'college', 'department', 'contactNumber', 'role'
+        ]
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Roles
+        fields =  ['role']
+
+class SetRoleSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = CustomUser
+        fields =  ['role']
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    roles = RoleSerializer(many=True, source='role')
+
+    class Meta(object):
+        model = CustomUser
+        fields = ['userID', 'firstname', 'lastname', 'roles']
+
+class PostTargetGroupSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = TargetGroup
+        fields = ['targetGroup']
+    
+class PostGoalsAndObjectivesSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = GoalsAndObjectives
+        fields = ['goalsAndObjectives']
+
+class PostMonitoringPlanAndScheduleSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = MonitoringPlanAndSchedule
+        fields = [
+            'approach', 'dataGatheringStrategy', 'schedule',
+            'implementationPhase'
+        ]
+
+class PostEvaluationAndMonitoringSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = EvaluationAndMonitoring
+        fields = [
+            'projectSummary', 'indicators', 'meansOfVerification',
+            'risksAssumptions', 'type'
+        ]
+
+class PostBudgetaryRequirementsItemsSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = BudgetRequirementsItems
+        fields = ['itemName', 'ustpAmount', 'partnerAmount', 'totalAmount']
+
+class PostProjectActivitiesSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = ProjectActivities
+        fields = [
+            'objective', 'involved', 'targetDate', 'personResponsible'
+        ]
+
+class PostLoadingOfTrainersSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = LoadingOfTrainers
+        fields = [
+            'faculty', 'trainingLoad', 'hours', 'ustpBudget', 'agencyBudget', 'totalBudgetRequirement'
+        ]
+
+class PostSignatoriesSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Signatories
+        fields = ['userID', 'approvalStatus']
+
+class PostProponentsSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Proponents
+        fields = ['proponent']
+
+class RegionSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Region
+        fields = ['regionID', 'region']
+
+class ProvinceSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Province
+        fields = ['provinceID', 'province', 'regionID']
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = City
+        fields = ['cityID', 'city', 'postalCode', 'provinceID']
+
+class BarangaySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Barangay
+        fields = ['barangayID', 'barangay', 'cityID']
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Address
+        fields = ['addressID', 'street', 'barangayID']
+
+class PartnerAgencySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = PartnerAgency
+        fields = ['agencyID', 'agencyName', 'addressID']
+
+class MOASerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = MOA
+        fields = ['moaID', 'partyADescription', 'partyBDescription', 'termination']
+
+class WitnessethSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Witnesseth
+        fields = ['witnessethID', 'whereas', 'moaID']
+
+class PartyObligationSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = PartyObligation
+        fields = ['poID', 'obligation', 'party', 'moaID']
+
+class EffectivitySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Effectivity
+        fields = ['effectiveID', 'effectivity', 'moaID']
+
+class PostProjectSerializer(serializers.ModelSerializer):
+    userID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    projectLocationID = serializers.PrimaryKeyRelatedField(queryset=Address.objects.all())
+    agency = serializers.PrimaryKeyRelatedField(queryset=PartnerAgency.objects.all(), many=True)
+
+    targetGroups = PostTargetGroupSerializer(many=True)
+    goalsAndObjectives = PostGoalsAndObjectivesSerializer(many=True)
+    monitoringPlanSchedules = PostMonitoringPlanAndScheduleSerializer(many=True)
+    evaluationAndMonitorings = PostEvaluationAndMonitoringSerializer(many=True)
+    budgetaryRequirements = PostBudgetaryRequirementsItemsSerializer(many=True)
+    projectActivities = PostProjectActivitiesSerializer(many=True)
+    loadingOfTrainers = PostLoadingOfTrainersSerializer(many=True)
+    signatories = PostSignatoriesSerializer(many=True)
+    proponents = PostProponentsSerializer(many=True)
+
+    class Meta(object):
+        model = Project
+        fields = [
+            'userID', 'programCategory', 'projectTitle', 'projectType',
+            'projectCategory', 'researchTitle', 'program', 'accreditationLevel',
+            'college', 'projectLocationID', 'agency', 'targetImplementation',
+            'totalHours', 'background', 'projectComponent', 'beneficiaries',
+            'totalBudget', 'targetGroups', 'goalsAndObjectives', 'monitoringPlanSchedules',
+            'evaluationAndMonitorings', 'budgetaryRequirements', 'projectActivities',
+            'loadingOfTrainers', 'signatories', 'proponents'
+        ]
+
+    def create(self, validated_data): 
+        targetGroups_data = validated_data.pop('targetGroups')
+        goalsAndObjectives_data = validated_data.pop('goalsAndObjectives')
+        monitoringPlanSchedules_data = validated_data.pop('monitoringPlanSchedules')
+        evaluationAndMonitorings_data = validated_data.pop('evaluationAndMonitorings')
+        budgetaryRequirements_data = validated_data.pop('budgetaryRequirements')
+        projectActivities_data = validated_data.pop('projectActivities')
+        loadingOfTrainers_data = validated_data.pop('loadingOfTrainers')
+        signatories_data = validated_data.pop('signatories')
+        proponents_data = validated_data.pop('proponents')
+
+        agency_data = validated_data.pop('agency')
+
+        project = Project.objects.create(**validated_data)
+
+        project.agency.set(agency_data)
+
+        for targetGroup_data in targetGroups_data:
+            TargetGroup.objects.create(project=project, **targetGroup_data)
+        
+        for goalsAndObjective_data in goalsAndObjectives_data:
+            GoalsAndObjectives.objects.create(project=project, **goalsAndObjective_data)
+
+        for monitoringPlanSchedule_data in monitoringPlanSchedules_data:
+            MonitoringPlanAndSchedule.objects.create(project=project, **monitoringPlanSchedule_data)
+
+        for evaluationAndMonitoring_data in evaluationAndMonitorings_data:
+            EvaluationAndMonitoring.objects.create(project=project, **evaluationAndMonitoring_data)
+
+        for budgetaryRequirement_data in budgetaryRequirements_data:
+            BudgetRequirementsItems.objects.create(project=project, **budgetaryRequirement_data)
+
+        for projectActivity_data in projectActivities_data:
+            ProjectActivities.objects.create(project=project, **projectActivity_data)
+
+        for loadingOfTrainer_data in loadingOfTrainers_data:
+            LoadingOfTrainers.objects.create(project=project, **loadingOfTrainer_data)
+
+        for signatory_data in signatories_data:
+            Signatories.objects.create(project=project, **signatory_data)
+
+        for proponent_data in proponents_data:
+            Proponents.objects.create(project=project, **proponent_data)
+
+        return project
+
+views.py (docquestapp/views.py is empty):
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from .serializers import *
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+User = get_user_model()
+
+# signup
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup(request):
+    serializer = UserSignupSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        user = User.objects.get(email=request.data['email'])
+        user.set_password(request.data['password'])
+        user.save()
+
+        return Response({"message": "User created and role assigned",},
+                            status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# inig login mag fetch user name and roles
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def name_and_roles(request):
+    user = request.user  # Get the authenticated user from the request
+
+    # Serialize user data
+    user_serializer = UserLoginSerializer(instance=user)
+
+    # Return combined response with user data and roles
+    return Response({
+        "userID": user_serializer.data['userID'],
+        "firstname": user_serializer.data['firstname'],
+        "lastname": user_serializer.data['lastname'],
+        "roles": user_serializer.data['roles']
+    })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    user = request.user  # Get the authenticated user from the request
+
+    # Serialize user data
+    user_serializer = UserEditProfileSerializer(instance=user)
+
+    # Return combined response with user data and roles
+    return Response(user_serializer.data)
+
+# edit user profile
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def edit_profile(request, pk):
+    try:
+        instance = CustomUser.objects.get(pk=pk)
+    except CustomUser.DoesNotExist:
+        return Response({"error": "Object not found."}),
+
+    serializer = UserEditProfileSerializer(instance, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_project(request):
+    serializer = PostProjectSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Project successfuly created"}, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def roles(request):
+    # Retrieve the userID from the request data
+    user_id = request.data.get('userID')
+
+    # Manually check if userID exists in CustomUser
+    if not User.objects.filter(userID=user_id).exists():
+        return Response("User does not exist.", status=status.HTTP_400_BAD_REQUEST)
+    
+    # Check if the user already has a role entry in the Roles table
+    try:
+        role_instance = Roles.objects.get(userID=user_id)
+    except Roles.DoesNotExist:
+        role_instance = None
+    
+    # Initialize the serializer with the instance to update if it exists
+    serializer = RoleSerializer(instance=role_instance, data=request.data)
+    
+    if serializer.is_valid():
+        serializer.save()  # Save will either create a new instance or update the existing one
+        return Response("Successfully assigned/updated role/s.", status=status.HTTP_200_OK)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def test_token(request):
+    return Response("passed for {}".format(request.user.email))
+
+urls.py:
+
+from django.contrib import admin
+from django.urls import re_path, include, path
+from . import views
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+
+    re_path('signup', views.signup),
+    re_path('name_and_roles', views.name_and_roles),
+    re_path('roles', views.roles),
+    re_path('create_project', views.create_project),
+
+    # edit user profile
+    re_path('get_user_details', views.user_profile),
+    path('edit_user_details/<int:pk>/', views.edit_profile),
+
+    # create project
+    path('create_project', views.create_project),
+
+    re_path(r'^auth/', include('djoser.urls')),
+    re_path(r'^auth/', include('djoser.urls.authtoken')),
+
+    re_path('test_token', views.test_token),
+]
+
+# /auth/users/ Register a new user
+
+# log in
+# /auth/token/login/
+
+# access user’s details
+# /auth/users/me/
+
+# log out
+# /auth/token/logout/
+
+
+settings.py:
+
+"""
+Django settings for docquest project.
+
+Generated by 'django-admin startproject' using Django 5.0.7.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/5.0/topics/settings/
+
+For the full list of settings and their values, see
+https://docs.djangoproject.com/en/5.0/ref/settings/
+"""
+import os
+import dj_database_url
+from pathlib import Path
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-+6q5l+09zwkn(pp%p0i^mejaiy$3u&9v#!n#7dguz3gwk4=4=m'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost', 
+    'docquest-production.up.railway.app'
+]
+
+
+# Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
+    'docquestapp',
+    "whitenoise.runserver_nostatic",
+    'corsheaders',
+]
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'docquest.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'docquest.wsgi.application'
+
+
+# Database
+# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+
+DATABASES = {
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / "db.sqlite3",
+    # }
+
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:vCjEKpnHRGmqseGNfKlAoZVDAOAesjrr@junction.proxy.rlwy.net:47567/railway')
+    )
+}
+
+
+# Password validation
+# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+
+# Internationalization
+# https://docs.djangoproject.com/en/5.0/topics/i18n/
+
+LANGUAGE_CODE = 'en-us'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = True
+
+USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.0/howto/static-files/
+
+STATIC_URL = 'static/'
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'docquestapp.CustomUser'
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_CREDENTIALS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # Use token authentication
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Require authentication by default
+    ],
+}
+
+DJOSER = {
+    'SERIALIZERS': {
+         'user_create': 'docquestapp.serializer.UserRegistrationSerializer',
+         'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
+    }
+}
+
+
+admin.py:
+
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+
+from .forms import *
+from .models import *
+
+class CustomUserAdmin(UserAdmin):
+    add_form = CustomUserCreationForm
+    form = CustomUserChangeForm
+    model = CustomUser
+    list_display = ("email", "is_staff", "is_active",)
+    list_filter = ("email", "is_staff", "is_active",)
+    fieldsets = (
+        (None, {"fields": ("email", "password")}),
+        ("Permissions", {"fields": ("is_staff", "is_active", "groups", "user_permissions")}),
+    )
+    add_fieldsets = (
+        (None, {
+            "classes": ("wide",),
+            "fields": (
+                "email", "password1", "password2", "is_staff",
+                "is_active", "groups", "user_permissions"
+            )}
+        ),
+    )
+    search_fields = ("email",)
+    ordering = ("email",)
+
+class RolesAdmin(admin.ModelAdmin):
+    form = RoleCreationForm
+
+    fields = ["role", "code"]
+    list_display = ["roleID", "role"]
+
+class RegionAdmin(admin.ModelAdmin):
+    fields = ["region"]
+    list_display = ["regionID", "region"]
+
+class ProvinceAdmin(admin.ModelAdmin):
+    fields = ["province", "regionID"]
+    list_display = ["provinceID", "province", "regionID"]
+
+class CityAdmin(admin.ModelAdmin):
+    fields = ["city", "postalCode", "provinceID"]
+    list_display = ["cityID", "city", "postalCode", "provinceID"]
+
+class BarangayAdmin(admin.ModelAdmin):
+    fields = ["barangay", "cityID"]
+    list_display = ["barangayID", "barangay", "cityID"]
+
+class AddressAdmin(admin.ModelAdmin):
+    fields = ["street", "barangayID"]
+    list_display = ["addressID", "street", "barangayID"]
+
+class PartnerAgencyAdmin(admin.ModelAdmin):
+    fields = ["agencyName", "addressID"]
+    list_display = ["agencyID", "agencyName", "addressID"]
+
+admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(Roles, RolesAdmin)
+admin.site.register(Region, RegionAdmin)
+admin.site.register(Province, ProvinceAdmin)
+admin.site.register(City, CityAdmin)
+admin.site.register(Barangay, BarangayAdmin)
+admin.site.register(Address, AddressAdmin)
+admin.site.register(PartnerAgency, PartnerAgencyAdmin)

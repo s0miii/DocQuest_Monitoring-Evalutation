@@ -35,7 +35,8 @@ import ProponentsDailyAttRec from "./pages/proponents/ProponentsDailyAttRec";
 import ProponentsEvalSum from "./pages/proponents/ProponentsEvalSum";
 import ProponentsTrainerCVDTR from "./pages/proponents/ProponentsTrainerCVDTR";
 import ProponentsLecNotes from "./pages/proponents/ProponentsLecNotes";
-import ProponentsOther from "./pages/proponents/ProponentsOther";
+import ProponentsOtherFiles from "./pages/proponents/ProponentsOtherFiles";
+import ProponentsPhotoDocs from "./pages/proponents/ProponentsPhotoDocs";
 
 import EvaluationForm from "./pages/proponents/EvaluationForm";
 import ProjectsDashboard from "./pages/proponents/ProjectsDashboard";
@@ -75,7 +76,8 @@ function App() {
       <Route path="/proponents/project/:projectID/evaluation-summary" element={<ProponentsEvalSum />} />
       <Route path="/proponents/proj/req/trainer-cv-dtr" element={<ProponentsTrainerCVDTR />} />
       <Route path="/proponents/project/:projectID/modules-notes" element={<ProponentsLecNotes />} />
-      <Route path="/proponents/project/:projectID/other" element={<ProponentsOther />} />
+      <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
+      <Route path="/proponents/project/:projectID/photo-docs" element={<ProponentsPhotoDocs />} />
       <Route path="/eval" element={<EvaluationForm />} />
     </Routes>
 
