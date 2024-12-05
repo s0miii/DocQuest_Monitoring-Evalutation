@@ -15,11 +15,69 @@ from docquestapp.models import Roles, Project, LoadingOfTrainers
 from .models import *
 from .forms import *
 from .serializers import *
+from .utils import send_reminder_email
 from .decorators import role_required
 from django.http import HttpResponseForbidden, JsonResponse
 import secrets, logging, datetime
 from django.utils.dateparse import parse_date
 
+# Email
+@role_required(allowed_role_codes=["estf"])  # Restrict to EStaff
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def send_dynamic_reminder_email(request, project_id):
+    user = request.user  # Logged-in EStaff user
+
+    # Fetch the project
+    project = get_object_or_404(Project, projectID=project_id, status="approved")
+    project_leader = project.userID  # Assuming userID links to the project leader
+
+    if not project_leader or not project_leader.email:
+        return Response({"error": "Project leader email not found."}, status=400)
+
+    # Fetch missing submissions directly in the view
+    missing_items = []
+
+    # Check for missing Daily Attendance Records
+    if not DailyAttendanceRecord.objects.filter(project=project, status="Approved").exists():
+        missing_items.append("Daily Attendance Record")
+
+    # Check for missing Summary of Evaluations
+    if not SummaryOfEvaluation.objects.filter(project=project, status="Approved").exists():
+        missing_items.append("Summary of Evaluation")
+
+    # Check for other checklist items
+    if not ModulesLectureNotes.objects.filter(project=project, status="Approved").exists():
+        missing_items.append("Modules/Lecture Notes")
+
+    if not PhotoDocumentation.objects.filter(project=project, status="Approved").exists():
+        missing_items.append("Photo Documentation")
+
+    if not OtherFiles.objects.filter(project=project, status="Approved").exists():
+        missing_items.append("Other Files")
+
+    # Generate dynamic email content
+    subject = request.data.get('subject', f"Reminder: Missing Submissions for Project '{project.projectTitle}'")
+    message = (
+        f"Dear {project_leader.firstname} {project_leader.lastname},\n\n"
+        f"The following submissions are still missing for the project '{project.projectTitle}':\n"
+        f"{', '.join(missing_items) if missing_items else 'No missing items found.'}\n\n"
+        "Best regards,\nEStaff Team"
+    )
+
+    # Send the email
+    send_reminder_email(subject, message, [project_leader.email], sender_email=user.email)
+
+    # Log the notification
+    NotificationLog.objects.create(
+        sender=user,
+        project=project,
+        recipient_email=project_leader.email,
+        subject=subject,
+        message=message,
+    )
+
+    return Response({"message": "Reminder email sent successfully."}, status=200)
 
 # retrieve projects based on user role each project
 @role_required(allowed_role_codes=["pjld", "ppnt"])

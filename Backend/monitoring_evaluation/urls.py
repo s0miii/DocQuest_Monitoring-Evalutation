@@ -32,6 +32,9 @@ urlpatterns = [
     ### User Role
     path('user/roles/', get_user_roles, name='get_user_roles'),
 
+    # Email
+    path('projects/<int:project_id>/send_dynamic_reminder/', send_dynamic_reminder_email, name='send_dynamic_reminder'),
+
     # view all projects
     path("user-projects/", UserProjectsView.as_view(), name="user-projects"),
 

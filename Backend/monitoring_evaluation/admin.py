@@ -25,6 +25,13 @@ from django.utils.html import format_html
 # class AttendanceRecordAdmin(admin.ModelAdmin):
 #     list_display = ('upload_date', 'total_attendees')
 
+# Email
+@admin.register(NotificationLog)
+class NotificationLogAdmin(admin.ModelAdmin):
+    list_display = ('sender', 'recipient_email', 'project', 'subject', 'timestamp')
+    list_filter = ('timestamp', 'sender', 'project')
+    search_fields = ('recipient_email', 'subject', 'message')
+
 # Checklist
 @admin.register(DailyAttendanceRecord)
 class DailyAttendanceRecordAdmin(admin.ModelAdmin):
