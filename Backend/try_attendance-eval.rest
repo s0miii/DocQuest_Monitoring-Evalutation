@@ -293,5 +293,80 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 #Calculate Number of Attendees per Project
 POST http://127.0.0.1:8000/monitoring/calculate_attendees/3/
 Content-Type: application/json
-Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+# New Evaluation Endpoints
+###
+# Generate Sharable Link for Evaluation
+POST http://127.0.0.1:8000/monitoring/evaluation_links/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+{
+    "trainer_id": 2,
+    "project_id": 3,
+    "expiration_date": "2024-12-31"
+}
+
+###
+# Retrieve All Evaluation Sharable Links - working
+GET http://127.0.0.1:8000/monitoring/evaluation_links/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+###
+# Retrieve Sharable Link Details Using Token
+# GET http://127.0.0.1:8000/monitoring/evaluation/fill/TOKEN_HERE/
+GET http://127.0.0.1:8000/monitoring/evaluation/fill/aZ6ktEUEu4xG53Ep_v1SUg/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+
+###
+# Submit Evaluation Form Using Sharable Link - Public Endpoint
+# POST http://127.0.0.1:8000/monitoring/evaluation/fill/<TOKEN>/
+POST http://127.0.0.1:8000/monitoring/evaluation/fill/flAUZyPO_EDG4MCyIcBYXQ/
+Content-Type: application/json
+
+{
+    
+    "attendee_name": "Cinderella",
+    "relevance_of_topics": 5,
+    "organizational_flow": 4,
+    "learning_methods": 5,
+    "technology_use": 4,
+    "time_efficiency": 5,
+    "mastery_subject": 4,
+    "preparedness": 5,
+    "audience_participation": 4,
+    "interest_level": 4,
+    "handle_questions": 3,
+    "voice_personality": 4,
+    "visual_aids": 3,
+    "venue_assessment": 4,
+    "timeliness": 5,
+    "overall_management": 4,
+    "useful_concepts": "Very useful concepts covered.",
+    "improvement_areas": "None noted.",
+    "additional_comments": "Great presentation.",
+    "remarks": "Excellent overall."
+}
+
+### Get All Evaluations - working
+GET http://127.0.0.1:8000/monitoring/evaluations/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+### Filter Evaluations - working filter
+GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=2&project=3
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+### Search Evaluations by Trainer Name or Project Title - working
+GET http://127.0.0.1:8000/monitoring/evaluations/?search=Maris
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 

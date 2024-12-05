@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     'corsheaders',
     'channels',
-    'monitoring_evaluation'
+    'monitoring_evaluation',
+    'django_filters',
 ]
 
 CHANNEL_LAYERS = {

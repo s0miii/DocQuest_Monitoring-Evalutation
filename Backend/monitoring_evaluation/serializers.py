@@ -61,13 +61,28 @@ class EvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evaluation
         fields = '__all__'
+        extra_kwargs = {
+            "trainer": {"required": False},
+            "project": {"required": False},
+        }
 
     #I-validate if project is approved before maka evaluate
     def validate(self, data):
         project = data.get('project')
         if project.status != 'approved':
             raise ValidationError("Evaluations can only be created for approved projects.")
-        return data    
+        return data  
+
+class EvaluationSharableLinkSerializer(serializers.ModelSerializer):
+    trainer_name = serializers.CharField(source='trainer.faculty', read_only=True)
+    project_title = serializers.CharField(source='project.projectTitle', read_only=True)
+
+    class Meta:
+        model = EvaluationSharableLink
+        fields = [
+            "id", "trainer", "trainer_name", "project", "project_title",
+            "expiration_date", "token", "sharable_link"
+        ]       
 
 class PREXCAchievementSerializer(serializers.ModelSerializer):
     class Meta: model = PREXCAchievement
