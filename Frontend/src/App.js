@@ -21,6 +21,7 @@ import ProjLeadOthers from "./pages/projectlead/ProjLeadOthers";
 // import Topbar from "./components/Topbar";
 // import DeptOffSideBar from './components/DeptOffSideBar';
 import DeptOffDashboard from "./pages/deptoff/DeptOffDashboard";
+import DeptOffGenerateDocument from "./pages/deptoff/DeptOffGenerateDocument";
 // import DeptOffGenerateDocument from "./pages/deptoff/DeptOffGenerateDocument";
 // import DeptOffProfilePage from "./pages/deptoff/DeptOffProfilePage";
 import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
@@ -29,6 +30,7 @@ import EStaffProjects from "./pages/estaff/EStaffProjects";
 import EStaffProjMonitoring from "./pages/estaff/EStaffProjMonitoring";
 import EstaffTrainerCVDTR from "./pages/estaff/EstaffTrainersCVDTR";
 import EStaffOP1OP2 from "./pages/estaff/EStaffOP1OP2";
+import EStaffPREXC from "./pages/estaff/EStaffPREXC";
 import ProponentsProjects from "./pages/proponents/ProponentsProjects"
 import ProponentsProjReq from "./pages/proponents/ProponentsProjReq";
 import ProponentsDailyAttRec from "./pages/proponents/ProponentsDailyAttRec";
@@ -47,9 +49,8 @@ function App() {
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/user" element={<ProjLeadDashboard />} />
-      <Route path="/estaff" element={<EstaffDashboard />} />
-      <Route path="/estaff/prexc/op1-op2" element={<EStaffOP1OP2 />} />
       <Route path="/deptoff" element={<DeptOffDashboard />} />
+      <Route path="/deptoff/generate-doc" element={<DeptOffGenerateDocument />} />
       <Route path="/coordinator" element={<CoordinatorDashboard />} />
       <Route path="/signatory" element={<SignatoryDashboard />} />
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
@@ -63,8 +64,11 @@ function App() {
       <Route path="/projlead/proj/req/modules-notes" element={<ProjLeadLecNotes />} />
       <Route path="/projlead/proj/req/others" element={<ProjLeadOthers />} />
 
-      <Route path="estaff/proj" element={<EStaffProjects />} />
-      <Route path="estaff/proj/monitoring" element={<EStaffProjMonitoring />} />
+      <Route path="/estaff" element={<EstaffDashboard />} />
+      <Route path="/estaff/prexc/op1-op3" element={<EStaffOP1OP2 />} />
+      <Route path="/estaff/prexc/performance" element={<EStaffPREXC />} />
+      <Route path="/estaff/proj" element={<EStaffProjects />} />
+      <Route path="/estaff/proj/monitoring" element={<EStaffProjMonitoring />} />
       <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR />} />
 
       <Route path="/proponents/projects" element={<ProponentsProjects />} />

@@ -21,7 +21,7 @@ function EStaffSideBar() {
     };
 
     return (
-        <div className="w-1/5 bg-vlu text-white h-screen fixed z-50 overflow-y-auto">
+        <div className="fixed z-50 w-1/5 h-screen overflow-y-auto text-white bg-vlu">
             <div className="flex justify-center">
                 <img src="/images/logo2.png" alt="DocQuestLogo" className="w-52" />
             </div>
@@ -31,7 +31,7 @@ function EStaffSideBar() {
                         <Link to="/dashboard" className={`text-lg font-bold block px-6 py-3 ${isActive(["/dashboard"]) ? "text-yellow-500" : ""}`}>Dashboard</Link>
                     </li>
                     <li>
-                        <button onClick={toggleUserManagementSubMenu} className="text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none">
+                        <button onClick={toggleUserManagementSubMenu} className="block w-full px-6 py-3 text-lg text-left hover:text-yellow-500 focus:outline-none">
                             User Management
                         </button>
                         <ul className={`${isUserManagementSubMenuVisible ? "" : "hidden"} bg-indigo-900`}>
@@ -51,18 +51,18 @@ function EStaffSideBar() {
                         </Link>
                     </li>
                     <li>
-                        <button onClick={togglePREXCSubMenu} className="text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none">
+                        <button onClick={togglePREXCSubMenu} className="block w-full px-6 py-3 text-lg text-left hover:text-yellow-500 focus:outline-none">
                             PREXC
                         </button>
                         <ul className={`${isPREXCSubMenuVisible ? "" : "hidden"} bg-indigo-900`}>
-                            <li><Link to="/estaff/prexc/op1-op2" className="block px-6 py-3 hover:text-yellow-500">Extension Program (OP1 and OP2)</Link></li>
+                            <li><Link to="/estaff/prexc/op1-op3" className="block px-6 py-3 hover:text-yellow-500">Extension Program (OP1 and OP2)</Link></li>
                             <li><Link to="/prexc/op2" className="block px-6 py-3 hover:text-yellow-500">Extension Program (OP2)</Link></li>
                             <li><Link to="/prexc/oc" className="block px-6 py-3 hover:text-yellow-500">Extension Program (Oc)</Link></li>
-                            <li><Link to="/prexc/campus-performance" className="block px-6 py-3 hover:text-yellow-500">College Campus Performance</Link></li>
+                            <li><Link to="/estaff/prexc/performance" className="block px-6 py-3 hover:text-yellow-500">College Campus Performance</Link></li>
                         </ul>
                     </li>
                     <li>
-                        <Link to="/logout" className="text-lg block px-6 py-3 hover:text-yellow-500">
+                        <Link to="/logout" className="block px-6 py-3 text-lg hover:text-yellow-500">
                             Log Out
                         </Link>
                     </li>
