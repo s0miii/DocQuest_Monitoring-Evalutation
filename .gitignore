@@ -5,6 +5,9 @@ Backend/*.sqlite3
 uploads/
 myvenv/
 venv/
+venv-wyn/
+venv_/
+venv3/
 __pycache__/
 *.pyc
 .vscode

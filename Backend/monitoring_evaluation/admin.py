@@ -59,7 +59,7 @@ class ChecklistAssignmentAdmin(admin.ModelAdmin):
 
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
-    list_display = ('trainer', 'project', 'attendee_name', 'stored_overall_rating', 'submitted_at', 'evaluation_link')
+    list_display = ('trainer', 'project', 'attendee_name', 'overall_rating', 'submitted_at', 'evaluation_link')
     search_fields = ('attendee_name', 'project__projectTitle', 'trainer__faculty')
     list_filter = ('project', 'trainer')
     
@@ -67,9 +67,9 @@ class EvaluationAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         return qs.filter(project__status='approved') 
 
-    def get_overall_rating(self, obj):
-        return obj.stored_overall_rating
-    get_overall_rating.short_description = 'Average Overall Rating'
+    def overall_rating(self, obj):
+        return obj.stored_overall_rating or "N/A"
+    overall_rating.short_description = 'Average Overall Rating'
 
     def get_date_submitted(self, obj):
         return obj.submitted_at
