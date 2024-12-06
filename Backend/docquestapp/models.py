@@ -7,11 +7,36 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 import datetime
+from django.core.exceptions import ValidationError
 
 class Roles(models.Model):
     roleID = models.AutoField(primary_key=True)
     code = models.CharField(max_length=5)
     role = models.CharField(max_length=50, default='NO ROLE')
+
+    class Meta:
+        verbose_name_plural = "Roles"
+    
+    def save(self, *args, **kwargs):
+        # Define the role and code combination that should be unique
+        unique_role = "Director, Extension & Community Relations"
+        unique_code = "ecrd"
+        
+        # Check if the current role and code match the unique combination
+        if self.role == unique_role and self.code == unique_code:
+            # Check if another instance with the same unique combination exists
+            existing_role = Roles.objects.filter(
+                role=unique_role, 
+                code=unique_code
+            ).exclude(roleID=self.roleID).exists()
+            
+            if existing_role:
+                raise ValidationError(
+                    f"The role '{unique_role}' with code '{unique_code}' must be unique. Only 1 Director can exist at a time."
+                )
+        
+        # Proceed to save the instance if no conflict
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.role
@@ -23,9 +48,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     firstname = models.CharField(max_length=50)
     middlename = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
-    campus = models.CharField(max_length=50, default="USTP-CDO")
-    college = models.CharField(max_length=50, default="NO COLLEGE")
-    department = models.CharField(max_length=50, default="NO DEPARTMENT")
     contactNumber = models.CharField(max_length=15, default="NO NUMBER")
     role = models.ManyToManyField(Roles, related_name='user')
 
@@ -39,8 +61,72 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
+    class Meta:
+        verbose_name_plural = "Users"
+    
+    def save(self, *args, **kwargs):
+        # Check if the user is being assigned the unique role
+        unique_role_code = "ecrd"
+        unique_role = Roles.objects.filter(code=unique_role_code).first()
+        
+        if unique_role and self.pk:  # If the role exists and user instance is being saved
+            if unique_role in self.role.all():  # If the user has the unique role
+                # Check if any other user already has this role
+                conflicting_users = CustomUser.objects.filter(role=unique_role).exclude(userID=self.userID)
+                if conflicting_users.exists():
+                    raise ValidationError(
+                        _("The role 'Director, Extension & Community Relations' with code 'ecrd' is already assigned to another user.")
+                    )
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.email
+
+class Campus(models.Model):
+    campusID = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name_plural = "Campuses"
+
+class College(models.Model):
+    collegeID = models.AutoField(primary_key=True)
+    abbreviation = models.CharField(max_length=15)
+    title = models.CharField(max_length=100)
+    collegeDean = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
+    campusID = models.ForeignKey(Campus, related_name='campus', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = "Colleges"
+
+    def __str__(self):
+        return self.title
+
+class Program(models.Model):
+    programID = models.AutoField(primary_key=True)
+    abbreviation = models.CharField(max_length=15)
+    title = models.CharField(max_length=100)
+    programChair = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
+    collegeID = models.ForeignKey(College, related_name='program', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = "Programs"
+
+    def __str__(self):
+        return self.title
+
+class Faculty(models.Model):
+    facultyID = models.AutoField(primary_key=True)
+    userID = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    collegeID = models.ForeignKey(College, on_delete=models.CASCADE)
+    programID = models.ForeignKey(Program, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        verbose_name_plural = "Faculties"
 
 class Region(models.Model):
     regionID = models.AutoField(primary_key=True)
@@ -57,6 +143,9 @@ class City(models.Model):
     postalCode = models.IntegerField()
     provinceID = models.ForeignKey(Province, related_name='city', on_delete=models.CASCADE)
 
+    class Meta:
+        verbose_name_plural = "Cities"
+
 class Barangay(models.Model):
     barangayID = models.AutoField(primary_key=True)
     barangay = models.CharField(max_length=50)
@@ -67,10 +156,16 @@ class Address(models.Model):
     street = models.CharField(max_length=150)
     barangayID = models.ForeignKey(Barangay, related_name='address', on_delete=models.CASCADE)
 
+    class Meta:
+        verbose_name_plural = "Addresses"
+
 class PartnerAgency(models.Model):
     agencyID = models.AutoField(primary_key=True)
     agencyName = models.CharField(max_length=100)
     addressID = models.ForeignKey(Address, related_name='partnerAgency', on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        verbose_name_plural = "Partner Agencies"
 
 class MOA(models.Model):
     STATUS_CHOICES = [
@@ -81,8 +176,8 @@ class MOA(models.Model):
 
     moaID = models.AutoField(primary_key=True)
     userID = models.ForeignKey(CustomUser, related_name='moaUser', on_delete=models.CASCADE)
-    partyADescription = models.TextField()
-    partyBDescription = models.TextField()
+    partyDescription = models.TextField()
+    # partyBDescription = models.TextField()
     coverageAndEffectivity = models.TextField()
     confidentialityClause = models.TextField()
     termination = models.TextField()
@@ -124,20 +219,15 @@ class ProgramCategory(models.Model):
     programCategoryID = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
 
+    class Meta:
+        verbose_name_plural = "Program Categories"
+
 class ProjectCategory(models.Model):
     projectCategoryID = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
 
-class College(models.Model):
-    collegeID = models.AutoField(primary_key=True)
-    abbreviation = models.CharField(max_length=15)
-    title = models.CharField(max_length=100)
-
-class Program(models.Model):
-    programID = models.AutoField(primary_key=True)
-    abbreviation = models.CharField(max_length=15)
-    title = models.CharField(max_length=100)
-    collegeID = models.ForeignKey(College, related_name='program', on_delete=models.CASCADE)
+    class Meta:
+        verbose_name_plural = "Project Categories"
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -157,7 +247,9 @@ class Project(models.Model):
     accreditationLevel = models.CharField(max_length=50) #7
     # college = models.CharField(max_length=50) #8
     beneficiaries = models.TextField() #9
-    targetImplementation = models.DateField() #10
+    # targetImplementation = models.DateField() #10
+    targetStartDateImplementation = models.DateField()
+    targetEndDateImplementation = models.DateField()
     totalHours = models.FloatField() #11
     background = models.TextField() #12
     projectComponent = models.TextField() #13
@@ -175,7 +267,7 @@ class Project(models.Model):
     approvalCounter = models.IntegerField(default=0)
     uniqueCode = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
-class Signatories(models.Model):
+class Signatories(models.Model): #print purpose
     project = models.ForeignKey(Project, related_name='signatories', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
     title = models.CharField(max_length=100, null=True, blank=True)
@@ -187,6 +279,9 @@ class NonUserProponents(models.Model):
 class Deliverables(models.Model):
     deliverableID = models.AutoField(primary_key=True)
     deliverableName = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural = "Deliverables"
 
 class UserProjectDeliverables(models.Model):
     userID = models.ForeignKey(CustomUser, related_name='userProjectDeliverables', on_delete=models.CASCADE)
@@ -229,6 +324,10 @@ class Review(models.Model):
     comment = models.TextField(null=True, blank=True)
     approvalCounter = models.IntegerField(default=0)
     reviewerResponsible = models.CharField(max_length=10, blank=True, null=True)
+
+    # New fields for college-specific reviews
+    collegeID = models.ForeignKey('College', on_delete=models.CASCADE, null=True, blank=True)
+    sequence = models.PositiveIntegerField(default=0)  # Group all reviewers of a college under the same sequence
 
 class GoalsAndObjectives(models.Model): #a5
     GAOID = models.AutoField(primary_key=True)

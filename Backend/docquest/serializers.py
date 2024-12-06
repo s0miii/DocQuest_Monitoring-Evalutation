@@ -3,26 +3,83 @@ from docquestapp.models import *
 from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.fields.related import ForeignObjectRel
+from django.db import transaction
 
 # mga nagamit
 class UserSignupSerializer(serializers.ModelSerializer):
     role = serializers.PrimaryKeyRelatedField(many=True, queryset=Roles.objects.all())
-
-    class Meta(object):
+    campus = serializers.PrimaryKeyRelatedField(queryset=Campus.objects.all(), write_only=True, required=False)
+    college = serializers.PrimaryKeyRelatedField(queryset=College.objects.all(), write_only=True, required=False)
+    program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), write_only=True, required=False)
+    
+    class Meta:
         model = CustomUser
         fields = [
             'email', 'password', 'firstname', 'middlename', 'lastname',
-            'campus', 'college', 'department', 'contactNumber', 'role'
+            'campus', 'college', 'program', 'contactNumber', 'role'
         ]
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def create(self, validated_data):
+        # Extract non-user model fields
+        roles = validated_data.pop('role')
+        campus = validated_data.pop('campus', None)
+        college = validated_data.pop('college', None)
+        program = validated_data.pop('program', None)
+
+        # Use transaction to ensure data consistency
+        with transaction.atomic():
+            # Create the user without setting password (since view handles it)
+            password = validated_data.pop('password')  # Remove password from validated_data
+            user = CustomUser(**validated_data)
+            user.save()
+
+            # Add roles
+            user.role.set(roles)
+
+            # If college/program info is provided, create Faculty record
+            if any([college, program]):
+                Faculty.objects.create(
+                    userID=user,
+                    collegeID=college,
+                    programID=program
+                )
+
+        return user
+
+    def validate(self, data):
+        # Validate that if program is provided, college must also be provided
+        if 'program' in data and not 'college' in data:
+            raise serializers.ValidationError(
+                {"college": "College must be provided when program is specified"}
+            )
+
+        # Validate that the program belongs to the specified college
+        if 'program' in data and 'college' in data:
+            if data['program'].collegeID != data['college']:
+                raise serializers.ValidationError(
+                    {"program": "Program must belong to the specified college"}
+                )
+
+        # Validate that the college belongs to the specified campus
+        if 'college' in data and 'campus' in data:
+            if data['college'].campusID != data['campus']:
+                raise serializers.ValidationError(
+                    {"college": "College must belong to the specified campus"}
+                )
+
+        return data
 
 class UserEditProfileSerializer(serializers.ModelSerializer):
-    role = serializers.PrimaryKeyRelatedField(many=True, queryset=Roles.objects.all())
+    # role = serializers.PrimaryKeyRelatedField(many=True, queryset=Roles.objects.all())
 
     class Meta(object):
         model = CustomUser
         fields = [
             'email', 'password', 'firstname', 'middlename', 'lastname',
-            'campus', 'college', 'department', 'contactNumber', 'role'
+            'contactNumber'
         ]
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -36,6 +93,13 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = CustomUser
         fields = ['userID', 'firstname', 'lastname', 'roles']
+
+class EditUserRoleSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(many=True, source='role')
+
+    class Meta(object):
+        model = CustomUser
+        fields = ['role']
     
 class GoalsAndObjectivesSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -206,7 +270,7 @@ class GetSpecificMoaSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = MOA
         fields = [
-            'moaID', 'partyADescription', 'partyBDescription', 'coverageAndEffectivity', 'confidentialityClause',
+            'moaID', 'partyDescription', 'coverageAndEffectivity', 'confidentialityClause',
             'termination', 'witnesseth', 'partyObligation', 'firstParty', 'secondParty', 'witnesses'
         ]
 
@@ -220,7 +284,7 @@ class PostMOASerializer(serializers.ModelSerializer):
     class Meta:
         model = MOA
         fields = [
-            'moaID', 'partyADescription', 'partyBDescription', 'coverageAndEffectivity', 'confidentialityClause',
+            'moaID', 'partyDescription', 'coverageAndEffectivity', 'confidentialityClause',
             'termination', 'witnesseth', 'partyObligation', 'firstParty', 'secondParty', 'witnesses'
         ]
 
@@ -263,7 +327,7 @@ class UpdateMOASerializer(serializers.ModelSerializer):
     class Meta:
         model = MOA
         fields = [
-            'moaID', 'partyADescription', 'partyBDescription', 'coverageAndEffectivity', 'confidentialityClause',
+            'moaID', 'partyDescription', 'coverageAndEffectivity', 'confidentialityClause',
             'termination', 'witnesseth', 'partyObligation', 'firstParty', 'secondParty', 'witnesses'
         ]
     
@@ -359,11 +423,12 @@ class NotificationSerializer(serializers.ModelSerializer):
         return None
 
 class ReviewSerializer(serializers.ModelSerializer):
-    class Meta(object):
+    class Meta:
         model = Review
         fields = [
             'reviewID', 'contentOwnerID', 'content_type', 'source_id',
-            'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
+            'reviewedByID', 'reviewStatus', 'reviewDate', 'comment',
+            'collegeID', 'sequence'
         ]
 
 class ProjectReviewSerializer(serializers.ModelSerializer):
@@ -372,13 +437,15 @@ class ProjectReviewSerializer(serializers.ModelSerializer):
     projectTitle = serializers.SerializerMethodField()
     dateCreated = serializers.SerializerMethodField()
     content_type_name = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Review
         fields = [
             'reviewID', 'contentOwnerID', 'firstname', 'lastname',
             'content_type', 'content_type_name', 'source_id', 'projectTitle',
-            'dateCreated', 'reviewedByID', 'reviewStatus', 'reviewDate', 'comment'
+            'dateCreated', 'reviewedByID', 'reviewStatus', 'reviewDate', 'comment',
+            'sequence', 'status'
         ]
 
     def get_firstname(self, obj):
@@ -398,6 +465,9 @@ class ProjectReviewSerializer(serializers.ModelSerializer):
     def get_content_type_name(self, obj):
         # Fetch and return the name of the content type (e.g., 'Project' or 'MOA')
         return obj.content_type.model
+    
+    def get_status(self, obj):
+        return getattr(obj.source, 'status', None)
 
 class DocumentPDFSerializer(serializers.ModelSerializer):
     content_type = serializers.SlugRelatedField(
@@ -419,17 +489,31 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
         model = ProjectCategory
         fields = ['projectCategoryID', 'title']
 
+class CampusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Campus
+        fields = ['campusID', 'name']
+
+class GetNameAndIDSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = CustomUser
+        fields = ['userID', 'firstname', 'lastname']
+
 class CollegeSerializer(serializers.ModelSerializer):
+    campus = CampusSerializer(source='campusID', read_only=True)
+    collegeDean = GetNameAndIDSerializer(read_only=True)
+
     class Meta(object):
         model = College
-        fields = ['collegeID', 'abbreviation', 'title']
+        fields = ['collegeID', 'abbreviation', 'title', 'collegeDean', 'campus']
 
 class ProgramSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(source='collegeID', read_only=True)
+    programChair = GetNameAndIDSerializer(read_only=True)
 
     class Meta(object):
         model = Program
-        fields = ['programID', 'abbreviation', 'title', 'college']
+        fields = ['programID', 'abbreviation', 'title', 'programChair', 'college']
 
 class GetProjectSerializer(serializers.ModelSerializer):
     userID = GetProjectLeaderSerializer()
@@ -452,13 +536,12 @@ class GetProjectSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Project
         fields = [
-            'userID', 'programCategory', 'projectTitle', 'projectType',
-            'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'beneficiaries',  
-            'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
-            'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
-            'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
-            'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 'dateCreated',
-            'status'
+            'userID', 'programCategory', 'projectTitle', 'projectType', 'projectCategory', 'researchTitle', 'program', 
+            'accreditationLevel', 'beneficiaries', 'targetStartDateImplementation', 'targetEndDateImplementation', 'totalHours',
+            'background', 'projectComponent', 'targetScope', 'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 
+            'nonUserProponents', 'projectLocationID', 'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 
+            'budgetRequirements', 'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories', 
+            'dateCreated', 'status'
         ]
 
 class PostProjectSerializer(serializers.ModelSerializer):
@@ -484,7 +567,7 @@ class PostProjectSerializer(serializers.ModelSerializer):
         fields = [
             'userID', 'programCategory', 'projectTitle', 'projectType',
             'projectCategory', 'researchTitle', 'program', 'accreditationLevel', 'beneficiaries',  
-            'targetImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
+            'targetStartDateImplementation', 'targetEndDateImplementation', 'totalHours', 'background', 'projectComponent', 'targetScope',
             'ustpBudget', 'partnerAgencyBudget', 'totalBudget', 'proponents', 'nonUserProponents', 'projectLocationID',
             'agency', 'goalsAndObjectives', 'projectActivities', 'projectManagementTeam', 'budgetRequirements',
             'evaluationAndMonitorings', 'monitoringPlanSchedules', 'loadingOfTrainers', 'signatories' 
@@ -677,3 +760,96 @@ class GetMoaSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = MOA
         fields = ['moaUser', 'moaID', 'uniqueCode', 'dateCreated', 'status', 'projectTitles']
+
+class GetCampusSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Campus
+        fields = ['campusID', 'name']
+
+class GetCollegeDeanSerializer(serializers.ModelSerializer):
+    collegeDean = GetNameAndIDSerializer(read_only=True)
+
+    class Meta:
+        model = College
+        fields = ['collegeDean']
+
+# Serializer to fetch program chair's name
+class GetProgramChairSerializer(serializers.ModelSerializer):
+    programChair = GetNameAndIDSerializer(read_only=True)
+
+    class Meta:
+        model = Program
+        fields = ['programChair']
+
+class GetAllProjectsSerializer(serializers.ModelSerializer):
+    program = ProgramSerializer(many=True)
+
+    class Meta:
+        model = Project
+        fields = ['status', 'dateCreated', 'program']
+
+class GetReviewsWithProjectIDSerializer(serializers.ModelSerializer):
+    reviewedByID = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    college = serializers.SerializerMethodField()
+    program = serializers.SerializerMethodField()
+    fullname = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = [
+            'reviewID', 'reviewedByID', 'college', 'program', 'fullname',
+            'reviewStatus', 'reviewDate', 'comment', 'approvalCounter', 'reviewerResponsible'
+        ]
+
+    def get_college(self, obj):
+        # Retrieve the related college if available
+        if obj.collegeID:
+            return obj.collegeID.title
+        return None
+
+    def get_program(self, obj):
+        # Check if the reviewer is associated with a program
+        reviewer = obj.reviewedByID
+        program = Program.objects.filter(programChair=reviewer).first()
+        return program.title if program else None
+
+    def get_fullname(self, obj):
+        # Concatenate the reviewer's full name
+        reviewer = obj.reviewedByID
+        return f"{reviewer.firstname} {reviewer.middlename} {reviewer.lastname}".strip()
+
+class GetProgramUsingFacultySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Faculty
+        fields = ['programID']
+
+class GetProjectsCountUsingProgram(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+
+    class Meta(object):
+        model = Project
+        fields = ['status', 'uniqueCode', 'projectTitle', 'dateCreated', 'program',
+            'fullname', 'projectID'
+        ]
+    
+    def get_fullname(self, obj):
+        # Concatenate the reviewer's full name
+        projectLeader = obj.userID
+        return f"{projectLeader.firstname} {projectLeader.lastname}".strip()
+
+class UsersByProgramSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(many=True)
+
+    class Meta(object):
+        model = CustomUser
+        fields = ['userID', 'email', 'firstname',
+            'middlename', 'lastname', 'contactNumber', 'role',
+            'is_active'
+        ]
+
+class CoordinatorProgramToCampus(serializers.ModelSerializer):
+    programID = ProgramSerializer()
+
+    class Meta(object):
+        model = Faculty
+        fields = ['programID']

@@ -7,6 +7,22 @@ from django.contrib.auth import get_user_model
 import secrets
 from datetime import date
 
+# model for logging
+
+CustomUser = get_user_model()
+
+class NotificationLog(models.Model):
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="sent_notifications")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="notification_logs")
+    recipient_email = models.EmailField()
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification from {self.sender} to {self.recipient_email} for {self.project.projectTitle}"
+
+
 ### Checklist Items
 
 # Daily Attendance Record
@@ -52,7 +68,7 @@ class ModulesLectureNotes(models.Model):
     ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="lecture_notes")
     proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="lecture_notes_submissions", null=True)
-    module_file = models.FileField(upload_to="modules/", null=True, blank=True)
+    module_file = models.FileField(upload_to="lecture_notes/", null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     date_uploaded = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")

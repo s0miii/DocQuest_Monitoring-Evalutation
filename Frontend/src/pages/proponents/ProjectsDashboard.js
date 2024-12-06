@@ -4,17 +4,24 @@ import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProponentsSideBar from "../../components/ProponentsSideBar";
 
-const ProponentsProjects = () => {
+const ProjectsDashboard = () => {
     const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const projectsPerPage = 5;
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
-    const handleViewClick = (path) => {
-        navigate(path);
-    }
+    const handleViewClick = (project) => {
+        if (project.role === "proponent") {
+            navigate(`/proponents/proj/req/${project.projectID}`);
+        } else if (project.role === "leader") {
+            navigate(`/projlead/proj/req/${project.projectID}`);
+        } else {
+            alert("Invalid role detected.");
+        }
+    };
 
     // Fetch projects dynamically
     useEffect(() => {
@@ -54,6 +61,23 @@ const ProponentsProjects = () => {
         fetchProjects();
     }, [navigate]);
 
+    // Handle sorting
+    const handleSort = (key) => {
+        let direction = "asc";
+        if (sortConfig.key === key && sortConfig.direction === "asc") {
+            direction = "desc";
+        }
+        setSortConfig({ key, direction });
+
+        const sortedProjects = [...projects].sort((a, b) => {
+            if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
+            if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+            return 0;
+        });
+
+        setProjects(sortedProjects);
+    };
+
     // Filter projects by search term
     const filteredProjects = (projects || []).filter((project) =>
         project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase())
@@ -76,6 +100,17 @@ const ProponentsProjects = () => {
             setCurrentPage(newPage);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="p-4">
+                <div className="bg-gray-200 animate-pulse h-6 w-3/4 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-1/2 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-full rounded"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
@@ -124,23 +159,45 @@ const ProponentsProjects = () => {
                                 <table className="min-w-full table-auto">
                                     <thead className="bg-gray-100">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Project ID</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Project Role</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Title</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Target Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase"> </th>
+                                            <th
+                                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
+                                                onClick={() => handleSort("projectTitle")}
+                                            >
+                                                Title {sortConfig.key === "projectTitle" && (sortConfig.direction === "asc" ? "🔼" : "🔽")}
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
+                                                onClick={() => handleSort("role")}
+                                            >
+                                                Project Role {sortConfig.key === "role" && (sortConfig.direction === "asc" ? "🔼" : "🔽")}
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
+                                                onClick={() => handleSort("projectID")}
+                                            >
+                                                Project ID {sortConfig.key === "projectID" && (sortConfig.direction === "asc" ? "🔼" : "🔽")}
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
+                                                onClick={() => handleSort("targetImplementation")}
+                                            >
+                                                Target Date {sortConfig.key === "targetImplementation" && (sortConfig.direction === "asc" ? "🔼" : "🔽")}
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase"></th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {currentProjects.map((project) => (
                                             <tr key={project.projectID}>
-                                                <td className="px-6 py-4 whitespace-nowrap">{project.projectID}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{project.role.charAt(0).toUpperCase() + project.role.slice(1)}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">{project.role.charAt(0).toUpperCase() + project.role.slice(1)}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">{project.projectID}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">{project.targetImplementation}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <button className="text-black underline pr-3"
-                                                        onClick={() => handleViewClick(`/proponents/proj/req/${project.projectID}`)}>
+                                                    <button
+                                                        className="text-black underline pr-3"
+                                                        onClick={() => handleViewClick(project)}
+                                                    >
                                                         View
                                                     </button>
                                                 </td>
@@ -153,7 +210,7 @@ const ProponentsProjects = () => {
 
                         {/* Pagination */}
                         <div className="mt-4 flex justify-between items-center">
-                            <div>Showing page {currentPage} out of {totalPages} pages</div>
+                            <div>Showing page {currentPage} out of {totalPages}</div>
                             <div className="flex space-x-2">
                                 <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                                     Previous
@@ -170,4 +227,4 @@ const ProponentsProjects = () => {
     );
 }
 
-export default ProponentsProjects;
+export default ProjectsDashboard;

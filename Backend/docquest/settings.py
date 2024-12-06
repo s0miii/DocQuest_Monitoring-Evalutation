@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost', 
     'docquest-production.up.railway.app'
+    'docquestmonitoring-evalutation-production.up.railway.app'
 ]
 
 
@@ -129,6 +130,18 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Media Files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_HOST = 'smtp.office365.com'  
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'testpmes25@hotmail.com'  # replace later on with actual email and pass
+# EMAIL_HOST_PASSWORD = 'PMESTest@25'  
 
 
 # Internationalization
