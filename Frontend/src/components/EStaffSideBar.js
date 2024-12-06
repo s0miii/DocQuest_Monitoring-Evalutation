@@ -55,9 +55,9 @@ function EStaffSideBar() {
                             PREXC
                         </button>
                         <ul className={`${isPREXCSubMenuVisible ? "" : "hidden"} bg-indigo-900`}>
-                            <li><Link to="/estaff/prexc/op1-op3" className="block px-6 py-3 hover:text-yellow-500">Extension Program (OP1 and OP2)</Link></li>
-                            <li><Link to="/prexc/op2" className="block px-6 py-3 hover:text-yellow-500">Extension Program (OP2)</Link></li>
-                            <li><Link to="/prexc/oc" className="block px-6 py-3 hover:text-yellow-500">Extension Program (Oc)</Link></li>
+                            <li><Link to="/estaff/prexc/op1-op3" className="block px-6 py-3 hover:text-yellow-500">Extension Program (OP1 and OP3)</Link></li>
+                            <li><Link to="/estaff/prexc/op2" className="block px-6 py-3 hover:text-yellow-500">Extension Program (OP2)</Link></li>
+                            <li><Link to="/estaff/prexc/oc" className="block px-6 py-3 hover:text-yellow-500">Extension Program (Oc)</Link></li>
                             <li><Link to="/estaff/prexc/performance" className="block px-6 py-3 hover:text-yellow-500">College Campus Performance</Link></li>
                         </ul>
                     </li>

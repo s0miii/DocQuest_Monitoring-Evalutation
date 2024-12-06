@@ -30,6 +30,8 @@ import EStaffProjects from "./pages/estaff/EStaffProjects";
 import EStaffProjMonitoring from "./pages/estaff/EStaffProjMonitoring";
 import EstaffTrainerCVDTR from "./pages/estaff/EstaffTrainersCVDTR";
 import EStaffOP1OP2 from "./pages/estaff/EStaffOP1OP2";
+import EStaffOC from "./pages/estaff/EStaffOC";
+import EStaffOP2 from "./pages/estaff/EStaffOP2";
 import EStaffPREXC from "./pages/estaff/EStaffPREXC";
 import ProponentsProjects from "./pages/proponents/ProponentsProjects"
 import ProponentsProjReq from "./pages/proponents/ProponentsProjReq";
@@ -66,6 +68,8 @@ function App() {
 
       <Route path="/estaff" element={<EstaffDashboard />} />
       <Route path="/estaff/prexc/op1-op3" element={<EStaffOP1OP2 />} />
+      <Route path="/estaff/prexc/op2" element={<EStaffOP2 />} />
+      <Route path="/estaff/prexc/oc" element={<EStaffOC />} />
       <Route path="/estaff/prexc/performance" element={<EStaffPREXC />} />
       <Route path="/estaff/proj" element={<EStaffProjects />} />
       <Route path="/estaff/proj/monitoring" element={<EStaffProjMonitoring />} />

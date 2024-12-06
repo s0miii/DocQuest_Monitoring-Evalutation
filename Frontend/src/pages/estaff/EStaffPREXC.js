@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar";
@@ -11,6 +11,45 @@ const EStaffPREXC = () => {
         navigate(path);
     }
 
+    const [data, setData] = useState([
+        {
+            campus: "CEA",
+            programNumbers: 1,
+            programPercent: 1,
+            facultyNumbers: 1,
+            facultyPercent: 1,
+            avgPercent: 1,
+            personsTrainedTarget: 1,
+            personsTrainedAccomp: 1,
+            personsTrainedVar: 1,
+            activePartnerTarget: 1,
+            activePartnerAccomp: 1,
+            activePartnerVar: 1,
+            percentOfBenefTarget: 1,
+            percentOfBenefAccomp: 1,
+            percentOfBenefVar: 1,
+            numOfExProgsTarget: 1,
+            numOfExProgsAccomp: 1,
+            numOfExProgsVar: 1,
+        }
+    ]); // Array to hold input values for each row
+
+
+    // Handle input change for each row
+    // const handleChange = (setData, inputs, index, e) => {
+    //     const rawValue = e.target.value;
+
+    //     // Allow only numeric values in the input
+    //     if (/^[0-9]*\.?[0-9]*$/.test(rawValue)) {
+    //     const updatedInputs = [...inputs];
+    //     updatedInputs[index] = rawValue; // Update the specific input for the row
+    //     setData(updatedInputs);
+    //     }
+    // };
+
+    // Calculate the total sum of all inputs (convert to numbers)
+    // const totalInput = [...dataMain, ...dataSat].reduce((sum, value) => sum + (parseFloat(value) || 0), 0);
+      
     return (
         <div className="flex min-h-screen bg-gray-200">
             <div className="fixed w-1/5 h-full">
@@ -78,47 +117,65 @@ const EStaffPREXC = () => {
                             <tbody>
                             {/* <!-- Example Row: Cagayan de Oro Campus --> */}
                             <tr class="bg-yellow-100 border-b border-gray-300">
-                                <td class="px-4 py-2 font-semibold text-left border-r border-gray-400">Cagayan de Oro Campus</td>
-                                <td class="px-4 py-2 border-r border-gray-400">7</td>
-                                <td class="px-4 py-2 border-r border-gray-400">14.00%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">78</td>
-                                <td class="px-4 py-2 border-r border-gray-400">27.4%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">20.7%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1,758.16</td>
-                                <td class="px-4 py-2 border-r border-gray-400">157.90</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1,600.26</td>
-                                <td class="px-4 py-2 border-r border-gray-400">3</td>
-                                <td class="px-4 py-2 border-r border-gray-400">3</td>
-                                <td class="px-4 py-2 border-r border-gray-400">0</td>
-                                <td class="px-4 py-2 border-r border-gray-400">99%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">100</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1</td>
-                                <td class="px-4 py-2">0</td>
+                                <td colspan="19" class="px-4 py-2 font-semibold text-left border-r border-gray-400">Cagayan de Oro Campus</td>
+                            </tr>
+                            {data.map((row, index) => (
+                            <tr key={index} className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">{row.campus}</td>
+                                <td className="py-2 border-r border-gray-400 ">{row.programNumbers}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.programPercent}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.facultyNumbers}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.facultyPercent}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.avgPercent}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedTarget}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedAccomp}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedVar}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerTarget}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerAccomp}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerVar}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefTarget}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefAccomp}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefVar}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.numOfExProgsTarget}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.numOfExProgsAccomp}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.numOfExProgsVar}</td>
+                            </tr>
+                            ))}
+
+                            <tr class="bg-yellow-100 border-b border-gray-300">
+                                <td colspan="19" class="px-4 py-2 font-semibold text-left border-r border-gray-400">Satellite Campuses</td>
                             </tr>
 
-                            {/* <!-- Example Row: Satellite Campus --> */}
-                            <tr class="bg-white border-b border-gray-300">
-                                <td class="px-4 py-2 font-semibold text-left border-r border-gray-400">Satellite Campuses</td>
-                                <td class="px-4 py-2 border-r border-gray-400">5</td>
-                                <td class="px-4 py-2 border-r border-gray-400">10.00%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">17</td>
-                                <td class="px-4 py-2 border-r border-gray-400">6.0%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">8.0%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">678.51</td>
-                                <td class="px-4 py-2 border-r border-gray-400">65.03</td>
-                                <td class="px-4 py-2 border-r border-gray-400">(65.03)</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1</td>
-                                <td class="px-4 py-2 border-r border-gray-400">0</td>
-                                <td class="px-4 py-2 border-r border-gray-400">99%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">99%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">0</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1</td>
-                                <td class="px-4 py-2">0</td>
+                            {/* {dataSat.map((row, index) => {
+                            // Calculate the percentage for this row, handling division by zero
+                            // let percentage = 0;
+                            // if (totalInput > 0) {
+                            //     percentage = (parseFloat(inputValue) || 0) / totalInput * 100;
+                            // }
+
+                            return (
+                            <tr key={index} className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">{row.campus}</td>
+                                <td className="py-2 border-r border-gray-400 ">{row.programNumbers}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.programPercent}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.facultyNumbers}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.facultyPercent}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedTarget}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedAccomp}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedVar}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerTarget}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerAccomp}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerVar}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefTarget}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefAccomp}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefVar}</td>
+                                <td className="px-4 py-2 border-r border-gray-400">0</td>
+                                <td className="px-4 py-2 border-r border-gray-400">1</td>
+                                <td className="px-4 py-2 border-r border-gray-400">1</td>
+                                <td className="px-4 py-2">0</td>
                             </tr>
+                            );
+                            })} */}
 
                             {/* <!-- Example Row: Total --> */}
                             <tr class="bg-blue-800 text-white font-bold">
