@@ -11,7 +11,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
-{ "email": "john@gmail.com", "password": "testpass"}
+{ "email": "bsitcoord@gmail.com", "password": "testpass"}
 
 ###
 
@@ -51,19 +51,20 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 # submit created proj
 POST http://127.0.0.1:8000/create_project
 Content-Type: application/json
-Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+Authorization: Token da9a4ba5f34ece2c626ab030f7dc9a08ecb3dea8
 
 {
     "userID": 10,
     "programCategory": [1, 2],
-    "projectTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
+    "projectTitle": "again TestTest sakit E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
     "projectType": "New Project",
     "projectCategory": [1, 2],
     "researchTitle": "E-monitorMo OutreachActivity and Training at Kahigayonan 2024",
     "program": [1, 2],
     "accreditationLevel": "IV",
     "beneficiaries": "Out of School Youth Development Alliance (OSYDA)",
-    "targetImplementation": "2024-08-01",
+    "targetStartDateImplementation": "2024-08-01",
+    "targetEndDateImplementation": "2024-08-01",
     "totalHours": 24,
     "background": "The Out-of-School Youth Development Alliance (OSYDA) will be conducting its annual program “KAHIGAYONAN: Skills Expo & Enrollment and Job Fair” at Ayala Malls Centrio, Cagayan de Oro City on August 2024. This year's activity has been branded as “UY! IPORTUNIDAD para sa Kabatan-onan, Year 3”. In our continued support of their endeavors, the College of Information Technology and Computing spearheaded by Dr. Jocelyn Barbosa would like to conduct an outreach activity and training during the event, aimed at utilizing the eMonitorMo app developed last year in a partnership with the University of Science and Technology of Southern Philippines and USAID. The team sees this as an opportunity to not only strengthen the college's partnership with OSYDA but also improve the services offered to our city's youth population.",
     "projectComponent": "Participant Orientation and Registration into the eMonitorMo App",
@@ -240,6 +241,16 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
             "name": "William Thomas",
             "title": "Chancellor, USTP CDO"
         }
+    ],
+    "deliverables": [
+        1,2,3,4,5,6,7,8,9,10,11,12,13,14
+    ],
+    "approvers": [
+        {
+            "collegeDean": 24,
+            "collegeID": 1,
+            "programChairs": [25, 26] 
+        }
     ]
 }
 
@@ -273,9 +284,9 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 #     "action": "deny",
 #     "comment": "The project lacks sufficient data to proceed."
 # }
-POST http://127.0.0.1:8000/approve_or_deny_project/35/
+POST http://127.0.0.1:8000/approve_or_deny_project/15/
 Content-Type: application/json
-Authorization: Token c0d2ebdc7a3163963ee1664d4c16e8dadb398907
+Authorization: Token a6ff444cc987e339d5f8c5fcd0b9c6e7c8901dcc
 
 {
     "action": "approve"
@@ -623,13 +634,25 @@ Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
 
 GET http://127.0.0.1:8000/get_project/25/
 Content-Type: application/json
-Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+Authorization: Token c2f1e401a8449e8635f5c74f2dd0dda51f008db4
+
+###
+
+GET http://127.0.0.1:8000/get_project_review/25/
+Content-Type: application/json
+Authorization: Token c2f1e401a8449e8635f5c74f2dd0dda51f008db4
+
+###
+
+GET http://127.0.0.1:8000/get_projects_to_review
+Content-Type: application/json
+Authorization: Token 82df2da1fc75d66af76d7d9bfc187077474a7a95
 
 ###
 
 GET http://127.0.0.1:8000/get_users_exclude_roles
 Content-Type: application/json
-Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+Authorization: Token e6e6593e6d04309abb793f4b5f32494093226458
 
 ###
 
@@ -643,16 +666,16 @@ Authorization: Token 0c621fc934ac3bd947bb970d530b7eda0f53ae40
 # get request inig navigate sa user profile
 GET http://127.0.0.1:8000/get_user_details
 Content-Type: application/json
-Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+Authorization: Token e6e6593e6d04309abb793f4b5f32494093226458
 
 {}
 
 ###
 
 # patch request inig edit user
-PATCH http://127.0.0.1:8000/edit_user_details/2/
+PATCH http://127.0.0.1:8000/edit_user_details/23/
 Content-Type: application/json
-Authorization: Token f17c9f447d3e24b919f102815eb536bc5cf62ba0
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
 
 {"firstname": "Chalbeee"}
 
@@ -709,7 +732,7 @@ Content-Type: application/json
 
 GET http://127.0.0.1:8000/get_moa/10/
 Content-Type: application/json
-Authorization: Token b1a379f6327fafea0a857e63a20a725b0db7b16d
+Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
 
 {}
 
@@ -729,10 +752,12 @@ Content-Type: application/json
 
 ###
 
-GET http://127.0.0.1:8000/get_colleges
+POST http://127.0.0.1:8000/get_colleges/
 Content-Type: application/json
 
-{}
+{
+  "campusIDs": [1, 2]
+}
 
 ###
 
@@ -752,9 +777,116 @@ Content-Type: application/json
 
 ###
 
+GET http://127.0.0.1:8000/get_all_projects_of_program
+Content-Type: application/json
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/users_by_program
+Content-Type: application/json
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
+
+{}
+
+###
+
+POST http://127.0.0.1:8000/auth/token/login/
+Content-Type: application/json
+
+{ "email": "bsitcoord@gmail.com", "password": "testpass"}
+
+###
+
+GET http://127.0.0.1:8000/get_reviews_with_projectID/53/
+Content-Type: application/json
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
+
+{}
+
+###
+
 GET http://127.0.0.1:8000/get_review
 Content-Type: application/json
-Authorization: Token 61da9108b277bc8208692d9241ebe360f7b1e854
+Authorization: Token f25df1958b33fed5fca0f18b828e152d49fc5d77
+
+{}
+
+###bsitchair
+
+GET http://127.0.0.1:8000/get_review
+Content-Type: application/json
+Authorization: Token e5fbb4553d71f2788316021c0446ed513404e355
+
+{}
+
+###bscschair
+
+GET http://127.0.0.1:8000/get_review
+Content-Type: application/json
+Authorization: Token fa217666e813475f2ce3f4113b3aeea25841d9ec
+
+{}
+
+###citcdean
+
+GET http://127.0.0.1:8000/get_review
+Content-Type: application/json
+Authorization: Token ba2d68181619cceeea9c58c5e60e38c36c66685d
+
+{}
+
+###director
+
+POST http://127.0.0.1:8000/review_project
+Content-Type: application/json
+Authorization: Token ba2d68181619cceeea9c58c5e60e38c36c66685d
+
+{
+    "reviewID": 71,
+    "action": "approve",
+    "comment": "Looks good!"
+}
+
+###
+
+GET http://127.0.0.1:8000/get_all_projects
+Content-Type: application/json
+Authorization: Token 79b93dfa6895ace1548b60b94473726c05ddf787
+
+{}
+
+###director
+
+GET http://127.0.0.1:8000/college/1/dean/
+Content-Type: application/json
+Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/program/1/chair/
+Content-Type: application/json
+Authorization: Token 51515da38c2cdbfdd713af87463359545004643c
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/coordinator_get_roles
+Content-Type: application/json
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
+
+{}
+
+###
+
+GET http://127.0.0.1:8000/get_program_to_campus
+Content-Type: application/json
+Authorization: Token 66fa1967750b39f81971c7cdcc7c2b052a1de715
 
 {}
 

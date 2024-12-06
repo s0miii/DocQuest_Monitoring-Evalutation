@@ -33,20 +33,38 @@ urlpatterns = [
     ### User Role
     path('user/roles/', get_user_roles, name='get_user_roles'),
 
+    # Email
+    path('projects/<int:project_id>/send_dynamic_reminder/', send_dynamic_reminder_email, name='send_dynamic_reminder'),
+
     # view all projects
     path("user-projects/", UserProjectsView.as_view(), name="user-projects"),
+
+    # document count
+    # path("project/<int:project_id>/document_counts/", DocumentCountsView.as_view(), name="document_counts"),
+    path("project/<int:project_id>/document_counts/", document_counts, name="document_counts"),
+
+    # View Proponent Project Details
+    path('projects/<int:project_id>/details/', ProponentProjectDetailsView.as_view(), name='proponent_project_details'),
+
+    # project progress
+    path('project/<int:project_id>/progress/', project_progress, name='project_progress'),
 
     ### Checklist & items
     # upload
     path('upload/attendance/<int:project_id>/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),
     path('upload/evaluation/<int:project_id>/', SummaryOfEvaluationUploadView.as_view(), name='evaluation_upload'),
     path('upload/lecture_notes/<int:project_id>/', ModulesLectureNotesUploadView.as_view(), name='lecture_notes_upload'),
-    path('upload/photo/<int:project_id>/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
+    path('upload/photo_documentation/<int:project_id>/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
     path('upload/other_files/<int:project_id>/', OtherFilesUploadView.as_view(), name='other_files_upload'),
-    # view all submissions of all items
-    path("project/<int:project_id>/checklist_submissions/", ChecklistSubmissionsView.as_view(), name="view_checklist_submissions"),
+    
+    # Delete submission
+    path("submissions/<str:model_name>/<int:submission_id>/", delete_submission, name="delete_submission"),
+
+    
+    # view all submissions from a checklist item
+    path("project/<int:project_id>/checklist/<str:checklist_item_name>/submissions/", ChecklistItemSubmissionsView.as_view(), name="checklist_item_submissions", ),
     # view submission for a specific item
-    path("project/<int:project_id>/checklist_item/<str:checklist_item_name>/submissions/", ChecklistSubmissionsView.as_view(), name="checklist_item_submissions",),
+    # path("project/<int:project_id>/checklist_item/<str:checklist_item_name>/submissions/", ChecklistSubmissionsView.as_view(), name="checklist_item_submissions",),
     # assign checklist item
     path('assign/checklist_items/', AssignChecklistItemsView.as_view(), name='assign_checklist_items'),
     #submission status for project leader

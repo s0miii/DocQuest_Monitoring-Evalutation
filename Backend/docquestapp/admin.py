@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.db import transaction
+from django.utils.safestring import mark_safe
 
 from .forms import *
 from .models import *
@@ -26,23 +28,86 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ("email",)
     ordering = ("email",)
 
-class CreateUserAdmin(admin.ModelAdmin):
-    fields = ["email", "password", "firstname", "middlename", "lastname",
-              "campus", "college", "department", "contactNumber", "role"
-    ]
-    list_display = ["userID", "firstname", "lastname", "display_roles"]
+class CustomUserAdmin(admin.ModelAdmin):
+    form = CustomUserForm
+
+    list_display = ["userID", "email", "firstname", "lastname", "display_roles", "display_college", "display_program"]
+    list_filter = ["role", "faculty__collegeID", "faculty__programID"]
+    search_fields = ["email", "firstname", "lastname", "faculty__collegeID__title", "faculty__programID__title"]
+
+    fieldsets = (
+        (None, {
+            'fields': ('email', 'password'),
+        }),
+        ('Personal Information', {
+            'fields': ('firstname', 'middlename', 'lastname', 'contactNumber'),
+        }),
+        ('Roles and Assignments', {
+            'fields': ('role', 'campus', 'college', 'program'),
+            'description': mark_safe(
+                "<p style='color: red; font-weight: bold;'>"
+                "Note: Only one user can have the role 'Director, Extension & Community Relations' with code 'ecrd' at a time."
+                "</p>"
+            ),
+        }),
+        ('Permissions', {
+            'fields': ('is_active', 'is_staff', 'is_superuser'),
+        }),
+    )
 
     def save_model(self, request, obj, form, change):
-        # Only hash the password if it's a new user or the password has been changed
-        if obj.pk is None or 'password' in form.changed_data:
-            obj.set_password(obj.password)
-        super().save_model(request, obj, form, change)
+        with transaction.atomic():
+            # Hash password if it's new or changed
+            if obj.pk is None or 'password' in form.changed_data:
+                obj.set_password(obj.password)
+            
+            # Save the user first
+            super().save_model(request, obj, form, change)
+            
+            # Handle faculty information
+            college = form.cleaned_data.get('college')
+            program = form.cleaned_data.get('program')
+            
+            if college or program:
+                faculty, created = Faculty.objects.update_or_create(
+                    userID=obj,
+                    defaults={
+                        'collegeID': college,
+                        'programID': program
+                    }
+                )
+            elif not (college or program):
+                # Remove faculty record if no college/program is specified
+                Faculty.objects.filter(userID=obj).delete()
 
-    # Create a method to display roles as a comma-separated string
     def display_roles(self, obj):
         return ", ".join([role.role for role in obj.role.all()])
-    
-    display_roles.short_description = 'Roles'  # Customize column header
+    display_roles.short_description = 'Roles'
+
+    def display_college(self, obj):
+        try:
+            faculty = Faculty.objects.filter(userID=obj).select_related('collegeID').first()
+            return faculty.collegeID.title if faculty and faculty.collegeID else '-'
+        except:
+            return '-'
+    display_college.short_description = 'College'
+
+    def display_program(self, obj):
+        try:
+            faculty = Faculty.objects.filter(userID=obj).select_related('programID').first()
+            return faculty.programID.title if faculty and faculty.programID else '-'
+        except:
+            return '-'
+    display_program.short_description = 'Program'
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('role', 'faculty__collegeID', 'faculty__programID')
+
+class FacultyAdmin(admin.ModelAdmin):
+    list_display = ['facultyID', 'userID', 'collegeID', 'programID']
+    list_select_related = ['userID', 'collegeID', 'programID']
+    search_fields = ['userID__email', 'userID__firstname', 'userID__lastname']
+    autocomplete_fields = ['userID', 'collegeID', 'programID']
 
 class RolesAdmin(admin.ModelAdmin):
     form = RoleCreationForm
@@ -86,12 +151,16 @@ class ProjectCategoryAdmin(admin.ModelAdmin):
     fields = ["title"]
     list_display = ["projectCategoryID", "title"]
 
+class CampusAdmin(admin.ModelAdmin):
+    fields = ["name"]
+    list_display = ["campusID", "name"]
+
 class CollegeAdmin(admin.ModelAdmin):
-    fields = ["abbreviation", "title"]
+    fields = ["abbreviation", "title", "collegeDean", "campusID"]
     list_display = ["collegeID", "abbreviation", "title"]
 
 class ProgramAdmin(admin.ModelAdmin):
-    fields = ["abbreviation", "title", "collegeID"]
+    fields = ["abbreviation", "title", "programChair", "collegeID"]
     list_display = ["programID", "abbreviation", "title", "collegeID"]
 
 class DeliverablesAdmin(admin.ModelAdmin):
@@ -106,9 +175,10 @@ admin.site.register(City, CityAdmin)
 admin.site.register(Barangay, BarangayAdmin)
 admin.site.register(Address, AddressAdmin)
 admin.site.register(PartnerAgency, PartnerAgencyAdmin)
-admin.site.register(CustomUser, CreateUserAdmin)
+admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(ProgramCategory, ProgramCategoryAdmin)
 admin.site.register(ProjectCategory, ProjectCategoryAdmin)
+admin.site.register(Campus, CampusAdmin)
 admin.site.register(College, CollegeAdmin)
 admin.site.register(Program, ProgramAdmin)
 admin.site.register(Deliverables, DeliverablesAdmin)
