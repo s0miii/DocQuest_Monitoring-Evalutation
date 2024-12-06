@@ -319,6 +319,7 @@ class EvaluationSharableLink(models.Model):
 # Attendance Template and Attendance Record Model
 class AttendanceTemplate(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attendance_templates")
+    trainer = models.ForeignKey('docquestapp.LoadingOfTrainers', on_delete=models.CASCADE, related_name='attendance_templates') #Added field to reference trainer
     templateName = models.CharField(max_length=255, default="Attendance Template")    
 
     include_attendee_name = models.BooleanField(default=False)
@@ -374,6 +375,7 @@ class TotalAttendees(models.Model):
 class CreatedAttendanceRecord(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     template = models.ForeignKey(AttendanceTemplate, on_delete=models.CASCADE)
+    trainer = models.ForeignKey('docquestapp.LoadingOfTrainers', on_delete=models.CASCADE,related_name='attendance_records')
     attendee_name = models.CharField(max_length=255, null=True, blank=True)
     gender = models.CharField(max_length=50, null=True, blank=True)
     college = models.CharField(max_length=255, null=True, blank=True)
