@@ -336,6 +336,13 @@ class EvaluationSharableLink(models.Model):
 class AttendanceTemplate(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attendance_templates")
     templateName = models.CharField(max_length=255, default="Attendance Template")    
+    trainerLoad = models.ForeignKey(
+        LoadingOfTrainers,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='attendance_templates'
+    )
 
     include_attendee_name = models.BooleanField(default=False)
     include_gender = models.BooleanField(default=False)
