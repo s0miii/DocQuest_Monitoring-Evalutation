@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 
 const ProponentsDailyAttRec = () => {
     const navigate = useNavigate();
+    const token = localStorage.getItem("token");
     const { projectID } = useParams(); // Extract projectID from the URL
     const [projectDetails, setProjectDetails] = useState(null);
     const [date, setDate] = useState("");
@@ -32,7 +33,6 @@ const ProponentsDailyAttRec = () => {
 
         const fetchProjectDetails = async () => {
             try {
-                const token = localStorage.getItem("authToken");
                 if (!token) {
                     alert("User not logged in. Please log in again.");
                     navigate("/login");
@@ -69,7 +69,6 @@ const ProponentsDailyAttRec = () => {
     }, [projectID, navigate]);
 
     const fetchUpdatedSubmissions = async () => {
-        const token = localStorage.getItem("authToken");
 
         if (!token) {
             alert("User not logged in. Please log in again.");

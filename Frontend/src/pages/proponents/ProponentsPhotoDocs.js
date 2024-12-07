@@ -31,7 +31,7 @@ const ProponentsPhotoDocs = () => {
 
         const fetchProjectDetails = async () => {
             try {
-                const token = localStorage.getItem("authToken");
+                const token = localStorage.getItem("token");
                 if (!token) {
                     alert("User not logged in. Please log in again.");
                     navigate("/login");
@@ -68,7 +68,7 @@ const ProponentsPhotoDocs = () => {
     }, [projectID, navigate]);
 
     const fetchUpdatedSubmissions = async () => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
 
         if (!token) {
             alert("User not logged in. Please log in again.");
@@ -107,11 +107,8 @@ const ProponentsPhotoDocs = () => {
 
     // Handle form submission
     const handleSubmit = async () => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         const currentUser = localStorage.getItem("userid"); // Fetch 'userid'
-
-        console.log("Token:", token);
-        console.log("Current User ID:", currentUser);
 
         if (!token || !currentUser) {
             alert("User not logged in or invalid session.");
@@ -158,7 +155,7 @@ const ProponentsPhotoDocs = () => {
 
 
     const handleDelete = async (submissionId) => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         if (!token) {
             alert("User not logged in or invalid session.");
             return;

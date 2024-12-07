@@ -31,7 +31,7 @@ const ProponentsOtherFiles = () => {
 
         const fetchProjectDetails = async () => {
             try {
-                const token = localStorage.getItem("authToken");
+                const token = localStorage.getItem("token");
                 if (!token) {
                     alert("User not logged in. Please log in again.");
                     navigate("/login");
@@ -68,7 +68,7 @@ const ProponentsOtherFiles = () => {
     }, [projectID, navigate]);
 
     const fetchUpdatedSubmissions = async () => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
 
         if (!token) {
             alert("User not logged in. Please log in again.");
@@ -107,7 +107,7 @@ const ProponentsOtherFiles = () => {
 
     // Handle form submission
     const handleSubmit = async () => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         const currentUser = localStorage.getItem("userid"); // Fetch 'userid'
 
         console.log("Token:", token);
@@ -158,7 +158,7 @@ const ProponentsOtherFiles = () => {
 
 
     const handleDelete = async (submissionId) => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         if (!token) {
             alert("User not logged in or invalid session.");
             return;

@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import transaction
-from django.db.models import F, ExpressionWrapper, IntegerField, Sum
+from django.db.models import F, Q, ExpressionWrapper, IntegerField, Sum
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.decorators import method_decorator
@@ -87,49 +87,50 @@ def send_dynamic_reminder_email(request, project_id):
 class UserProjectsView(APIView):
     permission_classes = [IsAuthenticated]
 
+    # Define role_mapping inside the class
+    role_mapping = {
+        "pjld": "Project Leader",
+        "ppnt": "Proponent",
+    }
+
     def get(self, request):
         user = request.user
         if not user:
             return Response({"error": "Invalid session"}, status=403)
 
-        # Fetch user roles dynamically
-        user_roles = Roles.objects.filter(user__userID=user.userID).values_list("code", flat=True)
+        try:
+            # Filter projects where the user is a project leader or proponent
+            projects = Project.objects.filter(
+                Q(userID=user) | Q(proponents__userID=user.userID),
+                status="approved"
+            ).distinct()
 
-        # Dynamic Role-Query Mappings
-        role_query_mapping = {
-            "pjld": {
-                "queryset": Project.objects.filter(userID=user.userID, status="approved"),
-                "role": "leader",
-            },
-            "ppnt": {
-                "queryset": Project.objects.filter(proponents__userID=user.userID, status="approved"),
-                "role": "proponent",
-            },
-        }
+            combined_projects = []
+            for project in projects:
+                role = None
+                # Determine the role based on user association with the project
+                if project.userID == user:
+                    role = self.role_mapping.get("pjld")  # Map "pjld" role code
+                elif project.proponents.filter(userID=user.userID).exists():
+                    role = self.role_mapping.get("ppnt")  # Map "ppnt" role code
 
-        combined_projects = []
-
-        # Dynamically fetch and serialize based on roles
-        for role in user_roles:
-            if role in role_query_mapping:
-                config = role_query_mapping[role]
-                queryset = config["queryset"]
-
-                # Serialize manually to inject the dynamic role
-                for project in queryset:
+                if role:
                     combined_projects.append({
                         "projectID": project.projectID,
                         "projectTitle": project.projectTitle,
                         "background": project.background,
                         "targetImplementation": f"{project.targetStartDateImplementation or 'N/A'} - {project.targetEndDateImplementation or 'N/A'}",
-                        "role": config["role"],  # Dynamically add the role
+                        "role": role,
                     })
 
-        # Return a response even if no projects are found
-        if not combined_projects:
-            return Response({"message": "No projects found for the user"}, status=200)
+            return Response(combined_projects, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
-        return Response(combined_projects, status=200)
+
+
+
+
     
 # Proponent Project Details
 @role_required(allowed_role_codes=["ppnt"])

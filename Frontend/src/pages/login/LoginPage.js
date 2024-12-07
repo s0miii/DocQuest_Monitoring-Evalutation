@@ -50,34 +50,29 @@ const LoginPage = () => {
       localStorage.setItem('roles', JSON.stringify(rolesList));
 
       // Navigate based on roles
-      if (rolesList.includes('rglr')) {
-        navigate('/user');
-      } else if (rolesList.includes('prch')) {
-        navigate('/program-chair');
-      } else if (rolesList.includes('cldn')) {
-        navigate('/college-dean');
-      } else if (rolesList.includes('ecrd')) {
+
+      if (rolesList.includes('ecrd')) {
         navigate('/director');
+      } else if (rolesList.includes('estf')) {
+        navigate('/estaff');
       } else if (rolesList.includes('vpala')) {
         navigate('/vpala'); // Add a specific route for 'vpala' if needed
       } else if (rolesList.includes('coord')) {
         navigate('/coordinatordashboard');
+      } else if (rolesList.includes('cldn')) {
+        navigate('/college-dean');
+      } else if (rolesList.includes('prch')) {
+        navigate('/program-chair');
       } else if (
         rolesList.includes('pjld') ||
         rolesList.includes('ppnt')
       ) {
         navigate('/projects-dashboard');
-      } else if (
-        rolesList.includes('cldn') ||
-        rolesList.includes('vcaa') ||
-        rolesList.includes('vcri') ||
-        rolesList.includes('acnt') ||
-        rolesList.includes('cclr') ||
-        rolesList.includes('estf') ||
-        rolesList.includes('') ||
-        rolesList.includes('')
-      ) {
-        navigate('/estaff');
+      } else if (rolesList.includes('rglr')) {
+        navigate('/user');
+      } else {
+        navigate('/login')
+        console.log('oops failed ka sa navigating by role: ', rolesList);
       }
 
     } catch (error) {

@@ -3,55 +3,73 @@ import { FaSearch, FaFilter } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProponentsSideBar from "../../components/ProponentsSideBar";
+import axios from "axios";
 
 const ProjectsDashboard = () => {
     const navigate = useNavigate();
+    const token = localStorage.getItem("token");
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const projectsPerPage = 5;
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+    const [error, setError] = useState(null);
 
-    const handleViewClick = (project) => {
-        if (project.role === "proponent") {
-            navigate(`/proponents/proj/req/${project.projectID}`);
-        } else if (project.role === "leader") {
-            navigate(`/projlead/proj/req/${project.projectID}`);
-        } else {
-            alert("Invalid role detected.");
+    useEffect(() => {
+        if (!token) {
+            localStorage.clear();
+            navigate('/login', { replace: true });
+            return;
         }
-    };
 
-    // Fetch projects dynamically
+        const roles = JSON.parse(localStorage.getItem('roles') || '[]');
+
+        if (!roles.includes("pjld") && !roles.includes("ppnt")) {
+            localStorage.clear();
+            navigate('/login', { replace: true });
+            return;
+        }
+    }, [token, navigate]);
+
     useEffect(() => {
         const fetchProjects = async () => {
-            const token = localStorage.getItem("authToken");
-
-            if (!token) {
-                alert("User not logged in. Please log in again.");
-                navigate("/login");
-                return;
-            }
-
             try {
-                const response = await fetch("http://127.0.0.1:8000/monitoring/user-projects/", {
-                    method: "GET",
+                const response = await axios({
+                    method: 'get',
+                    url: 'http://127.0.0.1:8000/monitoring/user-projects/',
                     headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
+                        'Authorization': `Token ${token}`,
+                        'Content-Type': 'application/json',
                     },
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setProjects(data); // Store all projects fetched from the backend
-                } else {
-                    console.error("Failed to fetch projects:", await response.json());
+                if (!Array.isArray(response.data)) {
+                    console.error("Invalid data structure received:", response.data);
+                    setError("Invalid data format received from server");
                     setProjects([]);
+                    return;
                 }
+
+                const formattedProjects = response.data.map((proj) => ({
+                    projectID: proj.projectID || "N/A",
+                    projectTitle: proj.projectTitle || "Untitled Project",
+                    background: proj.background || "N/A",
+                    targetImplementation: proj.targetImplementation || "N/A",
+                    role: proj.role || "N/A",
+                    status: proj.status || "N/A",
+                }));
+
+                const sortedProjects = formattedProjects.sort((a, b) =>
+                    new Date(b.targetImplementation.split(" - ")[1]) -
+                    new Date(a.targetImplementation.split(" - ")[1])
+                );
+
+                setProjects(sortedProjects);
+                setError(null);
             } catch (error) {
                 console.error("Error fetching projects:", error);
+                setError(error.message || "Failed to fetch projects");
                 setProjects([]);
             } finally {
                 setLoading(false);
@@ -59,7 +77,17 @@ const ProjectsDashboard = () => {
         };
 
         fetchProjects();
-    }, [navigate]);
+    }, [token]);
+
+    const handleViewClick = (project) => {
+        if (project.role === "Project Leader") {
+            navigate(`/projlead/proj/req/${project.projectID}`);
+        } else if (project.role === "Proponent") {
+            navigate(`/proponents/proj/req/${project.projectID}`);
+        } else {
+            alert("Invalid role detected.");
+        }
+    };
 
     // Handle sorting
     const handleSort = (key) => {
@@ -79,7 +107,7 @@ const ProjectsDashboard = () => {
     };
 
     // Filter projects by search term
-    const filteredProjects = (projects || []).filter((project) =>
+    const filteredProjects = projects.filter((project) =>
         project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -87,14 +115,14 @@ const ProjectsDashboard = () => {
     const completedProjects = projects.filter(project => project.status === "completed");
     const ongoingProjects = projects.filter(project => project.status !== "completed");
 
+
     // Calculate the displayed projects based on pagination
     const indexOfLastProject = currentPage * projectsPerPage;
     const indexOfFirstProject = indexOfLastProject - projectsPerPage;
     const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
 
-    const totalPages = Math.ceil(projects.length / projectsPerPage);
+    const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
 
-    // Page controls
     const handlePageChange = (newPage) => {
         if (newPage > 0 && newPage <= totalPages) {
             setCurrentPage(newPage);
@@ -153,59 +181,33 @@ const ProjectsDashboard = () => {
                         </div>
 
                         <div className="overflow-x-auto">
-                            {loading ? (
-                                <p className="text-center">Loading projects...</p>
-                            ) : (
-                                <table className="min-w-full table-auto">
-                                    <thead className="bg-gray-100">
-                                        <tr>
-                                            <th
-                                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
-                                                onClick={() => handleSort("projectTitle")}
-                                            >
-                                                Title {sortConfig.key === "projectTitle" && (sortConfig.direction === "asc" ? "🔼" : "🔽")}
-                                            </th>
-                                            <th
-                                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
-                                                onClick={() => handleSort("role")}
-                                            >
-                                                Project Role {sortConfig.key === "role" && (sortConfig.direction === "asc" ? "🔼" : "🔽")}
-                                            </th>
-                                            <th
-                                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
-                                                onClick={() => handleSort("projectID")}
-                                            >
-                                                Project ID {sortConfig.key === "projectID" && (sortConfig.direction === "asc" ? "🔼" : "🔽")}
-                                            </th>
-                                            <th
-                                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
-                                                onClick={() => handleSort("targetImplementation")}
-                                            >
-                                                Target Date {sortConfig.key === "targetImplementation" && (sortConfig.direction === "asc" ? "🔼" : "🔽")}
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase"></th>
+                            <table className="min-w-full table-auto">
+                                <thead className="bg-gray-100">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Title</th>
+                                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Project Role</th>
+                                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Target Date</th>
+                                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase"> </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {currentProjects.map((project) => (
+                                        <tr key={project.projectID}>
+                                            <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{project.role || "No Role"}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{project.targetImplementation}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <button
+                                                    className="text-blue-500 hover:underline"
+                                                    onClick={() => handleViewClick(project)}
+                                                >
+                                                    View
+                                                </button>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {currentProjects.map((project) => (
-                                            <tr key={project.projectID}>
-                                                <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{project.role.charAt(0).toUpperCase() + project.role.slice(1)}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{project.projectID}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{project.targetImplementation}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <button
-                                                        className="text-black underline pr-3"
-                                                        onClick={() => handleViewClick(project)}
-                                                    >
-                                                        View
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
 
                         {/* Pagination */}
@@ -225,6 +227,6 @@ const ProjectsDashboard = () => {
             </div>
         </div>
     );
-}
+};
 
 export default ProjectsDashboard;

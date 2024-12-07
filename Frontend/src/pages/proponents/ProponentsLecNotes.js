@@ -31,7 +31,7 @@ const ProponentsLecNotes = () => {
 
         const fetchProjectDetails = async () => {
             try {
-                const token = localStorage.getItem("authToken");
+                const token = localStorage.getItem("token");
                 if (!token) {
                     alert("User not logged in. Please log in again.");
                     navigate("/login");
@@ -68,7 +68,7 @@ const ProponentsLecNotes = () => {
     }, [projectID, navigate]);
 
     const fetchUpdatedSubmissions = async () => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
 
         if (!token) {
             alert("User not logged in. Please log in again.");
@@ -107,7 +107,7 @@ const ProponentsLecNotes = () => {
 
     // Handle form submission
     const handleSubmit = async () => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         if (!token) {
             alert("User not logged in or invalid session.");
             return;
@@ -154,7 +154,7 @@ const ProponentsLecNotes = () => {
 
 
     const handleDelete = async (submissionId, modelName) => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         if (!token) {
             alert("User not logged in or invalid session.");
             return;
