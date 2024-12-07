@@ -271,8 +271,8 @@ POST http://127.0.0.1:8000/monitoring/attendance/fill/PThUrsrA2BmQDWHFlB8ucg/
 Content-Type: application/json
 
 {
-    "attendee_name": "Anthony Jennings",
-    "gender": "Male",
+    "attendee_name": "Attend",
+    "gender": "Female",
     "contact_number": "1234567890"
 }
 
@@ -283,15 +283,15 @@ Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 
 ###
 #  Retrieve a Specific Attendance Record
-GET http://127.0.0.1:8000/monitoring/attendance_records/4/
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+GET http://127.0.0.1:8000/monitoring/attendance_records/2/
+Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 
 ###
 # POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/
 #Calculate Number of Attendees per Project
-POST http://127.0.0.1:8000/monitoring/calculate_attendees/3/
+POST http://127.0.0.1:8000/monitoring/calculate_attendees/1/
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 
 # New Evaluation Endpoints
 ###
