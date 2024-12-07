@@ -18,6 +18,7 @@ import ProjLeadEvalSum from "./pages/projectlead/ProjLeadEvalSum";
 import ProjLeadTrainersCV from "./pages/projectlead/ProjLeadTrainersCV";
 import ProjLeadLecNotes from "./pages/projectlead/ProjLeadLecNotes";
 import ProjLeadOthers from "./pages/projectlead/ProjLeadOthers";
+import ProjLeadPhotoDocs from "./pages/projectlead/ProjLeadPhotoDocs";
 // import Topbar from "./components/Topbar";
 // import DeptOffSideBar from './components/DeptOffSideBar';
 import DeptOffDashboard from "./pages/deptoff/DeptOffDashboard";
@@ -57,14 +58,15 @@ function App() {
       <Route path="/signatory" element={<SignatoryDashboard />} />
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
       <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
-      <Route path="/projlead/proj/req/assign-proponents" element={<ProjLeadAssignProponents />} />
+      <Route path="/projlead/project/:projectID/assign-proponents" element={<ProjLeadAssignProponents />} />
       <Route path="/projlead/proj/req/accomplishment-report" element={<ProjLeadAccReport />} />
-      <Route path="/projlead/proj/req/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
-      <Route path="/projlead/proj/req/daily-attendance" element={<ProjLeadDailyAttRec />} />
-      <Route path="/projlead/proj/req/evaluation-summary" element={<ProjLeadEvalSum />} />
+      <Route path="/projlead/project/:projectID/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
+      <Route path="/projlead/project/:projectID/daily-attendance" element={<ProjLeadDailyAttRec />} />
+      <Route path="/projlead/project/:projectID/evaluation-summary" element={<ProjLeadEvalSum />} />
       <Route path="/projlead/proj/req/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
-      <Route path="/projlead/proj/req/modules-notes" element={<ProjLeadLecNotes />} />
-      <Route path="/projlead/proj/req/others" element={<ProjLeadOthers />} />
+      <Route path="/projlead/project/:projectID/modules-notes" element={<ProjLeadLecNotes />} />
+      <Route path="/projlead/project/:projectID/others" element={<ProjLeadOthers />} />
+      <Route path="/projlead/project/:projectID/photo-docs" element={<ProjLeadPhotoDocs />} />
 
       <Route path="estaff/proj" element={<EStaffProjects />} />
       <Route path="estaff/proj/monitoring" element={<EStaffProjMonitoring />} />

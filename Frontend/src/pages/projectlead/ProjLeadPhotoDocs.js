@@ -4,7 +4,7 @@ import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 import { FaArrowLeft } from "react-icons/fa";
 
-const ProjLeadAccReport = () => {
+const ProjLeadPhotoDocs = () => {
     const navigate = useNavigate();
 
     const handleViewClick = (path) => {
@@ -29,7 +29,7 @@ const ProjLeadAccReport = () => {
                         <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req')}>
                             <FaArrowLeft />
                         </button>
-                        <h1 className="text-2xl font-semibold">Accomplishment Report</h1>
+                        <h1 className="text-2xl font-semibold">Photo Documentation</h1>
                     </div>
 
                     {/* Project Details and Progress Status Section */}
@@ -91,4 +91,4 @@ const ProjLeadAccReport = () => {
     );
 };
 
-export default ProjLeadAccReport;
+export default ProjLeadPhotoDocs;

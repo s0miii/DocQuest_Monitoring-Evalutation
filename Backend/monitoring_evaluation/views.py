@@ -496,24 +496,41 @@ class ChecklistItemSubmissionsView(APIView):
             # Get the authenticated user
             user = request.user
 
-            # Initialize a list to store submissions
+            # Fetch the project
+            project = get_object_or_404(Project, projectID=project_id, status="approved")
+
+            # Determine if the user is a Project Leader or Proponent for this project
+            is_project_leader = project.userID == user  # User is project leader if they match the project's owner
+            is_proponent = project.proponents.filter(userID=user.userID).exists()  # Check if user is assigned as proponent
+
+            # Ensure user has access to the project
+            if not is_project_leader and not is_proponent:
+                return Response({"error": "You do not have access to this project."}, status=status.HTTP_403_FORBIDDEN)
+
+            # Initialize submissions list
             submissions = []
 
-            # Filter submissions based on the checklist item
+            # Determine the model to use based on the checklist item name
             if checklist_item_name == "Daily Attendance":
-                records = DailyAttendanceRecord.objects.filter(project__projectID=project_id, proponent=user)
+                model = DailyAttendanceRecord
             elif checklist_item_name == "Summary of Evaluation":
-                records = SummaryOfEvaluation.objects.filter(project__projectID=project_id, proponent=user)
+                model = SummaryOfEvaluation
             elif checklist_item_name == "Lecture Notes":
-                records = ModulesLectureNotes.objects.filter(project__projectID=project_id, proponent=user)
+                model = ModulesLectureNotes
             elif checklist_item_name == "Photo Documentation":
-                records = PhotoDocumentation.objects.filter(project__projectID=project_id, proponent=user)
+                model = PhotoDocumentation
             elif checklist_item_name == "Other Files":
-                records = OtherFiles.objects.filter(project__projectID=project_id, proponent=user)
+                model = OtherFiles
             else:
                 return Response({"error": "Invalid checklist item name."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Serialize submissions dynamically
+            # Fetch records based on the role
+            if is_project_leader:
+                records = model.objects.filter(project=project)  # Project leader sees all submissions
+            else:
+                records = model.objects.filter(project=project, proponent=user)  # Proponent sees only their own submissions
+
+            # Serialize submissions
             for record in records:
                 submissions.append({
                     "submission_id": record.id,
@@ -521,6 +538,7 @@ class ChecklistItemSubmissionsView(APIView):
                     "rejection_reason": record.rejection_reason,
                     "date_uploaded": record.date_uploaded,
                     "description": getattr(record, "description", "N/A"),  # Optional field
+                    "submitted_by": f"{record.proponent.firstname} {record.proponent.lastname}" if record.proponent else "Unknown",
                     "file_name": (
                         getattr(record, 'attendance_file', None).name if getattr(record, 'attendance_file', None) else
                         getattr(record, 'summary_file', None).name if getattr(record, 'summary_file', None) else
@@ -528,7 +546,7 @@ class ChecklistItemSubmissionsView(APIView):
                         getattr(record, 'photo', None).name if getattr(record, 'photo', None) else
                         getattr(record, 'file', None).name if getattr(record, 'file', None) else
                         None
-                    )  
+                    )
                 })
 
             return Response({"submissions": submissions}, status=status.HTTP_200_OK)
