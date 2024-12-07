@@ -1,15 +1,103 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 import { FaArrowLeft } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 
 const ProjLeadDailyAttRec = () => {
     const navigate = useNavigate();
+    const { projectID } = useParams(); // Extract projectID from the URL
+    const [projectDetails, setProjectDetails] = useState(null);
+    const [date, setDate] = useState("");
+    const [description, setDescription] = useState("");
+    const [totalAttendees, setAttendees] = useState(0);
+    const [attachedFiles, setAttachedFiles] = useState([]); // Array to handle multiple files
+    const [loading, setLoading] = useState(true);
+    const [submissions, setSubmissions] = useState([]);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+    const [isProjectLeader, setIsProjectLeader] = useState(false);
 
     const handleViewClick = (path) => {
         navigate(path);
     }
+
+    // Fetch project details and submissions
+    useEffect(() => {
+        if (!projectID) {
+            console.error("Project ID is undefined.");
+            return;
+        }
+
+        const fetchProjectDetails = async () => {
+            try {
+                const token = localStorage.getItem("authToken");
+                if (!token) {
+                    alert("User not logged in. Please log in again.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(
+                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setProjectDetails(data.projectDetails);
+                    setIsProjectLeader(data.isProjectLeader);
+                } else {
+                    console.error("Failed to fetch project details.");
+                }
+            } catch (error) {
+                console.error("Error fetching project details:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProjectDetails();
+        fetchUpdatedSubmissions();
+    }, [projectID, navigate]);
+
+    const fetchUpdatedSubmissions = async () => {
+        const token = localStorage.getItem("authToken");
+
+        if (!token) {
+            alert("User not logged in. Please log in again.");
+            navigate("/login");
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Daily%20Attendance/submissions/`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                setSubmissions(data.submissions); // Dynamically update submissions
+            } else {
+                console.error("Failed to fetch submissions.");
+            }
+        } catch (error) {
+            console.error("Error fetching submissions:", error);
+        }
+    };
 
     const submittedFiles = [
         { fileName: "Day 1 Attendance.pdf", submittedBy: "Proponent A", date: "2024-10-10" },
@@ -44,7 +132,7 @@ const ProjLeadDailyAttRec = () => {
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">Tabasan, Wynoah Louis</p>
                             </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">College/Campus</label>
