@@ -218,9 +218,7 @@ const ProponentsDailyAttRec = () => {
     }
 
 
-    if (!projectDetails) {
-        return <div>Project not found.</div>;
-    }
+
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -239,7 +237,7 @@ const ProponentsDailyAttRec = () => {
                         >
                             <FaArrowLeft />
                         </button>
-                        <h1 className="text-2xl font-semibold">Daily Attendance Record</h1>
+                        <h1 className="text-2xl font-semibold">Attendance Record</h1>
                     </div>
                     {/* Project Details */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">

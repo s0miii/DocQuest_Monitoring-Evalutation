@@ -1,20 +1,121 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../components/Topbar";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 import { FaArrowLeft } from "react-icons/fa";
 
 const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
     const navigate = useNavigate();
+    const { projectID } = useParams();
+    const [projectDetails, setProjectDetails] = useState(null); // Store project details
+    const [documentCounts, setDocumentCounts] = useState({});
+    const [projectProgress, setProjectProgress] = useState(0);
+    const [loading, setLoading] = useState(true); // Loading state
 
     const handleViewClick = (path) => {
         navigate(path);
     }
 
-    // Calculate the progress percentage, ensuring it does not exceed 100%
-    const progressPercentage = totalRequirements > 0
-        ? Math.min((completedRequirements / totalRequirements) * 100, 100)
-        : 0;
+    useEffect(() => {
+        const fetchProjectDetails = async () => {
+            try {
+                const token = localStorage.getItem("authToken");
+
+                // Fetch project details
+                const projectResponse = await fetch(
+                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (!projectResponse.ok) {
+                    throw new Error("Failed to fetch project details.");
+                }
+
+                const projectData = await projectResponse.json();
+                setProjectDetails(projectData.projectDetails);
+                // setAssignedRequirements(projectData.assignedRequirements);
+
+                // Fetch project progress
+                const progressResponse = await fetch(
+                    `http://127.0.0.1:8000/monitoring/project/${projectID}/progress/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (!progressResponse.ok) {
+                    throw new Error("Failed to fetch project progress.");
+                }
+
+                const progressData = await progressResponse.json();
+                setProjectProgress(progressData.progress || 0);
+            } catch (error) {
+                console.error("Error fetching project details:", error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const fetchDocumentCounts = async () => {
+            const token = localStorage.getItem("authToken");
+
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
+            try {
+                const countsResponse = await fetch(
+                    `http://127.0.0.1:8000/monitoring/project/${projectID}/document_counts/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (!countsResponse.ok) {
+                    throw new Error("Failed to fetch document counts.");
+                }
+
+                const countsData = await countsResponse.json();
+                setDocumentCounts(countsData.document_counts);
+            } catch (error) {
+                console.error("Error fetching document counts:", error);
+            }
+        };
+
+
+        fetchProjectDetails();
+        fetchDocumentCounts();
+    }, [projectID]);
+
+    if (loading) {
+        return (
+            <div className="p-4">
+                <div className="bg-gray-200 animate-pulse h-6 w-3/4 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-1/2 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-full rounded"></div>
+            </div>
+        );
+    }
+
+    if (!projectDetails) {
+        return <div>Project not found.</div>;
+    }
 
 
     return (
@@ -28,10 +129,10 @@ const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/projlead/proj')}>
+                        <button className="mr-2" onClick={() => handleViewClick('/projects-dashboard')}>
                             <FaArrowLeft />
                         </button>
-                        <h1 className="text-2xl font-semibold">Project Details</h1>
+                        <h1 className="text-2xl font-semibold">Project {projectDetails.projectTitle} Details</h1>
                     </div>
 
                     {/* Project Details and Progress Status Section */}
@@ -40,11 +141,11 @@ const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
                             {/* Project Title and Leader */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Title</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Tesda Vocational</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectTitle}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Leader</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Valueno, Rabosa A.</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectLeader}</p>
                             </div>
                         </div>
 
@@ -52,28 +153,28 @@ const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">College/Campus</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">CEA</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.college}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Target Date</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">May 2024</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.targetDate}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Partner Agency</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Placeholder Inc.</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.partnerAgency}</p>
                             </div>
                         </div>
-                        {/* Project Progress Status */}
-                        <h2 className="text-xl font-semibold text-center mt-8 mb-4">Project Progress Status</h2>
+                        {/* Project Progress Bar */}
+                        <h2 className="text-xl font-semibold text-center mt-8 mb-4">Project Progress Bar</h2>
                         <div className="mt-4 flex flex-col items-center">
                             <div className="w-2/3 bg-gray-200 rounded-full h-2.5 mb-4">
                                 <div
                                     className="bg-yellow-500 h-2.5 rounded-full"
-                                    style={{ width: `${progressPercentage}%` }}
+                                    style={{ width: `${Math.min(projectProgress, 100)}%`, }}
                                 ></div>
                             </div>
                             <div className="w-2/3 flex justify-center text-sm text-gray-600">
-                                <span>{progressPercentage.toFixed(0)}% Completed</span>
+                                <span>{Math.min(projectProgress, 100).toFixed(2)}% Completed</span>
                             </div>
                         </div>
                     </div>
@@ -83,66 +184,30 @@ const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
                         <h2 className="text-xl font-semibold">Documentary Requirements</h2>
                         <button
                             className="text-blue-500 text-sm"
-                            onClick={() => handleViewClick('/projlead/proj/req/assign-proponents')}
+                            onClick={() => handleViewClick('/projlead/project/${projectID}${projectID}/assign-proponents')}
                         >
                             Assign Proponents
                         </button>
                     </div>
-                    <div className="bg-white shadow-lg rounded-lg p-6">
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p>Progress/Accomplishment/Terminal Report</p>
-                                    <p className="text-gray-500 text-sm">0 document attached</p>
-                                </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/projlead/proj/req/accomplishment-report')}>
-                                    View
-                                </button>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p>List of Participants/Daily Attendance Sheet</p>
-                                    <p className="text-gray-500 text-sm">0 document attached</p>
-                                </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/projlead/proj/req/daily-attendance')}>
-                                    View
-                                </button>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p>Summary of Evaluation/Evaluation Sheets</p>
-                                    <p className="text-gray-500 text-sm">0 document attached</p>
-                                </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/projlead/proj/req/evaluation-summary')}>
-                                    View
-                                </button>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p>TrainersCV/DTR</p>
-                                    <p className="text-gray-500 text-sm">0 document attached</p>
-                                </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/projlead/proj/req/trainer-cv-dtr')}>
-                                    View
-                                </button>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p>Modules/Lecture Notes</p>
-                                    <p className="text-gray-500 text-sm">0 document attached</p>
-                                </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/projlead/proj/req/modules-notes')}>
-                                    View
-                                </button>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p>Other</p>
-                                    <p className="text-gray-500 text-sm">0 document attached</p>
-                                </div>
-                                <button className="text-black underline ml-auto pr-3" onClick={() => handleViewClick('/projlead/proj/req/others')}>
-                                    View
-                                </button>
+                    <div className="assigned-requirements">
+                        <div className="bg-white shadow-lg rounded-lg p-6">
+                            <div className="space-y-4">
+                                {Object.entries(documentCounts).map(([itemName, count]) => (
+                                    <div key={itemName} className="flex justify-between items-center">
+                                        <div>
+                                            <p>{itemName}</p>
+                                            <p className="text-gray-500 text-sm">
+                                                {count} document(s) attached
+                                            </p>
+                                        </div>
+                                        <button
+                                            className="text-black underline ml-auto pr-3"
+                                            onClick={() => handleViewClick(`/projlead/project/${projectID}/${itemName.replace(/\s+/g, '-').toLowerCase()}`)}
+                                        >
+                                            View
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>

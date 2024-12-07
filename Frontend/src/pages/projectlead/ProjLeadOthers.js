@@ -54,10 +54,10 @@ const ProjLeadOthers = () => {
                 setLoading(false);
             }
         };
-    
+
         fetchSubmissions();
     }, []);
-    
+
     const handleApprove = async (id) => {
         try {
             const response = await fetch(`https://api.yourdomain.com/submissions/${id}`, {
@@ -72,7 +72,7 @@ const ProjLeadOthers = () => {
         } catch (error) {
             console.error('Error approving:', error);
         }
-    };    
+    };
 
     const handleDecline = (id) => {
         setShowCommentInput((prevState) => ({ ...prevState, [id]: true }));
