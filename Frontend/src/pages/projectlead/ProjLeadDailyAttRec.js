@@ -31,7 +31,7 @@ const ProjLeadDailyAttRec = () => {
 
         const fetchProjectDetails = async () => {
             try {
-                const token = localStorage.getItem("authToken");
+                const token = localStorage.getItem("token");
                 if (!token) {
                     alert("User not logged in. Please log in again.");
                     navigate("/login");
@@ -68,7 +68,7 @@ const ProjLeadDailyAttRec = () => {
     }, [projectID, navigate]);
 
     const fetchUpdatedSubmissions = async () => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
 
         if (!token) {
             alert("User not logged in. Please log in again.");
@@ -117,7 +117,7 @@ const ProjLeadDailyAttRec = () => {
     };
 
     const handleApprove = async (submissionId, modelName) => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
 
         if (!token) {
             alert("You are not logged in. Please log in and try again.");
@@ -126,7 +126,7 @@ const ProjLeadDailyAttRec = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
+                `http://127.0.0.1:8000/monitoring/submission/update/daily_attendance/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {
@@ -151,7 +151,7 @@ const ProjLeadDailyAttRec = () => {
     };
 
     const handleReject = async (submissionId, modelName) => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
 
         if (!token) {
             alert("You are not logged in. Please log in and try again.");
@@ -167,7 +167,7 @@ const ProjLeadDailyAttRec = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
+                `http://127.0.0.1:8000/monitoring/submission/update/daily_attendance/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {

@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost', 
+    'http://localhost:3000',
     'docquest-production.up.railway.app'
     'docquestmonitoring-evalutation-production.up.railway.app'
 ]
