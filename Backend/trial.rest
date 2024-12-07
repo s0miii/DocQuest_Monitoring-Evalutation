@@ -4,24 +4,16 @@ POST http://127.0.0.1:8000/signup/
 Content-Type: application/json
 
 {
-<<<<<<< HEAD
-    "email": "kit@test.com",
-    "password": "testpass123",
-    "firstname": "Keith",
-    "middlename": "C",
-    "lastname": "Tapongot",
-=======
-    "email": "eval@test.com",
+    "email": "trial@test.com",
     "password": "testpass123",
     "firstname": "Test",
-    "middlename": "The",
-    "lastname": "Eval",
->>>>>>> 1d34ae4b656202436153beee369d97b9a97843ef
+    "middlename": "For",
+    "lastname": "Proponent",
     "campus": "USTP-CDO",
     "college": "College of Information Technology",
     "department": "Department of Data Science",
-    "contactNumber": "09123456789",
-    "role": [1]
+    "contactNumber": "09356362269",
+    "role": [2]
 }
 
 ###
@@ -31,13 +23,8 @@ POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
 {
-<<<<<<< HEAD
     "email": "wyn@test.com",
     "password": "testpass"
-=======
-    "email": "eval@test.com",
-    "password": "testpass123"
->>>>>>> 1d34ae4b656202436153beee369d97b9a97843ef
 }
 
 # Example token: de95d63d55190f47cf0ae40ea1c805752686f6a7
