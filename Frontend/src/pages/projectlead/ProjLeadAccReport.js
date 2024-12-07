@@ -46,7 +46,7 @@ const ProjLeadAccReport = () => {
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">Tabasan, Wynoah Louis</p>
                             </div>
                         </div>
-                        
+
                         {/* College/Campus, Target Date, Partner Agency */}
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>

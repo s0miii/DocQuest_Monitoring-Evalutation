@@ -16,7 +16,7 @@ const ProjLeadAssignProponents = () => {
             const timer = setTimeout(() => {
                 setNotification("");
             }, 3000);
-            return () => clearTimeout(timer); 
+            return () => clearTimeout(timer);
         }
     }, [notification]);
 
@@ -29,11 +29,11 @@ const ProjLeadAssignProponents = () => {
     };
 
     const handleAddRow = () => {
-        const newRow = { 
-            id: Date.now(), 
-            isEditing: true, 
-            proponent: "Select Proponent", 
-            checkboxes: activeTraining === "Training" ? [false, false, false, false, false] : [false, false] 
+        const newRow = {
+            id: Date.now(),
+            isEditing: true,
+            proponent: "Select Proponent",
+            checkboxes: activeTraining === "Training" ? [false, false, false, false, false] : [false, false]
         };
         if (activeTraining === "Training") {
             setTrainingRows([...trainingRows, newRow]);
@@ -57,7 +57,7 @@ const ProjLeadAssignProponents = () => {
                 }
                 return row;
             });
-        
+
         if (activeTraining === "Training") {
             setTrainingRows(updateRows(trainingRows));
         } else {
@@ -68,7 +68,7 @@ const ProjLeadAssignProponents = () => {
     const handleProponentChange = (id, value) => {
         const updateRows = (rows) =>
             rows.map(row => (row.id === id ? { ...row, proponent: value } : row));
-        
+
         if (activeTraining === "Training") {
             setTrainingRows(updateRows(trainingRows));
         } else {
@@ -173,7 +173,7 @@ const ProjLeadAssignProponents = () => {
                                                     checked={checked}
                                                     disabled={!row.isEditing}
                                                     onChange={() => handleCheckboxChange(row.id, index)}
-                                                    className="w-4 h-4" 
+                                                    className="w-4 h-4"
                                                 />
                                             </td>
                                         ))}
