@@ -228,11 +228,11 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 #  Create Attendance Template  - working endpoint with sharable link
 POST http://127.0.0.1:8000/monitoring/attendance_templates/
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 
 {
-    "project": 4,
-    "templateName": "Day 2: Multi Day Project Attendance for Project 4",
+    "project": 1,
+    "templateName": "Single Day Project",
     "include_attendee_name": true,
     "include_gender": true,
     "include_college": false,
@@ -243,44 +243,43 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
     "expiration_date": "2024-11-30"
 }
 
+
 ###
 # Update other fields --> change expiration date for testing"
-PATCH http://127.0.0.1:8000/monitoring/attendance_templates/18/
+PATCH http://127.0.0.1:8000/monitoring/attendance_templates/1/
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 
 {
-    "expiration_date": "2024-01-01"
+    "expiration_date": "2024-12-25"
 }
 
 
 ###
 #  List All Templates Created for specific template- working endpoint
 GET http://127.0.0.1:8000/monitoring/attendance_templates/
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 
 ###
 #  Test Token
-GET http://127.0.0.1:8000/monitoring/attendance/fill/Kxj6cJBdfZ3iKJYWAnMHLQ/
+GET http://127.0.0.1:8000/monitoring/attendance/fill/PThUrsrA2BmQDWHFlB8ucg/
 Content-Type: application/json
 
 ###
 #  Submit Attendance Record via Sharable Link
-POST http://127.0.0.1:8000/monitoring/attendance/fill/9fxt3582Ote3dMu8SQlcPA/
+POST http://127.0.0.1:8000/monitoring/attendance/fill/PThUrsrA2BmQDWHFlB8ucg/
 Content-Type: application/json
 
 {
-    "attendee_name": "8 - 1 day",
-    "gender": "Female",
-    "contact_number": "1234567890",
-    "college": "oten",
-
+    "attendee_name": "Anthony Jennings",
+    "gender": "Male",
+    "contact_number": "1234567890"
 }
 
 ###
 #  Retrieve All Attendance Records for a Project - working endpoint
 GET http://127.0.0.1:8000/monitoring/attendance_records/project/1/
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 
 ###
 #  Retrieve a Specific Attendance Record
@@ -290,7 +289,82 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 ###
 # POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/
 #Calculate Number of Attendees per Project
-POST http://127.0.0.1:8000/monitoring/calculate_attendees/1/
+POST http://127.0.0.1:8000/monitoring/calculate_attendees/3/
 Content-Type: application/json
-Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+# New Evaluation Endpoints
+###
+# Generate Sharable Link for Evaluation
+POST http://127.0.0.1:8000/monitoring/evaluation_links/
+Content-Type: application/json
+Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
+
+
+{
+    "trainer_id": 1,
+    "project_id": 1,
+    "expiration_date": "2024-12-31"
+}
+
+###
+# Retrieve All Evaluation Sharable Links - working
+GET http://127.0.0.1:8000/monitoring/evaluation_links/
+Content-Type: application/json
+Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793"
+
+
+###
+# Retrieve Sharable Link Details Using Token
+# GET http://127.0.0.1:8000/monitoring/evaluation/fill/TOKEN_HERE/
+GET http://127.0.0.1:8000/monitoring/evaluation/fill/OjPqwN6XCp_1k_Xc152FGg/
+Content-Type: application/json
+Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
+
+
+
+###
+# Submit Evaluation Form Using Sharable Link - Public Endpoint
+# POST http://127.0.0.1:8000/monitoring/evaluation/fill/<TOKEN>/
+POST http://127.0.0.1:8000/monitoring/evaluation/fill/OjPqwN6XCp_1k_Xc152FGg/
+Content-Type: application/json
+
+{
+    
+    "attendee_name": "Anthony Jennings",
+    "relevance_of_topics": 5,
+    "organizational_flow": 4,
+    "learning_methods": 5,
+    "technology_use": 4,
+    "time_efficiency": 5,
+    "mastery_subject": 4,
+    "preparedness": 5,
+    "audience_participation": 4,
+    "interest_level": 4,
+    "handle_questions": 3,
+    "voice_personality": 4,
+    "visual_aids": 3,
+    "venue_assessment": 4,
+    "timeliness": 5,
+    "overall_management": 4,
+    "useful_concepts": "Very useful concepts covered.",
+    "improvement_areas": "None noted.",
+    "additional_comments": "Great presentation.",
+    "remarks": "Excellent overall."
+}
+
+### Get All Evaluations - working
+GET http://127.0.0.1:8000/monitoring/evaluations/
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+### Filter Evaluations - working filter
+GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=2&project=3
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+### Search Evaluations by Trainer Name or Project Title - working
+GET http://127.0.0.1:8000/monitoring/evaluations/?search=Maris
+Content-Type: application/json
+Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 

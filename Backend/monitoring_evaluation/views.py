@@ -20,6 +20,9 @@ from .decorators import role_required
 from django.http import HttpResponseForbidden, JsonResponse
 import secrets, logging, datetime
 from django.utils.dateparse import parse_date
+from django.conf import settings
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Email
 @role_required(allowed_role_codes=["estf"])  # Restrict to EStaff
@@ -792,149 +795,209 @@ class ProjectNarrativeViewSet(viewsets.ModelViewSet):
 class EvaluationViewSet(viewsets.ModelViewSet):
     queryset = Evaluation.objects.all()
     serializer_class = EvaluationSerializer
-    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = {'trainer': ['exact'], 'project': ['exact']}  # These must match model field names
+    search_fields = ['attendee_name', 'project__projectTitle', 'trainer__faculty']
+    ordering_fields = ['submitted_at', 'overall_rating']
 
     def get_queryset(self):
-        return Evaluation.objects.filter(project__status='approved')
-
-    @action(detail=True, methods=['get'])
-    def generate_evaluation_url(self, request, trainer_id, project_id):
-        trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id)
-        project_id = get_object_or_404(Project, projectID=project_id)
-
-        if not project_id:
-            return Response({"error": "Project ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        project = get_object_or_404(Project, projectID=project_id)
-
-        evaluation, created = Evaluation.objects.get_or_create(
-            trainer=trainer, project=project,
-            defaults={"access_token": secrets.token_urlsafe(16)}
-        )
-
-        evaluation_url = (
-            f"{request.build_absolute_uri('/')[:-1]}"
-            f"/evaluation/{trainer.LOTID}/{project.id}/"
-            f"?access_token={evaluation.access_token}"
-        )    
-        return Response({"evaluation_url": evaluation_url}, status=status.HTTP_200_OK)
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            evaluation = serializer.save()
-            evaluation.access_token = secrets.token_urlsafe(16)
-            evaluation.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-# Evaluation Form View for HTML Form Submission
-def evaluation_form_view(request, project_id, trainer_id=None):
-    project = get_object_or_404(Project, projectID=project_id)
-    trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id) if trainer_id else None #Set trainer to None if not provided for project-only evaluations
-
-    access_token = request.GET.get("access_token")
-    evaluation = get_object_or_404(Evaluation, project=project, trainer=trainer)
-    if access_token != evaluation.access_token:
-        return HttpResponseForbidden("Invalid or missing access token.")
-
-    if request.method == 'POST':
-        form = EvaluationForm(request.POST)
-        if form.is_valid():
-            evaluation = form.save(commit=False)
-            evaluation.project = project
-            if trainer:
-                evaluation.trainer = trainer
-            evaluation.stored_overall_rating = evaluation.calculate_overall_rating()
-            evaluation.save()
-            
-            return render(request, 'thank_you.html', {'stored_overall_rating': evaluation.stored_overall_rating})
-    else:
-        form = EvaluationForm()
-
-    return render(request, 'evaluation_form.html', {'form': form, 'trainer': trainer, 'project': project})    
-
-def evaluation_summary_view(request):
-    projects = Project.objects.all()
-    project_summaries = []
-
-    for project in projects:
-        trainers = project.loadingOfTrainers.all()
-        trainer_evaluations = []
-
-        for trainer in trainers:
-            evaluations = Evaluation.objects.filter(project=project, trainer=trainer)
-            if evaluations.exists():
-                trainer_evaluations.append({
-                    'trainer': trainer,
-                    'evaluations': evaluations,
-                })
-
-        if trainer_evaluations:
-            project_summaries.append({
-                'project': project,
-                'trainer_evaluations': trainer_evaluations,
-            })        
-
-    context = {'project_summaries': project_summaries}
-    return render(request, 'evaluation_summary.html', context)            
-
-
-# Attendance 
-# class AttendanceTemplateViewSet(viewsets.ModelViewSet):
-#     queryset = AttendanceTemplate.objects.all()
-#     serializer_class = AttendanceTemplateSerializer
-
-#     def perform_create(self, serializer):
-#         # Link the template to the current user/project if needed
-#         serializer.save()
-
-# def create_attendance_template(request):
-#     if request.method == 'POST':
-#         project_id = request.POST['project']
-#         name = request.POST['name']
-#         field_names = request.POST.getlist('field_names')
-#         field_types = request.POST.getlist('field_types')
-
-#         # fields = {name: field_type for name, field_type in zip(field_names, field_types)}
-#         if not project_id:
-#             return JsonResponse({'error': 'Project is required.'}, status=400)
-#         try:
-#             project = Project.objects.get(projectID=project_id)
-#         except (ValueError, Project.DoesNotExist):
-#             return JsonResponse({'message': 'Template created successfully!'}, status=201)
-#         fields = {name: field_type for name, field_type in zip(field_names, field_types)}
+        queryset = super().get_queryset()
+        trainer = self.request.query_params.get('trainer')
+        project = self.request.query_params.get('project')
         
-#         AttendanceTemplate.objects.create(project=project, name=name, fields=fields)
-#         return JsonResponse({'message': 'Template created successfully!'}, status=201)
+        if trainer:
+            queryset = queryset.filter(trainer_id=trainer)
+        if project:
+            queryset = queryset.filter(project_id=project)
+        
+        print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
+        return queryset
 
-#     projects = Project.objects.all()  # Pass projects to template
-#     return render(request, 'attendance_template_form.html', {'projects': projects})
+class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
+    queryset = EvaluationSharableLink.objects.all()
+    serializer_class = EvaluationSharableLinkSerializer
 
-# class AttendanceRecordViewSet(viewsets.ModelViewSet):
-#     queryset = AttendanceRecord.objects.all()
-#     serializer_class = AttendanceRecordSerializer
+    # List all sharable links
+    def list(self, request, *args, **kwargs):
+        # Handle GET requests to list all sharable links.
+        
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
-#     def perform_create(self, serializer):
-#         # Save attendance record dynamically
-#         serializer.save()
+    # Retrieve a specific sharable link by ID
+    def retrieve(self, request, pk=None):
+        # Handle GET requests to retrieve a specific sharable link.
+        sharable_link = get_object_or_404(EvaluationSharableLink, pk=pk)
+        serializer = self.get_serializer(sharable_link)
+        return Response(serializer.data)
+        
+    def create(self, request, *args, **kwargs):
+        try:
+            trainer_id = request.data.get("trainer_id")
+            project_id = request.data.get("project_id")
+            expiration_date = request.data.get("expiration_date")
+            trainer = LoadingOfTrainers.objects.get(pk=trainer_id)
+            project = Project.objects.get(pk=project_id)
 
-# def submit_attendance_record(request):
+            link, created = EvaluationSharableLink.objects.get_or_create(
+                trainer=trainer,
+                project=project,
+                defaults={"expiration_date": expiration_date},
+            )
+
+            if not created:
+                link.expiration_date = expiration_date
+                link.save()
+
+            return Response(
+                {"message": "Sharable link created/retrieved successfully", "data": EvaluationSharableLinkSerializer(link).data},
+                status=status.HTTP_201_CREATED,
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+# # Evaluation Form View for HTML Form Submission
+# def evaluation_form_view(request, project_id, trainer_id=None):
+#     project = get_object_or_404(Project, projectID=project_id)
+#     trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id) if trainer_id else None #Set trainer to None if not provided for project-only evaluations
+
+#     access_token = request.GET.get("access_token")
+#     evaluation = get_object_or_404(Evaluation, project=project, trainer=trainer)
+#     if access_token != evaluation.access_token:
+#         return HttpResponseForbidden("Invalid or missing access token.")
+
 #     if request.method == 'POST':
-#         template_id = request.POST['template']
-#         data = request.POST['data']
+#         form = EvaluationForm(request.POST)
+#         if form.is_valid():
+#             evaluation = form.save(commit=False)
+#             evaluation.project = project
+#             if trainer:
+#                 evaluation.trainer = trainer
+#             evaluation.stored_overall_rating = evaluation.calculate_overall_rating()
+#             evaluation.save()
+            
+#             return render(request, 'thank_you.html', {'stored_overall_rating': evaluation.stored_overall_rating})
+#     else:
+#         form = EvaluationForm()
 
-#         try:
-#             data_json = json.loads(data)  # Validate JSON format
-#             template = AttendanceTemplate.objects.get(id=template_id)
-#             AttendanceRecord.objects.create(template=template, data=data_json)
-#             return JsonResponse({'message': 'Record submitted successfully!'}, status=200)
-#         except json.JSONDecodeError:
-#             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+#     return render(request, 'evaluation_form.html', {'form': form, 'trainer': trainer, 'project': project})    
 
-#     templates = AttendanceTemplate.objects.all()  # Pass templates to template
-#     return render(request, 'attendance_record_form.html', {'templates': templates})
+# def evaluation_summary_view(request):
+#     projects = Project.objects.all()
+#     project_summaries = []
 
+#     for project in projects:
+#         trainers = project.loadingOfTrainers.all()
+#         trainer_evaluations = []
+
+#         for trainer in trainers:
+#             evaluations = Evaluation.objects.filter(project=project, trainer=trainer)
+#             if evaluations.exists():
+#                 trainer_evaluations.append({
+#                     'trainer': trainer,
+#                     'evaluations': evaluations,
+#                 })
+
+#         if trainer_evaluations:
+#             project_summaries.append({
+#                 'project': project,
+#                 'trainer_evaluations': trainer_evaluations,
+#             })        
+
+#     context = {'project_summaries': project_summaries}
+#     return render(request, 'evaluation_summary.html', context)            
+
+
+#EVAL NGA API-BASED NA
+class GenerateEvaluationSharableLinkView(APIView):
+    # API to generate sharable links for evaluations.
+    def post(self, request):
+        trainer_id = request.data.get("trainer_id")
+        project_id = request.data.get("project_id")
+        expiration_date = request.data.get("expiration_date")
+
+        try:
+            sharable_link, created = EvaluationSharableLink.objects.get_or_create(
+                trainer_id=trainer_id,
+                project_id=project_id,
+                defaults={"expiration_date": expiration_date},
+            )
+            if not created:
+                sharable_link.expiration_date = expiration_date
+                sharable_link.save()
+
+            return Response({
+                "message": "Sharable link generated successfully.",
+                "data": {
+                    "trainer_id": trainer_id,
+                    "project_id": project_id,
+                    "link": sharable_link.sharable_link,
+                    "expiration_date": sharable_link.expiration_date,
+                }
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubmitEvaluationView(APIView):
+    # API to retrieve and submit evaluations via sharable links.
+    permission_classes = [AllowAny]
+    
+    def get(self, request, token):
+        sharable_link = get_object_or_404(EvaluationSharableLink, token=token)
+
+        if sharable_link.expiration_date and sharable_link.expiration_date < timezone.now().date():
+            return Response({"error": "This link has expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        base_url = request.build_absolute_uri('/')[:-1]
+        sharable_link_url = f"{base_url}/monitoring/evaluation/fill/{sharable_link.token}/"
+
+        return Response({
+            "trainer_id": sharable_link.trainer.LOTID,
+            "trainer_name": sharable_link.trainer.faculty,
+            "project_id": sharable_link.project.projectID,
+            "project_title": sharable_link.project.projectTitle,
+            "expiration_date": sharable_link.expiration_date,
+            "sharable_link": sharable_link_url
+        }, status=status.HTTP_200_OK)
+
+    def post(self, request, token):
+            sharable_link = get_object_or_404(EvaluationSharableLink, token=token)
+
+            if sharable_link.expiration_date and sharable_link.expiration_date < timezone.now().date():
+                return Response({"error": "This link has expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+            required_fields = ["attendee_name", "relevance_of_topics", "organizational_flow", "learning_methods"]
+            missing_fields = [field for field in required_fields if field not in request.data]
+            if missing_fields:
+                return Response({"error": f"Missing required fields: {', '.join(missing_fields)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            existing_evaluation = Evaluation.objects.filter(
+                attendee_name=request.data.get("attendee_name"),
+                trainer=sharable_link.trainer,
+                project=sharable_link.project
+            ).first()
+
+            if existing_evaluation:
+                return Response({"error": "You have already submitted an evaluation."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Inject trainer and project into the data
+            data = request.data.copy()
+            data["trainer"] = sharable_link.trainer.LOTID
+            data["project"] = sharable_link.project.projectID
+
+            serializer = EvaluationSerializer(data=data)
+            if serializer.is_valid():
+                evaluation = serializer.save()
+                return Response({
+                    "message": "Evaluation submitted successfully.",
+                    "evaluation_id": evaluation.id
+                }, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 # ATTENDANCE TEMPLATE -> KATONG CHECKLIST NGA LOGIC
 class AttendanceTemplateViewSet(viewsets.ModelViewSet):
@@ -961,15 +1024,7 @@ class CreateAttendanceTemplateView(APIView):
             "include_agency_office": request.data.get("include_agency_office", False),
             "include_contact_number": request.data.get("include_contact_number", False),
         }
-
-        # expiration_date_str = request.data.get("expiration_date")
-        # if not expiration_date_str:
-        #     return Response({"error": "Expiration date is required."})
         
-        # expiration_date = parse_date(expiration_date_str)
-        # if not expiration_date or expiration_date <= date.today().date():
-        #     return Response({"error": "Invalid expiration date."}, status=400)
-
         expiration_date = request.data.get("expiration_date")
         if not expiration_date:
             return Response({"error": "Expiration date is required."}, status=400)
@@ -983,8 +1038,12 @@ class CreateAttendanceTemplateView(APIView):
         # Create the template
         attendance_template = AttendanceTemplate.objects.create(project=project, expiration_date=expiration_date, **fields)
 
-        # Generate sharable link
-        sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
+        # # Generate sharable link
+        # sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
+
+        # Use the frontend base URL for the sharable link
+        frontend_base_url = settings.FRONTEND_BASE_URL  # Retrieve the frontend URL from settings
+        sharable_link = f"{frontend_base_url}/attendance/fill/{attendance_template.token}/"
 
         # Save the sharable link sa database mismo -> added feature lang
         attendance_template.sharable_link = sharable_link
@@ -1009,6 +1068,15 @@ class AttendanceRecordViewSet(viewsets.ModelViewSet):
         if not records.exists():
             return Response({"message": "No attendance records found for this project."}, status=404)
         
+        serializer = self.get_serializer(records, many=True)
+        return Response(serializer.data)
+    
+
+    @action(detail=False, methods=['get'], url_path='template/(?P<template_id>[^/.]+)')
+    def get_by_template(self, request, template_id=None):
+        records = CreatedAttendanceRecord.objects.filter(template__id=template_id)
+        if not records.exists():
+            return Response({"message": "No attendance records found for this template."}, status=404)
         serializer = self.get_serializer(records, many=True)
         return Response(serializer.data)
     
@@ -1066,26 +1134,6 @@ class SubmitAttendanceRecordView(APIView):
 logger = logging.getLogger(__name__)
 class FillAttendanceView(APIView):
     permission_classes = [AllowAny]  # Allow anyone to access this view without authentication
-
-    # def get(self, request, token):
-    #     template = get_object_or_404(AttendanceTemplate, token=token)
-    #     print(f"GET request received with token: {token}") #For debugging only
-    #     # Return the template details so the frontend can generate the form dynamically
-    #     print(f"Template found: {template}") #For debugging only
-
-    #     return Response({
-    #         "templateName": template.templateName,
-    #         "fields": {
-    #             "include_attendee_name": template.include_attendee_name,
-    #             "include_gender": template.include_gender,
-    #             "include_college": template.include_college,
-    #             "include_department": template.include_department,
-    #             "include_year_section": template.include_year_section,
-    #             "include_agency_office": template.include_agency_office,
-    #             "include_contact_number": template.include_contact_number,
-    #         },
-    #         "project": template.project.projectID
-    #     })
 
     def get(self, request, token):
         template = get_object_or_404(AttendanceTemplate, token=token)
@@ -1170,13 +1218,7 @@ class CalculateTotalAttendeesView(APIView):
         for template in attendance_templates:
             count = template.createdattendancerecord_set.count()
             total_attendees += count
-            print(f"Template ID {template.id} has {count} attendees")
-
-        # if num_templates > 0:
-        #     average_attendees = round(total_attendees / num_templates)
-
-        # else:
-        #     average_attendees = 0    
+            print(f"Template ID {template.id} has {count} attendees")    
 
         if num_templates > 1: #Multiple-days Project
             average_attendees = round(total_attendees/ num_templates)

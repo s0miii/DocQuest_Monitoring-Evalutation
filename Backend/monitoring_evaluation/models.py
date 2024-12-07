@@ -229,11 +229,13 @@ class Evaluation(models.Model):
     trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluations")
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluations")
     attendee_name = models.CharField(max_length=255)
+
     relevance_of_topics = models.IntegerField(choices=[(i, i) for i in range(6)])
     organizational_flow = models.IntegerField(choices=[(i, i) for i in range(6)])
     learning_methods = models.IntegerField(choices=[(i, i) for i in range(6)])
     technology_use = models.IntegerField(choices=[(i, i) for i in range(6)])
     time_efficiency = models.IntegerField(choices=[(i, i) for i in range(6)])
+
     mastery_subject = models.IntegerField(choices=[(i, i) for i in range(6)])
     preparedness = models.IntegerField(choices=[(i, i) for i in range(6)])
     audience_participation = models.IntegerField(choices=[(i, i) for i in range(6)])
@@ -241,17 +243,45 @@ class Evaluation(models.Model):
     handle_questions = models.IntegerField(choices=[(i, i) for i in range(6)])
     voice_personality = models.IntegerField(choices=[(i, i) for i in range(6)])
     visual_aids = models.IntegerField(choices=[(i, i) for i in range(6)])
+
     useful_concepts = models.TextField(blank=True, null=True)
     improvement_areas = models.TextField(blank=True, null=True)
     additional_comments = models.TextField(blank=True, null=True)
+
     venue_assessment = models.IntegerField(choices=[(i, i) for i in range(6)])
     timeliness = models.IntegerField(choices=[(i, i) for i in range(6)])
     overall_management = models.IntegerField(choices=[(i, i) for i in range(6)])
-    stored_overall_rating = models.IntegerField(null=True, blank=True, verbose_name="Overall Rating")
+    overall_rating = models.IntegerField(null=True, blank=True, verbose_name="Overall Rating")
+    remarks = models.TextField(blank=True, null=True)
+    
     submitted_at = models.DateTimeField(default=timezone.now, verbose_name="Date Submitted")
     evaluation_number = models.IntegerField(null=True, blank=True, verbose_name="No.")
-    access_token = models.CharField(max_length=255, unique=True, blank=True, null=True)
-     
+    access_token = models.CharField(max_length=64, unique=True, blank=True, null=True)
+    
+    class Meta:
+        unique_together = ('trainer', 'project', 'attendee_name')
+
+    def save(self, *args, **kwargs):
+        if self.project.status != 'approved':
+            raise ValueError(f"Evaluations can only be created for approved projects.")
+
+        if not self.access_token:
+            self.access_token = secrets.token_urlsafe(16)
+
+        self.overall_rating = self.calculate_overall_rating()
+        
+        if not self.evaluation_number:
+            last_evaluation = Evaluation.objects.filter(
+                trainer=self.trainer, project=self.project
+            ).order_by('evaluation_number').last()
+
+            if last_evaluation and last_evaluation.evaluation_number is not None:
+                self.evaluation_number = last_evaluation.evaluation_number + 1
+            else:
+                self.evaluation_number = 1
+
+        super().save(*args, **kwargs)
+    
     def calculate_overall_rating(self):
         ratings = [
             self.relevance_of_topics,
@@ -272,45 +302,40 @@ class Evaluation(models.Model):
         ]
         
         total_ratings = [r for r in ratings if r is not None]
-        average_rating = sum(total_ratings) / len(total_ratings) if total_ratings else 0 
-        return round(average_rating)
+        return round(sum(total_ratings) / len(total_ratings) if total_ratings else 0)
     
-    def save(self, *args, **kwargs):
-        if self.project.status != 'approved':
-            raise ValueError(f"Evaluations can only be created for approved projects.")
-
-        if not self.access_token:
-            self.access_token = secrets.token_urlsafe(16)
-
-        self.stored_overall_rating = self.calculate_overall_rating()
-
-        if not self.evaluation_number:
-            last_evaluation = Evaluation.objects.filter(
-                trainer=self.trainer, project=self.project
-            ).order_by('evaluation_number').last()
-
-            if last_evaluation and last_evaluation.evaluation_number is not None:
-                self.evaluation_number = last_evaluation.evaluation_number + 1
-            else:
-                self.evaluation_number = 1
-        
-        super().save(*args, **kwargs)
-   
-    def get_absolute_url(self):
-        return reverse('evaluation_form', args=[str(self.trainer.id), str(self.project.id)]) + f"?access_token={self.access_token}"
-
     def __str__(self):
         return f"Evaluation for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"
-    
-    # This calculates/aggregates the average rating for all trainers sa specific project
-    @staticmethod
-    def get_project_average_rating(project_id):
-        evaluations = Evaluation.objects.filter(project_id=project_id)
-        return evaluations.aggregate(average_rating=Avg('stored_overall_rating'))['average_rating'] or 0
+
+class EvaluationSharableLink(models.Model):
+    trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluation_links")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluation_links")
+    token = models.CharField(max_length=64, unique=True, default=secrets.token_urlsafe(16))
+    sharable_link = models.URLField(max_length=500, blank=True, null=True)
+    expiration_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(16)
+
+        # Generate the sharable link if not already set
+        if not self.sharable_link:
+            base_url = "http://127.0.0.1:8000/monitoring/evaluation/fill"
+            self.sharable_link = f"{base_url}/{self.token}/"
+
+        super().save(*args, **kwargs)
+
+    def is_valid(self):
+        return not self.expiration_date or self.expiration_date >= timezone.now().date()
+
+    def __str__(self):
+        return f"Sharable Link for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"    
     
 # Attendance Template and Attendance Record Model
 class AttendanceTemplate(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attendance_templates")
+    trainer = models.ForeignKey('docquestapp.LoadingOfTrainers', on_delete=models.CASCADE, related_name='attendance_templates') #Added field to reference trainer
     templateName = models.CharField(max_length=255, default="Attendance Template")    
 
     include_attendee_name = models.BooleanField(default=False)
@@ -327,7 +352,7 @@ class AttendanceTemplate(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def is_valid(self):
-        """Check if the template is still valid based on the expiration date."""
+        # Check if the template is still valid based on the expiration date."""
         if self.expiration_date:
             return date.today() <= self.expiration_date
         return True
@@ -366,6 +391,7 @@ class TotalAttendees(models.Model):
 class CreatedAttendanceRecord(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     template = models.ForeignKey(AttendanceTemplate, on_delete=models.CASCADE)
+    trainer = models.ForeignKey('docquestapp.LoadingOfTrainers', on_delete=models.CASCADE,related_name='attendance_records')
     attendee_name = models.CharField(max_length=255, null=True, blank=True)
     gender = models.CharField(max_length=50, null=True, blank=True)
     college = models.CharField(max_length=255, null=True, blank=True)
