@@ -6,6 +6,7 @@ import { FaArrowLeft } from "react-icons/fa";
 
 const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
     const navigate = useNavigate();
+    const token = localStorage.getItem("token");
     const { projectID } = useParams();
     const [projectDetails, setProjectDetails] = useState(null); // Store project details
     const [documentCounts, setDocumentCounts] = useState({});
@@ -19,7 +20,7 @@ const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
     useEffect(() => {
         const fetchProjectDetails = async () => {
             try {
-                const token = localStorage.getItem("authToken");
+
 
                 // Fetch project details
                 const projectResponse = await fetch(
@@ -67,7 +68,6 @@ const ProjLeadProjReq = ({ totalRequirements, completedRequirements }) => {
         };
 
         const fetchDocumentCounts = async () => {
-            const token = localStorage.getItem("authToken");
 
             if (!token) {
                 alert("User not logged in. Please log in again.");
