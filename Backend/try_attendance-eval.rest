@@ -225,14 +225,16 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 # Test for Sharable Link in Attendance
 
 ###
-#  Create Attendance Template  - working endpoint with sharable link
+#  Create Attendance Template  - NOT WORKING FULLY YET, di mugana ang validation
+# Still working but if nay trainer ang project, add "trainer_id": <trainer id>
+# If walay training then project lang ang i specify
 POST http://127.0.0.1:8000/monitoring/attendance_templates/
 Content-Type: application/json
-Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 
 {
-    "project": 1,
-    "templateName": "Single Day Project",
+    "project": 2,
+    "templateName": "Naay trainer",
     "include_attendee_name": true,
     "include_gender": true,
     "include_college": false,
@@ -242,6 +244,27 @@ Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
     "include_contact_number": true,
     "expiration_date": "2024-11-30"
 }
+
+###
+#  Create Attendance Template - added trainingLoad as reference - WORKING 
+# Project Id ang last - woking pero need pa specific id sa link
+POST http://127.0.0.1:8000/monitoring/attendance_templates/create/2/
+Content-Type: application/json
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+
+{
+  "trainer_id": "1",    
+  "templateName": "Test before push",
+  "include_attendee_name": true,
+  "include_gender": true,
+  "include_college": false,
+  "include_department": false,
+  "include_year_section": true,
+  "include_agency_office": false,
+  "include_contact_number": true,
+  "expiration_date": "2024-12-31"
+}
+
 
 
 ###
@@ -262,17 +285,18 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 
 ###
 #  Test Token
-GET http://127.0.0.1:8000/monitoring/attendance/fill/PThUrsrA2BmQDWHFlB8ucg/
+GET http://127.0.0.1:8000/monitoring/attendance/fill/AlKa1i0n5m-tjJSqHbmtkw/
 Content-Type: application/json
 
 ###
 #  Submit Attendance Record via Sharable Link
-POST http://127.0.0.1:8000/monitoring/attendance/fill/PThUrsrA2BmQDWHFlB8ucg/
+POST http://127.0.0.1:8000/monitoring/attendance/fill/AlKa1i0n5m-tjJSqHbmtkw/
 Content-Type: application/json
 
 {
     "attendee_name": "Attend",
     "gender": "Female",
+    "year_section": "4R6",
     "contact_number": "1234567890"
 }
 
@@ -285,6 +309,7 @@ Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 #  Retrieve a Specific Attendance Record
 GET http://127.0.0.1:8000/monitoring/attendance_records/2/
 Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
+
 
 ###
 # POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/

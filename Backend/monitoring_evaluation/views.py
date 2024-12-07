@@ -18,11 +18,12 @@ from .serializers import *
 from .utils import send_reminder_email
 from .decorators import role_required
 from django.http import HttpResponseForbidden, JsonResponse
-import secrets, logging, datetime
+import secrets, logging
 from django.utils.dateparse import parse_date
 from django.conf import settings
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from datetime import datetime
 
 # Email
 @role_required(allowed_role_codes=["estf"])  # Restrict to EStaff
@@ -1033,6 +1034,17 @@ class CreateAttendanceTemplateView(APIView):
         # Validate project
         project = get_object_or_404(Project, projectID=project_id)
 
+        #Validate trainer_id if existing
+        trainer_id = request.data.get("trainer_id")
+        trainer_load = None
+        if trainer_id:
+            # Validate if associated ba ang trainer sa project
+            try:
+                trainer_load = LoadingOfTrainers.objects.get(LOTID=trainer_id, project=project)
+            except LoadingOfTrainers.DoesNotExist:
+                return Response({"error": "The specified trainer is not linked to this project."}, status=400)
+
+
         # Extract template fields
         fields = {
             "include_attendee_name": request.data.get("include_attendee_name", False),
@@ -1055,14 +1067,20 @@ class CreateAttendanceTemplateView(APIView):
         
 
         # Create the template
-        attendance_template = AttendanceTemplate.objects.create(project=project, expiration_date=expiration_date, **fields)
+        attendance_template = AttendanceTemplate.objects.create(
+            project=project, 
+            trainerLoad=trainer_load, 
+            expiration_date=expiration_date,  
+            templateName=request.data.get("templateName"), 
+            **fields
+            )
 
-        # # Generate sharable link
-        # sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
+        # Generate sharable link
+        sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
 
-        # Use the frontend base URL for the sharable link
-        frontend_base_url = settings.FRONTEND_BASE_URL  # Retrieve the frontend URL from settings
-        sharable_link = f"{frontend_base_url}/attendance/fill/{attendance_template.token}/"
+        # # Use the frontend base URL for the sharable link
+        # frontend_base_url = settings.FRONTEND_BASE_URL  # Retrieve the frontend URL from settings
+        # sharable_link = f"{frontend_base_url}/attendance/fill/{attendance_template.token}/"
 
         # Save the sharable link sa database mismo -> added feature lang
         attendance_template.sharable_link = sharable_link
