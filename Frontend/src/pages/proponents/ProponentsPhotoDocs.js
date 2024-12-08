@@ -341,18 +341,12 @@ const ProponentsPhotoDocs = () => {
                                             <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                                     <a
-                                                        href={submission.file_url || "#"}
+                                                        href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:underline truncate block text-center"
-                                                        style={{ maxWidth: "200px" }}
-                                                        title={submission.file_name || "No File"}
                                                     >
-                                                        {submission.file_name
-                                                            ? submission.file_name.replace("photo_documentations/", "").length > 20
-                                                                ? `${submission.file_name.replace("photo_documentations/", "").slice(0, 17)}...`
-                                                                : submission.file_name.replace("photo_documentations/", "")
-                                                            : "No File"}
+                                                        {submission.file_name || "No File"}
                                                     </a>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">

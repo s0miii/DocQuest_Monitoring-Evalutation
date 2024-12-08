@@ -515,14 +515,19 @@ class ChecklistItemSubmissionsView(APIView):
             # Determine the model to use based on the checklist item name
             if checklist_item_name == "Daily Attendance":
                 model = DailyAttendanceRecord
+                directory = "attendance_records"
             elif checklist_item_name == "Summary of Evaluation":
                 model = SummaryOfEvaluation
+                directory = "summary_of_evaluations"
             elif checklist_item_name == "Lecture Notes":
                 model = ModulesLectureNotes
+                directory = "lecture_notes"
             elif checklist_item_name == "Photo Documentation":
                 model = PhotoDocumentation
+                directory = "photo_documentations"
             elif checklist_item_name == "Other Files":
                 model = OtherFiles
+                directory = "other_files"
             else:
                 return Response({"error": "Invalid checklist item name."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -534,6 +539,14 @@ class ChecklistItemSubmissionsView(APIView):
 
             # Serialize submissions
             for record in records:
+                file_field = (
+                    getattr(record, 'attendance_file', None) or
+                    getattr(record, 'summary_file', None) or
+                    getattr(record, 'module_file', None) or
+                    getattr(record, 'photo', None) or
+                    getattr(record, 'file', None)
+                )
+
                 submissions.append({
                     "submission_id": record.id,
                     "status": record.status,
@@ -541,14 +554,8 @@ class ChecklistItemSubmissionsView(APIView):
                     "date_uploaded": record.date_uploaded,
                     "description": getattr(record, "description", "N/A"),  # Optional field
                     "submitted_by": f"{record.proponent.firstname} {record.proponent.lastname}" if record.proponent else "Unknown",
-                    "file_name": (
-                        getattr(record, 'attendance_file', None).name if getattr(record, 'attendance_file', None) else
-                        getattr(record, 'summary_file', None).name if getattr(record, 'summary_file', None) else
-                        getattr(record, 'module_file', None).name if getattr(record, 'module_file', None) else
-                        getattr(record, 'photo', None).name if getattr(record, 'photo', None) else
-                        getattr(record, 'file', None).name if getattr(record, 'file', None) else
-                        None
-                    )
+                    "file_name": file_field.name.split('/')[-1] if file_field else "No File",
+                    "directory": directory,  # Add directory for frontend URL construction
                 })
 
             return Response({"submissions": submissions}, status=status.HTTP_200_OK)
