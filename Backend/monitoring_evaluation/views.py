@@ -54,7 +54,7 @@ def send_dynamic_reminder_email(request, project_id):
         missing_items.append("Modules/Lecture Notes")
 
     if not PhotoDocumentation.objects.filter(project=project, status="Approved").exists():
-        missing_items.append("Photo Documentation")
+        missing_items.append("Photo Documentations")
 
     if not OtherFiles.objects.filter(project=project, status="Approved").exists():
         missing_items.append("Other Files")
@@ -168,10 +168,11 @@ class ProponentProjectDetailsView(APIView):
                     assigned_requirements.append("Summary of Evaluation")
                 if assignment.can_submit_modules_lecture_notes:
                     assigned_requirements.append("Lecture Notes")
+                if assignment.can_submit_photo_documentation:
+                    assigned_requirements.append("Photo Documentations")
                 if assignment.can_submit_other_files:
                     assigned_requirements.append("Other Files")
-                if assignment.can_submit_photo_documentation:
-                    assigned_requirements.append("Photo Documentation")
+                
 
             return Response({
                 "projectDetails": project_details,
@@ -202,7 +203,7 @@ def document_counts(request, project_id):
         (DailyAttendanceRecord, 'Daily Attendance'),
         (SummaryOfEvaluation, 'Summary of Evaluation'),
         (ModulesLectureNotes, 'Lecture Notes'),
-        (PhotoDocumentation, 'Photo Documentation'),
+        (PhotoDocumentation, 'Photo Documentations'),
         (OtherFiles, 'Other Files'),
     ]
 
@@ -456,7 +457,7 @@ MODEL_MAP = {
     "daily_attendance": DailyAttendanceRecord,
     "summary_of_evaluation": SummaryOfEvaluation,
     "modules_lecture_notes": ModulesLectureNotes,
-    "photo_documentation": PhotoDocumentation,
+    "photo_documentations": PhotoDocumentation,
     "other_files": OtherFiles,
 }
 
@@ -521,7 +522,7 @@ class ChecklistItemSubmissionsView(APIView):
             elif checklist_item_name == "Lecture Notes":
                 model = ModulesLectureNotes
                 directory = "lecture_notes"
-            elif checklist_item_name == "Photo Documentation":
+            elif checklist_item_name == "Photo Documentations":
                 model = PhotoDocumentation
                 directory = "photo_documentations"
             elif checklist_item_name == "Other Files":
@@ -660,8 +661,8 @@ class ChecklistItemSubmissionView(APIView): ## this is a different class from th
 MODEL_MAP = {
     "daily_attendance": DailyAttendanceRecord,
     "summary_of_evaluation": SummaryOfEvaluation,
-    "modules_lecture_notes": ModulesLectureNotes,
-    "photo_documentation": PhotoDocumentation,
+    "lecture_notes": ModulesLectureNotes,
+    "photo_documentations": PhotoDocumentation,
     "other_files": OtherFiles,
 }
 @role_required(allowed_role_codes=["pjld"])
