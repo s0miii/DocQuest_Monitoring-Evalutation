@@ -403,7 +403,7 @@ const ProjLeadDailyAttRec = () => {
                 navigate("/login");
                 return;
             }
-            
+
             const response = await axios.put(
                 `http://127.0.0.1:8000/monitoring/attendance_templates/${templateId}/`,
                 `http://127.0.0.1:8000/monitoring/attendance_templates/${editingTemplateId}/`,
@@ -734,10 +734,10 @@ const ProjLeadDailyAttRec = () => {
                                                     <span className='text-red-500'>Expired</span>
                                                 ) : (
                                                     <>
-                                                        <button onClick={() => handleEditTemplate(template)}
+                                                        {/* <button onClick={() => handleEditTemplate(template)}
                                                             className="text-blue-500">
                                                             <FaEdit />
-                                                        </button>
+                                                        </button> */}
                                                         <button 
                                                             onClick={() => handleDeleteTemplate(template.id)} 
                                                             className='text-red-500 mr-2'>
