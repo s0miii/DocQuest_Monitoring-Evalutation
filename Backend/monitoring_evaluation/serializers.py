@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from .models import *
+from django.conf import settings
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -102,7 +103,7 @@ class AttendanceTemplateSerializer(serializers.ModelSerializer):
     def get_sharable_link(self, obj):
         request = self.context.get('request')
         if request:
-            return f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{obj.token}/"
+            return f"{settings.FRONTEND_BASE_URL}/attendance/fill/{obj.token}/"
         return None
 class CreatedAttendanceRecordSerializer(serializers.ModelSerializer):
     class Meta:

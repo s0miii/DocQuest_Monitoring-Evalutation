@@ -115,13 +115,20 @@ const ProjLeadDailyAttRec = () => {
     // Function to handle calculation of total attendees
     const calculateTotalAttendees = async () => {
         try {
+            const token = localStorage.getItem("token"); // Move this inside useEffect
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+            
             const projectId = 1; 
             const response = await axios.post(
                 `http://127.0.0.1:8000/monitoring/calculate_attendees/${projectId}/`,
                 {},
                 {
                     headers: {
-                        'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5',
+                        'Authorization': `Token ${token}`,
                         'Content-Type': 'application/json'
                     }
                 }

@@ -177,7 +177,7 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 ###
 # Retrieve Attendance Record for a Specific Record ID - dapat authenticated ang token di pako sure unsaon but nag try rakog token from other user
 GET http://127.0.0.1:8000/monitoring/attendance_records/2/
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 ### 
 # Retrieve All Attendance Records for a Project - working endpoint
