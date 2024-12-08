@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
+import axios from 'axios';
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaCopy, FaTrash, FaEdit } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 
 const ProjLeadDailyAttRec = () => {
@@ -11,12 +12,33 @@ const ProjLeadDailyAttRec = () => {
     const [projectDetails, setProjectDetails] = useState(null);
     const [date, setDate] = useState("");
     const [description, setDescription] = useState("");
-    const [totalAttendees, setAttendees] = useState(0);
+    const [totalAttendees, setAttendees] = useState(null);
     const [attachedFiles, setAttachedFiles] = useState([]); // Array to handle multiple files
     const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [isProjectLeader, setIsProjectLeader] = useState(false);
+
+    const [templateName, setTemplateName] = useState('');
+    const [includeAttendeeName, setIncludeAttendeeName] = useState(true);
+    const [includeGender, setIncludeGender] = useState(false);
+    const [includeCollege, setIncludeCollege] = useState(false);
+    const [includeDepartment, setIncludeDepartment] = useState(false);
+    const [includeYearSection, setIncludeYearSection] = useState(false);
+    const [includeAgencyOffice, setIncludeAgencyOffice] = useState(false);
+    const [includeContactNumber, setIncludeContactNumber] = useState(false);
+    const [expirationDate, setExpirationDate] = useState('');
+    const [templates, setTemplates] = useState([]);
+    const [totalAttendeess, setTotalAttendees] = useState(null);
+    const [averageAttendees, setAverageAttendees] = useState(null);
+    const [numTemplates, setNumTemplates] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);  // To handle edit state
+    const [templateId, setTemplateId] = useState(null);
+    const [editingTemplateId, setEditingTemplateId] = useState(null);  // To track which template is being edited
+
+    // Reference to the "Generated Attendance Links" section
+    const linksSectionRef = useRef(null);
+
 
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
@@ -66,6 +88,49 @@ const ProjLeadDailyAttRec = () => {
         fetchProjectDetails();
         fetchUpdatedSubmissions();
     }, [projectID, navigate]);
+
+    
+    // Fetch templates on component mount
+    useEffect(() => {
+        const fetchTemplates = async () => {
+            try {
+                const response = await axios.get('http://127.0.0.1:8000/monitoring/attendance_templates/', {
+                    headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+                });
+                setTemplates(response.data);
+            } catch (error) {
+                console.error('Error fetching templates', error);
+                alert('Failed to fetch templates.');
+            }
+        };
+        fetchTemplates();
+    }, []);
+
+    // Fetch total attendees data when the component mounts or templates change
+    useEffect(() => {
+        const fetchTotalAttendees = async () => {
+            try {
+                const projectId = 1;  // Assuming you're working with project ID 1, adjust if necessary
+                const response = await axios.post(
+                    `http://127.0.0.1:8000/monitoring/calculate_total_attendees/${projectId}/`,
+                    {},
+                    {
+                        headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+                    }
+                );
+                // Set the fetched data to state variables
+                setTotalAttendees(response.data.total_attendees);
+                setAverageAttendees(response.data.average_attendees);
+                setNumTemplates(response.data.num_templates);
+            } catch (error) {
+                console.error('Error fetching total attendees', error);
+                alert('Failed to fetch total attendees.');
+            }
+        };
+
+        fetchTotalAttendees();
+    }, [templates]); // Re-run the effect when templates change
+
 
     const fetchUpdatedSubmissions = async () => {
         const token = localStorage.getItem("token");
@@ -207,6 +272,169 @@ const ProjLeadDailyAttRec = () => {
         return <div>Project not found.</div>;
     }
 
+
+    // Create new template
+    const handleCreateTemplate = async () => {
+        try {
+            const response = await axios.post(
+                'http://127.0.0.1:8000/monitoring/attendance_templates/',
+                {
+                    project: 1,
+                    templateName,
+                    include_attendee_name: includeAttendeeName,
+                    include_gender: includeGender,
+                    include_college: includeCollege,
+                    include_department: includeDepartment,
+                    include_year_section: includeYearSection,
+                    include_agency_office: includeAgencyOffice,
+                    include_contact_number: includeContactNumber,
+                    expiration_date: expirationDate,
+                },
+                {
+                    headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+                }
+            );
+
+            const newTemplate = response.data;
+            setTemplates(prevTemplates => [...prevTemplates, newTemplate]);
+            alert(`Attendance Template Created! Share this link: ${newTemplate.sharable_link}`);
+
+            // Scroll to "Generated Attendance Links" section after creation
+            if (linksSectionRef.current) {
+                linksSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Clear the form fields after creation
+            setTemplateName('');
+            setIncludeAttendeeName(true);
+            setIncludeGender(false);
+            setIncludeCollege(false);
+            setIncludeDepartment(false);
+            setIncludeYearSection(false);
+            setIncludeAgencyOffice(false);
+            setIncludeContactNumber(false);
+            setExpirationDate('');
+
+        } catch (error) {
+            console.error('Error creating attendance template', error);
+            alert('Failed to create attendance template.');
+        }
+    };
+
+    // Check if template is expired
+    const isExpired = (expirationDate) => {
+        const today = new Date();
+        const expiration = new Date(expirationDate);
+        return expiration < today;
+    };
+
+    const handleCopyLink = link => {
+        navigator.clipboard.writeText(link).then(() => {
+            alert('Link copied to clipboard!');
+        }).catch(err => {
+            console.error('Error copying link: ', err);
+            alert('Failed to copy link.');
+        });
+    };
+
+    // Delete template
+    const handleDeleteTemplate = async (templateId) => {
+        try {
+            await axios.delete(`http://127.0.0.1:8000/monitoring/attendance_templates/${templateId}/`, {
+                headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+            });
+            setTemplates(templates.filter(template => template.id !== templateId));
+            alert('Template deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting template', error);
+            alert('Failed to delete template.');
+        }
+    };
+
+    // Start editing a template
+    const handleEditTemplate = (template) => {
+        setIsEditing(true);
+        setEditingTemplateId(template.id);
+        setTemplateName(template.templateName);
+        setIncludeAttendeeName(template.include_attendee_name);
+        setIncludeGender(template.include_gender);
+        setIncludeCollege(template.include_college);
+        setIncludeDepartment(template.include_department);
+        setIncludeYearSection(template.include_year_section);
+        setIncludeAgencyOffice(template.include_agency_office);
+        setIncludeContactNumber(template.include_contact_number);
+        setExpirationDate(template.expiration_date);
+    };
+
+    // Save edited template
+    const handleSaveTemplate = async () => {
+        try {
+            const response = await axios.put(
+                `http://127.0.0.1:8000/monitoring/attendance_templates/${templateId}/`,
+                `http://127.0.0.1:8000/monitoring/attendance_templates/${editingTemplateId}/`,
+                {
+                    project: 1,
+                    templateName,
+                    include_attendee_name: includeAttendeeName,
+                    include_gender: includeGender,
+                    include_college: includeCollege,
+                    include_department: includeDepartment,
+                    include_year_section: includeYearSection,
+                    include_agency_office: includeAgencyOffice,
+                    include_contact_number: includeContactNumber,
+                    expiration_date: expirationDate,
+                },
+                {
+                    headers: { 
+                        'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5',
+                        'Content-Type': 'application/json'
+                    },
+                }
+            );
+
+            const updatedTemplate = response.data;
+            setTemplates(prevTemplates =>
+                prevTemplates.map(template =>
+                    template.id === updatedTemplate.id ? updatedTemplate : template
+                )
+            );
+            alert('Template updated successfully!');
+            setIsEditing(false);  // Exit editing mode
+            setEditingTemplateId(null);
+            resetFormFields();
+        } catch (error) {
+            console.error('Error updating template', error.response || error);
+            alert('Failed to update template. Please try again.');
+        }
+    };
+
+
+    // Reset form fields after editing
+    const resetFormFields = () => {
+        setTemplateName('');
+        setIncludeAttendeeName(true);
+        setIncludeGender(false);
+        setIncludeCollege(false);
+        setIncludeDepartment(false);
+        setIncludeYearSection(false);
+        setIncludeAgencyOffice(false);
+        setIncludeContactNumber(false);
+        setExpirationDate('');
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);  // Exit editing mode without saving changes
+        setEditingTemplateId(null);  // Clear the editing template id
+        resetFormFields();  // Clear the form fields
+    };
+
+    const handleViewAttendanceRecords = (templateId) => {
+        // Navigate to a new page (or modal) where attendance records can be viewed.
+        navigate(`/projlead/attendance-records/${templateId}`);
+    };
+
+    // Get today's date to set as the minimum value for expiration date
+    const todayDate = new Date().toISOString().split('T')[0];
 
 
     return (
@@ -403,6 +631,176 @@ const ProjLeadDailyAttRec = () => {
                             </table>
                         </div>
                     </div>
+
+                    {/* Total Attendees Info Section */}
+                    <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
+                        <h2 className='text-2xl font-semibold text-center mb-4'>Total Attendance Information</h2>
+                        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+                            <div>
+                                <label className='block text-sm font-medium text-gray-600'>Total Attendees</label>
+                                <p className='bg-gray-100 rounded-lg p-3 mt-1 text-center'>
+                                    {totalAttendees !== null ? totalAttendees : 'Loading...'}
+                                </p>
+                            </div>
+                            <div>
+                                <label className='block text-sm font-medium text-gray-600'>Average Attendees</label>
+                                <p className='bg-gray-100 rounded-lg p-3 mt-1 text-center'>
+                                    {averageAttendees !== null ? averageAttendees : 'Loading...'}
+                                </p>
+                            </div>
+                            <div>
+                                <label className='block text-sm font-medium text-gray-600'>Number of Templates</label>
+                                <p className='bg-gray-100 rounded-lg p-3 mt-1 text-center'>
+                                    {numTemplates !== null ? numTemplates : 'Loading...'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Generated Attendance Links Section */}
+                    <div ref={linksSectionRef} className='bg-white shadow-md rounded-lg p-6 mb-6'>
+                        <h2 className='text-2xl font-semibold text-center mb-4'>Generated Attendance Links</h2>
+                        <div className='overflow-x-auto'>
+                            <table className='w-full border border-gray-200'>
+                                <thead>
+                                    <tr className='bg-gray-50'>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Template Name</th>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Link</th>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Date Created</th>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Expiration Date</th>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Actions</th>
+                                        <th className='p-3 text-left text-gray-700 font-medium'>Attendance Report</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {templates.map((template, index) => (
+                                        <tr key={index} className='border-t'>
+                                            <td className='p-3 text-gray-600'>{template.templateName}</td>
+                                            <td className='p-3'>
+                                                <button
+                                                    onClick={() => handleCopyLink(template.sharable_link)}
+                                                    className={`flex items-center ${isExpired(template.expiration_date) ? 'cursor-not-allowed opacity-50 text-gray-500' : 'text-blue-500'}`}
+                                                    disabled={isExpired(template.expiration_date)}
+                                                >
+                                                    {isExpired(template.expiration_date) ? (
+                                                        <span>Expired</span>
+                                                    ) : (
+                                                        <>
+                                                            <FaCopy className='mr-1' />
+                                                            Copy Link
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </td>
+                                            <td className='p-3 text-gray-600'>{new Date(template.created_at).toLocaleDateString()}</td>
+                                            <td className='p-3 text-gray-600'>{template.expiration_date || 'N/A'}</td>
+                                            <td className='p-3'>
+                                                {isExpired(template.expiration_date) ? (
+                                                    <span className='text-red-500'>Expired</span>
+                                                ) : (
+                                                    <>
+                                                        <button onClick={() => handleEditTemplate(template)}
+                                                            className="text-blue-500">
+                                                            <FaEdit />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteTemplate(template.id)} 
+                                                            className='text-red-500 mr-2'>
+                                                            <FaTrash />
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </td>
+                                            <td className='p-3 text-gray-600'>
+                                                <button 
+                                                    onClick={() => handleViewAttendanceRecords(template.id)} 
+                                                    className='text-blue-500 hover:text-blue-600'>
+                                                    View Attendance Records
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Template Creation and Editing Section */}
+                    <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
+                        <h2 className='text-2xl font-semibold text-center mb-4'>
+                            {isEditing ? 'Edit Attendance Template' : 'Create New Attendance Template'}
+                        </h2>
+                        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                            <div>
+                                <label className='block text-sm font-medium text-gray-600'>Template Name</label>
+                                <input
+                                    type='text'
+                                    value={templateName}
+                                    onChange={(e) => setTemplateName(e.target.value)}
+                                    className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
+                                    disabled={isEditing}  // Disable in editing mode
+                                />
+                            </div>
+                            <div>
+                                <label className='block text-sm font-medium text-gray-600'>Expiration Date</label>
+                                <input
+                                    type='date'
+                                    value={expirationDate}
+                                    onChange={(e) => setExpirationDate(e.target.value)}
+                                    className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
+                                    min={todayDate}  // Ensure only future dates can be selected
+                                />
+                            </div>
+                        </div>
+                        <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mt-4'>
+                            {[
+                                { label: 'Include Attendee Name', state: includeAttendeeName, setState: setIncludeAttendeeName },
+                                { label: 'Include Gender', state: includeGender, setState: setIncludeGender },
+                                { label: 'Include College', state: includeCollege, setState: setIncludeCollege },
+                                { label: 'Include Department', state: includeDepartment, setState: setIncludeDepartment },
+                                { label: 'Include Year/Section', state: includeYearSection, setState: setIncludeYearSection },
+                                { label: 'Include Agency/Office', state: includeAgencyOffice, setState: setIncludeAgencyOffice },
+                                { label: 'Include Contact Number', state: includeContactNumber, setState: setIncludeContactNumber },
+                            ].map((item, idx) => (
+                                <div key={idx} className='flex items-center'>
+                                    <input
+                                        type='checkbox'
+                                        checked={item.state}
+                                        onChange={() => item.setState(!item.state)}
+                                        className='mr-2'
+                                        disabled={isEditing}  // Disable in editing mode
+                                    />
+                                    <label className='text-sm text-gray-700'>{item.label}</label>
+                                </div>
+                            ))}
+                        </div>
+                        <div className='mt-6 text-center'>
+                            {isEditing ? (
+                                <>
+                                    <button
+                                        onClick={handleSaveTemplate}
+                                        className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
+                                    >
+                                        Save Template
+                                    </button>
+                                    <button
+                                        onClick={handleCancelEdit}
+                                        className='px-6 py-2 text-white bg-gray-500 rounded-lg hover:bg-gray-600 ml-4'
+                                    >
+                                        Cancel
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={handleCreateTemplate}
+                                    className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
+                                >
+                                    Create Template
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
 
                 </div>
             </div>

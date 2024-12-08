@@ -39,10 +39,11 @@ import ProponentsLecNotes from "./pages/proponents/ProponentsLecNotes";
 import ProponentsOtherFiles from "./pages/proponents/ProponentsOtherFiles";
 import ProponentsPhotoDocs from "./pages/proponents/ProponentsPhotoDocs";
 
-import EvaluationForm from "./pages/proponents/EvaluationForm";
+import EvaluationForm from "./pages/attendance and evaluation/EvaluationForm";
 import ProjectsDashboard from "./pages/proponents/ProjectsDashboard";
 
-
+import FillAttendanceForm from "./pages/attendance and evaluation/FillAttendanceForm"
+import AttendanceReport from "./pages/attendance and evaluation/AttendanceReport";
 
 function App() {
   return (
@@ -81,6 +82,8 @@ function App() {
       <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
       <Route path="/proponents/project/:projectID/photo-docs" element={<ProponentsPhotoDocs />} />
       <Route path="/eval" element={<EvaluationForm />} />
+      <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
+      <Route path="/projlead/attendance-records/:templateId" element={<AttendanceReport />} />
     </Routes>
 
   );
