@@ -92,10 +92,17 @@ const ProjLeadDailyAttRec = () => {
     
     // Fetch templates on component mount
     useEffect(() => {
+        const token = localStorage.getItem("token"); // Move this inside useEffect
+        if (!token) {
+            alert("User not logged in. Please log in again.");
+            navigate("/login");
+            return;
+        }
+
         const fetchTemplates = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:8000/monitoring/attendance_templates/', {
-                    headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+                    headers: { 'Authorization': `Token ${token}` }
                 });
                 setTemplates(response.data);
             } catch (error) {
@@ -108,6 +115,13 @@ const ProjLeadDailyAttRec = () => {
 
     // Fetch total attendees data when the component mounts or templates change
     useEffect(() => {
+        const token = localStorage.getItem("token"); // Move this inside useEffect
+        if (!token) {
+            alert("User not logged in. Please log in again.");
+            navigate("/login");
+            return;
+        }
+        
         const fetchTotalAttendees = async () => {
             try {
                 const projectId = 1;  // Assuming you're working with project ID 1, adjust if necessary
@@ -115,7 +129,7 @@ const ProjLeadDailyAttRec = () => {
                     `http://127.0.0.1:8000/monitoring/calculate_total_attendees/${projectId}/`,
                     {},
                     {
-                        headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+                        headers: { 'Authorization': `Token ${token}` },
                     }
                 );
                 // Set the fetched data to state variables
@@ -276,6 +290,13 @@ const ProjLeadDailyAttRec = () => {
     // Create new template
     const handleCreateTemplate = async () => {
         try {
+            const token = localStorage.getItem("token"); // Move this inside useEffect
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
             const response = await axios.post(
                 'http://127.0.0.1:8000/monitoring/attendance_templates/',
                 {
@@ -291,7 +312,7 @@ const ProjLeadDailyAttRec = () => {
                     expiration_date: expirationDate,
                 },
                 {
-                    headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+                    headers: { 'Authorization': `Token ${token}` },
                 }
             );
 
@@ -340,8 +361,15 @@ const ProjLeadDailyAttRec = () => {
     // Delete template
     const handleDeleteTemplate = async (templateId) => {
         try {
+            const token = localStorage.getItem("token"); // Move this inside useEffect
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
             await axios.delete(`http://127.0.0.1:8000/monitoring/attendance_templates/${templateId}/`, {
-                headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+                headers: { 'Authorization': `Token ${token}` },
             });
             setTemplates(templates.filter(template => template.id !== templateId));
             alert('Template deleted successfully!');
@@ -369,6 +397,13 @@ const ProjLeadDailyAttRec = () => {
     // Save edited template
     const handleSaveTemplate = async () => {
         try {
+            const token = localStorage.getItem("token"); // Move this inside useEffect
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+            
             const response = await axios.put(
                 `http://127.0.0.1:8000/monitoring/attendance_templates/${templateId}/`,
                 `http://127.0.0.1:8000/monitoring/attendance_templates/${editingTemplateId}/`,
@@ -386,7 +421,7 @@ const ProjLeadDailyAttRec = () => {
                 },
                 {
                     headers: { 
-                        'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5',
+                        'Authorization': `Token ${token}`,
                         'Content-Type': 'application/json'
                     },
                 }
