@@ -85,6 +85,11 @@ urlpatterns = [
     path('attendance_records/<int:projectID>/<int:template_id>/', SubmitAttendanceRecordView.as_view(), name='submit-attendance-record'),
     # path('attendance/calculate_total/<int:project_id>/', CalculateTotalAttendeesView.as_view(), name='calculate-total-attendees'),
     path('calculate_attendees/<int:project_id>/', CalculateTotalAttendeesView.as_view(), name='calculate-attendees'),
+    path(
+        'attendance_templates/create/<int:project_id>/',
+        CreateAttendanceTemplateView.as_view(),
+        name='create-attendance-template'
+    ),
 
     # Accomplishment Report
     path('create/report/', AccomplishmentReportCreateView.as_view(), name='report_create'),
