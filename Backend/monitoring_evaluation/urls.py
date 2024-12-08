@@ -1,6 +1,8 @@
 from django.urls import path, include
 from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
+from django.conf import settings
+from django.conf.urls.static import static
 from .views import *
 
 app_name = 'monitoring_evaluation'
@@ -99,3 +101,8 @@ urlpatterns = [
     path('evaluation_links/', GenerateEvaluationSharableLinkView.as_view(), name="generate_evaluation_link"),
     path("evaluation/fill/<str:token>/", SubmitEvaluationView.as_view(), name='submit_evaluation'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

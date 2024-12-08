@@ -184,9 +184,24 @@ const ProjectsDashboard = () => {
                             <table className="min-w-full table-auto">
                                 <thead className="bg-gray-100">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Title</th>
-                                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Project Role</th>
-                                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Target Date</th>
+                                        <th
+                                            className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
+                                            onClick={() => handleSort('projectTitle')}
+                                        >
+                                            Title {sortConfig.key === 'projectTitle' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                        </th>
+                                        <th
+                                            className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
+                                            onClick={() => handleSort('role')}
+                                        >
+                                            Project Role {sortConfig.key === 'role' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                        </th>
+                                        <th
+                                            className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase cursor-pointer"
+                                            onClick={() => handleSort('targetImplementation')}
+                                        >
+                                            Target Date {sortConfig.key === 'targetImplementation' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                        </th>
                                         <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase"> </th>
                                     </tr>
                                 </thead>
