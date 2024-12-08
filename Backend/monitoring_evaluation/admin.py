@@ -100,6 +100,13 @@ class EvaluationAdmin(admin.ModelAdmin):
         extra_context['title'] = "Evaluations Grouped by Trainer and Project"
         return super().changelist_view(request, extra_context=extra_context)
 
+@admin.register(EvaluationSharableLink)
+class EvaluationSharableLinkAdmin(admin.ModelAdmin):
+    list_display = ('id', 'trainer', 'project', 'expiration_date', 'created_at', 'sharable_link')
+    list_filter = ('expiration_date', 'created_at')
+    search_fields = ('trainer__faculty', 'project__projectTitle', 'token')
+    ordering = ('-created_at',)
+    readonly_fields = ('sharable_link',)
 
 @admin.register(AccomplishmentReport)
 class AccomplishmentReportAdmin(admin.ModelAdmin):
