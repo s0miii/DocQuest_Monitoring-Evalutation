@@ -58,12 +58,13 @@ class AccomplishmentReportSerializer(serializers.ModelSerializer):
 
         
 class EvaluationSerializer(serializers.ModelSerializer):
+    trainerLoad = serializers.ReadOnlyField()
     class Meta:
         model = Evaluation
         fields = '__all__'
         extra_kwargs = {
             "trainer": {"required": False},
-            "project": {"required": False},
+            "project": {"required": True},
         }
 
     #I-validate if project is approved before maka evaluate
@@ -71,8 +72,20 @@ class EvaluationSerializer(serializers.ModelSerializer):
         project = data.get('project')
         if project.status != 'approved':
             raise ValidationError("Evaluations can only be created for approved projects.")
-        return data  
+        
+        # Ensure unique combination of attendee_name, trainer, and project
+        attendee_name = data.get('attendee_name')
+        trainer = data.get('trainer')
+        project = data.get('project')
 
+        if Evaluation.objects.filter(
+            attendee_name=attendee_name,
+            trainer=trainer,
+            project=project
+        ).exists():
+            raise ValidationError("An evaluation for this attendee, trainer, and project already exists.")
+
+        return data
 class EvaluationSharableLinkSerializer(serializers.ModelSerializer):
     trainer_name = serializers.CharField(source='trainer.faculty', read_only=True)
     project_title = serializers.CharField(source='project.projectTitle', read_only=True)
@@ -80,10 +93,20 @@ class EvaluationSharableLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvaluationSharableLink
         fields = [
-            "id", "trainer", "trainer_name", "project", "project_title",
-            "expiration_date", "token", "sharable_link"
+            "id",
+            "project", 
+            "project_title", 
+            "trainer", 
+            "trainer_name", 
+            "trainingLoad",
+            "expiration_date", 
+            "token", 
+            "sharable_link"
         ]       
-
+    
+    def get_trainingLoad(self, obj):
+        # Return the trainingLoad if the trainer exists, else None
+        return obj.trainer.trainingLoad if obj.trainer else None
 class PREXCAchievementSerializer(serializers.ModelSerializer):
     class Meta: model = PREXCAchievement
     fields = '__all__'

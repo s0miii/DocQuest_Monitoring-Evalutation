@@ -823,7 +823,7 @@ class EvaluationViewSet(viewsets.ModelViewSet):
     queryset = Evaluation.objects.all()
     serializer_class = EvaluationSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = {'trainer': ['exact'], 'project': ['exact']}  # These must match model field names
+    filterset_fields = {'trainer': ['exact'], 'project': ['exact']}
     search_fields = ['attendee_name', 'project__projectTitle', 'trainer__faculty']
     ordering_fields = ['submitted_at', 'overall_rating']
 
@@ -832,11 +832,11 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         trainer = self.request.query_params.get('trainer')
         project = self.request.query_params.get('project')
         
-        if trainer:
-            queryset = queryset.filter(trainer_id=trainer)
         if project:
             queryset = queryset.filter(project_id=project)
-        
+        if trainer:
+            queryset = queryset.filter(trainer_id=trainer)
+
         print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
         return queryset
 
@@ -844,32 +844,41 @@ class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
     queryset = EvaluationSharableLink.objects.all()
     serializer_class = EvaluationSharableLinkSerializer
 
-    # List all sharable links
     def list(self, request, *args, **kwargs):
-        # Handle GET requests to list all sharable links.
-        
+        # List all sharable links.
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    # Retrieve a specific sharable link by ID
     def retrieve(self, request, pk=None):
-        # Handle GET requests to retrieve a specific sharable link.
+        # Retrieve a specific sharable link by ID.
         sharable_link = get_object_or_404(EvaluationSharableLink, pk=pk)
         serializer = self.get_serializer(sharable_link)
         return Response(serializer.data)
-        
+    
     def create(self, request, *args, **kwargs):
         try:
             trainer_id = request.data.get("trainer_id")
             project_id = request.data.get("project_id")
             expiration_date = request.data.get("expiration_date")
-            trainer = LoadingOfTrainers.objects.get(pk=trainer_id)
+
+            # Fetch the project project
             project = Project.objects.get(pk=project_id)
 
+            # Validate trainer if related siya sa project (if naay trainer)
+            trainer = None
+            if trainer_id:
+                trainer = LoadingOfTrainers.objects.filter(pk=trainer_id, project=project).first()
+                if not trainer:
+                    return Response(
+                         {"error": f"Trainer with ID {trainer_id} is not associated with Project ID {project_id}."},
+                         status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            #  Create or update sharable link
             link, created = EvaluationSharableLink.objects.get_or_create(
-                trainer=trainer,
                 project=project,
+                trainer=trainer,  # This will be None if no trainer is provided
                 defaults={"expiration_date": expiration_date},
             )
 
@@ -877,79 +886,46 @@ class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
                 link.expiration_date = expiration_date
                 link.save()
 
+            response_data = EvaluationSharableLinkSerializer(link).data
+
+            # Remove trainer-related fields if no trainer is assigned
+            if not trainer:
+                response_data.pop("trainer", None)
+                response_data.pop("trainer_name", None)
+
             return Response(
-                {"message": "Sharable link created/retrieved successfully", "data": EvaluationSharableLinkSerializer(link).data},
+                {"message": "Sharable link created/retrieved successfully", "data": response_data},
                 status=status.HTTP_201_CREATED,
             )
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-            
-# # Evaluation Form View for HTML Form Submission
-# def evaluation_form_view(request, project_id, trainer_id=None):
-#     project = get_object_or_404(Project, projectID=project_id)
-#     trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id) if trainer_id else None #Set trainer to None if not provided for project-only evaluations
+   
 
-#     access_token = request.GET.get("access_token")
-#     evaluation = get_object_or_404(Evaluation, project=project, trainer=trainer)
-#     if access_token != evaluation.access_token:
-#         return HttpResponseForbidden("Invalid or missing access token.")
-
-#     if request.method == 'POST':
-#         form = EvaluationForm(request.POST)
-#         if form.is_valid():
-#             evaluation = form.save(commit=False)
-#             evaluation.project = project
-#             if trainer:
-#                 evaluation.trainer = trainer
-#             evaluation.stored_overall_rating = evaluation.calculate_overall_rating()
-#             evaluation.save()
-            
-#             return render(request, 'thank_you.html', {'stored_overall_rating': evaluation.stored_overall_rating})
-#     else:
-#         form = EvaluationForm()
-
-#     return render(request, 'evaluation_form.html', {'form': form, 'trainer': trainer, 'project': project})    
-
-# def evaluation_summary_view(request):
-#     projects = Project.objects.all()
-#     project_summaries = []
-
-#     for project in projects:
-#         trainers = project.loadingOfTrainers.all()
-#         trainer_evaluations = []
-
-#         for trainer in trainers:
-#             evaluations = Evaluation.objects.filter(project=project, trainer=trainer)
-#             if evaluations.exists():
-#                 trainer_evaluations.append({
-#                     'trainer': trainer,
-#                     'evaluations': evaluations,
-#                 })
-
-#         if trainer_evaluations:
-#             project_summaries.append({
-#                 'project': project,
-#                 'trainer_evaluations': trainer_evaluations,
-#             })        
-
-#     context = {'project_summaries': project_summaries}
-#     return render(request, 'evaluation_summary.html', context)            
-
-
-#EVAL NGA API-BASED NA
+# API-based Eval Link Generation - NEW
 class GenerateEvaluationSharableLinkView(APIView):
     # API to generate sharable links for evaluations.
     def post(self, request):
-        trainer_id = request.data.get("trainer_id")
         project_id = request.data.get("project_id")
+        trainer_id = request.data.get("trainer_id")
         expiration_date = request.data.get("expiration_date")
 
         try:
+            project = Project.objects.get(pk=project_id)
+
+            # Check if the project has a trainer
+            trainer = None
+            if trainer_id:
+                trainer = LoadingOfTrainers.objects.filter(pk=trainer_id).first()
+                if not trainer:
+                    return Response({"error": "Trainer not found."}, status=status.HTTP_400_BAD_REQUEST)
+
             sharable_link, created = EvaluationSharableLink.objects.get_or_create(
-                trainer_id=trainer_id,
-                project_id=project_id,
+                trainer=trainer,
+                project=project,
                 defaults={"expiration_date": expiration_date},
             )
+
             if not created:
                 sharable_link.expiration_date = expiration_date
                 sharable_link.save()
@@ -957,13 +933,18 @@ class GenerateEvaluationSharableLinkView(APIView):
             return Response({
                 "message": "Sharable link generated successfully.",
                 "data": {
-                    "trainer_id": trainer_id,
-                    "project_id": project_id,
-                    "link": sharable_link.sharable_link,
+                    "trainer_id": trainer.LOTID if trainer else None,
+                    "trainer_name": trainer.faculty if trainer else None,
+                    "trainingLoad": trainer.trainingLoad if trainer else None,
+                    "project_id": project.projectID,
+                    "project_title": project.projectTitle,
                     "expiration_date": sharable_link.expiration_date,
+                    "link": sharable_link.sharable_link,
                 }
             }, status=status.HTTP_201_CREATED)
 
+        except Project.DoesNotExist:
+            return Response({"error": "Project not found."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
