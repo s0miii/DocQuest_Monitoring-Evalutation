@@ -26,8 +26,12 @@ import DeptOffDashboard from "./pages/deptoff/DeptOffDashboard";
 // import DeptOffProfilePage from "./pages/deptoff/DeptOffProfilePage";
 import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
-import EStaffProjects from "./pages/estaff/EStaffProjects";
-import EStaffProjMonitoring from "./pages/estaff/EStaffProjMonitoring";
+import StaffProjectsDashboard from "./pages/estaff/StaffProjectsDashboard";
+import StaffDailyAttRec from "./pages/estaff/StaffDailyAttRec";
+import StaffLecNotes from "./pages/estaff/StaffLecNotes";
+import StaffPhotoDocs from "./pages/estaff/StaffPhotoDocs";
+import StaffOthers from "./pages/estaff/StaffOthers";
+import EStaffProjReq from "./pages/estaff/EStaffProjReq";
 import EstaffTrainerCVDTR from "./pages/estaff/EstaffTrainersCVDTR";
 import EStaffOP1OP2 from "./pages/estaff/EStaffOP1OP2";
 import ProponentsProjects from "./pages/proponents/ProjectsDashboard"
@@ -45,18 +49,29 @@ import ProjectsDashboard from "./pages/proponents/ProjectsDashboard";
 import FillAttendanceForm from "./pages/attendance and evaluation/FillAttendanceForm"
 import AttendanceReport from "./pages/attendance and evaluation/AttendanceReport";
 
+
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/user" element={<ProjLeadDashboard />} />
-      <Route path="/estaff" element={<EstaffDashboard />} />
-      <Route path="/estaff/prexc/op1-op2" element={<EStaffOP1OP2 />} />
-      <Route path="/estaff/proj" element={<EStaffProjMonitoring />} />
       <Route path="/deptoff" element={<DeptOffDashboard />} />
       <Route path="/coordinator" element={<CoordinatorDashboard />} />
       <Route path="/signatory" element={<SignatoryDashboard />} />
+
+      <Route path="/estaff" element={<EstaffDashboard />} />
+      <Route path="/estaff/prexc/op1-op2" element={<EStaffOP1OP2 />} />
+      <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR />} />
+      <Route path="/estaff/projreq/:projectID" element={<EStaffProjReq />} />
+      <Route path="/staff-projects-dashboard" element={<StaffProjectsDashboard />} />
+      <Route path="/staff/project/:projectID/daily-attendance" element={<StaffDailyAttRec />} />
+      <Route path="/staff/project/:projectID/lecture-notes" element={<StaffLecNotes />} />
+      <Route path="/staff/project/:projectID/photo-documentations" element={<StaffPhotoDocs />} />
+      <Route path="/staff/project/:projectID/other-files" element={<StaffOthers />} />
+
+
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
       <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
       <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />
@@ -66,12 +81,10 @@ function App() {
       <Route path="/projlead/project/:projectID/evaluation-summary" element={<ProjLeadEvalSum />} />
       <Route path="/projlead/proj/req/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
       <Route path="/projlead/project/:projectID/lecture-notes" element={<ProjLeadLecNotes />} />
-      <Route path="/projlead/project/:projectID/others" element={<ProjLeadOthers />} />
+      <Route path="/projlead/project/:projectID/other-files" element={<ProjLeadOthers />} />
       <Route path="/projlead/project/:projectID/photo-documentations" element={<ProjLeadPhotoDocs />} />
 
-      <Route path="estaff/proj" element={<EStaffProjects />} />
-      <Route path="estaff/proj/monitoring" element={<EStaffProjMonitoring />} />
-      <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR />} />
+
 
       <Route path="/projects-dashboard" element={<ProjectsDashboard />} />
       <Route path="/proponents/proj/req/:projectID" element={<ProponentsProjReq />} />
