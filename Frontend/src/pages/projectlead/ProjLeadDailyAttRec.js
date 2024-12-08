@@ -334,16 +334,12 @@ const ProjLeadDailyAttRec = () => {
                                             <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                                     <a
-                                                        href={submission.file_url || "#"}
+                                                        href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:underline truncate block text-center"
-                                                        style={{ maxWidth: "200px" }}
-                                                        title={submission.file_name || "No File"}
                                                     >
-                                                        {submission.file_name?.length > 20
-                                                            ? `${submission.file_name.slice(0, 17)}...`
-                                                            : submission.file_name || "No File"}
+                                                        {submission.file_name || "No File"}
                                                     </a>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
@@ -375,6 +371,8 @@ const ProjLeadDailyAttRec = () => {
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
                                                     {submission.status === "Approved" ? (
                                                         <span className="text-gray-500">Approved</span>
+                                                    ) : submission.status === "Rejected" ? (
+                                                        <span className="text-gray-500">Rejected</span>
                                                     ) : (
                                                         <div className="space-x-2">
                                                             <button
