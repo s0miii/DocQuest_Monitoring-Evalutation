@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Topbar from "../../components/Topbar";
-import ProjLeadSidebar from "../../components/ProjLeadSideBar";
+import EStaffSideBar from "../../components/EStaffSideBar";
 
-const ProjLeadDashboard = () => {
+const EstaffDashboard = () => {
     const [users, setUsers] = useState([]);
     const [campusProposalCount, setCampusProposalCount] = useState(0);
     const [sharedProposalCount, setSharedProposalCount] = useState(0);
@@ -56,7 +56,7 @@ const ProjLeadDashboard = () => {
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
-                <ProjLeadSidebar />
+                <EStaffSideBar />
             </div>
             <div className="flex-1 ml-[20%]">
                 <Topbar />
@@ -149,4 +149,4 @@ const ProjLeadDashboard = () => {
     );
 };
 
-export default ProjLeadDashboard;
+export default EstaffDashboard;

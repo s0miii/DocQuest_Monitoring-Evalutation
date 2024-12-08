@@ -1,70 +1,129 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import axios from "axios";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
 
-function EStaffSideBar() {
+function EStaffSideBar({ onFilterChange }) {
+    const [activeDropdown, setActiveDropdown] = useState(null); // To track which dropdown is open
+    const navigate = useNavigate();
     const location = useLocation();
 
-    const [isUserManagementSubMenuVisible, setIsUserManagementSubMenuVisible] = useState(false);
-    const [isPREXCSubMenuVisible, setIsPREXCSubMenuVisible] = useState(false);
+    // Helper function to check if the pathname is related to a specific section
+    const isPathActive = (path) => location.pathname.startsWith(path);
 
-    const toggleUserManagementSubMenu = () => {
-        setIsUserManagementSubMenuVisible(!isUserManagementSubMenuVisible);
+    const handleLogout = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.post('https://web-production-4b16.up.railway.app/auth/token/logout/', {}, {
+                headers: {
+                    'Authorization': `Token ${token}`,
+                },
+            });
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+        localStorage.clear();
+        navigate('/login');
     };
 
-
-    const togglePREXCSubMenu = () => {
-        setIsPREXCSubMenuVisible(!isPREXCSubMenuVisible);
-    };
-
-    const isActive = (paths) => {
-        return paths.some((path) => location.pathname.startsWith(path));
+    const toggleDropdown = (dropdown) => {
+        // Toggle the dropdown and close others
+        setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
     };
 
     return (
-        <div className="w-1/5 bg-vlu text-white h-screen fixed z-50 overflow-y-auto">
+        <div className="w-1/5 bg-vlu text-white h-screen fixed z-50">
             <div className="flex justify-center">
                 <img src="/images/logo2.png" alt="DocQuestLogo" className="w-52" />
             </div>
             <nav>
                 <ul>
                     <li>
-                        <Link to="/dashboard" className={`text-lg font-bold block px-6 py-3 ${isActive(["/dashboard"]) ? "text-yellow-500" : ""}`}>Dashboard</Link>
+                        <NavLink
+                            to="/estaff"
+                            className={({ isActive }) =>
+                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                        >
+                            Dashboard
+                        </NavLink>
                     </li>
                     <li>
-                        <button onClick={toggleUserManagementSubMenu} className="text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none">
-                            User Management
+                        <NavLink
+                            to="/estaff-project-statistics"
+                            className={({ isActive }) =>
+                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                        >
+                            Project Statistics
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/estaff-project-view-list/approved/project"
+                            className={({ isActive }) =>
+                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                        >
+                            Project List
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/estaff-moa-view-list/all/moa"
+                            className={({ isActive }) =>
+                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                        >
+                            MOA List
+                        </NavLink>
+                    </li>
+
+                    <li>
+                        <NavLink
+                            to="/staff-projects-dashboard"
+                            className={({ isActive }) =>
+                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                        >
+                            Project Monitoring
+                        </NavLink>
+                    </li>
+
+                    {/* Accounts Dropdown */}
+                    <li>
+                        <button
+                            onClick={() => toggleDropdown('accounts')}
+                            className={`text-lg block px-6 py-3 w-full text-left ${activeDropdown === 'accounts' ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                        >
+                            Accounts
                         </button>
-                        <ul className={`${isUserManagementSubMenuVisible ? "" : "hidden"} bg-indigo-900`}>
-                            <li><Link to="/user-management/view" className="block px-6 py-3 hover:text-yellow-500">View Users</Link></li>
-                            <li><Link to="/user-management/create" className="block px-6 py-3 hover:text-yellow-500">Create User</Link></li>
-                        </ul>
+                        {activeDropdown === 'accounts' && (
+                            <ul className="pl-6">
+                                <li>
+                                    <NavLink
+                                        to="/estaff-userlist"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        User List
+                                    </NavLink>
+                                </li>
+
+                                <li>
+                                    <NavLink
+                                        to="/estaff-create-user"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        Create User
+                                    </NavLink>
+                                </li>
+                            </ul>
+                        )}
                     </li>
+
                     <li>
-                        <Link to="/documents" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/documents"]) ? "text-yellow-500" : ""}`}>Documents</Link>
-                    </li>
-                    <li>
-                        <Link to="/estaff/proj" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/estaff/proj"]) ? "text-yellow-500" : ""}`}>Project Monitoring</Link>
-                    </li>
-                    <li>
-                        <Link to="#" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["#"]) ? "text-yellow-500" : ""}`}>
-                            Email
-                        </Link>
-                    </li>
-                    <li>
-                        <button onClick={togglePREXCSubMenu} className="text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none">
-                            PREXC
+                        <button
+                            onClick={handleLogout}
+                            className="text-lg text-white block px-6 py-3 hover:text-red-600 w-full text-left"
+                        >
+                            Log out
                         </button>
-                        <ul className={`${isPREXCSubMenuVisible ? "" : "hidden"} bg-indigo-900`}>
-                            <li><Link to="/estaff/prexc/op1-op2" className="block px-6 py-3 hover:text-yellow-500">Extension Program (OP1 and OP2)</Link></li>
-                            <li><Link to="/prexc/op2" className="block px-6 py-3 hover:text-yellow-500">Extension Program (OP2)</Link></li>
-                            <li><Link to="/prexc/oc" className="block px-6 py-3 hover:text-yellow-500">Extension Program (Oc)</Link></li>
-                            <li><Link to="/prexc/campus-performance" className="block px-6 py-3 hover:text-yellow-500">College Campus Performance</Link></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <Link to="/logout" className="text-lg block px-6 py-3 hover:text-yellow-500">
-                            Log Out
-                        </Link>
                     </li>
                 </ul>
             </nav>

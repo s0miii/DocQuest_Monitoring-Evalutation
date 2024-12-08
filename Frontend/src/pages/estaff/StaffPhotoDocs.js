@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
-import ProjLeadSidebar from "../../components/ProjLeadSideBar";
+import EStaffSideBar from "../../components/EStaffSideBar";
 import { FaArrowLeft } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 
-const ProjLeadOthers = () => {
+const StaffPhotoDocs = () => {
     const navigate = useNavigate();
     const { projectID } = useParams(); // Extract projectID from the URL
     const [projectDetails, setProjectDetails] = useState(null);
@@ -74,7 +74,7 @@ const ProjLeadOthers = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Other%20Files/submissions/`,
+                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Photo%20Documentations/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -112,81 +112,6 @@ const ProjLeadOthers = () => {
         setSubmissions(sortedData);
     };
 
-    const handleApprove = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/other_files/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Approved" }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission approved successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error approving submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error approving submission:", error);
-            alert("An error occurred while approving the submission.");
-        }
-    };
-
-    const handleReject = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        const rejectionReason = prompt("Please provide a reason for rejection:");
-
-        if (!rejectionReason) {
-            alert("Rejection reason is required.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/other_files/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Rejected", rejection_reason: rejectionReason }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission rejected successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error rejecting submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error rejecting submission:", error);
-            alert("An error occurred while rejecting the submission.");
-        }
-    };
-
 
     // loading substitute
     if (loading) {
@@ -208,17 +133,17 @@ const ProjLeadOthers = () => {
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
-                <ProjLeadSidebar />
+                <EStaffSideBar />
             </div>
             {/* Main content area */}
             <div className="flex-1 ml-[20%]">
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req/:projectID')}>
+                        <button className="mr-2" onClick={() => handleViewClick('/estaff/projreq/:projectID')}>
                             <FaArrowLeft />
                         </button>
-                        <h1 className="text-2xl font-semibold">Other Files</h1>
+                        <h1 className="text-2xl font-semibold">Photo Documentations</h1>
                     </div>
                     {/* Project Details */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
@@ -319,9 +244,7 @@ const ProjLeadOthers = () => {
                                             {sortConfig.key === "status" &&
                                                 (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                                         </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            Actions
-                                        </th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -364,28 +287,6 @@ const ProjLeadOthers = () => {
                                                         <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
                                                     )}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                    {submission.status === "Approved" ? (
-                                                        <span className="text-gray-500">Approved</span>
-                                                    ) : submission.status === "Rejected" ? (
-                                                        <span className="text-gray-500">Rejected</span>
-                                                    ) : (
-                                                        <div className="space-x-2">
-                                                            <button
-                                                                onClick={() => handleApprove(submission.submission_id, submission.model_name)}
-                                                                className="text-green-500 hover:text-green-700"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleReject(submission.submission_id, submission.model_name)}
-                                                                className="text-red-500 hover:text-red-700"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </td>
                                             </tr>
                                         ))
                                     ) : (
@@ -406,4 +307,4 @@ const ProjLeadOthers = () => {
     );
 };
 
-export default ProjLeadOthers;
+export default StaffPhotoDocs;
