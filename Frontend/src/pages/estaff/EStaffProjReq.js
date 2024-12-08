@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Topbar from "../../components/Topbar";
 import { useNavigate, useParams } from 'react-router-dom';
-import ProjLeadSidebar from "../../components/ProjLeadSideBar";
+import Topbar from "../../components/Topbar";
+import EStaffSideBar from "../../components/EStaffSideBar";
 import { FaArrowLeft } from "react-icons/fa";
 
-const ProjLeadProjReq = () => {
+
+const EStaffProjReq = ({ totalRequirements, completedRequirements }) => {
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
     const { projectID } = useParams();
@@ -117,19 +118,18 @@ const ProjLeadProjReq = () => {
         return <div>Project not found.</div>;
     }
 
-
     return (
         <div className="bg-gray-200 min-h-screen flex">
             {/* Sidebar with fixed width */}
             <div className="w-1/5 fixed h-full">
-                <ProjLeadSidebar />
+                <EStaffSideBar />
             </div>
             {/* Main content area */}
             <div className="flex-1 ml-[20%]">
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/projects-dashboard')}>
+                        <button className="mr-2" onClick={() => handleViewClick('/staff-projects-dashboard')}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Project {projectDetails.projectTitle} Details</h1>
@@ -184,13 +184,13 @@ const ProjLeadProjReq = () => {
                         <h2 className="text-xl font-semibold">Documentary Requirements</h2>
                         <button
                             className="text-blue-500 text-sm"
-                            onClick={() => handleViewClick('/projlead/assign-checklist/${projectID}')}
+                            onClick={() => handleViewClick('#')}
                         >
-                            Assign Proponents
+                            Send Reminder
                         </button>
                     </div>
                     <div className="assigned-requirements">
-                        <div className="bg-white shadow-lg rounded-lg p-6">
+                        <div className="bg-white shadow-lg rounded-lg p-6 ">
                             <div className="space-y-4 text-lg">
                                 {Object.entries(documentCounts).map(([itemName, count]) => (
                                     <div key={itemName} className="flex justify-between items-center">
@@ -202,7 +202,7 @@ const ProjLeadProjReq = () => {
                                         </div>
                                         <button
                                             className="text-blue-500 hover:underline"
-                                            onClick={() => handleViewClick(`/projlead/project/${projectID}/${itemName.replace(/\s+/g, '-').toLowerCase()}`)}
+                                            onClick={() => handleViewClick(`/staff/project/${projectID}/${itemName.replace(/\s+/g, '-').toLowerCase()}`)}
                                         >
                                             View
                                         </button>
@@ -217,4 +217,4 @@ const ProjLeadProjReq = () => {
     );
 };
 
-export default ProjLeadProjReq;
+export default EStaffProjReq;

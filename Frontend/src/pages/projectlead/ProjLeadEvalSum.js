@@ -417,9 +417,9 @@ const ProjLeadEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Excellent (5)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -427,9 +427,9 @@ const ProjLeadEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Very Satisfactory (4)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -437,9 +437,9 @@ const ProjLeadEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Satisfactory (3)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -447,9 +447,9 @@ const ProjLeadEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Fair (2)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -457,9 +457,9 @@ const ProjLeadEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Poor (1)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -474,19 +474,19 @@ const ProjLeadEvalSum = () => {
                         <div className="grid grid-cols-2 gap-4 mt-4 max-w-2xl mx-auto">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Total Evaluations</label>
-                                <input 
-                                    type="text" 
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full" 
-                                    placeholder="Total Evaluations" 
+                                <input
+                                    type="text"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Total Evaluations"
                                     readOnly
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Percentage</label>
-                                <input 
-                                    type="text" 
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full" 
-                                    placeholder="Percentage" 
+                                <input
+                                    type="text"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Percentage"
                                     readOnly
                                 />
                             </div>
@@ -498,4 +498,4 @@ const ProjLeadEvalSum = () => {
     );
 };
 
-export default ProjLeadEvalSum ;
+export default ProjLeadEvalSum;

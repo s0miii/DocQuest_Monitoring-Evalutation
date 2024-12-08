@@ -41,12 +41,17 @@ urlpatterns = [
     # view all projects
     path("user-projects/", UserProjectsView.as_view(), name="user-projects"),
 
+    # staff view for all projects
+    path("staff-projects/", StaffProjectsView.as_view(), name="staff-projects"),
+
     # document count
     # path("project/<int:project_id>/document_counts/", DocumentCountsView.as_view(), name="document_counts"),
     path("project/<int:project_id>/document_counts/", document_counts, name="document_counts"),
 
     # View Proponent Project Details
     path('projects/<int:project_id>/details/', ProponentProjectDetailsView.as_view(), name='proponent_project_details'),
+
+    
 
     # project progress
     path('project/<int:project_id>/progress/', project_progress, name='project_progress'),
