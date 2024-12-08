@@ -27,10 +27,10 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
                 return `/proponents/project/${projectID}/evaluation-summary`;
             case "Lecture Notes":
                 return `/proponents/project/${projectID}/modules-notes`;
+            case "Photo Documentations":
+                return `/proponents/project/${projectID}/photo-documentations`;
             case "Other Files":
                 return `/proponents/project/${projectID}/other`;
-            case "Photo Documentation":
-                return `/proponents/project/${projectID}/photo-docs`;
             default:
                 return "#";
         }

@@ -9,10 +9,6 @@ const ProjLeadDailyAttRec = () => {
     const navigate = useNavigate();
     const { projectID } = useParams(); // Extract projectID from the URL
     const [projectDetails, setProjectDetails] = useState(null);
-    const [date, setDate] = useState("");
-    const [description, setDescription] = useState("");
-    const [totalAttendees, setAttendees] = useState(0);
-    const [attachedFiles, setAttachedFiles] = useState([]); // Array to handle multiple files
     const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
