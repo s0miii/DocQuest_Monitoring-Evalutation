@@ -10,9 +10,6 @@ const ProjLeadDailyAttRec = () => {
     const navigate = useNavigate();
     const { projectID } = useParams(); // Extract projectID from the URL
     const [projectDetails, setProjectDetails] = useState(null);
-    const [date, setDate] = useState("");
-    const [description, setDescription] = useState("");
-    const [attachedFiles, setAttachedFiles] = useState([]); // Array to handle multiple files
     const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -484,6 +481,7 @@ const ProjLeadDailyAttRec = () => {
                         </button>
                         <h1 className="text-2xl font-semibold">Attendance Record</h1>
                     </div>
+
                     {/* Project Details */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-4">
