@@ -59,15 +59,15 @@ function App() {
       <Route path="/signatory" element={<SignatoryDashboard />} />
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
       <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
-      <Route path="/projlead/project/:projectID/assign-proponents" element={<ProjLeadAssignProponents />} />
+      <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />
       <Route path="/projlead/proj/req/accomplishment-report" element={<ProjLeadAccReport />} />
       <Route path="/projlead/project/:projectID/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
       <Route path="/projlead/project/:projectID/daily-attendance" element={<ProjLeadDailyAttRec />} />
       <Route path="/projlead/project/:projectID/evaluation-summary" element={<ProjLeadEvalSum />} />
       <Route path="/projlead/proj/req/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
-      <Route path="/projlead/project/:projectID/modules-notes" element={<ProjLeadLecNotes />} />
+      <Route path="/projlead/project/:projectID/lecture-notes" element={<ProjLeadLecNotes />} />
       <Route path="/projlead/project/:projectID/others" element={<ProjLeadOthers />} />
-      <Route path="/projlead/project/:projectID/photo-docs" element={<ProjLeadPhotoDocs />} />
+      <Route path="/projlead/project/:projectID/photo-documentations" element={<ProjLeadPhotoDocs />} />
 
       <Route path="estaff/proj" element={<EStaffProjects />} />
       <Route path="estaff/proj/monitoring" element={<EStaffProjMonitoring />} />
@@ -80,7 +80,7 @@ function App() {
       <Route path="/proponents/proj/req/trainer-cv-dtr" element={<ProponentsTrainerCVDTR />} />
       <Route path="/proponents/project/:projectID/modules-notes" element={<ProponentsLecNotes />} />
       <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
-      <Route path="/proponents/project/:projectID/photo-docs" element={<ProponentsPhotoDocs />} />
+      <Route path="/proponents/project/:projectID/photo-documentations" element={<ProponentsPhotoDocs />} />
       <Route path="/eval" element={<EvaluationForm />} />
       <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
       <Route path="/projlead/attendance-records/:templateId" element={<AttendanceReport />} />

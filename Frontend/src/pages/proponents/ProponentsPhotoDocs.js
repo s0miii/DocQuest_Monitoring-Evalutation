@@ -78,7 +78,7 @@ const ProponentsPhotoDocs = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Photo%20Documentation/submissions/`,
+                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Photo%20Documentations/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -128,7 +128,7 @@ const ProponentsPhotoDocs = () => {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/photo_documentation/${projectID}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/photo_documentations/${projectID}/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`, // Ensure the token is passed correctly
@@ -166,7 +166,7 @@ const ProponentsPhotoDocs = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/photo_documentation/${submissionId}/`,
+                `http://127.0.0.1:8000/monitoring/submissions/photo_documentations/${submissionId}/`,
                 {
                     method: "DELETE",
                     headers: {
