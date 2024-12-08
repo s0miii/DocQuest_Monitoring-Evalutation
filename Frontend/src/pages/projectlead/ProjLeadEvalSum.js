@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Topbar from "../../components/Topbar";
 import { useNavigate } from 'react-router-dom';
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
@@ -9,12 +9,61 @@ const ProjLeadEvalSum = () => {
     const navigate = useNavigate();
     const { projectID } = useParams();
     const [projectDetails, setProjectDetails] = useState(null);
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+    const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+    const [isProjectLeader, setIsProjectLeader] = useState(false);
+
+
 
     const handleViewClick = (path) => {
-        navigate(path);
-    }
+        navigate(path.replace(":projectID", projectID));
+    };
+
+    // Fetch project details and submissions
+    useEffect(() => {
+        if (!projectID) {
+            console.error("Project ID is undefined.");
+            return;
+        }
+
+        const fetchProjectDetails = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("User not logged in. Please log in again.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(
+                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setProjectDetails(data.projectDetails);
+                    setIsProjectLeader(data.isProjectLeader);
+                } else {
+                    console.error("Failed to fetch project details.");
+                }
+            } catch (error) {
+                console.error("Error fetching project details:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProjectDetails();
+        fetchUpdatedSubmissions();
+    }, [projectID, navigate]);
 
     
     const fetchUpdatedSubmissions = async () => {
@@ -140,6 +189,22 @@ const ProjLeadEvalSum = () => {
             alert("An error occurred while rejecting the submission.");
         }
     };
+
+    
+    // loading substitute
+    if (loading) {
+        return (
+            <div className="p-4">
+                <div className="bg-gray-200 animate-pulse h-6 w-3/4 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-1/2 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-full rounded"></div>
+            </div>
+        );
+    }
+
+    if (!projectDetails) {
+        return <div>Project not found.</div>;
+    }
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
