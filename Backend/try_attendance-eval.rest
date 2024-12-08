@@ -289,9 +289,9 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 ###
 # POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/
 #Calculate Number of Attendees per Project
-POST http://127.0.0.1:8000/monitoring/calculate_attendees/3/
+POST http://127.0.0.1:8000/monitoring/calculate_attendees/9/
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 # New Evaluation Endpoints
 ###

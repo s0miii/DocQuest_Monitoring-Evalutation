@@ -12,7 +12,6 @@ const ProjLeadDailyAttRec = () => {
     const [projectDetails, setProjectDetails] = useState(null);
     const [date, setDate] = useState("");
     const [description, setDescription] = useState("");
-    const [totalAttendees, setAttendees] = useState(null);
     const [attachedFiles, setAttachedFiles] = useState([]); // Array to handle multiple files
     const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
@@ -29,7 +28,7 @@ const ProjLeadDailyAttRec = () => {
     const [includeContactNumber, setIncludeContactNumber] = useState(false);
     const [expirationDate, setExpirationDate] = useState('');
     const [templates, setTemplates] = useState([]);
-    const [totalAttendeess, setTotalAttendees] = useState(null);
+    const [totalAttendees, setTotalAttendees] = useState(null);
     const [averageAttendees, setAverageAttendees] = useState(null);
     const [numTemplates, setNumTemplates] = useState(null);
     const [isEditing, setIsEditing] = useState(false);  // To handle edit state
@@ -113,38 +112,29 @@ const ProjLeadDailyAttRec = () => {
         fetchTemplates();
     }, []);
 
-    // Fetch total attendees data when the component mounts or templates change
-    useEffect(() => {
-        const token = localStorage.getItem("token"); // Move this inside useEffect
-        if (!token) {
-            alert("User not logged in. Please log in again.");
-            navigate("/login");
-            return;
-        }
-        
-        const fetchTotalAttendees = async () => {
-            try {
-                const projectId = 1;  // Assuming you're working with project ID 1, adjust if necessary
-                const response = await axios.post(
-                    `http://127.0.0.1:8000/monitoring/calculate_total_attendees/${projectId}/`,
-                    {},
-                    {
-                        headers: { 'Authorization': `Token ${token}` },
+    // Function to handle calculation of total attendees
+    const calculateTotalAttendees = async () => {
+        try {
+            const projectId = 1; 
+            const response = await axios.post(
+                `http://127.0.0.1:8000/monitoring/calculate_attendees/${projectId}/`,
+                {},
+                {
+                    headers: {
+                        'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5',
+                        'Content-Type': 'application/json'
                     }
-                );
-                // Set the fetched data to state variables
-                setTotalAttendees(response.data.total_attendees);
-                setAverageAttendees(response.data.average_attendees);
-                setNumTemplates(response.data.num_templates);
-            } catch (error) {
-                console.error('Error fetching total attendees', error);
-                alert('Failed to fetch total attendees.');
-            }
-        };
-
-        fetchTotalAttendees();
-    }, [templates]); // Re-run the effect when templates change
-
+                }
+            );
+            setTotalAttendees(response.data.total_attendees);
+            setAverageAttendees(response.data.average_attendees);
+            setNumTemplates(response.data.num_templates);
+            alert('Attendance totals calculated successfully!');
+        } catch (error) {
+            console.error('Error calculating total attendees', error);
+            alert('Failed to calculate total attendees.');
+        }
+    };
 
     const fetchUpdatedSubmissions = async () => {
         const token = localStorage.getItem("token");
@@ -670,25 +660,33 @@ const ProjLeadDailyAttRec = () => {
                     {/* Total Attendees Info Section */}
                     <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
                         <h2 className='text-2xl font-semibold text-center mb-4'>Total Attendance Information</h2>
-                        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+                        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 text-center'>
                             <div>
                                 <label className='block text-sm font-medium text-gray-600'>Total Attendees</label>
-                                <p className='bg-gray-100 rounded-lg p-3 mt-1 text-center'>
+                                <p className='bg-gray-100 rounded-lg p-3 mt-1'>
                                     {totalAttendees !== null ? totalAttendees : 'Loading...'}
                                 </p>
                             </div>
                             <div>
                                 <label className='block text-sm font-medium text-gray-600'>Average Attendees</label>
-                                <p className='bg-gray-100 rounded-lg p-3 mt-1 text-center'>
+                                <p className='bg-gray-100 rounded-lg p-3 mt-1'>
                                     {averageAttendees !== null ? averageAttendees : 'Loading...'}
                                 </p>
                             </div>
                             <div>
                                 <label className='block text-sm font-medium text-gray-600'>Number of Templates</label>
-                                <p className='bg-gray-100 rounded-lg p-3 mt-1 text-center'>
+                                <p className='bg-gray-100 rounded-lg p-3 mt-1'>
                                     {numTemplates !== null ? numTemplates : 'Loading...'}
                                 </p>
                             </div>
+                        </div>
+                        <div className="flex justify-center mt-4"> {/* This div centers the button horizontally */}
+                            <button
+                                onClick={calculateTotalAttendees}
+                                className="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                            >
+                                Calculate Total Attendees
+                            </button>
                         </div>
                     </div>
 
