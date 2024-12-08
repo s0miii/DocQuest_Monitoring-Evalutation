@@ -25,9 +25,16 @@ const AttendanceReport = () => {
     useEffect(() => {
         const fetchTemplateDetailsAndRecords = async () => {
             try {
+                const token = localStorage.getItem("token"); // Move this inside useEffect
+                if (!token) {
+                    alert("User not logged in. Please log in again.");
+                    navigate("/login");
+                    return;
+                }
+                
                 // Fetch template details
                 const templateResponse = await axios.get(`http://127.0.0.1:8000/monitoring/attendance_templates/${templateId}/`, {
-                    headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+                    headers: { 'Authorization': `Token ${token}` },
                 });
                 setTemplateName(templateResponse.data.templateName);
 
@@ -45,7 +52,7 @@ const AttendanceReport = () => {
 
                 // Fetch attendance records
                 const attendanceResponse = await axios.get(`http://127.0.0.1:8000/monitoring/attendance_records/template/${templateId}/`, {
-                    headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
+                    headers: { 'Authorization': `Token ${token}` },
                 });
                 setAttendanceRecords(attendanceResponse.data);
             } catch (error) {
