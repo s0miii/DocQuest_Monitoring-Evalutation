@@ -139,6 +139,12 @@ class EvaluationSharableLinkAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
     readonly_fields = ('sharable_link',)
 
+@admin.register(EvaluationSummary)
+class EvaluationSummaryAdmin(admin.ModelAdmin):
+    list_display = ('project', 'total_evaluations', 'last_updated')
+    search_fields = ('project__name',)
+    list_filter = ('last_updated',)    
+
 @admin.register(AccomplishmentReport)
 class AccomplishmentReportAdmin(admin.ModelAdmin):
     list_display = (
