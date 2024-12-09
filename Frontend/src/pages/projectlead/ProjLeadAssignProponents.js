@@ -83,7 +83,7 @@ const ProjLeadAssignProponents = () => {
     };
 
     const handleViewClick = (path) => {
-        navigate(path);
+        navigate(path.replace(":projectID", projectID));
     };
 
     const hanNonTrainingClick = (training) => {
@@ -186,7 +186,7 @@ const ProjLeadAssignProponents = () => {
                     <div className="flex items-center mb-5">
                         <button
                             className="mr-2"
-                            onClick={() => handleViewClick("/projlead/proj/req")}
+                            onClick={() => handleViewClick('/projlead/proj/req/:projectID')}
                         >
                             <FaArrowLeft />
                         </button>

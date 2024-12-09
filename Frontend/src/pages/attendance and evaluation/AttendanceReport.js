@@ -25,16 +25,9 @@ const AttendanceReport = () => {
     useEffect(() => {
         const fetchTemplateDetailsAndRecords = async () => {
             try {
-                const token = localStorage.getItem("token"); // Move this inside useEffect
-                if (!token) {
-                    alert("User not logged in. Please log in again.");
-                    navigate("/login");
-                    return;
-                }
-                
                 // Fetch template details
                 const templateResponse = await axios.get(`http://127.0.0.1:8000/monitoring/attendance_templates/${templateId}/`, {
-                    headers: { 'Authorization': `Token ${token}` },
+                    headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
                 });
                 setTemplateName(templateResponse.data.templateName);
 
@@ -52,7 +45,7 @@ const AttendanceReport = () => {
 
                 // Fetch attendance records
                 const attendanceResponse = await axios.get(`http://127.0.0.1:8000/monitoring/attendance_records/template/${templateId}/`, {
-                    headers: { 'Authorization': `Token ${token}` },
+                    headers: { 'Authorization': 'Token 547dca520cf2940cd3cada1bf5208411a27d3ce5' },
                 });
                 setAttendanceRecords(attendanceResponse.data);
             } catch (error) {
@@ -143,7 +136,7 @@ const AttendanceReport = () => {
                         <button className='mr-2' onClick={() => navigate('/projlead/proj/req/daily-attendance')}>
                             <FaArrowLeft />
                         </button>
-                        <h1 className="text-2xl font-semibold">Attendance Records for Template: {templateName}</h1>
+                        <h1 className="text-2xl font-semibold">Attendance Records for Template #{templateId}</h1>
                         <button
                             onClick={downloadPdf}
                             className="ml-auto bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded-sm text-sm mt-3"
