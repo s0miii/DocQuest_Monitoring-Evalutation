@@ -428,22 +428,22 @@ POST http://127.0.0.1:8000/monitoring/evaluation/fill/Z7clYVwbJ13o0kzxUPXjMA/
 Content-Type: application/json
 
 {
-    "attendee_name": "Attendee Ni",
-    "relevance_of_topics": 5,
-    "organizational_flow": 4,
+    "attendee_name": "3rd Attendee Ni",
+    "relevance_of_topics": 3,
+    "organizational_flow": 3,
     "learning_methods": 3,
-    "technology_use": 5,
-    "time_efficiency": 4,
-    "mastery_subject": 5,
-    "preparedness": 4,
+    "technology_use": 3,
+    "time_efficiency": 3,
+    "mastery_subject": 3,
+    "preparedness": 3,
     "audience_participation": 4,
     "interest_level": 4,
-    "handle_questions": 4,
-    "voice_personality": 5,
+    "handle_questions": 3,
+    "voice_personality": 3,
     "visual_aids": 3,
     "venue_assessment": 4,
     "timeliness": 4,
-    "overall_management": 5,
+    "overall_management": 3,
     "useful_concepts": "Everything was great.",
     "improvement_areas": "Add more Q&A sessions.",
     "additional_comments": "Thank you for the informative session!"
@@ -463,3 +463,15 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 GET http://127.0.0.1:8000/monitoring/evaluations/{id}/
 Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+
+
+
+###
+# Generate Evaluation Summary
+### Retrieve Evaluation Summary for a Project
+GET http://127.0.0.1:8000/monitoring/project/2/evaluations_summary/
+Content-Type: application/json
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+
+# Replace {project_id} with the ID of the project you want to get the evaluation summary for.
+
