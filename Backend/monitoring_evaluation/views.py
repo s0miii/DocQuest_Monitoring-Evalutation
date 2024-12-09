@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import transaction
-from django.db.models import F, Q, ExpressionWrapper, IntegerField, Sum
+from django.db.models import F, Q, ExpressionWrapper, IntegerField, Sum, Count
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.decorators import method_decorator
@@ -1050,7 +1050,145 @@ class SubmitEvaluationView(APIView):
                 }, status=status.HTTP_201_CREATED)
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def evaluation_form_view(request, trainer_id, project_id):
+    trainer = get_object_or_404(LoadingOfTrainers, pk=trainer_id)
+    project = get_object_or_404(Project, pk=project_id)
+    return render(request, 'evaluation_form.html', {
+        'trainer': trainer,
+        'project': project,
+    })    
+
+# Function to fetch all evaluations for a specific project/trainer
+def get_evaluations_summary(project_id):
+    evaluations = Evaluation.objects.filter(project_id=project_id)
     
+    # Build a table-like structure
+    summary = []
+    for evaluation in evaluations:
+        row = {
+            "id": evaluation.id,
+            "relevance_of_topics": evaluation.relevance_of_topics,
+            "organizational_flow": evaluation.organizational_flow,
+            "learning_methods": evaluation.learning_methods,
+            "technology_use": evaluation.technology_use,
+            "time_efficiency": evaluation.time_efficiency,
+            "mastery_subject": evaluation.mastery_subject,
+            "preparedness": evaluation.preparedness,
+            "audience_participation": evaluation.audience_participation,
+            "interest_level": evaluation.interest_level,
+            "handle_questions": evaluation.handle_questions,
+            "voice_personality": evaluation.voice_personality,
+            "visual_aids": evaluation.visual_aids,
+            "venue_assessment": evaluation.venue_assessment,
+            "timeliness": evaluation.timeliness,
+            "overall_management": evaluation.overall_management,
+            "average": evaluation.overall_rating,
+        }
+        summary.append(row)
+    
+    return summary
+
+# View that generates evaluation summary table
+@api_view(['GET'])
+def evaluations_summary_view(request, project_id):
+    try:
+        # Fetch evaluations for the project
+        evaluations_summary = get_evaluations_summary(project_id)
+        
+        if not evaluations_summary:
+            # No evaluations found
+            return Response({
+                "message": "No evaluations found for this project.",
+                "evaluations": [],
+                "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                "total_evaluations": 0,
+                "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+            }, status=status.HTTP_200_OK)
+
+        # Calculate total evaluations
+        total_evaluations = len(evaluations_summary)
+
+        # Count evaluators in each rating category
+        categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+        for eval in evaluations_summary:
+            if eval["average"] <= 1:
+                categories["poor"] += 1
+            elif eval["average"] <= 2:
+                categories["fair"] += 1
+            elif eval["average"] <= 3:
+                categories["good"] += 1
+            elif eval["average"] <= 4:
+                categories["better"] += 1
+            else:
+                categories["best"] += 1
+        
+        # Calculate percentages
+        percentages = {key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0 
+                       for key, value in categories.items()}
+
+        # Combine results
+        return Response({
+            "message": "Evaluations summary retrieved successfully.",
+            "evaluations": evaluations_summary,
+            "categories": categories,
+            "total_evaluations": total_evaluations,
+            "percentages": percentages,
+        })
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Working ni but specific lang sa projects nga nay trainer - DON'T REMOVE YET
+@api_view(['GET'])
+def evaluations_summary_view(request, project_id):
+    try:
+        # Fetch evaluations
+        evaluations_summary = get_evaluations_summary(project_id)
+        
+        if not evaluations_summary:
+            # No evaluations found
+            return Response({
+                "message": "No evaluations found for this project.",
+                "evaluations": [],
+                "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                "total_evaluations": 0,
+                "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+            }, status=status.HTTP_200_OK)
+        
+        # Calculate total evaluations
+        total_evaluations = len(evaluations_summary)
+
+        # Count evaluators in each rating category
+        categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+        for eval in evaluations_summary:
+            if eval["average"] <= 1:
+                categories["poor"] += 1
+            elif eval["average"] <= 2:
+                categories["fair"] += 1
+            elif eval["average"] <= 3:
+                categories["good"] += 1
+            elif eval["average"] <= 4:
+                categories["better"] += 1
+            else:
+                categories["best"] += 1
+        
+        # Calculate percentages
+        percentages = {key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0 
+                       for key, value in categories.items()}
+
+        # Combine results
+        return Response({
+            "message": "Evaluations summary retrieved successfully.",            
+            "evaluations": evaluations_summary,
+            "categories": categories,
+            "total_evaluations": total_evaluations,
+            "percentages": percentages,
+        })
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 # ATTENDANCE TEMPLATE -> KATONG CHECKLIST NGA LOGIC
 class AttendanceTemplateViewSet(viewsets.ModelViewSet):
