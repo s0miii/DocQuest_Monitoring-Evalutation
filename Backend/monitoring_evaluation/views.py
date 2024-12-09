@@ -1060,11 +1060,11 @@ def evaluation_form_view(request, trainer_id, project_id):
     })    
 
 # Function to fetch all evaluations for a specific project/trainer
-def get_evaluations_summary(project_id):
+def get_detailed_evaluations(project_id):
     evaluations = Evaluation.objects.filter(project_id=project_id)
     
     # Build a table-like structure
-    summary = []
+    detaield_summary = []
     for evaluation in evaluations:
         row = {
             "id": evaluation.id,
@@ -1085,9 +1085,9 @@ def get_evaluations_summary(project_id):
             "overall_management": evaluation.overall_management,
             "average": evaluation.overall_rating,
         }
-        summary.append(row)
+        detaield_summary.append(row)
     
-    return summary
+    return detaield_summary
 
 # View that generates evaluation summary table - UPDATED, WITH MODEL
 @api_view(['GET'])
@@ -1118,7 +1118,9 @@ def evaluation_summary_view(request, project_id):
                     "evaluations": [],
                     "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
                     "total_evaluations": 0,
-                    "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+                    "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                    "detailed_evaluations": [],
+
                 }, status=200)
 
             # Count evaluators in each rating category
@@ -1158,65 +1160,69 @@ def evaluation_summary_view(request, project_id):
                     percentages=percentages,
                 )
 
-        # Step 5: Return the summary (whether from database or recalculated)
+        # Step 5: Get detailed evaluations
+        detailed_evaluations = get_detailed_evaluations(project_id)
+
+        # Step 6: Return the summary (whether from database or recalculated)
         return Response({
             "message": "Evaluations summary retrieved successfully.",
             "total_evaluations": summary.total_evaluations,
             "categories": summary.categories,
             "percentages": summary.percentages,
+            "detailed_evaluations": detailed_evaluations,
         }, status=200)
 
     except Exception as e:
         return Response({"message": "An error occurred.", "error": str(e)}, status=500)
 
-# View that generates evaluation summary table - no model to store data yet, purely view lang
-@api_view(['GET'])
-def evaluations_summary_view(request, project_id):
-    try:
-        # Fetch evaluations for the project
-        evaluations_summary = get_evaluations_summary(project_id)
+# # View that generates evaluation summary table - no model to store data yet, purely view lang
+# @api_view(['GET'])
+# def evaluations_summary_view(request, project_id):
+#     try:
+#         # Fetch evaluations for the project
+#         evaluations_summary = get_evaluations_summary(project_id)
         
-        if not evaluations_summary:
-            # No evaluations found
-            return Response({
-                "message": "No evaluations found for this project.",
-                "evaluations": [],
-                "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
-                "total_evaluations": 0,
-                "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
-            }, status=status.HTTP_200_OK)
+#         if not evaluations_summary:
+#             # No evaluations found
+#             return Response({
+#                 "message": "No evaluations found for this project.",
+#                 "evaluations": [],
+#                 "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+#                 "total_evaluations": 0,
+#                 "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+#             }, status=status.HTTP_200_OK)
 
-        # Calculate total evaluations
-        total_evaluations = len(evaluations_summary)
+#         # Calculate total evaluations
+#         total_evaluations = len(evaluations_summary)
 
-        # Count evaluators in each rating category
-        categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
-        for eval in evaluations_summary:
-            if eval["average"] <= 1:
-                categories["poor"] += 1
-            elif eval["average"] <= 2:
-                categories["fair"] += 1
-            elif eval["average"] <= 3:
-                categories["good"] += 1
-            elif eval["average"] <= 4:
-                categories["better"] += 1
-            else:
-                categories["best"] += 1
+#         # Count evaluators in each rating category
+#         categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+#         for eval in evaluations_summary:
+#             if eval["average"] <= 1:
+#                 categories["poor"] += 1
+#             elif eval["average"] <= 2:
+#                 categories["fair"] += 1
+#             elif eval["average"] <= 3:
+#                 categories["good"] += 1
+#             elif eval["average"] <= 4:
+#                 categories["better"] += 1
+#             else:
+#                 categories["best"] += 1
         
-        # Calculate percentages
-        percentages = {key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0 
-            for key, value in categories.items()}
+#         # Calculate percentages
+#         percentages = {key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0 
+#                        for key, value in categories.items()}
 
-        # Combine results
-        return Response({
-            "message": "Evaluations summary retrieved successfully.",
-            "evaluations": evaluations_summary,
-            "categories": categories,
-            "total_evaluations": total_evaluations,
-            "percentages": percentages,
-        })
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         # Combine results
+#         return Response({
+#             "message": "Evaluations summary retrieved successfully.",
+#             "evaluations": evaluations_summary,
+#             "categories": categories,
+#             "total_evaluations": total_evaluations,
+#             "percentages": percentages,
+#         })
+#     except Exception as e:
+#         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # # Working ni but specific lang sa projects nga nay trainer - DON'T REMOVE YET
