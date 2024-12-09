@@ -945,7 +945,7 @@ class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-   
+
 
 # API-based Eval Link Generation - NEW
 class GenerateEvaluationSharableLinkView(APIView):
@@ -1125,7 +1125,7 @@ def evaluations_summary_view(request, project_id):
         
         # Calculate percentages
         percentages = {key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0 
-                       for key, value in categories.items()}
+            for key, value in categories.items()}
 
         # Combine results
         return Response({
