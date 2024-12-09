@@ -13,7 +13,10 @@ const ProjLeadEvalSum = () => {
     const [submissions, setSubmissions] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [isProjectLeader, setIsProjectLeader] = useState(false);
-
+    const [trainers, setTrainers] = useState([]);
+    const [selectedTrainerId, setSelectedTrainerId] = useState('');
+    const [sharableLink, setSharableLink] = useState("");
+    const [expirationDate, setExpirationDate] = useState('');
 
 
     const handleViewClick = (path) => {
@@ -95,6 +98,72 @@ const ProjLeadEvalSum = () => {
             }
         } catch (error) {
             console.error("Error fetching submissions:", error);
+        }
+    };
+
+
+    const fetchTrainers = async () => {
+        const token = localStorage.getItem("token");
+        try {
+            const response = await fetch(
+                'http://127.0.0.1:8000/api/trainers/', // Adjust this endpoint as necessary
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                setTrainers(data);
+            } else {
+                console.error("Failed to fetch trainers.");
+            }
+        } catch (error) {
+            console.error("Error fetching trainers:", error);
+        }
+    };
+
+
+    const generateSharableLink = async () => {
+        const token = localStorage.getItem("token");
+        if (!selectedTrainerId) {
+            alert('Please select a trainer.');
+            return;
+        }
+        const requestBody = {
+            trainer_id: selectedTrainerId,
+            project_id: projectID,
+            expiration_date: "2024-12-31"
+        };
+
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:8000/monitoring/evaluation_links/`, // Correct endpoint
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(requestBody)
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                setSharableLink(data.link); // Ensure your backend returns the link in this format
+                alert("Sharable link generated successfully!");
+            } else {
+                const errorData = await response.json();
+                alert(`Error generating sharable link: ${errorData.error || "An error occurred."}`);
+            }
+        } catch (error) {
+            console.error("Error generating sharable link:", error);
+            alert("An error occurred while generating the sharable link.");
         }
     };
 
@@ -492,6 +561,52 @@ const ProjLeadEvalSum = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Sharable Link Generation Section */}
+                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-center mb-4">Generate Sharable Link</h2>
+                        <div className="flex justify-between items-end">
+                            <div className="flex-1 mr-4">
+                                <label htmlFor="trainer-select" className="block mb-2 text-sm font-medium text-gray-700">Select Trainer:</label>
+                                <select
+                                    id="trainer-select"
+                                    value={selectedTrainerId}
+                                    onChange={e => setSelectedTrainerId(e.target.value)}
+                                    className="block p-2 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">Select a Trainer</option>
+                                    {trainers.map(trainer => (
+                                        <option key={trainer.id} value={trainer.id}>{trainer.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex-1 ml-4">
+                                <label htmlFor="expiration-date" className="block mb-2 text-sm font-medium text-gray-700">Expiration Date:</label>
+                                <input
+                                    type="date"
+                                    id="expiration-date"
+                                    value={expirationDate}
+                                    onChange={e => setExpirationDate(e.target.value)}
+                                    className="block p-2 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
+                        <button
+                            onClick={generateSharableLink}
+                            className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Generate Link
+                        </button>
+                        {sharableLink && (
+                            <div className="mt-4 p-2 bg-gray-100 rounded">
+                                <label className="font-semibold">Sharable Link:</label>
+                                <a href={sharableLink} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:underline">
+                                    {sharableLink}
+                                </a>
+                            </div>
+                        )}
+                    </div>
+
                 </div>
             </div>
         </div>
