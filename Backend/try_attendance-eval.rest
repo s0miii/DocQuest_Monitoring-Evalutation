@@ -471,7 +471,7 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 ###
 # Generate Evaluation Summary
 ### Retrieve Evaluation Summary for a Project
-GET http://127.0.0.1:8000/monitoring/project/2/evaluations_summary/
+GET http://127.0.0.1:8000/monitoring/project/2/evaluation_summary/
 Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 
