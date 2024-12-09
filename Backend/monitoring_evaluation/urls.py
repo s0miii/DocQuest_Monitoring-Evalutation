@@ -105,7 +105,7 @@ urlpatterns = [
     path('evaluation_links/', GenerateEvaluationSharableLinkView.as_view(), name="generate_evaluation_link"),
     path("evaluation/fill/<str:token>/", SubmitEvaluationView.as_view(), name='submit_evaluation'),
     # compute summary
-    path('project/<int:project_id>/evaluations_summary/', evaluations_summary_view, name='evaluations_summary'),
+    path('project/<int:project_id>/evaluation_summary/', evaluation_summary_view, name='evaluation_summary'),
 
 ]
 

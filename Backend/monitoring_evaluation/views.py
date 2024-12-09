@@ -1044,7 +1044,87 @@ def get_evaluations_summary(project_id):
     
     return summary
 
-# View that generates evaluation summary table
+# View that generates evaluation summary table - UPDATED, WITH MODEL
+@api_view(['GET'])
+def evaluation_summary_view(request, project_id):
+    try:
+        # Step 1: Check for an existing summary in the database
+        try:
+            summary = EvaluationSummary.objects.get(project_id=project_id)
+        except EvaluationSummary.DoesNotExist:
+            summary = None
+
+        # Step 2: Determine if recalculation is needed
+        recalculate = False
+        if summary:
+            # Check if the summary is outdated (you can adjust the condition)
+            time_difference = now() - summary.last_updated
+            if time_difference.seconds > 3600:  # 1 hour threshold
+                recalculate = True
+        else:
+            recalculate = True
+
+        if recalculate:
+            # Step 3: Recalculate the summary dynamically
+            evaluations = Evaluation.objects.filter(project_id=project_id)
+            if not evaluations.exists():
+                return Response({
+                    "message": "No evaluations found for this project.",
+                    "evaluations": [],
+                    "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                    "total_evaluations": 0,
+                    "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+                }, status=200)
+
+            # Count evaluators in each rating category
+            categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+            total_evaluations = evaluations.count()
+            for evaluation in evaluations:
+                avg = evaluation.overall_rating
+                if avg <= 1:
+                    categories["poor"] += 1
+                elif avg <= 2:
+                    categories["fair"] += 1
+                elif avg <= 3:
+                    categories["good"] += 1
+                elif avg <= 4:
+                    categories["better"] += 1
+                else:
+                    categories["best"] += 1
+
+            # Calculate percentages
+            percentages = {
+                key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0
+                for key, value in categories.items()
+            }
+
+            # Step 4: Update or create the database record
+            if summary:
+                summary.total_evaluations = total_evaluations
+                summary.categories = categories
+                summary.percentages = percentages
+                summary.last_updated = now()
+                summary.save()
+            else:
+                summary = EvaluationSummary.objects.create(
+                    project_id=project_id,
+                    total_evaluations=total_evaluations,
+                    categories=categories,
+                    percentages=percentages,
+                )
+
+        # Step 5: Return the summary (whether from database or recalculated)
+        return Response({
+            "message": "Evaluations summary retrieved successfully.",
+            "total_evaluations": summary.total_evaluations,
+            "categories": summary.categories,
+            "percentages": summary.percentages,
+        }, status=200)
+
+    except Exception as e:
+        return Response({"message": "An error occurred.", "error": str(e)}, status=500)
+
+# View that generates evaluation summary table - no model to store data yet, purely view lang
 @api_view(['GET'])
 def evaluations_summary_view(request, project_id):
     try:
@@ -1094,54 +1174,54 @@ def evaluations_summary_view(request, project_id):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# Working ni but specific lang sa projects nga nay trainer - DON'T REMOVE YET
-@api_view(['GET'])
-def evaluations_summary_view(request, project_id):
-    try:
-        # Fetch evaluations
-        evaluations_summary = get_evaluations_summary(project_id)
+# # Working ni but specific lang sa projects nga nay trainer - DON'T REMOVE YET
+# @api_view(['GET'])
+# def evaluations_summary_view(request, project_id):
+#     try:
+#         # Fetch evaluations
+#         evaluations_summary = get_evaluations_summary(project_id)
         
-        if not evaluations_summary:
-            # No evaluations found
-            return Response({
-                "message": "No evaluations found for this project.",
-                "evaluations": [],
-                "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
-                "total_evaluations": 0,
-                "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
-            }, status=status.HTTP_200_OK)
+#         if not evaluations_summary:
+#             # No evaluations found
+#             return Response({
+#                 "message": "No evaluations found for this project.",
+#                 "evaluations": [],
+#                 "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+#                 "total_evaluations": 0,
+#                 "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+#             }, status=status.HTTP_200_OK)
         
-        # Calculate total evaluations
-        total_evaluations = len(evaluations_summary)
+#         # Calculate total evaluations
+#         total_evaluations = len(evaluations_summary)
 
-        # Count evaluators in each rating category
-        categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
-        for eval in evaluations_summary:
-            if eval["average"] <= 1:
-                categories["poor"] += 1
-            elif eval["average"] <= 2:
-                categories["fair"] += 1
-            elif eval["average"] <= 3:
-                categories["good"] += 1
-            elif eval["average"] <= 4:
-                categories["better"] += 1
-            else:
-                categories["best"] += 1
+#         # Count evaluators in each rating category
+#         categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+#         for eval in evaluations_summary:
+#             if eval["average"] <= 1:
+#                 categories["poor"] += 1
+#             elif eval["average"] <= 2:
+#                 categories["fair"] += 1
+#             elif eval["average"] <= 3:
+#                 categories["good"] += 1
+#             elif eval["average"] <= 4:
+#                 categories["better"] += 1
+#             else:
+#                 categories["best"] += 1
         
-        # Calculate percentages
-        percentages = {key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0 
-                       for key, value in categories.items()}
+#         # Calculate percentages
+#         percentages = {key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0 
+#                        for key, value in categories.items()}
 
-        # Combine results
-        return Response({
-            "message": "Evaluations summary retrieved successfully.",            
-            "evaluations": evaluations_summary,
-            "categories": categories,
-            "total_evaluations": total_evaluations,
-            "percentages": percentages,
-        })
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         # Combine results
+#         return Response({
+#             "message": "Evaluations summary retrieved successfully.",            
+#             "evaluations": evaluations_summary,
+#             "categories": categories,
+#             "total_evaluations": total_evaluations,
+#             "percentages": percentages,
+#         })
+#     except Exception as e:
+#         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
