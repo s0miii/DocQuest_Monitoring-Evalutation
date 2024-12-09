@@ -403,8 +403,8 @@ Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 
 {
-  "trainer_id": 1,
-  "project_id": 2,
+  "trainer_id": 3,
+  "project_id": 1,
   "expiration_date": "2024-12-31"
 }
 
@@ -424,23 +424,23 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 ###
 # Submit and Evaluation
 # token sa link ang last
-POST http://127.0.0.1:8000/monitoring/evaluation/fill/Z7clYVwbJ13o0kzxUPXjMA/
+POST http://127.0.0.1:8000/monitoring/evaluation/fill/VesN8Q3Wjv028eVwA2yemA/
 Content-Type: application/json
 
 {
-    "attendee_name": "3rd Attendee Ni",
+    "attendee_name": "3rd ni Belle",
     "relevance_of_topics": 3,
     "organizational_flow": 3,
-    "learning_methods": 3,
+    "learning_methods": 2,
     "technology_use": 3,
-    "time_efficiency": 3,
-    "mastery_subject": 3,
-    "preparedness": 3,
+    "time_efficiency": 4,
+    "mastery_subject": 4,
+    "preparedness": 4,
     "audience_participation": 4,
     "interest_level": 4,
-    "handle_questions": 3,
-    "voice_personality": 3,
-    "visual_aids": 3,
+    "handle_questions": 4,
+    "voice_personality": 4,
+    "visual_aids": 4,
     "venue_assessment": 4,
     "timeliness": 4,
     "overall_management": 3,
@@ -452,7 +452,14 @@ Content-Type: application/json
 ###
 # Retrieve All Submitted Evaluations
 #  last kay /?trainer=1&project=2
-GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=1&project=2
+GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=3&project=1
+Content-Type: application/json
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+
+###
+# Retrieve All Submitted Evaluations
+#  last kay /?trainer=1&project=2
+GET http://127.0.0.1:8000/monitoring/evaluations/
 Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 
