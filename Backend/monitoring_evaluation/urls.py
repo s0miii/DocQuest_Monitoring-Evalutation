@@ -99,12 +99,14 @@ urlpatterns = [
     #     name="generate_evaluation_url",
     # ),
     # path('evaluation/generate_evaluation_url/', EvaluationViewSet.as_view({'get': 'generate_evaluation_url'})),
-    # path('evaluation/<int:trainer_id>/<int:project_id>/', evaluation_form_view, name='evaluation_form'),
     # path('evaluation/<int:project_id>/', evaluation_form_view, name='evaluation_form_project_only'),
-    # path('evaluation_thank_you/', TemplateView.as_view(template_name="thank_you.html"), name='evaluation_thank_you'),
-    # path('evaluation_summary/', evaluation_summary_view, name='evaluation_summary'),
+    
+    path('evaluation/<int:trainer_id>/<int:project_id>/', evaluation_form_view, name='evaluation_form'),
     path('evaluation_links/', GenerateEvaluationSharableLinkView.as_view(), name="generate_evaluation_link"),
     path("evaluation/fill/<str:token>/", SubmitEvaluationView.as_view(), name='submit_evaluation'),
+    # compute summary
+    path('project/<int:project_id>/evaluations_summary/', evaluations_summary_view, name='evaluations_summary'),
+
 ]
 
 
