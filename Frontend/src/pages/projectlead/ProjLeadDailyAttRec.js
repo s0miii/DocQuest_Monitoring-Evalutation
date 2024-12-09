@@ -264,6 +264,19 @@ const ProjLeadDailyAttRec = () => {
         }
     };
 
+    // loading substitute
+    if (loading) {
+        return (
+            <div className="p-4">
+                <div className="bg-gray-200 animate-pulse h-6 w-3/4 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-1/2 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-full rounded"></div>
+            </div>
+        );
+    }
+    if (!projectDetails) {
+        return <div>Project not found.</div>;
+    }
 
     // Create new template
     const handleCreateTemplate = async () => {

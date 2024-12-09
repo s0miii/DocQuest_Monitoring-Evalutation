@@ -78,7 +78,7 @@ function App() {
       <Route path="/projlead/proj/req/accomplishment-report" element={<ProjLeadAccReport />} />
       <Route path="/projlead/project/:projectID/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
       <Route path="/projlead/project/:projectID/daily-attendance" element={<ProjLeadDailyAttRec />} />
-      <Route path="/projlead/project/:projectID/evaluation-summary" element={<ProjLeadEvalSum />} />
+      <Route path="/projlead/project/:projectID/summary-of-evaluation" element={<ProjLeadEvalSum />} />
       <Route path="/projlead/proj/req/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
       <Route path="/projlead/project/:projectID/lecture-notes" element={<ProjLeadLecNotes />} />
       <Route path="/projlead/project/:projectID/other-files" element={<ProjLeadOthers />} />

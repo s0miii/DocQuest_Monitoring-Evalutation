@@ -184,7 +184,7 @@ const ProjLeadProjReq = () => {
                         <h2 className="text-xl font-semibold">Documentary Requirements</h2>
                         <button
                             className="text-blue-500 text-sm"
-                            onClick={() => handleViewClick('/projlead/assign-checklist/${projectID}')}
+                            onClick={() => handleViewClick(`/projlead/assign-checklist/${projectID}`)}
                         >
                             Assign Proponents
                         </button>
