@@ -1019,7 +1019,7 @@ def get_detailed_evaluations(project_id):
     evaluations = Evaluation.objects.filter(project_id=project_id)
     
     # Build a table-like structure
-    detaield_summary = []
+    detailed_summary = []
     for evaluation in evaluations:
         row = {
             "id": evaluation.id,
@@ -1040,9 +1040,9 @@ def get_detailed_evaluations(project_id):
             "overall_management": evaluation.overall_management,
             "average": evaluation.overall_rating,
         }
-        detaield_summary.append(row)
+        detailed_summary.append(row)
     
-    return detaield_summary
+    return detailed_summary
 
 # View that generates evaluation summary table - UPDATED, WITH MODEL
 @api_view(['GET'])
@@ -1178,57 +1178,6 @@ def evaluation_summary_view(request, project_id):
 #         })
 #     except Exception as e:
 #         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# # Working ni but specific lang sa projects nga nay trainer - DON'T REMOVE YET
-# @api_view(['GET'])
-# def evaluations_summary_view(request, project_id):
-#     try:
-#         # Fetch evaluations
-#         evaluations_summary = get_evaluations_summary(project_id)
-        
-#         if not evaluations_summary:
-#             # No evaluations found
-#             return Response({
-#                 "message": "No evaluations found for this project.",
-#                 "evaluations": [],
-#                 "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
-#                 "total_evaluations": 0,
-#                 "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
-#             }, status=status.HTTP_200_OK)
-        
-#         # Calculate total evaluations
-#         total_evaluations = len(evaluations_summary)
-
-#         # Count evaluators in each rating category
-#         categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
-#         for eval in evaluations_summary:
-#             if eval["average"] <= 1:
-#                 categories["poor"] += 1
-#             elif eval["average"] <= 2:
-#                 categories["fair"] += 1
-#             elif eval["average"] <= 3:
-#                 categories["good"] += 1
-#             elif eval["average"] <= 4:
-#                 categories["better"] += 1
-#             else:
-#                 categories["best"] += 1
-        
-#         # Calculate percentages
-#         percentages = {key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0 
-#                        for key, value in categories.items()}
-
-#         # Combine results
-#         return Response({
-#             "message": "Evaluations summary retrieved successfully.",            
-#             "evaluations": evaluations_summary,
-#             "categories": categories,
-#             "total_evaluations": total_evaluations,
-#             "percentages": percentages,
-#         })
-#     except Exception as e:
-#         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 # ATTENDANCE TEMPLATE -> KATONG CHECKLIST NGA LOGIC
@@ -1492,5 +1441,7 @@ class CalculateTotalAttendeesView(APIView):
             }, 
             status=200
         )
-
-        
+# Fetch list of trainers per project from docquestapp
+def get_trainers_by_project(request, project_id):
+    trainers = LoadingOfTrainers.objects.filter(project_id=project_id).values('LOTID', 'faculty', 'trainingLoad', 'hours')
+    return JsonResponse({'trainers': list(trainers)})       
