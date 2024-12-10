@@ -88,26 +88,14 @@ class EvaluationSerializer(serializers.ModelSerializer):
 
         return data
 class EvaluationSharableLinkSerializer(serializers.ModelSerializer):
-    trainer_name = serializers.CharField(source='trainer.faculty', read_only=True)
-    project_title = serializers.CharField(source='project.projectTitle', read_only=True)
-
     class Meta:
         model = EvaluationSharableLink
-        fields = [
-            "id",
-            "project", 
-            "project_title", 
-            "trainer", 
-            "trainer_name", 
-            "trainingLoad",
-            "expiration_date", 
-            "token", 
-            "sharable_link"
-        ]       
+        fields = ['trainer', 'project', 'expiration_date', 'token', 'sharable_link']
+
+    def create(self, validated_data):
+        # You can add custom creation logic here if needed
+        return super().create(validated_data)
     
-    def get_trainingLoad(self, obj):
-        # Return the trainingLoad if the trainer exists, else None
-        return obj.trainer.trainingLoad if obj.trainer else None
 class PREXCAchievementSerializer(serializers.ModelSerializer):
     class Meta: model = PREXCAchievement
     fields = '__all__'

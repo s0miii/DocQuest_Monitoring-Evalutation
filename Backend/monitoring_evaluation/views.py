@@ -902,6 +902,13 @@ class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             trainer_id = request.data.get("trainer_id")
             project_id = request.data.get("project_id")
