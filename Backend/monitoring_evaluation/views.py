@@ -287,8 +287,10 @@ def document_counts(request, project_id):
         try:
             if is_project_leader:  # Project leader sees all documents
                 count = model.objects.filter(project=project).count()
-            elif is_estaff or is_coord:  # estaff and coordinator see all documents
-                count = model.objects.filter(project=project, status="Approved").count()
+            elif is_estaff:  # estaff and coordinator see all documents
+                count = model.objects.filter(project=project).count()
+            # elif is_coord:  # estaff and coordinator see all documents
+            #     count = model.objects.filter(project=project, status="Approved").count()
             else:  # Proponent sees only their own documents
                 count = model.objects.filter(project=project, proponent=user).count()
 
@@ -617,7 +619,9 @@ class ChecklistItemSubmissionsView(APIView):
             if is_project_leader:
                 records = model.objects.filter(project=project)
             elif is_estaff:
-                records = model.objects.filter(project=project, status="Approved")
+                records = model.objects.filter(project=project)
+            # elif is_estaff:
+            #     records = model.objects.filter(project=project, status="Approved")
             else:
                 records = model.objects.filter(project=project, proponent=user)
 
@@ -778,7 +782,7 @@ MODEL_MAP = {
     "photo_documentations": PhotoDocumentation,
     "other_files": OtherFiles,
 }
-@role_required(allowed_role_codes=["pjld"])
+@role_required(allowed_role_codes=["estf"])
 class UpdateSubmissionStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -797,13 +801,18 @@ class UpdateSubmissionStatusView(APIView):
                 return Response({"error": "Invalid status value."}, status=status.HTTP_400_BAD_REQUEST)
 
             submission.status = status_value
+
+            # Handle rejection reason
             if status_value == "Rejected":
+                if not rejection_reason:
+                    return Response({"error": "Rejection reason is required for rejection."}, status=status.HTTP_400_BAD_REQUEST)
                 submission.rejection_reason = rejection_reason
             else:
-                submission.rejection_reason = None
+                submission.rejection_reason = None  # Clear rejection reason for other statuses
+
             submission.save()
 
-            return Response({"message": "Submission status updated successfully."}, status=status.HTTP_200_OK)
+            return Response({"message": f"Submission status updated to {status_value}."}, status=status.HTTP_200_OK)
 
         except Model.DoesNotExist:
             return Response({"error": "Submission not found."}, status=status.HTTP_404_NOT_FOUND)
