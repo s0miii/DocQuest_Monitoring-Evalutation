@@ -13,11 +13,15 @@ const ProjLeadEvalSum = () => {
     // const [submissions, setSubmissions] = useState([]);
     // const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [isProjectLeader, setIsProjectLeader] = useState(false);
-    // const [trainers, setTrainers] = useState([]);
+    const [trainers, setTrainers] = useState([]);
     // const [selectedTrainerId, setSelectedTrainerId] = useState('');
     // const [sharableLink, setSharableLink] = useState("");
     // const [expirationDate, setExpirationDate] = useState('');
-
+    
+    const [generatedLinks, setGeneratedLinks] = useState([]);
+    const [linkData, setLinkData] = useState({ trainer: "", expirationDate: "" });
+    const [loadingLinks, setLoadingLinks] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
@@ -67,6 +71,94 @@ const ProjLeadEvalSum = () => {
         fetchProjectDetails();
         // fetchUpdatedSubmissions();
     }, [projectID, navigate]);
+
+
+    // Fetch generated links for the project
+    const fetchGeneratedLinks = async () => {
+        setLoadingLinks(true);
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:8000/monitoring/evaluation_links/?project=${projectID}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                setGeneratedLinks(data.links);
+            } else {
+                setErrorMessage("Failed to fetch links.");
+            }
+        } catch (error) {
+            console.error("Error fetching links:", error);
+            setErrorMessage("Failed to fetch links.");
+        } finally {
+            setLoadingLinks(false);
+        }
+    };
+
+    // Fetch the list of trainers when the component mounts
+    useEffect(() => {
+        const fetchTrainers = async () => {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/monitoring/project/${projectID}/trainers/`);
+                if (!response.ok) throw new Error('Failed to fetch trainers');
+                const result = await response.json();
+                setTrainers(result.trainers); // Access the trainers key from the response
+            } catch (error) {
+                console.error('Error fetching trainers:', error);
+                setTrainers([]);  // Ensures trainers is always an array even on error
+            }
+        };
+    
+        if (projectID) {
+            fetchTrainers();
+        }
+    }, [projectID]);
+
+    // Handle Sharable Link generation
+    const handleGenerateLink = async (e) => {
+        e.preventDefault();
+        const { trainer, expirationDate } = linkData;
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:8000/monitoring/evaluation_links/`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        trainer,
+                        project: projectID,
+                        expiration_date: expirationDate,
+                    }),
+                }
+            );
+
+            if (response.ok) {
+                setLinkData({ trainer: "", expirationDate: "" });
+                fetchGeneratedLinks();  // Refresh list of generated links
+            } else {
+                setErrorMessage("Failed to generate link.");
+            }
+        } catch (error) {
+            console.error("Error generating link:", error);
+            setErrorMessage("Failed to generate link.");
+        }
+    };
 
     
     // const fetchUpdatedSubmissions = async () => {
@@ -493,6 +585,69 @@ const ProjLeadEvalSum = () => {
                                     readOnly
                                 />
                             </div>
+                        </div>
+                    </div>
+
+
+                    {/* Sharable Link Generation Section */}
+                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-center mb-4">Generate Sharable Link</h2>
+
+                        <form onSubmit={handleGenerateLink}>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Trainer</label>
+                                <select
+                                    value={linkData.trainer}
+                                    onChange={(e) => setLinkData({ ...linkData, trainer: e.target.value })}
+                                    className="bg-gray-100 rounded-lg p-2 w-full"
+                                >
+                                    <option value="">Select a Trainer</option>
+                                    {trainers.map((trainer) => (
+                                        <option key={trainer.LOTID} value={trainer.LOTID}>
+                                            {trainer.faculty}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Expiration Date</label>
+                                <input
+                                    type="date"
+                                    value={linkData.expirationDate}
+                                    onChange={(e) => setLinkData({ ...linkData, expirationDate: e.target.value })}
+                                    className="bg-gray-100 rounded-lg p-2 w-full"
+                                />
+                            </div>
+
+                            <div className="text-center mt-4">
+                                <button
+                                    type="submit"
+                                    className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    Generate Link
+                                </button>
+                            </div>
+                        </form>
+
+                        {errorMessage && <p className="text-red-500 text-center mt-4">{errorMessage}</p>}
+
+                        {/* Display Generated Links */}
+                        <div className="mt-6">
+                            {loadingLinks ? (
+                                <p>Loading generated links...</p>
+                            ) : (
+                                <ul>
+                                    {generatedLinks.map((link) => (
+                                        <li key={link.id} className="mb-2">
+                                            <div className="flex justify-between items-center">
+                                                <span>{link.link_url}</span>
+                                                <span>{link.expiration_date}</span>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     </div>
                 </div>
