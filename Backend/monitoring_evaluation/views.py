@@ -916,8 +916,8 @@ class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
                 trainer = LoadingOfTrainers.objects.filter(pk=trainer_id, project=project).first()
                 if not trainer:
                     return Response(
-                         {"error": f"Trainer with ID {trainer_id} is not associated with Project ID {project_id}."},
-                         status=status.HTTP_400_BAD_REQUEST,
+                        {"error": f"Trainer with ID {trainer_id} is not associated with Project ID {project_id}."},
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
 
             #  Create or update sharable link
