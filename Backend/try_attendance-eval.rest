@@ -484,3 +484,9 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 
 # Replace {project_id} with the ID of the project you want to get the evaluation summary for.
 
+### 
+# Fetch List of Trainers by Project ID
+# project id ang <id> next to project
+GET http://127.0.0.1:8000/monitoring/project/1/trainers/
+Content-Type: application/json
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
