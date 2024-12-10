@@ -33,12 +33,22 @@ def send_dynamic_reminder_email(request, project_id):
 
     # Fetch the project
     project = get_object_or_404(Project, projectID=project_id, status="approved")
-    project_leader = project.userID  # Assuming userID links to the project leader
 
+    # Fetch the project leader
+    project_leader = project.userID  # The project leader (CustomUser instance)
     if not project_leader or not project_leader.email:
         return Response({"error": "Project leader email not found."}, status=400)
 
-    # Fetch missing submissions directly in the view
+    # Fetch proponents associated with the project
+    proponents = project.proponents.all()  # Related CustomUser instances
+    proponent_emails = [proponent.email for proponent in proponents if proponent.email]
+
+    # Combine project leader email with proponent emails
+    recipient_list = [project_leader.email] + proponent_emails
+    if not recipient_list:
+        return Response({"error": "No recipients found for this project."}, status=400)
+
+    # Check for missing checklist items
     missing_items = []
 
     # Check for missing Daily Attendance Records
@@ -54,7 +64,7 @@ def send_dynamic_reminder_email(request, project_id):
         missing_items.append("Modules/Lecture Notes")
 
     if not PhotoDocumentation.objects.filter(project=project, status="Approved").exists():
-        missing_items.append("Photo Documentations")
+        missing_items.append("Photo Documentation")
 
     if not OtherFiles.objects.filter(project=project, status="Approved").exists():
         missing_items.append("Other Files")
@@ -62,25 +72,29 @@ def send_dynamic_reminder_email(request, project_id):
     # Generate dynamic email content
     subject = request.data.get('subject', f"Reminder: Missing Submissions for Project '{project.projectTitle}'")
     message = (
-        f"Dear {project_leader.firstname} {project_leader.lastname},\n\n"
-        f"The following submissions are still missing for the project '{project.projectTitle}':\n"
-        f"{', '.join(missing_items) if missing_items else 'No missing items found.'}\n\n"
-        "Best regards,\nEStaff Team"
+        f"Dear Project Leader and Proponents,\n\n"
+        "Good day! The following submissions are still missing for the project "
+        f"'{project.projectTitle}':\n"
+        + ("\n".join(f"• {item}" for item in missing_items) if missing_items else "No missing items found.")
+        + "\n\nPlease ensure that all submissions are completed as soon as possible. Wenk wenk\n\n"
+        "Gwapo si,\nKettaps"
     )
 
     # Send the email
-    send_reminder_email(subject, message, [project_leader.email], sender_email=user.email)
+    send_reminder_email(subject, message, recipient_list, sender_email=user.email)
 
-    # Log the notification
-    NotificationLog.objects.create(
-        sender=user,
-        project=project,
-        recipient_email=project_leader.email,
-        subject=subject,
-        message=message,
-    )
+    # Log the notification for each recipient
+    for recipient in recipient_list:
+        NotificationLog.objects.create(
+            sender=user,
+            project=project,
+            recipient_email=recipient,
+            subject=subject,
+            message=message,
+        )
 
     return Response({"message": "Reminder email sent successfully."}, status=200)
+
 
 # retrieve projects based on user role each project
 @role_required(allowed_role_codes=["pjld", "ppnt", "estf"])
@@ -216,6 +230,33 @@ class ProponentProjectDetailsView(APIView):
             return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
         except CustomUser.DoesNotExist:
             return Response({"error": "Project Leader not found."}, status=status.HTTP_404_NOT_FOUND)
+
+# get project proponents
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def project_proponents(request, project_id):
+    """
+    Get all proponents assigned to a specific project.
+    """
+    try:
+        # Fetch the project
+        project = get_object_or_404(Project, projectID=project_id, status="approved")
+
+        # Retrieve proponents
+        proponents = project.proponents.all()  # Access the many-to-many relationship
+
+        # Serialize proponents
+        serialized_proponents = [
+            {
+                "id": proponent.userID,
+                "name": f"{proponent.firstname} {proponent.lastname}",
+            }
+            for proponent in proponents
+        ]
+
+        return Response({"proponents": serialized_proponents}, status=200)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
 # document count for checklist item
 @role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
@@ -614,12 +655,12 @@ class ChecklistItemSubmissionsView(APIView):
 class AssignChecklistItemsView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        project_id = request.data.get('project')
+    def post(self, request, projectID):
+        project_id = projectID  # Extract projectID from the URL
         proponent_id = request.data.get('proponent')
         checklist_items = request.data.get('checklist_items', {})
 
-        if not all([project_id, proponent_id]):
+        if not proponent_id:
             return Response({"error": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -651,6 +692,34 @@ class AssignChecklistItemsView(APIView):
             return Response({"error": "Proponent not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+def get_proponent_checklist(request, project_id):
+    try:
+        # Fetch the project and related proponents
+        project = Project.objects.get(id=project_id)
+        proponents = project.proponents.all()
+
+        # Fetch the checklist assignments for each proponent in the project
+        data = []
+        for proponent in proponents:
+            assignments = ChecklistAssignment.objects.filter(project=project, proponent=proponent)
+            checklist = {
+                "id": proponent.id,
+                "name": proponent.name,  # Adjust according to your user model
+                "daily_attendance": assignments.filter(item="daily_attendance").exists(),
+                "summary_of_evaluation": assignments.filter(item="summary_of_evaluation").exists(),
+                "lecture_notes": assignments.filter(item="lecture_notes").exists(),
+                "other_files": assignments.filter(item="other_files").exists(),
+                "photo_documentation": assignments.filter(item="photo_documentation").exists(),
+            }
+            data.append(checklist)
+
+        return JsonResponse({"proponents": data}, status=200)
+
+    except Project.DoesNotExist:
+        return JsonResponse({"error": "Project not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 ## View checklist assignments by project
 @role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
