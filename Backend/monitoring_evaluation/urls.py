@@ -106,6 +106,9 @@ urlpatterns = [
     path("evaluation/fill/<str:token>/", SubmitEvaluationView.as_view(), name='submit_evaluation'),
     # compute summary
     path('project/<int:project_id>/evaluation_summary/', evaluation_summary_view, name='evaluation_summary'),
+    
+    # fetch the list of trainers per project
+    path('project/<int:project_id>/trainers/', get_trainers_by_project, name='get_trainers_by_project')
 
 ]
 
