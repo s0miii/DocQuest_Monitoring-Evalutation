@@ -107,7 +107,7 @@ const ProponentsDailyAttRec = () => {
 
     // Handle form submission
     const handleSubmit = async () => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         if (!token) {
             alert("User not logged in or invalid session.");
             return;
@@ -153,7 +153,7 @@ const ProponentsDailyAttRec = () => {
     };
 
     const handleDelete = async (submissionId) => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         if (!token) {
             alert("User not logged in or invalid session.");
             return;
