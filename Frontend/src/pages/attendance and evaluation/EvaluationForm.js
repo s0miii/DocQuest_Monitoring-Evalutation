@@ -37,11 +37,21 @@ const EvaluationForm = () => {
     };
 
     const handleRatingChange = (section, name, value) => {
-        setFormData({
-            ...formData,
-            [section]: { ...formData[section], [name]: parseInt(value) },
-        });
+        if (section) {
+            // If there is a section, it's a nested structure
+            setFormData({
+                ...formData,
+                [section]: { ...formData[section], [name]: parseInt(value) },
+            });
+        } else {
+            // For non-nested structures like 'venue_assessment', 'timeliness', 'overall_management'
+            setFormData({
+                ...formData,
+                [name]: parseInt(value),
+            });
+        }
     };
+    
 
     const handleSubmit = (e) => {
         e.preventDefault();
