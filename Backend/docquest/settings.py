@@ -136,13 +136,14 @@ AUTH_PASSWORD_VALIDATORS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Email
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_HOST = 'smtp.office365.com'  
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'testpmes25@hotmail.com'  # replace later on with actual email and pass
-# EMAIL_HOST_PASSWORD = 'PMESTest@25'  
+# Email Settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP host
+EMAIL_HOST_USER = "testpmes25@gmail.com"  # Your email address
+EMAIL_HOST_PASSWORD = "euhd bthe ndwg oyiw"  # Your email password
+EMAIL_PORT = 587  # SMTP port
+EMAIL_USE_TLS = True  # Use SSL for secure connection
+
 
 
 # Internationalization

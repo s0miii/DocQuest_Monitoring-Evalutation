@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaSearch, FaFilter } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
-import ProponentsSideBar from "../../components/ProponentsSideBar";
+import ProjLeadSideBar from "../../components/ProjLeadSideBar";
 import axios from "axios";
 
 const ProjectsDashboard = () => {
@@ -142,7 +142,7 @@ const ProjectsDashboard = () => {
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
-                <ProponentsSideBar />
+                <ProjLeadSideBar />
             </div>
             <div className="flex-1 ml-[20%]">
                 <Topbar />
