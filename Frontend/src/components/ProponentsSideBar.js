@@ -29,7 +29,7 @@ function ProponentsSideBar() {
             <nav>
                 <ul>
                     <li><Link to="#" className={`text-lg font-bold block px-6 py-3 ${isActive(["/user"]) ? "text-yellow-500" : ""}`}>Dashboard</Link></li>
-                    <li><Link to="/proponents/projects" className="text-lg block px-6 py-3 hover:text-yellow-500">Projects</Link></li>
+                    <li><Link to="/projects-dashboard" className="text-lg block px-6 py-3 hover:text-yellow-500">Project Monitoring</Link></li>
                     <li><Link to="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Log out</Link></li>
                 </ul>
             </nav>
