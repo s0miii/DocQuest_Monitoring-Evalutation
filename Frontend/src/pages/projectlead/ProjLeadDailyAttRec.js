@@ -695,7 +695,7 @@ const ProjLeadDailyAttRec = () => {
                     {/* Generated Attendance Links Section */}
                     <div ref={linksSectionRef} className='bg-white shadow-md rounded-lg p-6 mb-6'>
                         <h2 className='text-2xl font-semibold text-center mb-4'>Generated Attendance Links</h2>
-                        <div className='overflow-x-auto'>
+                        <div className='overflow-x-auto max-h-60 overflow-y-auto'> {/* Tailwind classes for scrolling */}
                             <table className='w-full border border-gray-200'>
                                 <thead>
                                     <tr className='bg-gray-50'>
@@ -734,10 +734,6 @@ const ProjLeadDailyAttRec = () => {
                                                     <span className='text-red-500'>Expired</span>
                                                 ) : (
                                                     <>
-                                                        {/* <button onClick={() => handleEditTemplate(template)}
-                                                            className="text-blue-500">
-                                                            <FaEdit />
-                                                        </button> */}
                                                         <button 
                                                             onClick={() => handleDeleteTemplate(template.id)} 
                                                             className='text-red-500 mr-2'>
@@ -759,6 +755,7 @@ const ProjLeadDailyAttRec = () => {
                             </table>
                         </div>
                     </div>
+
 
                     {/* Template Creation and Editing Section */}
                     <div className='bg-white shadow-md rounded-lg p-6 mb-6'>

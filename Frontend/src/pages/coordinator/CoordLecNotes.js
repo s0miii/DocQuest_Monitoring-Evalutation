@@ -95,115 +95,6 @@ const StaffLecNotes = () => {
         }
     };
 
-    const handleApprove = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/lecture_notes/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Approved" }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission approved successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error approving submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error approving submission:", error);
-            alert("An error occurred while approving the submission.");
-        }
-    };
-
-    const handleReject = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        const rejectionReason = prompt("Please provide a reason for rejection:");
-
-        if (!rejectionReason) {
-            alert("Rejection reason is required.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/lecture_notes/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Rejected", rejection_reason: rejectionReason }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission rejected successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error rejecting submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error rejecting submission:", error);
-            alert("An error occurred while rejecting the submission.");
-        }
-    };
-
-    const handleReset = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/lecture_notes/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Pending" }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Undid successfully.");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error resetting submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error resetting submission:", error);
-            alert("An error occurred while resetting the submission.");
-        }
-    };
-
     // Function to handle sorting
     const handleSort = (key) => {
         let direction = "asc";
@@ -353,9 +244,7 @@ const StaffLecNotes = () => {
                                             {sortConfig.key === "status" &&
                                                 (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                                         </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            Actions
-                                        </th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -396,33 +285,6 @@ const StaffLecNotes = () => {
                                                     </p>
                                                     {submission.status === "Rejected" && submission.rejection_reason && (
                                                         <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                    {submission.status === "Approved" || submission.status === "Rejected" ? (
-                                                        <div className="space-x-2">
-                                                            <button
-                                                                onClick={() => handleReset(submission.submission_id, submission.model_name)}
-                                                                className="text-gray-500 hover:text-blue-700"
-                                                            >
-                                                                Undo
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="space-x-2">
-                                                            <button
-                                                                onClick={() => handleApprove(submission.submission_id, submission.model_name)}
-                                                                className="text-green-500 hover:text-green-700"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleReject(submission.submission_id, submission.model_name)}
-                                                                className="text-red-500 hover:text-red-700"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </div>
                                                     )}
                                                 </td>
                                             </tr>

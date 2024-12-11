@@ -51,7 +51,7 @@ urlpatterns = [
     # View Proponent Project Details
     path('projects/<int:project_id>/details/', ProponentProjectDetailsView.as_view(), name='proponent_project_details'),
 
-    
+    path("project/<int:project_id>/assigned/", get_proponent_checklist, name="proponent_checklist"),
 
     # project progress
     path('project/<int:project_id>/progress/', project_progress, name='project_progress'),
@@ -61,19 +61,21 @@ urlpatterns = [
     path('upload/attendance/<int:project_id>/', DailyAttendanceUploadView.as_view(), name='attendance_upload'),
     path('upload/evaluation/<int:project_id>/', SummaryOfEvaluationUploadView.as_view(), name='evaluation_upload'),
     path('upload/lecture_notes/<int:project_id>/', ModulesLectureNotesUploadView.as_view(), name='lecture_notes_upload'),
-    path('upload/photo_documentation/<int:project_id>/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
+    path('upload/photo_documentations/<int:project_id>/', PhotoDocumentationUploadView.as_view(), name='photo_upload'),
     path('upload/other_files/<int:project_id>/', OtherFilesUploadView.as_view(), name='other_files_upload'),
     
     # Delete submission
     path("submissions/<str:model_name>/<int:submission_id>/", delete_submission, name="delete_submission"),
 
-    
+    # Get project proponents
+    path('project/<int:project_id>/proponents/', project_proponents, name='project_proponents'),
+
     # view all submissions from a checklist item
     path("project/<int:project_id>/checklist/<str:checklist_item_name>/submissions/", ChecklistItemSubmissionsView.as_view(), name="checklist_item_submissions", ),
     # view submission for a specific item
     # path("project/<int:project_id>/checklist_item/<str:checklist_item_name>/submissions/", ChecklistSubmissionsView.as_view(), name="checklist_item_submissions",),
     # assign checklist item
-    path('assign/checklist_items/', AssignChecklistItemsView.as_view(), name='assign_checklist_items'),
+    path('assign-checklist/<int:projectID>/', AssignChecklistItemsView.as_view(), name='assign_checklist_items'),
     #submission status for project leader
     path("submission/update/<str:model_name>/<int:submission_id>/", UpdateSubmissionStatusView.as_view(), name="update_submission_status"),
     # submission status for proponent
