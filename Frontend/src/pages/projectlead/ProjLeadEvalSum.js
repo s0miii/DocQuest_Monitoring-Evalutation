@@ -105,24 +105,36 @@ const ProjLeadEvalSum = () => {
         }
     };
 
-    // Fetch the list of trainers when the component mounts
     useEffect(() => {
         const fetchTrainers = async () => {
+            const token = localStorage.getItem("token");
+            if (!projectID || !token) {
+                console.error("Project ID is undefined or user is not logged in.");
+                setTrainers([]); // Ensures trainers is always an array
+                return;
+            }
+    
             try {
-                const response = await fetch(`http://127.0.0.1:8000/monitoring/project/${projectID}/trainers/`);
-                if (!response.ok) throw new Error('Failed to fetch trainers');
-                const result = await response.json();
-                setTrainers(result.trainers); // Access the trainers key from the response
+                const response = await fetch(`http://127.0.0.1:8000/monitoring/project/${projectID}/trainers/`, {
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch trainers');
+                }
+                const data = await response.json();
+                setTrainers(data.trainers || []); // Fallback to an empty array if undefined
             } catch (error) {
                 console.error('Error fetching trainers:', error);
-                setTrainers([]);  // Ensures trainers is always an array even on error
+                setTrainers([]); // Ensures trainers is always an array on error
             }
         };
     
-        if (projectID) {
-            fetchTrainers();
-        }
+        fetchTrainers();
     }, [projectID]);
+    
 
     // Handle Sharable Link generation
     const handleGenerateLink = async (e) => {
@@ -130,7 +142,13 @@ const ProjLeadEvalSum = () => {
         const { trainer, expirationDate } = linkData;
         const token = localStorage.getItem("token");
         if (!token) return;
-
+    
+        const postData = {
+            trainer_id: trainer,
+            project: projectID,
+            expiration_date: expirationDate,
+        };
+    
         try {
             const response = await fetch(
                 `http://127.0.0.1:8000/monitoring/evaluation_links/`,
@@ -140,26 +158,23 @@ const ProjLeadEvalSum = () => {
                         Authorization: `Token ${token}`,
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({
-                        trainer,
-                        project: projectID,
-                        expiration_date: expirationDate,
-                    }),
+                    body: JSON.stringify(postData),
                 }
             );
-
+    
+            const data = await response.json(); // Assuming the server always returns JSON
             if (response.ok) {
-                setLinkData({ trainer: "", expirationDate: "" });
-                fetchGeneratedLinks();  // Refresh list of generated links
+                setLinkData({ trainer: "", expirationDate: "" });  // Reset form on success
+                fetchGeneratedLinks();  // Refresh the links list
+                setErrorMessage("");  // Clear any existing error message
             } else {
-                setErrorMessage("Failed to generate link.");
+                throw new Error(data.error || "Failed to generate link.");
             }
         } catch (error) {
             console.error("Error generating link:", error);
-            setErrorMessage("Failed to generate link.");
+            setErrorMessage(error.message || "Error generating link.");
         }
     };
-
     
     // const fetchUpdatedSubmissions = async () => {
     //     const token = localStorage.getItem("token");
@@ -602,10 +617,8 @@ const ProjLeadEvalSum = () => {
                                     className="bg-gray-100 rounded-lg p-2 w-full"
                                 >
                                     <option value="">Select a Trainer</option>
-                                    {trainers.map((trainer) => (
-                                        <option key={trainer.LOTID} value={trainer.LOTID}>
-                                            {trainer.faculty}
-                                        </option>
+                                    {Array.isArray(trainers) && trainers.map((trainer) => (
+                                        <option key={trainer.LOTID} value={trainer.LOTID}>{trainer.faculty}</option>
                                     ))}
                                 </select>
                             </div>

@@ -41,7 +41,7 @@ function ProjLeadSidebar() {
                         <Link to="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Create MOA/MOU</Link>
                     </li>
                     <li>
-                        <Link to="/projlead/proj" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/projlead/proj"]) ? "text-yellow-500" : ""}`}>Documentary Requirements</Link>
+                        <Link to="/projects-dashboard" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/projlead/proj"]) ? "text-yellow-500" : ""}`}>Project Monitoring</Link>
                     </li>
                     <li><Link to="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Log out</Link></li>
                 </ul>

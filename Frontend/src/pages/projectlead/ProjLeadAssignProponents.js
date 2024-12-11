@@ -6,7 +6,16 @@ import { FaArrowLeft } from "react-icons/fa";
 
 const ProjLeadAssignProponents = () => {
     const navigate = useNavigate();
-    const { projectID } = useParams(); // Retrieve projectID from the URL
+    const { projectID } = useParams();
+    const checklistItems = [
+        "Attendance Sheet",
+        "Evaluation Sheets/Summary of Evaluation (in Excel form)",
+        // "Trainers CV/DTR",
+        "Modules/Lecture Notes",
+        "Other Files",
+        "Photo Documentations",
+    ];
+
 
     const [activeTraining, setActiveTraining] = useState("Training");
     const [trainingRows, setTrainingRows] = useState([
@@ -17,7 +26,7 @@ const ProjLeadAssignProponents = () => {
             checkboxes: [false, false, false, false, false],
         },
     ]);
-    const [NonTrainingRows, setDleTrainingRows] = useState([
+    const [NonTrainingRows, setNonTrainingRows] = useState([
         {
             id: 1,
             isEditing: true,
@@ -25,7 +34,50 @@ const ProjLeadAssignProponents = () => {
             checkboxes: [false, false],
         },
     ]);
+    const [proponents, setProponents] = useState([]);
     const [notification, setNotification] = useState("");
+
+    const fetchProponents = async () => {
+        const token = localStorage.getItem("token");
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:8000/monitoring/project/${projectID}/assigned/`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                const updatedProponents = data.proponents.map((proponent) => ({
+                    ...proponent,
+                    checkboxes: [
+                        proponent.daily_attendance || false,
+                        proponent.summary_of_evaluation || false,
+                        proponent.lecture_notes || false,
+                        proponent.other_files || false,
+                        proponent.photo_documentation || false,
+                    ],
+                    isEditing: false,
+                }));
+                setProponents(updatedProponents);
+            } else {
+                console.error("Failed to fetch proponents.");
+            }
+        } catch (error) {
+            console.error("Error fetching proponents:", error);
+        }
+    };
+
+
+
+    useEffect(() => {
+        fetchProponents();
+    }, [projectID]);
 
     useEffect(() => {
         if (notification) {
@@ -36,7 +88,7 @@ const ProjLeadAssignProponents = () => {
         }
     }, [notification]);
 
-    const handleSubmit = async (row) => {
+    const handleSubmit = async (proponent) => {
         const token = localStorage.getItem("token");
         if (!token) {
             alert("You are not logged in. Please log in and try again.");
@@ -45,19 +97,19 @@ const ProjLeadAssignProponents = () => {
 
         try {
             const payload = {
-                project: projectID, // Dynamically set the project ID from useParams
-                proponent: row.proponent, // Selected proponent for this row
+                project: projectID,
+                proponent: proponent.id,
                 checklist_items: {
-                    daily_attendance: row.checkboxes[0],
-                    summary_of_evaluation: row.checkboxes[1],
-                    lecture_notes: row.checkboxes[2],
-                    other_files: row.checkboxes[3],
-                    photo_documentation: row.checkboxes[4], // Adjust based on checkbox order
+                    daily_attendance: proponent.checkboxes[0],
+                    summary_of_evaluation: proponent.checkboxes[1],
+                    lecture_notes: proponent.checkboxes[2],
+                    other_files: proponent.checkboxes[3],
+                    photo_documentation: proponent.checkboxes[4],
                 },
             };
 
             const response = await fetch(
-                "http://127.0.0.1:8000/monitoring/assign-checklist/",
+                `http://127.0.0.1:8000/monitoring/assign-checklist/${projectID}/`,
                 {
                     method: "POST",
                     headers: {
@@ -69,9 +121,8 @@ const ProjLeadAssignProponents = () => {
             );
 
             if (response.ok) {
-                const data = await response.json();
                 alert("Checklist successfully assigned!");
-                console.log("Response:", data);
+                fetchProponents(); // Refresh the data
             } else {
                 const errorData = await response.json();
                 alert(`Failed to assign checklist: ${errorData.error}`);
@@ -82,13 +133,6 @@ const ProjLeadAssignProponents = () => {
         }
     };
 
-    const handleViewClick = (path) => {
-        navigate(path.replace(":projectID", projectID));
-    };
-
-    const hanNonTrainingClick = (training) => {
-        setActiveTraining(training);
-    };
 
     const handleAddRow = () => {
         const newRow = {
@@ -103,104 +147,67 @@ const ProjLeadAssignProponents = () => {
         if (activeTraining === "Training") {
             setTrainingRows([...trainingRows, newRow]);
         } else {
-            setDleTrainingRows([...NonTrainingRows, newRow]);
+            setNonTrainingRows([...NonTrainingRows, newRow]);
         }
     };
 
-    const toggleEditMode = (id) => {
-        const updateRows = (rows) =>
-            rows.map((row) => {
-                if (row.id === id) {
-                    if (row.isEditing) {
-                        handleSubmit(row); // Submit data when exiting edit mode
+    const toggleEditMode = (proponentId) => {
+        setProponents((prevProponents) =>
+            prevProponents.map((proponent) => {
+                if (proponent.id === proponentId) {
+                    if (proponent.isEditing) {
+                        handleSubmit(proponent); // Submit data when exiting edit mode
                     }
-                    return { ...row, isEditing: !row.isEditing };
+                    return { ...proponent, isEditing: !proponent.isEditing };
                 }
-                return row;
-            });
-
-        if (activeTraining === "Training") {
-            setTrainingRows(updateRows(trainingRows));
-        } else {
-            setDleTrainingRows(updateRows(NonTrainingRows));
-        }
+                return proponent;
+            })
+        );
     };
 
-    const handleProponentChange = (id, value) => {
-        const updateRows = (rows) =>
-            rows.map((row) => (row.id === id ? { ...row, proponent: value } : row));
-
-        if (activeTraining === "Training") {
-            setTrainingRows(updateRows(trainingRows));
-        } else {
-            setDleTrainingRows(updateRows(NonTrainingRows));
-        }
-    };
-
-    const handleCheckboxChange = (rowId, index) => {
-        const updateRows = (rows) =>
-            rows.map((row) =>
-                row.id === rowId
+    const handleCheckboxChange = (proponentId, index) => {
+        setProponents((prevProponents) =>
+            prevProponents.map((proponent) =>
+                proponent.id === proponentId
                     ? {
-                        ...row,
-                        checkboxes: row.checkboxes.map((checked, i) =>
+                        ...proponent,
+                        checkboxes: proponent.checkboxes.map((checked, i) =>
                             i === index ? !checked : checked
                         ),
                     }
-                    : row
-            );
-
-        if (activeTraining === "Training") {
-            setTrainingRows(updateRows(trainingRows));
-        } else {
-            setDleTrainingRows(updateRows(NonTrainingRows));
-        }
+                    : proponent
+            )
+        );
     };
 
-    const getColumnName = (index) => {
-        const trainingColumns = [
-            "List of Participants/Daily Attendance Sheet",
-            "Evaluation Sheets/Summary of Evaluation (in Excel form)",
-            "Trainers CV/DTR",
-            "Modules/Lecture Notes",
-            "Other",
-        ];
-        const dleColumns = ["Modules/Lecture Notes", "Other"];
-        return activeTraining === "Training"
-            ? trainingColumns[index]
-            : dleColumns[index];
-    };
 
     const rows = activeTraining === "Training" ? trainingRows : NonTrainingRows;
 
     return (
         <div className="bg-gray-100 min-h-screen flex">
-            {/* Sidebar with fixed width */}
             <div className="w-1/5 fixed h-full">
                 <ProjLeadSidebar />
             </div>
-            {/* Main content area */}
             <div className="flex-1 ml-[20%]">
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
                         <button
                             className="mr-2"
-                            onClick={() => handleViewClick('/projlead/proj/req/:projectID')}
+                            onClick={() => navigate(`/projlead/proj/req/${projectID}`)}
                         >
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Assign Proponents</h1>
                     </div>
 
-                    {/* Training Tabs */}
                     <div className="flex items-center space-x-3 mb-5">
                         <button
                             className={`text-sm ${activeTraining === "Training"
                                 ? "text-blue-500 font-semibold underline"
                                 : "text-gray-500"
                                 }`}
-                            onClick={() => hanNonTrainingClick("Training")}
+                            onClick={() => setActiveTraining("Training")}
                         >
                             Training
                         </button>
@@ -210,20 +217,12 @@ const ProjLeadAssignProponents = () => {
                                 ? "text-blue-500 font-semibold underline"
                                 : "text-gray-500"
                                 }`}
-                            onClick={() => hanNonTrainingClick("Non-Training")}
+                            onClick={() => setActiveTraining("Non-Training")}
                         >
                             Non-Training
                         </button>
                     </div>
 
-                    {/* Notification */}
-                    {notification && (
-                        <div className="mb-4 text-green-600 font-semibold">
-                            {notification}
-                        </div>
-                    )}
-
-                    {/* Documentary Requirements Table */}
                     <div className="bg-white shadow-md rounded-lg p-6">
                         <table className="w-full border-collapse border border-gray-300">
                             <thead>
@@ -231,76 +230,52 @@ const ProjLeadAssignProponents = () => {
                                     <th className="border border-gray-300 p-2 text-left font-semibold">
                                         Proponent
                                     </th>
-                                    {activeTraining === "Training" && (
-                                        <>
-                                            <th className="border border-gray-300 p-2 text-center font-semibold">
-                                                Attendance Records
-                                            </th>
-                                            <th className="border border-gray-300 p-2 text-center font-semibold">
-                                                Evaluation Sheets/Summary of Evaluation (in
-                                                Excel form)
-                                            </th>
-                                            <th className="border border-gray-300 p-2 text-center font-semibold">
-                                                Trainers CV/DTR
-                                            </th>
-                                        </>
-                                    )}
-                                    <th className="border border-gray-300 p-2 text-center font-semibold">
-                                        Modules/Lecture Notes
-                                    </th>
-                                    <th className="border border-gray-300 p-2 text-center font-semibold">
-                                        Other Files
-                                    </th>
-                                    <th className="border border-gray-300 p-2 text-center font-semibold">
-                                        Photo Documentations
-                                    </th>
+                                    {checklistItems.map((item, index) => (
+                                        <th
+                                            key={index}
+                                            className="border border-gray-300 p-2 text-center font-semibold"
+                                        >
+                                            {item}
+                                        </th>
+                                    ))}
                                     <th className="border border-gray-300 p-2 text-center font-semibold">
                                         Action
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.map((row) => (
-                                    <tr key={row.id} className="border-t border-gray-200">
-                                        <td className="border border-gray-300 p-2">
-                                            <select
-                                                className="bg-gray-100 p-2 rounded w-full"
-                                                value={row.proponent}
-                                                onChange={(e) =>
-                                                    handleProponentChange(
-                                                        row.id,
-                                                        e.target.value
-                                                    )
-                                                }
-                                            >
-                                                <option>Select Proponent</option>
-                                                <option>Proponent 1</option>
-                                                <option>Proponent 2</option>
-                                            </select>
-                                        </td>
-                                        {row.checkboxes.map((checked, index) => (
-                                            <td
-                                                key={index}
-                                                className="border border-gray-300 p-2 text-center"
-                                            >
+                                {proponents.map((proponent) => (
+                                    <tr key={proponent.id} className="border-t border-gray-200">
+                                        <td className="border border-gray-300 p-2">{proponent.name}</td>
+                                        {proponent.checkboxes.map((checked, index) => (
+                                            <td key={index} className="border border-gray-300 p-2 text-center">
                                                 <input
                                                     type="checkbox"
                                                     checked={checked}
-                                                    disabled={!row.isEditing}
-                                                    onChange={() =>
-                                                        handleCheckboxChange(row.id, index)
-                                                    }
+                                                    disabled={!proponent.isEditing}
+                                                    onChange={() => {
+                                                        const updatedProponents = proponents.map((p) =>
+                                                            p.id === proponent.id
+                                                                ? {
+                                                                    ...p,
+                                                                    checkboxes: p.checkboxes.map((c, i) =>
+                                                                        i === index ? !c : c
+                                                                    ),
+                                                                }
+                                                                : p
+                                                        );
+                                                        setProponents(updatedProponents);
+                                                    }}
                                                     className="w-4 h-4"
                                                 />
                                             </td>
                                         ))}
-                                        {/* Action Button in a Dedicated Column */}
                                         <td className="border border-gray-300 p-2 text-center">
                                             <button
-                                                onClick={() => toggleEditMode(row.id)}
+                                                onClick={() => handleSubmit(proponent)}
                                                 className="text-blue-500 underline text-sm"
                                             >
-                                                {row.isEditing ? "Submit" : "Edit"}
+                                                Submit
                                             </button>
                                         </td>
                                     </tr>

@@ -5,7 +5,7 @@ import EStaffSideBar from "../../components/EStaffSideBar";
 import { FaArrowLeft } from "react-icons/fa";
 
 
-const EStaffProjReq = ({ totalRequirements, completedRequirements }) => {
+const EStaffProjReq = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
     const { projectID } = useParams();
@@ -13,6 +13,8 @@ const EStaffProjReq = ({ totalRequirements, completedRequirements }) => {
     const [documentCounts, setDocumentCounts] = useState({});
     const [projectProgress, setProjectProgress] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [isSending, setIsSending] = useState(false);
+
 
     const handleViewClick = (path) => {
         navigate(path);
@@ -118,6 +120,35 @@ const EStaffProjReq = ({ totalRequirements, completedRequirements }) => {
         return <div>Project not found.</div>;
     }
 
+    const handleSendReminder = async () => {
+        setIsSending(true); // Show loading indicator
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:8000/monitoring/projects/${projectID}/send_dynamic_reminder/`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.ok) {
+                alert("Reminder email sent successfully!");
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to send reminder email: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error("Error sending reminder email:", error);
+            alert("An error occurred while sending the reminder email.");
+        } finally {
+            setIsSending(false); // Hide loading indicator
+        }
+    };
+
+
     return (
         <div className="bg-gray-200 min-h-screen flex">
             {/* Sidebar with fixed width */}
@@ -183,10 +214,37 @@ const EStaffProjReq = ({ totalRequirements, completedRequirements }) => {
                     <div className="flex justify-between items-center mb-5">
                         <h2 className="text-xl font-semibold">Documentary Requirements</h2>
                         <button
-                            className="text-blue-500 text-sm"
-                            onClick={() => handleViewClick('#')}
+                            className="text-blue-500 text-sm flex items-center"
+                            onClick={handleSendReminder}
+                            disabled={isSending}
                         >
-                            Send Reminder
+                            {isSending ? (
+                                <>
+                                    <svg
+                                        className="animate-spin h-4 w-4 text-blue-500 mr-2"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        ></circle>
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"
+                                        ></path>
+                                    </svg>
+                                    Sending...
+                                </>
+                            ) : (
+                                "Send Reminder"
+                            )}
                         </button>
                     </div>
                     <div className="assigned-requirements">
