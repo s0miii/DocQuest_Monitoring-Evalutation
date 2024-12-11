@@ -28,13 +28,16 @@ const ProjLeadDailyAttRec = () => {
     const [totalAttendees, setTotalAttendees] = useState(null);
     const [averageAttendees, setAverageAttendees] = useState(null);
     const [numTemplates, setNumTemplates] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);  // To handle edit state
+    const [isEditing, setIsEditing] = useState(false);  
     const [templateId, setTemplateId] = useState(null);
-    const [editingTemplateId, setEditingTemplateId] = useState(null);  // To track which template is being edited
-
+    const [editingTemplateId, setEditingTemplateId] = useState(null); 
+    const [choice, setChoice] = useState("uploadFiles");
     // Reference to the "Generated Attendance Links" section
     const linksSectionRef = useRef(null);
 
+    const handleChoice = (choice) => {
+        setChoice(choice); // set the choice based on user selection
+    };
 
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
@@ -531,313 +534,337 @@ const ProjLeadDailyAttRec = () => {
                         </div>
                     </div>
 
-                    {/* Submitted Files Section */}
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
-                        <div
-                            className="overflow-y-auto"
-                            style={{
-                                maxHeight: "300px", // Limit the table height
-                            }}
+                    {/* Buttons to choose file upload or link generation */}
+                    <div className="flex space-x-4 mb-6">
+                        <button
+                            className={`px-6 py-2 text-white ${choice === "uploadFiles" ? "bg-blue-500" : "bg-gray-500"} rounded-lg`}
+                            onClick={() => handleChoice("uploadFiles")}
                         >
-                            <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
-                                <thead className="sticky top-0 bg-gray-100 z-10">
-                                    <tr className="border-b">
-                                        <th
-                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
-                                            onClick={() => handleSort("file_name")}
-                                        >
-                                            File Name
-                                            {sortConfig.key === "file_name" &&
-                                                (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                        </th>
-                                        <th
-                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
-                                            onClick={() => handleSort("submitted_by")}
-                                        >
-                                            Submitted By
-                                            {sortConfig.key === "submitted_by" &&
-                                                (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                        </th>
-                                        <th
-                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
-                                            onClick={() => handleSort("date_uploaded")}
-                                        >
-                                            Date Submitted
-                                            {sortConfig.key === "date_uploaded" &&
-                                                (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                        </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            Description
-                                        </th>
-                                        <th
-                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
-                                            onClick={() => handleSort("status")}
-                                        >
-                                            Status
-                                            {sortConfig.key === "status" &&
-                                                (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                        </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {submissions.length > 0 ? (
-                                        submissions.map((submission) => (
-                                            <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                                    <a
-                                                        href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:underline truncate block text-center"
-                                                    >
-                                                        {submission.file_name || "No File"}
-                                                    </a>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                    {submission.submitted_by || "Unknown"}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                    {new Date(submission.date_uploaded).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
-                                                    {submission.description || "No Description"}
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <p
-                                                        className={` ${submission.status === "Approved"
-                                                            ? "text-green-600"
-                                                            : submission.status === "Pending"
-                                                                ? "text-yellow-500"
-                                                                : submission.status === "Rejected"
-                                                                    ? "text-red-600"
-                                                                    : "text-gray-600"
-                                                            }`}
-                                                    >
-                                                        {submission.status}
-                                                    </p>
-                                                    {submission.status === "Rejected" && submission.rejection_reason && (
-                                                        <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                    {submission.status === "Approved" ? (
-                                                        <span className="text-gray-500">Approved</span>
-                                                    ) : submission.status === "Rejected" ? (
-                                                        <span className="text-gray-500">Rejected</span>
-                                                    ) : (
-                                                        <div className="space-x-2">
-                                                            <button
-                                                                onClick={() => handleApprove(submission.submission_id, submission.model_name)}
-                                                                className="text-green-500 hover:text-green-700"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleReject(submission.submission_id, submission.model_name)}
-                                                                className="text-red-500 hover:text-red-700"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                                                No submissions available.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                            Upload Physical Files
+                        </button>
+                        <button
+                            className={`px-6 py-2 text-white ${choice === "generateLinks" ? "bg-blue-500" : "bg-gray-500"} rounded-lg`}
+                            onClick={() => handleChoice("generateLinks")}
+                        >
+                            Generate Attendance Links
+                        </button>
                     </div>
 
-                    {/* Total Attendees Info Section */}
-                    <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
-                        <h2 className='text-2xl font-semibold text-center mb-4'>Total Attendance Information</h2>
-                        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 text-center'>
-                            <div>
-                                <label className='block text-sm font-medium text-gray-600'>Total Attendees</label>
-                                <p className='bg-gray-100 rounded-lg p-3 mt-1'>
-                                    {totalAttendees !== null ? totalAttendees : 'Loading...'}
-                                </p>
-                            </div>
-                            <div>
-                                <label className='block text-sm font-medium text-gray-600'>Average Attendees</label>
-                                <p className='bg-gray-100 rounded-lg p-3 mt-1'>
-                                    {averageAttendees !== null ? averageAttendees : 'Loading...'}
-                                </p>
-                            </div>
-                            <div>
-                                <label className='block text-sm font-medium text-gray-600'>Number of Templates</label>
-                                <p className='bg-gray-100 rounded-lg p-3 mt-1'>
-                                    {numTemplates !== null ? numTemplates : 'Loading...'}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex justify-center mt-4"> {/* This div centers the button horizontally */}
-                            <button
-                                onClick={calculateTotalAttendees}
-                                className="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                            >
-                                Calculate Total Attendees
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Generated Attendance Links Section */}
-                    <div ref={linksSectionRef} className='bg-white shadow-md rounded-lg p-6 mb-6'>
-                        <h2 className='text-2xl font-semibold text-center mb-4'>Generated Attendance Links</h2>
-                        <div className='overflow-x-auto max-h-60 overflow-y-auto'> {/* Tailwind classes for scrolling */}
-                            <table className='w-full border border-gray-200'>
-                                <thead>
-                                    <tr className='bg-gray-50'>
-                                        <th className='p-3 text-left text-gray-700 font-medium'>Template Name</th>
-                                        <th className='p-3 text-left text-gray-700 font-medium'>Link</th>
-                                        <th className='p-3 text-left text-gray-700 font-medium'>Date Created</th>
-                                        <th className='p-3 text-left text-gray-700 font-medium'>Expiration Date</th>
-                                        <th className='p-3 text-left text-gray-700 font-medium'>Actions</th>
-                                        <th className='p-3 text-left text-gray-700 font-medium'>Attendance Report</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {templates.map((template, index) => (
-                                        <tr key={index} className='border-t'>
-                                            <td className='p-3 text-gray-600'>{template.templateName}</td>
-                                            <td className='p-3'>
-                                                <button
-                                                    onClick={() => handleCopyLink(template.sharable_link)}
-                                                    className={`flex items-center ${isExpired(template.expiration_date) ? 'cursor-not-allowed opacity-50 text-gray-500' : 'text-blue-500'}`}
-                                                    disabled={isExpired(template.expiration_date)}
-                                                >
-                                                    {isExpired(template.expiration_date) ? (
-                                                        <span>Expired</span>
-                                                    ) : (
-                                                        <>
-                                                            <FaCopy className='mr-1' />
-                                                            Copy Link
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </td>
-                                            <td className='p-3 text-gray-600'>{new Date(template.created_at).toLocaleDateString()}</td>
-                                            <td className='p-3 text-gray-600'>{template.expiration_date || 'N/A'}</td>
-                                            <td className='p-3'>
-                                                {isExpired(template.expiration_date) ? (
-                                                    <span className='text-red-500'>Expired</span>
-                                                ) : (
-                                                    <>
-                                                        <button 
-                                                            onClick={() => handleDeleteTemplate(template.id)} 
-                                                            className='text-red-500 mr-2'>
-                                                            <FaTrash />
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </td>
-                                            <td className='p-3 text-gray-600'>
-                                                <button 
-                                                    onClick={() => handleViewAttendanceRecords(template.id)} 
-                                                    className='text-blue-500 hover:text-blue-600'>
-                                                    View Attendance Records
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-
-                    {/* Template Creation and Editing Section */}
-                    <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
-                        <h2 className='text-2xl font-semibold text-center mb-4'>
-                            {isEditing ? 'Edit Attendance Template' : 'Create New Attendance Template'}
-                        </h2>
-                        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-                            <div>
-                                <label className='block text-sm font-medium text-gray-600'>Template Name</label>
-                                <input
-                                    type='text'
-                                    value={templateName}
-                                    onChange={(e) => setTemplateName(e.target.value)}
-                                    className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
-                                    disabled={isEditing}  // Disable in editing mode
-                                />
-                            </div>
-                            <div>
-                                <label className='block text-sm font-medium text-gray-600'>Expiration Date</label>
-                                <input
-                                    type='date'
-                                    value={expirationDate}
-                                    onChange={(e) => setExpirationDate(e.target.value)}
-                                    className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
-                                    min={todayDate}  // Ensure only future dates can be selected
-                                />
-                            </div>
-                        </div>
-                        <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mt-4'>
-                            {[
-                                { label: 'Include Attendee Name', state: includeAttendeeName, setState: setIncludeAttendeeName },
-                                { label: 'Include Gender', state: includeGender, setState: setIncludeGender },
-                                { label: 'Include College', state: includeCollege, setState: setIncludeCollege },
-                                { label: 'Include Department', state: includeDepartment, setState: setIncludeDepartment },
-                                { label: 'Include Year/Section', state: includeYearSection, setState: setIncludeYearSection },
-                                { label: 'Include Agency/Office', state: includeAgencyOffice, setState: setIncludeAgencyOffice },
-                                { label: 'Include Contact Number', state: includeContactNumber, setState: setIncludeContactNumber },
-                            ].map((item, idx) => (
-                                <div key={idx} className='flex items-center'>
-                                    <input
-                                        type='checkbox'
-                                        checked={item.state}
-                                        onChange={() => item.setState(!item.state)}
-                                        className='mr-2'
-                                        disabled={isEditing}  // Disable in editing mode
-                                    />
-                                    <label className='text-sm text-gray-700'>{item.label}</label>
-                                </div>
-                            ))}
-                        </div>
-                        <div className='mt-6 text-center'>
-                            {isEditing ? (
-                                <>
-                                    <button
-                                        onClick={handleSaveTemplate}
-                                        className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
-                                    >
-                                        Save Template
-                                    </button>
-                                    <button
-                                        onClick={handleCancelEdit}
-                                        className='px-6 py-2 text-white bg-gray-500 rounded-lg hover:bg-gray-600 ml-4'
-                                    >
-                                        Cancel
-                                    </button>
-                                </>
-                            ) : (
-                                <button
-                                    onClick={handleCreateTemplate}
-                                    className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
+                    {/* Conditional Rendering of Sections */}
+                    {choice === "uploadFiles" && (
+                        <div>
+                            {/* Submitted Files Section */}
+                            <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                                <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
+                                <div
+                                    className="overflow-y-auto"
+                                    style={{
+                                        maxHeight: "300px", // Limit the table height
+                                    }}
                                 >
-                                    Create Template
-                                </button>
-                            )}
+                                    <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
+                                        <thead className="sticky top-0 bg-gray-100 z-10">
+                                            <tr className="border-b">
+                                                <th
+                                                    className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                                    onClick={() => handleSort("file_name")}
+                                                >
+                                                    File Name
+                                                    {sortConfig.key === "file_name" &&
+                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                                </th>
+                                                <th
+                                                    className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                                    onClick={() => handleSort("submitted_by")}
+                                                >
+                                                    Submitted By
+                                                    {sortConfig.key === "submitted_by" &&
+                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                                </th>
+                                                <th
+                                                    className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                                    onClick={() => handleSort("date_uploaded")}
+                                                >
+                                                    Date Submitted
+                                                    {sortConfig.key === "date_uploaded" &&
+                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                                </th>
+                                                <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                                    Description
+                                                </th>
+                                                <th
+                                                    className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                                    onClick={() => handleSort("status")}
+                                                >
+                                                    Status
+                                                    {sortConfig.key === "status" &&
+                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                                </th>
+                                                <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {submissions.length > 0 ? (
+                                                submissions.map((submission) => (
+                                                    <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                                            <a
+                                                                href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 hover:underline truncate block text-center"
+                                                            >
+                                                                {submission.file_name || "No File"}
+                                                            </a>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                            {submission.submitted_by || "Unknown"}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                            {new Date(submission.date_uploaded).toLocaleDateString()}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
+                                                            {submission.description || "No Description"}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-center">
+                                                            <p
+                                                                className={` ${submission.status === "Approved"
+                                                                    ? "text-green-600"
+                                                                    : submission.status === "Pending"
+                                                                        ? "text-yellow-500"
+                                                                        : submission.status === "Rejected"
+                                                                            ? "text-red-600"
+                                                                            : "text-gray-600"
+                                                                    }`}
+                                                            >
+                                                                {submission.status}
+                                                            </p>
+                                                            {submission.status === "Rejected" && submission.rejection_reason && (
+                                                                <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                            {submission.status === "Approved" ? (
+                                                                <span className="text-gray-500">Approved</span>
+                                                            ) : submission.status === "Rejected" ? (
+                                                                <span className="text-gray-500">Rejected</span>
+                                                            ) : (
+                                                                <div className="space-x-2">
+                                                                    <button
+                                                                        onClick={() => handleApprove(submission.submission_id, submission.model)}
+                                                                        className="text-green-600 hover:text-green-800"
+                                                                    >
+                                                                        Approve
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleReject(submission.submission_id, submission.model)}
+                                                                        className="text-red-600 hover:text-red-800"
+                                                                    >
+                                                                        Reject
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-700">
+                                                        No submissions available
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    )}
+
+                    {choice === "generateLinks" && (
+                        <div>
+                            {/* Total Attendees Info Section */}
+                            <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
+                                <h2 className='text-2xl font-semibold text-center mb-4'>Total Attendance Information</h2>
+                                <div className='grid grid-cols-1 md:grid-cols-3 gap-6 text-center'>
+                                    <div>
+                                        <label className='block text-sm font-medium text-gray-600'>Total Attendees</label>
+                                        <p className='bg-gray-100 rounded-lg p-3 mt-1'>
+                                            {totalAttendees !== null ? totalAttendees : 'Loading...'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label className='block text-sm font-medium text-gray-600'>Average Attendees</label>
+                                        <p className='bg-gray-100 rounded-lg p-3 mt-1'>
+                                            {averageAttendees !== null ? averageAttendees : 'Loading...'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label className='block text-sm font-medium text-gray-600'>Number of Templates</label>
+                                        <p className='bg-gray-100 rounded-lg p-3 mt-1'>
+                                            {numTemplates !== null ? numTemplates : 'Loading...'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex justify-center mt-4"> {/* This div centers the button horizontally */}
+                                    <button
+                                        onClick={calculateTotalAttendees}
+                                        className="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                                    >
+                                        Calculate Total Attendees
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Generated Attendance Links Section */}
+                            <div ref={linksSectionRef} className='bg-white shadow-md rounded-lg p-6 mb-6'>
+                                <h2 className='text-2xl font-semibold text-center mb-4'>Generated Attendance Links</h2>
+                                <div className='overflow-x-auto max-h-60 overflow-y-auto'> {/* Tailwind classes for scrolling */}
+                                    <table className='w-full border border-gray-200'>
+                                        <thead>
+                                            <tr className='bg-gray-50'>
+                                                <th className='p-3 text-left text-gray-700 font-medium'>Template Name</th>
+                                                <th className='p-3 text-left text-gray-700 font-medium'>Link</th>
+                                                <th className='p-3 text-left text-gray-700 font-medium'>Date Created</th>
+                                                <th className='p-3 text-left text-gray-700 font-medium'>Expiration Date</th>
+                                                <th className='p-3 text-left text-gray-700 font-medium'>Actions</th>
+                                                <th className='p-3 text-left text-gray-700 font-medium'>Attendance Report</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {templates.map((template, index) => (
+                                                <tr key={index} className='border-t'>
+                                                    <td className='p-3 text-gray-600'>{template.templateName}</td>
+                                                    <td className='p-3'>
+                                                        <button
+                                                            onClick={() => handleCopyLink(template.sharable_link)}
+                                                            className={`flex items-center ${isExpired(template.expiration_date) ? 'cursor-not-allowed opacity-50 text-gray-500' : 'text-blue-500'}`}
+                                                            disabled={isExpired(template.expiration_date)}
+                                                        >
+                                                            {isExpired(template.expiration_date) ? (
+                                                                <span>Expired</span>
+                                                            ) : (
+                                                                <>
+                                                                    <FaCopy className='mr-1' />
+                                                                    Copy Link
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </td>
+                                                    <td className='p-3 text-gray-600'>{new Date(template.created_at).toLocaleDateString()}</td>
+                                                    <td className='p-3 text-gray-600'>{template.expiration_date || 'N/A'}</td>
+                                                    <td className='p-3'>
+                                                        {isExpired(template.expiration_date) ? (
+                                                            <span className='text-red-500'>Expired</span>
+                                                        ) : (
+                                                            <>
+                                                                <button 
+                                                                    onClick={() => handleDeleteTemplate(template.id)} 
+                                                                    className='text-red-500 mr-2'>
+                                                                    <FaTrash />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </td>
+                                                    <td className='p-3 text-gray-600'>
+                                                        <button 
+                                                            onClick={() => handleViewAttendanceRecords(template.id)} 
+                                                            className='text-blue-500 hover:text-blue-600'>
+                                                            View Attendance Records
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
 
 
+                            {/* Template Creation and Editing Section */}
+                            <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
+                                <h2 className='text-2xl font-semibold text-center mb-4'>
+                                    {isEditing ? 'Edit Attendance Template' : 'Create New Attendance Template'}
+                                </h2>
+                                <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                                    <div>
+                                        <label className='block text-sm font-medium text-gray-600'>Template Name</label>
+                                        <input
+                                            type='text'
+                                            value={templateName}
+                                            onChange={(e) => setTemplateName(e.target.value)}
+                                            className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
+                                            disabled={isEditing}  // Disable in editing mode
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className='block text-sm font-medium text-gray-600'>Expiration Date</label>
+                                        <input
+                                            type='date'
+                                            value={expirationDate}
+                                            onChange={(e) => setExpirationDate(e.target.value)}
+                                            className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
+                                            min={todayDate}  // Ensure only future dates can be selected
+                                        />
+                                    </div>
+                                </div>
+                                <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mt-4'>
+                                    {[
+                                        { label: 'Include Attendee Name', state: includeAttendeeName, setState: setIncludeAttendeeName },
+                                        { label: 'Include Gender', state: includeGender, setState: setIncludeGender },
+                                        { label: 'Include College', state: includeCollege, setState: setIncludeCollege },
+                                        { label: 'Include Department', state: includeDepartment, setState: setIncludeDepartment },
+                                        { label: 'Include Year/Section', state: includeYearSection, setState: setIncludeYearSection },
+                                        { label: 'Include Agency/Office', state: includeAgencyOffice, setState: setIncludeAgencyOffice },
+                                        { label: 'Include Contact Number', state: includeContactNumber, setState: setIncludeContactNumber },
+                                    ].map((item, idx) => (
+                                        <div key={idx} className='flex items-center'>
+                                            <input
+                                                type='checkbox'
+                                                checked={item.state}
+                                                onChange={() => item.setState(!item.state)}
+                                                className='mr-2'
+                                                disabled={isEditing}  // Disable in editing mode
+                                            />
+                                            <label className='text-sm text-gray-700'>{item.label}</label>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className='mt-6 text-center'>
+                                    {isEditing ? (
+                                        <>
+                                            <button
+                                                onClick={handleSaveTemplate}
+                                                className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
+                                            >
+                                                Save Template
+                                            </button>
+                                            <button
+                                                onClick={handleCancelEdit}
+                                                className='px-6 py-2 text-white bg-gray-500 rounded-lg hover:bg-gray-600 ml-4'
+                                            >
+                                                Cancel
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            onClick={handleCreateTemplate}
+                                            className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
+                                        >
+                                            Create Template
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
     );
 };
+
 
 export default ProjLeadDailyAttRec;
