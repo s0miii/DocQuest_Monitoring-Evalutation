@@ -17,6 +17,11 @@ class SummaryOfEvaluationSerializer(serializers.ModelSerializer):
         model = SummaryOfEvaluation
         fields = '__all__'
 
+class TrainerCvDtrSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TrainerCvDtr
+        fields = '__all__'
+
 class ModulesLectureNotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ModulesLectureNotes

@@ -43,6 +43,11 @@ class SummaryOfEvaluationAdmin(admin.ModelAdmin):
     list_display = ('project', 'proponent', 'date_uploaded')
     search_fields = ('project__title', 'proponent__username')
 
+@admin.register(TrainerCvDtr)
+class TrainerCvDtrAdmin(admin.ModelAdmin):
+    list_display = ('project', 'proponent', 'description', 'date_uploaded')
+    search_fields = ('project__title', 'proponent__username')
+
 @admin.register(ModulesLectureNotes)
 class ModulesLectureNotesAdmin(admin.ModelAdmin):
     list_display = ('project', 'proponent', 'description', 'date_uploaded')

@@ -9,10 +9,14 @@ const ProjLeadPhotoDocs = () => {
     const navigate = useNavigate();
     const { projectID } = useParams(); // Extract projectID from the URL
     const [projectDetails, setProjectDetails] = useState(null);
+    const [date, setDate] = useState("");
+    const [description, setDescription] = useState("");
+    const [attachedFiles, setAttachedFiles] = useState([]); // Array to handle multiple files
     const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [isProjectLeader, setIsProjectLeader] = useState(false);
+    const currentUser = localStorage.getItem("userFullName");
 
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
@@ -95,6 +99,95 @@ const ProjLeadPhotoDocs = () => {
         }
     };
 
+    // Handle file attachments
+    const handleFileChange = (event) => {
+        const files = Array.from(event.target.files);
+        setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
+    };
+
+    // Handle form submission
+    const handleSubmit = async () => {
+        const token = localStorage.getItem("token");
+        const currentUser = localStorage.getItem("userid"); // Fetch 'userid'
+
+        if (!token || !currentUser) {
+            alert("User not logged in or invalid session.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("description", description);
+        formData.append("proponent", currentUser); // Use the correct proponent field
+        if (attachedFiles.length > 0) {
+            attachedFiles.forEach((file) => {
+                formData.append("photo", file); // Match the backend field
+            });
+        } else {
+            alert("Please attach at least one file.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/photo_documentations/${projectID}/`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Token ${token}`, // Ensure the token is passed correctly
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                alert("Submission successful!");
+                setDescription("");
+                setAttachedFiles([]);
+                fetchUpdatedSubmissions(); // Refresh submissions
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error || "Submission failed!"}`);
+            }
+        } catch (error) {
+            console.error("Error during submission:", error);
+            alert("An error occurred. Please try again later.");
+        }
+    };
+
+
+
+
+    const handleDelete = async (submissionId) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("User not logged in or invalid session.");
+            return;
+        }
+
+        const confirmDelete = window.confirm("Are you sure you want to delete this submission?");
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:8000/monitoring/submissions/photo_documentations/${submissionId}/`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                    },
+                }
+            );
+
+            if (response.ok) {
+                alert("Submission deleted successfully!");
+                fetchUpdatedSubmissions(); // Update submissions list
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error || "Failed to delete submission."}`);
+            }
+        } catch (error) {
+            console.error("Error deleting submission:", error);
+            alert("An error occurred. Please try again.");
+        }
+    };
+
     // Function to handle sorting
     const handleSort = (key) => {
         let direction = "asc";
@@ -110,81 +203,6 @@ const ProjLeadPhotoDocs = () => {
         });
 
         setSubmissions(sortedData);
-    };
-
-    const handleApprove = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/photo_documentations/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Approved" }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission approved successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error approving submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error approving submission:", error);
-            alert("An error occurred while approving the submission.");
-        }
-    };
-
-    const handleReject = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        const rejectionReason = prompt("Please provide a reason for rejection:");
-
-        if (!rejectionReason) {
-            alert("Rejection reason is required.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/photo_documentations/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Rejected", rejection_reason: rejectionReason }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission rejected successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error rejecting submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error rejecting submission:", error);
-            alert("An error occurred while rejecting the submission.");
-        }
     };
 
 
@@ -366,24 +384,14 @@ const ProjLeadPhotoDocs = () => {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
                                                     {submission.status === "Approved" ? (
-                                                        <span className="text-gray-500">Approved</span>
-                                                    ) : submission.status === "Rejected" ? (
-                                                        <span className="text-gray-500">Rejected</span>
+                                                        <span className="text-gray-500">Cannot Remove</span>
                                                     ) : (
-                                                        <div className="space-x-2">
-                                                            <button
-                                                                onClick={() => handleApprove(submission.submission_id, submission.model_name)}
-                                                                className="text-green-500 hover:text-green-700"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleReject(submission.submission_id, submission.model_name)}
-                                                                className="text-red-500 hover:text-red-700"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </div>
+                                                        <button
+                                                            onClick={() => handleDelete(submission.submission_id, "photo_documentation")} // Use the correct model name
+                                                            className="text-red-500 hover:text-red-700"
+                                                        >
+                                                            Remove
+                                                        </button>
                                                     )}
                                                 </td>
                                             </tr>
@@ -398,6 +406,108 @@ const ProjLeadPhotoDocs = () => {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+
+                    {/* Add New Submission Section */}
+                    <div className="bg-white shadow-lg rounded-lg p-8">
+                        <h2 className="text-xl font-semibold text-center mb-6">
+                            Add New Submission
+                        </h2>
+
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Description
+                                </label>
+                                <input
+                                    type="text"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Enter a Short Description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Date
+                                </label>
+                                <input
+                                    type="date"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Set Date"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Preview of Attached Files */}
+                        <div className="border border-gray-300 rounded-lg p-4 mb-6 relative">
+                            <h3 className="font-semibold text-center mb-3">Attach Files</h3>
+                            {attachedFiles.length === 0 && (
+                                <div className="text-gray-400 mb-3">
+                                    <span className="block text-center text-3xl">+</span>
+                                </div>
+                            )}
+                            <input
+                                type="file"
+                                multiple
+                                onChange={handleFileChange}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
+                            />
+                            {attachedFiles.length > 0 && (
+                                <div
+                                    className="grid grid-cols-5 gap-3 mt-4 w-full overflow-y-auto"
+                                    style={{
+                                        maxHeight: "250px", // Scrollable height
+                                        paddingRight: "10px", // Space for scrollbar
+                                    }}
+                                >
+                                    {attachedFiles.map((file, index) => {
+                                        const fileExtension = file.name.split('.').pop().toUpperCase();
+                                        const filePreview = file.type.startsWith("image/")
+                                            ? (
+                                                <img
+                                                    src={URL.createObjectURL(file)}
+                                                    alt={`attachment-preview-${index}`}
+                                                    className="h-20 w-20 object-cover rounded-lg" // Deducted 10% width
+                                                />
+                                            )
+                                            : (
+                                                <div className="flex items-center justify-center h-20 w-20 bg-gray-200 rounded-lg text-gray-600">
+                                                    <span className="text-lg">{fileExtension}</span>
+                                                </div>
+                                            );
+
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="flex flex-col items-center border border-gray-200 rounded-lg p-2 shadow-md"
+                                                title={file.name}
+                                                style={{ marginBottom: "10px" }}
+                                            >
+                                                {filePreview}
+                                                <p className="text-xs mt-2 text-center truncate w-full">{file.name}</p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+
+
+                        <div className="flex justify-center">
+                            <button
+                                type="button"
+                                onClick={handleSubmit}
+                                className="bg-yellow-500 text-white font-bold py-2 px-12 rounded-lg hover:bg-yellow-600 transition"
+                            >
+                                Submit
+                            </button>
+                        </div>
+
                     </div>
 
                 </div>
