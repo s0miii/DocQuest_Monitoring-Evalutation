@@ -5,18 +5,18 @@ import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 import { FaArrowLeft } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 
-const ProjLeadLecNotes = () => {
+const ProjLeadCvDtr = () => {
     const navigate = useNavigate();
     const { projectID } = useParams(); // Extract projectID from the URL
     const [projectDetails, setProjectDetails] = useState(null);
-    const [date, setDate] = useState("");
-    const [description, setDescription] = useState("");
-    const [attachedFiles, setAttachedFiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [isProjectLeader, setIsProjectLeader] = useState(false);
-    const currentUser = localStorage.getItem("userFullName");
+    const [date, setDate] = useState("");
+    const [description, setDescription] = useState("");
+    const [totalAttendees, setAttendees] = useState(0);
+    const [attachedFiles, setAttachedFiles] = useState([]);
 
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
@@ -78,7 +78,7 @@ const ProjLeadLecNotes = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Lecture%20Notes/submissions/`,
+                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Trainer%20CV%20DTR/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -105,7 +105,6 @@ const ProjLeadLecNotes = () => {
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
     };
 
-    // Handle form submission
     const handleSubmit = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -115,10 +114,10 @@ const ProjLeadLecNotes = () => {
 
         const formData = new FormData();
         formData.append("description", description);
-        formData.append("proponent", currentUser); // Adjust this to pass the correct proponent ID
+
         if (attachedFiles.length > 0) {
             attachedFiles.forEach((file) => {
-                formData.append("module_file", file); // Adjust to match the backend field name
+                formData.append("cv_dtr_file", file);
             });
         } else {
             alert("Please attach at least one file.");
@@ -126,7 +125,7 @@ const ProjLeadLecNotes = () => {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/lecture_notes/${projectID}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/trainer_cv_dtr/${projectID}/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`,
@@ -135,13 +134,11 @@ const ProjLeadLecNotes = () => {
             });
 
             if (response.ok) {
-                const responseData = await response.json();
                 alert("Submission successful!");
                 setDescription("");
+                setDate("");
                 setAttachedFiles([]);
-                fetchUpdatedSubmissions(); // Refresh the submissions list
-            } else if (response.status === 403) {
-                alert("You are not assigned to submit this item.");
+                fetchUpdatedSubmissions(); // Update submissions list
             } else {
                 const errorData = await response.json();
                 alert(`Error: ${errorData.error || "Submission failed!"}`);
@@ -152,8 +149,7 @@ const ProjLeadLecNotes = () => {
         }
     };
 
-
-    const handleDelete = async (submissionId, modelName) => {
+    const handleDelete = async (submissionId) => {
         const token = localStorage.getItem("token");
         if (!token) {
             alert("User not logged in or invalid session.");
@@ -164,6 +160,8 @@ const ProjLeadLecNotes = () => {
         if (!confirmDelete) return;
 
         try {
+            // Adjust model_name to "daily_attendance"
+            const modelName = "trainer_cv_dtr";
             const response = await fetch(
                 `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
                 {
@@ -234,7 +232,7 @@ const ProjLeadLecNotes = () => {
                         <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req/:projectID')}>
                             <FaArrowLeft />
                         </button>
-                        <h1 className="text-2xl font-semibold">Modules/Lecture Notes</h1>
+                        <h1 className="text-2xl font-semibold">Trainer CV/DTR</h1>
                     </div>
                     {/* Project Details */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
@@ -515,4 +513,4 @@ const ProjLeadLecNotes = () => {
 };
 
 
-export default ProjLeadLecNotes;
+export default ProjLeadCvDtr;

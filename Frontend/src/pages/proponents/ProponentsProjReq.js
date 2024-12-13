@@ -25,6 +25,8 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
                 return `/proponents/project/${projectID}/daily-attendance`;
             case "Summary of Evaluation":
                 return `/proponents/project/${projectID}/evaluation-summary`;
+            case "Trainer CV DTR":
+                return `/proponents/project/${projectID}/trainer-cv-dtr`;
             case "Lecture Notes":
                 return `/proponents/project/${projectID}/modules-notes`;
             case "Photo Documentations":
