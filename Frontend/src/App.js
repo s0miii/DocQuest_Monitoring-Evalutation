@@ -12,7 +12,6 @@ import ProjLeadProjects from "./pages/projectlead/ProjLeadProjects";
 import ProjLeadProjReq from "./pages/projectlead/ProjLeadProjReq";
 import ProjLeadAssignProponents from "./pages/projectlead/ProjLeadAssignProponents";
 import ProjLeadAccReport from "./pages/projectlead/ProjLeadAccReport";
-import ProjLeadCreateAccReport from "./pages/projectlead/ProjLeadCreateAccReport";
 import ProjLeadDailyAttRec from "./pages/projectlead/ProjLeadDailyAttRec";
 import ProjLeadEvalSum from "./pages/projectlead/ProjLeadEvalSum";
 import ProjLeadTrainersCV from "./pages/projectlead/ProjLeadTrainersCV";
@@ -51,6 +50,7 @@ import AttendanceReport from "./pages/attendance and evaluation/AttendanceReport
 
 
 
+
 function App() {
   return (
     <Routes>
@@ -76,7 +76,6 @@ function App() {
       <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
       <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />
       <Route path="/projlead/project/:projectID/accomplishment-report" element={<ProjLeadAccReport />} />
-      <Route path="/projlead/project/:projectID/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
       <Route path="/projlead/project/:projectID/daily-attendance" element={<ProjLeadDailyAttRec />} />
       <Route path="/projlead/project/:projectID/summary-of-evaluation" element={<ProjLeadEvalSum />} />
       <Route path="/projlead/project/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
