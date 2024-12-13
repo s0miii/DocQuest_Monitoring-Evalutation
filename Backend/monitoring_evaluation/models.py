@@ -60,6 +60,21 @@ class SummaryOfEvaluation(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     rejection_reason = models.TextField(null=True, blank=True)
 
+# Trainer's CV/DTR
+class TrainerCvDtr(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="trainer_cv_dtr")
+    proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="trainer_cv_dtr_submissions", null=True)
+    module_file = models.FileField(upload_to="trainer_cv_dtr/", null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
+    date_uploaded = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    rejection_reason = models.TextField(null=True, blank=True)
+
 # Modules/Lecture Notes
 class ModulesLectureNotes(models.Model):
     STATUS_CHOICES = [
@@ -115,6 +130,7 @@ class ChecklistAssignment(models.Model):
     # Boolean fields to represent the state of each checklist item
     can_submit_daily_attendance = models.BooleanField(default=False)
     can_submit_summary_of_evaluation = models.BooleanField(default=False)
+    can_submit_trainer_cv_dtr = models.BooleanField(default=False)
     can_submit_modules_lecture_notes = models.BooleanField(default=False)
     can_submit_other_files = models.BooleanField(default=False)
     can_submit_photo_documentation = models.BooleanField(default=False)
