@@ -3,52 +3,98 @@ import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import { FaArrowLeft } from "react-icons/fa";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
+import axios from 'axios';
+import { useParams } from "react-router-dom";
 
 const ProjLeadCreateAccReport = () => {
     const [formData, setFormData] = useState({
-        bannerProgramTitle: "",
-        flagshipProgram: "",
-        projectTitle: "",
-        typeOfProject: "",
-        titleOfResearch: "",
-        projectCategory: "",
+        banner_program_title: "",
+        flagship_program: "",
+        project_title: "",
+        project_type: "",
+        research_title: "",
+        project_category: "",
         proponents: "",
         program: "",
-        accreditationLevel: "",
+        accreditation_level: "",
         college: "",
-        targetGroups: "",
-        projectLocation: "",
-        partnerAgency: "",
-        trainingModality: "",
-        actualDateOfImplementation: "",
-        totalDays: "",
-        submittedBy: ""
+        target_groups_beneficiaries: "",
+        project_location: "",
+        partner_agency: "",
+        training_modality: "",
+        actual_implementation_date: "",
+        total_number_of_days: "",
+        submitted_by: ""
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [photos, setPhotos] = useState([{ file: null, description: '' }]);
     const [modalPhoto, setModalPhoto] = useState(null);
-
+    const { projectID } = useParams();
     const navigate = useNavigate();
 
+    //Fetch Accomplishment Report
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
+        if (!projectID) {
+            console.error("Project ID is undefined.");
+            return;
+        }
+
+        const fetchAccomplishmentReport = async () => {
             try {
-                // Simulate fetching data from an API
-                const response = await fetch('https://api.example.com/project-details');
-                const data = await response.json();
-                setFormData(data);
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("User not logged in. Please log in again.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(
+                    `http://127.0.0.1:8000/monitoring/accomplishment-reports/${projectID}/`,  // Adjust this URL to your API endpoint
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setFormData({
+                        banner_program_title: data.banner_program_title || "",
+                        flagship_program: data.flagship_program || "",
+                        project_title: data.project_title || "",
+                        project_type: data.project_type || "",
+                        research_title: data.research_title || "",
+                        project_category: data.project_category || "",
+                        proponents: data.proponents || "",
+                        program: data.program || "",
+                        accreditation_level: data.accreditation_level || "",
+                        college: data.college || "",
+                        target_groups_beneficiaries: data.target_groups_beneficiaries || "",
+                        project_location: data.project_location || "",
+                        partner_agency: data.partner_agency || "",
+                        training_modality: data.training_modality || "",
+                        actual_implementation_date: data.actual_implementation_date || "",
+                        total_number_of_days: data.total_number_of_days || "",
+                        submitted_by: data.submitted_by || "",
+                    });
+                } else {
+                    setError("Failed to fetch the report.");
+                }
             } catch (error) {
-                setError('Failed to fetch data: ' + error.message);
+                setError("Error fetching the report.");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchData();
-    }, []);
+        fetchAccomplishmentReport();
+    }, [projectID, navigate]);
 
+    // Handle photo uploads
     const handleFileChange = (index, files) => {
         const newPhotos = [...photos];
         newPhotos[index].files = files.map((file) => ({
@@ -72,9 +118,48 @@ const ProjLeadCreateAccReport = () => {
         setPhotos([...photos, { file: null, description: '' }]);
     };
 
-    const handleSubmit = () => {
-        console.log(photos);
+
+    // Handle form submission
+    const handleSubmit = async () => {
+        setLoading(true);
+        try {
+            // Prepare form data
+            const formDataToSubmit = {
+                ...formData,
+                photos: photos.map((photo) => ({
+                    files: photo.files,
+                    description: photo.description,
+                })),
+            };
+
+            // Make API request to backend (update URL to match your backend endpoint)
+            const response = await axios.post('/api/accomplishment-reports/', formDataToSubmit, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add authorization token if needed
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+            });
+
+            // Handle successful submission
+            if (response.status === 201) {
+                navigate('/projlead/proj/req/accomplishment-report');
+            }
+        } catch (err) {
+            setError("An error occurred while submitting the report. Please try again.");
+            console.error("Submission error: ", err);
+        } finally {
+            setLoading(false);
+        }
     };
+
+    if (loading) {
+        return <div>Loading...</div>; // Display loading message while data is being fetched
+    }
+
+    if (error) {
+        return <div>{error}</div>; // Display error message if fetch fails
+    }
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -97,33 +182,33 @@ const ProjLeadCreateAccReport = () => {
                         
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Banner Program Title</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.bannerProgramTitle}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.banner_program_title}</p>
                         </div>
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Flagship Program</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.flagshipProgram}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.flagship_program}</p>
                         </div>
                         
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Project Title</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.projectTitle}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_title}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Type of Project</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.typeOfProject}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_type}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Category</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.projectCategory}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_category}</p>
                             </div>
                         </div>
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Title of Research</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.titleOfResearch}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.research_title}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -143,7 +228,7 @@ const ProjLeadCreateAccReport = () => {
                                 </div>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700">Accreditation Level</label>
-                                    <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.accreditationLevel}</p>
+                                    <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.accreditation_level}</p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">College</label>
@@ -155,39 +240,39 @@ const ProjLeadCreateAccReport = () => {
                         <div className="grid grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Target Groups/Beneficiaries</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.targetGroups}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.target_groups_beneficiaries}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Location</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.projectLocation}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_location}</p>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Partner Agency</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.partnerAgency}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.partner_agency}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Training Modality</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.trainingModality}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.training_modality}</p>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Actual Date of Implementation</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.actualDateOfImplementation}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.actual_implementation_date}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Total Number of Days</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.totalDays}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.total_number_of_days}</p>
                             </div>
                         </div>
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Submitted By</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.submittedBy}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.submitted_by}</p>
                         </div>
 
                         {/* PREXC Achievement */}
@@ -318,13 +403,14 @@ const ProjLeadCreateAccReport = () => {
                                 Attach Another Photo
                             </span>
                         </div>
-                        <div className="flex justify-center">
+
+                        <div className="mt-8 text-center">
                             <button
-                                type="button"
-                                className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition"
                                 onClick={handleSubmit}
+                                className="bg-blue-500 text-white p-3 rounded-lg"
+                                disabled={loading}
                             >
-                                Submit
+                                {loading ? 'Submitting...' : 'Submit'}
                             </button>
                         </div>
 

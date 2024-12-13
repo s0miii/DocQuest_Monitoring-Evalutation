@@ -1,19 +1,82 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 import { FaArrowLeft } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 
 const ProjLeadAccReport = () => {
     const navigate = useNavigate();
+    const { projectID } = useParams();
+    const [loading, setLoading] = useState(true);
+    const [projectDetails, setProjectDetails] = useState(null);
+    const [isProjectLeader, setIsProjectLeader] = useState(false);
 
     const handleViewClick = (path) => {
-        navigate(path);
-    }
+        navigate(path.replace(":projectID", projectID));
+    };
 
     const handleAddNewSubmission = () => {
-        navigate('/projlead/proj/req/create-accomplishment-report');
+        navigate(`/projlead/project/${projectID}/create-accomplishment-report`);
     };
+
+    // Fetch project details and submissions
+    useEffect(() => {
+        if (!projectID) {
+            console.error("Project ID is undefined.");
+            return;
+        }
+
+        const fetchProjectDetails = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("User not logged in. Please log in again.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(
+                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setProjectDetails(data.projectDetails);
+                    setIsProjectLeader(data.isProjectLeader);
+                } else {
+                    console.error("Failed to fetch project details.");
+                }
+            } catch (error) {
+                console.error("Error fetching project details:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProjectDetails();
+    }, [projectID, navigate]);
+
+    // loading substitute
+    if (loading) {
+        return (
+            <div className="p-4">
+                <div className="bg-gray-200 animate-pulse h-6 w-3/4 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-1/2 mb-4 rounded"></div>
+                <div className="bg-gray-200 animate-pulse h-6 w-full rounded"></div>
+            </div>
+        );
+    }
+    if (!projectDetails) {
+        return <div>Project not found.</div>;
+    }
 
     return (
         <div className="bg-gray-200 min-h-screen flex">
@@ -26,40 +89,60 @@ const ProjLeadAccReport = () => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req')}>
+                        <button className="mr-2" onClick={() => handleViewClick('/projlead/project/${projectID}')}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Accomplishment Report</h1>
                     </div>
 
-                    {/* Project Details and Progress Status Section */}
+                    {/* Project Details */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Project Details</h2>
+                        <h2 className="text-xl font-semibold text-center mb-4">
+                            Project Details
+                        </h2>
                         <div className="grid grid-cols-2 gap-4">
-                            {/* Project Title and Leader */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Project Title</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Tesda Vocational</p>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Project Title
+                                </label>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                    {projectDetails.projectTitle}
+                                </p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Project Leader</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Tabasan, Wynoah Louis</p>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Project Leader
+                                </label>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                    {projectDetails.projectLeader}
+                                </p>
                             </div>
                         </div>
 
-                        {/* College/Campus, Target Date, Partner Agency */}
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">College/Campus</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">CEA</p>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    College/Campus
+                                </label>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                    {projectDetails.college}
+                                </p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Target Date</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">May 2024</p>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Target Date
+                                </label>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                    {projectDetails.targetDate}
+                                </p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Partner Agency</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">Placeholder Inc.</p>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Partner Agency
+                                </label>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                    {projectDetails.partnerAgency}
+                                </p>
                             </div>
                         </div>
                     </div>
