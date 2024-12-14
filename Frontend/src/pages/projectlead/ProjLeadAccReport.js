@@ -585,7 +585,7 @@ const ProjLeadAccReport = () => {
                                             <div className="w-full bg-gray-100 rounded-lg p-2 text-center">Rating 100%</div>
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{formData.weightedTraining}</p>
+                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center"></p>
                                         </td>
                                     </tr>
                                 </tbody>
