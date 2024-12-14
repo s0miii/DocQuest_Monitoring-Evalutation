@@ -12,9 +12,12 @@ const ProjectsDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const projectsPerPage = 5;
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+    const [filter, setFilter] = useState("Ongoing"); // Default to Ongoing projects
     const [error, setError] = useState(null);
+    const pageSize = 5; // Define the page size
+
+
 
     useEffect(() => {
         if (!token) {
@@ -32,52 +35,50 @@ const ProjectsDashboard = () => {
         }
     }, [token, navigate]);
 
-    useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const response = await axios({
-                    method: 'get',
-                    url: 'http://127.0.0.1:8000/monitoring/user-projects/',
-                    headers: {
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+    const fetchProjects = async () => {
+        try {
+            let allProjects = [];
+            let page = 1;
+            let totalPages = 1;
 
-                if (!Array.isArray(response.data)) {
-                    console.error("Invalid data structure received:", response.data);
-                    setError("Invalid data format received from server");
-                    setProjects([]);
-                    return;
-                }
-
-                const formattedProjects = response.data.map((proj) => ({
-                    projectID: proj.projectID || "N/A",
-                    projectTitle: proj.projectTitle || "Untitled Project",
-                    background: proj.background || "N/A",
-                    targetImplementation: proj.targetImplementation || "N/A",
-                    role: proj.role || "N/A",
-                    status: proj.status || "N/A",
-                }));
-
-                const sortedProjects = formattedProjects.sort((a, b) =>
-                    new Date(b.targetImplementation.split(" - ")[1]) -
-                    new Date(a.targetImplementation.split(" - ")[1])
+            // Fetch data from all pages
+            do {
+                const response = await axios.get(
+                    `http://127.0.0.1:8000/monitoring/user-projects/?page=${page}&page_size=${pageSize}`,
+                    {
+                        headers: {
+                            'Authorization': `Token ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
                 );
 
-                setProjects(sortedProjects);
-                setError(null);
-            } catch (error) {
-                console.error("Error fetching projects:", error);
-                setError(error.message || "Failed to fetch projects");
-                setProjects([]);
-            } finally {
-                setLoading(false);
-            }
-        };
+                const { data, meta } = response.data;
 
-        fetchProjects();
-    }, [token]);
+                // Combine current page data into allProjects
+                allProjects = [...allProjects, ...data];
+                totalPages = meta.total_pages;
+                page += 1; // Move to the next page
+            } while (page <= totalPages);
+
+            // Update the projects state with all fetched projects
+            setProjects(allProjects.map((project) => ({
+                ...project,
+                isCompleted: project.progress >= 100, // Mark completion status
+            })));
+            setError(null); // Clear any previous errors
+        } catch (error) {
+            console.error("Error fetching projects:", error);
+            setError(error.message || "Failed to fetch projects");
+            setProjects([]);
+        } finally {
+            setLoading(false); // Stop the loading spinner
+        }
+    };
+
+    useEffect(() => {
+        fetchProjects(currentPage); // Fetch projects when the component loads or page changes
+    }, [currentPage]);
 
     const handleViewClick = (project) => {
         if (project.role === "Project Leader") {
@@ -88,6 +89,13 @@ const ProjectsDashboard = () => {
             alert("Invalid role detected.");
         }
     };
+
+    const handlePageChange = (newPage) => {
+        if (newPage > 0 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+        }
+    };
+
 
     // Handle sorting
     const handleSort = (key) => {
@@ -106,28 +114,94 @@ const ProjectsDashboard = () => {
         setProjects(sortedProjects);
     };
 
-    // Filter projects by search term
-    const filteredProjects = projects.filter((project) =>
-        project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase())
+
+    const renderPagination = () => {
+        const paginationButtons = [];
+
+        // Previous Button
+        if (currentPage > 1) {
+            paginationButtons.push(
+                <button
+                    key="prev"
+                    className="px-3 py-1 border rounded hover:bg-gray-200"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                >
+                    Previous
+                </button>
+            );
+        }
+
+        // Current Page, Previous, and Next Buttons
+        if (currentPage > 1) {
+            paginationButtons.push(
+                <button
+                    key={currentPage - 1}
+                    className="px-3 py-1 border rounded hover:bg-gray-200"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                >
+                    {currentPage - 1}
+                </button>
+            );
+        }
+
+        paginationButtons.push(
+            <button
+                key={currentPage}
+                className="px-3 py-1 border rounded bg-gray-300 font-bold"
+                disabled
+            >
+                {currentPage}
+            </button>
+        );
+
+        if (currentPage < totalPages) {
+            paginationButtons.push(
+                <button
+                    key={currentPage + 1}
+                    className="px-3 py-1 border rounded hover:bg-gray-200"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                >
+                    {currentPage + 1}
+                </button>
+            );
+        }
+
+        // Next Button
+        if (currentPage < totalPages) {
+            paginationButtons.push(
+                <button
+                    key="next"
+                    className="px-3 py-1 border rounded hover:bg-gray-200"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                >
+                    Next
+                </button>
+            );
+        }
+
+        return paginationButtons;
+    };
+
+
+    // Filter projects by "Completed" or "Ongoing" and apply search term
+    const filteredProjects = projects
+        .filter((project) => {
+            if (filter === "Completed") {
+                return project.isCompleted;
+            }
+            return !project.isCompleted;
+        })
+        .filter((project) =>
+            project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+    // Calculate pagination details after defining filteredProjects
+    const totalPages = Math.ceil(filteredProjects.length / pageSize);
+    const currentProjects = filteredProjects.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
     );
 
-    // Logic for completed and ongoing projects
-    const completedProjects = projects.filter(project => project.status === "completed");
-    const ongoingProjects = projects.filter(project => project.status !== "completed");
-
-
-    // Calculate the displayed projects based on pagination
-    const indexOfLastProject = currentPage * projectsPerPage;
-    const indexOfFirstProject = indexOfLastProject - projectsPerPage;
-    const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
-
-    const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
-
-    const handlePageChange = (newPage) => {
-        if (newPage > 0 && newPage <= totalPages) {
-            setCurrentPage(newPage);
-        }
-    };
 
     if (loading) {
         return (
@@ -150,16 +224,26 @@ const ProjectsDashboard = () => {
                     <h1 className="text-2xl font-semibold mb-5">Projects Overview</h1>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-10">
                         {/* Completed */}
-                        <div className="bg-green-500 text-white rounded-lg p-6 flex flex-col items-center justify-center">
+                        <div
+                            className={`bg-green-500 text-white rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer ${filter === "Completed" ? "ring-4 ring-green-700" : ""}`}
+                            onClick={() => setFilter("Completed")}
+                        >
                             <h2 className="text-lg font-semibold">Completed</h2>
-                            <h2 className="text-4xl font-bold">{completedProjects.length}</h2>
-                            <button className="mt-2 underline">View</button>
+                            <h2 className="text-4xl font-bold">
+                                {projects.filter((p) => p.isCompleted).length}
+                            </h2>
+                            <span className="mt-2 underline">View</span>
                         </div>
                         {/* Ongoing */}
-                        <div className="bg-yellow-400 text-white rounded-lg p-6 flex flex-col items-center justify-center">
+                        <div
+                            className={`bg-yellow-400 text-white rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer ${filter === "Ongoing" ? "ring-4 ring-yellow-700" : ""}`}
+                            onClick={() => setFilter("Ongoing")}
+                        >
                             <h2 className="text-lg font-semibold">Ongoing</h2>
-                            <h2 className="text-4xl font-bold">{ongoingProjects.length}</h2>
-                            <button className="mt-2 underline">View</button>
+                            <h2 className="text-4xl font-bold">
+                                {projects.filter((p) => !p.isCompleted).length}
+                            </h2>
+                            <span className="mt-2 underline">View</span>
                         </div>
                     </div>
 
@@ -206,37 +290,38 @@ const ProjectsDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {currentProjects.map((project) => (
-                                        <tr key={project.projectID}>
-                                            <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center">{project.role || "No Role"}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center">{project.targetImplementation}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                <button
-                                                    className="text-blue-500 hover:underline"
-                                                    onClick={() => handleViewClick(project)}
-                                                >
-                                                    View
-                                                </button>
+                                    {currentProjects.length > 0 ? (
+                                        currentProjects.map((project) => (
+                                            <tr key={project.projectID}>
+                                                <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-center">{project.role || "No Role"}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-center">{project.targetImplementation}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                    <button
+                                                        className="text-blue-500 hover:underline"
+                                                        onClick={() => handleViewClick(project)}
+                                                    >
+                                                        View
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                                                No projects found. Try changing the filter or search term.
                                             </td>
                                         </tr>
-                                    ))}
+                                    )}
                                 </tbody>
                             </table>
                         </div>
 
                         {/* Pagination */}
-                        <div className="mt-4 flex justify-between items-center">
-                            <div>Showing page {currentPage} out of {totalPages}</div>
-                            <div className="flex space-x-2">
-                                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-                                    Previous
-                                </button>
-                                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-                                    Next
-                                </button>
-                            </div>
+                        <div className="mt-4 flex justify-center items-center space-x-2">
+                            {filteredProjects.length > 0 && renderPagination()}
                         </div>
+
                     </div>
                 </div>
             </div>
