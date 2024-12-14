@@ -398,9 +398,10 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 
 #########################
-### Generate Sharable Link for Evaluation
+### Generate Sharable Link for Evaluation - GenEvalview (API)
 # Remove trainer field for projects without trainers
-POST http://127.0.0.1:8000/monitoring/evaluation_links/
+# POST http://127.0.0.1:8000/monitoring/evaluation_links/
+POST http://127.0.0.1:8000/monitoring/generate_evaluation_link/
 Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 
