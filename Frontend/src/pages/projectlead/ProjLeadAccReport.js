@@ -282,7 +282,7 @@ const ProjLeadAccReport = () => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/projlead/project/${projectID}')}>
+                        <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req/:projectID')}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Accomplishment Report</h1>
