@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import transaction
-from django.db.models import F, Q, ExpressionWrapper, IntegerField, Sum
+from django.db.models import F, Q, ExpressionWrapper, IntegerField, Sum, Count
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import get_object_or_404, render, redirect
@@ -19,11 +19,12 @@ from .serializers import *
 from .utils import send_reminder_email
 from .decorators import role_required
 from django.http import HttpResponseForbidden, JsonResponse
-import secrets, logging, datetime
+import secrets, logging
 from django.utils.dateparse import parse_date
 from django.conf import settings
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from datetime import datetime
 
 # Email
 @role_required(allowed_role_codes=["estf"])  # Restrict to EStaff
@@ -1034,7 +1035,7 @@ class EvaluationViewSet(viewsets.ModelViewSet):
     queryset = Evaluation.objects.all()
     serializer_class = EvaluationSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = {'trainer': ['exact'], 'project': ['exact']}  # These must match model field names
+    filterset_fields = {'trainer': ['exact'], 'project': ['exact']}
     search_fields = ['attendee_name', 'project__projectTitle', 'trainer__faculty']
     ordering_fields = ['submitted_at', 'overall_rating']
 
@@ -1043,11 +1044,11 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         trainer = self.request.query_params.get('trainer')
         project = self.request.query_params.get('project')
         
-        if trainer:
-            queryset = queryset.filter(trainer_id=trainer)
         if project:
             queryset = queryset.filter(project_id=project)
-        
+        if trainer:
+            queryset = queryset.filter(trainer_id=trainer)
+
         print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
         return queryset
 
@@ -1055,32 +1056,41 @@ class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
     queryset = EvaluationSharableLink.objects.all()
     serializer_class = EvaluationSharableLinkSerializer
 
-    # List all sharable links
     def list(self, request, *args, **kwargs):
-        # Handle GET requests to list all sharable links.
-        
+        # List all sharable links.
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    # Retrieve a specific sharable link by ID
     def retrieve(self, request, pk=None):
-        # Handle GET requests to retrieve a specific sharable link.
+        # Retrieve a specific sharable link by ID.
         sharable_link = get_object_or_404(EvaluationSharableLink, pk=pk)
         serializer = self.get_serializer(sharable_link)
         return Response(serializer.data)
-        
+    
     def create(self, request, *args, **kwargs):
         try:
             trainer_id = request.data.get("trainer_id")
             project_id = request.data.get("project_id")
             expiration_date = request.data.get("expiration_date")
-            trainer = LoadingOfTrainers.objects.get(pk=trainer_id)
+
+            # Fetch the project project
             project = Project.objects.get(pk=project_id)
 
+            # Validate trainer if related siya sa project (if naay trainer)
+            trainer = None
+            if trainer_id:
+                trainer = LoadingOfTrainers.objects.filter(pk=trainer_id, project=project).first()
+                if not trainer:
+                    return Response(
+                        {"error": f"Trainer with ID {trainer_id} is not associated with Project ID {project_id}."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            #  Create or update sharable link
             link, created = EvaluationSharableLink.objects.get_or_create(
-                trainer=trainer,
                 project=project,
+                trainer=trainer,  # This will be None if no trainer is provided
                 defaults={"expiration_date": expiration_date},
             )
 
@@ -1088,79 +1098,46 @@ class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
                 link.expiration_date = expiration_date
                 link.save()
 
+            response_data = EvaluationSharableLinkSerializer(link).data
+
+            # Remove trainer-related fields if no trainer is assigned
+            if not trainer:
+                response_data.pop("trainer", None)
+                response_data.pop("trainer_name", None)
+
             return Response(
-                {"message": "Sharable link created/retrieved successfully", "data": EvaluationSharableLinkSerializer(link).data},
+                {"message": "Sharable link created/retrieved successfully", "data": response_data},
                 status=status.HTTP_201_CREATED,
             )
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-            
-# # Evaluation Form View for HTML Form Submission
-# def evaluation_form_view(request, project_id, trainer_id=None):
-#     project = get_object_or_404(Project, projectID=project_id)
-#     trainer = get_object_or_404(LoadingOfTrainers, LOTID=trainer_id) if trainer_id else None #Set trainer to None if not provided for project-only evaluations
-
-#     access_token = request.GET.get("access_token")
-#     evaluation = get_object_or_404(Evaluation, project=project, trainer=trainer)
-#     if access_token != evaluation.access_token:
-#         return HttpResponseForbidden("Invalid or missing access token.")
-
-#     if request.method == 'POST':
-#         form = EvaluationForm(request.POST)
-#         if form.is_valid():
-#             evaluation = form.save(commit=False)
-#             evaluation.project = project
-#             if trainer:
-#                 evaluation.trainer = trainer
-#             evaluation.stored_overall_rating = evaluation.calculate_overall_rating()
-#             evaluation.save()
-            
-#             return render(request, 'thank_you.html', {'stored_overall_rating': evaluation.stored_overall_rating})
-#     else:
-#         form = EvaluationForm()
-
-#     return render(request, 'evaluation_form.html', {'form': form, 'trainer': trainer, 'project': project})    
-
-# def evaluation_summary_view(request):
-#     projects = Project.objects.all()
-#     project_summaries = []
-
-#     for project in projects:
-#         trainers = project.loadingOfTrainers.all()
-#         trainer_evaluations = []
-
-#         for trainer in trainers:
-#             evaluations = Evaluation.objects.filter(project=project, trainer=trainer)
-#             if evaluations.exists():
-#                 trainer_evaluations.append({
-#                     'trainer': trainer,
-#                     'evaluations': evaluations,
-#                 })
-
-#         if trainer_evaluations:
-#             project_summaries.append({
-#                 'project': project,
-#                 'trainer_evaluations': trainer_evaluations,
-#             })        
-
-#     context = {'project_summaries': project_summaries}
-#     return render(request, 'evaluation_summary.html', context)            
 
 
-#EVAL NGA API-BASED NA
+# API-based Eval Link Generation - NEW
 class GenerateEvaluationSharableLinkView(APIView):
     # API to generate sharable links for evaluations.
     def post(self, request):
-        trainer_id = request.data.get("trainer_id")
         project_id = request.data.get("project_id")
+        trainer_id = request.data.get("trainer_id")
         expiration_date = request.data.get("expiration_date")
 
         try:
+            project = Project.objects.get(pk=project_id)
+
+            # Check if the project has a trainer
+            trainer = None
+            if trainer_id:
+                trainer = LoadingOfTrainers.objects.filter(pk=trainer_id).first()
+                if not trainer:
+                    return Response({"error": "Trainer not found."}, status=status.HTTP_400_BAD_REQUEST)
+
             sharable_link, created = EvaluationSharableLink.objects.get_or_create(
-                trainer_id=trainer_id,
-                project_id=project_id,
+                trainer=trainer,
+                project=project,
                 defaults={"expiration_date": expiration_date},
             )
+
             if not created:
                 sharable_link.expiration_date = expiration_date
                 sharable_link.save()
@@ -1168,13 +1145,18 @@ class GenerateEvaluationSharableLinkView(APIView):
             return Response({
                 "message": "Sharable link generated successfully.",
                 "data": {
-                    "trainer_id": trainer_id,
-                    "project_id": project_id,
-                    "link": sharable_link.sharable_link,
+                    "trainer_id": trainer.LOTID if trainer else None,
+                    "trainer_name": trainer.faculty if trainer else None,
+                    "trainingLoad": trainer.trainingLoad if trainer else None,
+                    "project_id": project.projectID,
+                    "project_title": project.projectTitle,
                     "expiration_date": sharable_link.expiration_date,
+                    "link": sharable_link.sharable_link,
                 }
             }, status=status.HTTP_201_CREATED)
 
+        except Project.DoesNotExist:
+            return Response({"error": "Project not found."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1235,7 +1217,180 @@ class SubmitEvaluationView(APIView):
                 }, status=status.HTTP_201_CREATED)
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def evaluation_form_view(request, trainer_id, project_id):
+    trainer = get_object_or_404(LoadingOfTrainers, pk=trainer_id)
+    project = get_object_or_404(Project, pk=project_id)
+    return render(request, 'evaluation_form.html', {
+        'trainer': trainer,
+        'project': project,
+    })    
+
+# Function to fetch all evaluations for a specific project/trainer
+def get_detailed_evaluations(project_id):
+    evaluations = Evaluation.objects.filter(project_id=project_id)
     
+    # Build a table-like structure
+    detailed_summary = []
+    for evaluation in evaluations:
+        row = {
+            "id": evaluation.id,
+            "relevance_of_topics": evaluation.relevance_of_topics,
+            "organizational_flow": evaluation.organizational_flow,
+            "learning_methods": evaluation.learning_methods,
+            "technology_use": evaluation.technology_use,
+            "time_efficiency": evaluation.time_efficiency,
+            "mastery_subject": evaluation.mastery_subject,
+            "preparedness": evaluation.preparedness,
+            "audience_participation": evaluation.audience_participation,
+            "interest_level": evaluation.interest_level,
+            "handle_questions": evaluation.handle_questions,
+            "voice_personality": evaluation.voice_personality,
+            "visual_aids": evaluation.visual_aids,
+            "venue_assessment": evaluation.venue_assessment,
+            "timeliness": evaluation.timeliness,
+            "overall_management": evaluation.overall_management,
+            "average": evaluation.overall_rating,
+        }
+        detailed_summary.append(row)
+    
+    return detailed_summary
+
+# View that generates evaluation summary table - UPDATED, WITH MODEL
+@api_view(['GET'])
+def evaluation_summary_view(request, project_id):
+    try:
+        # Step 1: Check for an existing summary in the database
+        try:
+            summary = EvaluationSummary.objects.get(project_id=project_id)
+        except EvaluationSummary.DoesNotExist:
+            summary = None
+
+        # Step 2: Determine if recalculation is needed
+        recalculate = False
+        if summary:
+            # Check if the summary is outdated (you can adjust the condition)
+            time_difference = now() - summary.last_updated
+            if time_difference.seconds > 3600:  # 1 hour threshold
+                recalculate = True
+        else:
+            recalculate = True
+
+        if recalculate:
+            # Step 3: Recalculate the summary dynamically
+            evaluations = Evaluation.objects.filter(project_id=project_id)
+            if not evaluations.exists():
+                return Response({
+                    "message": "No evaluations found for this project.",
+                    "evaluations": [],
+                    "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                    "total_evaluations": 0,
+                    "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                    "detailed_evaluations": [],
+
+                }, status=200)
+
+            # Count evaluators in each rating category
+            categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+            total_evaluations = evaluations.count()
+            for evaluation in evaluations:
+                avg = evaluation.overall_rating
+                if avg <= 1:
+                    categories["poor"] += 1
+                elif avg <= 2:
+                    categories["fair"] += 1
+                elif avg <= 3:
+                    categories["good"] += 1
+                elif avg <= 4:
+                    categories["better"] += 1
+                else:
+                    categories["best"] += 1
+
+            # Calculate percentages
+            percentages = {
+                key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0
+                for key, value in categories.items()
+            }
+
+            # Step 4: Update or create the database record
+            if summary:
+                summary.total_evaluations = total_evaluations
+                summary.categories = categories
+                summary.percentages = percentages
+                summary.last_updated = now()
+                summary.save()
+            else:
+                summary = EvaluationSummary.objects.create(
+                    project_id=project_id,
+                    total_evaluations=total_evaluations,
+                    categories=categories,
+                    percentages=percentages,
+                )
+
+        # Step 5: Get detailed evaluations
+        detailed_evaluations = get_detailed_evaluations(project_id)
+
+        # Step 6: Return the summary (whether from database or recalculated)
+        return Response({
+            "message": "Evaluations summary retrieved successfully.",
+            "total_evaluations": summary.total_evaluations,
+            "categories": summary.categories,
+            "percentages": summary.percentages,
+            "detailed_evaluations": detailed_evaluations,
+        }, status=200)
+
+    except Exception as e:
+        return Response({"message": "An error occurred.", "error": str(e)}, status=500)
+
+# # View that generates evaluation summary table - no model to store data yet, purely view lang
+# @api_view(['GET'])
+# def evaluations_summary_view(request, project_id):
+#     try:
+#         # Fetch evaluations for the project
+#         evaluations_summary = get_evaluations_summary(project_id)
+        
+#         if not evaluations_summary:
+#             # No evaluations found
+#             return Response({
+#                 "message": "No evaluations found for this project.",
+#                 "evaluations": [],
+#                 "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+#                 "total_evaluations": 0,
+#                 "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+#             }, status=status.HTTP_200_OK)
+
+#         # Calculate total evaluations
+#         total_evaluations = len(evaluations_summary)
+
+#         # Count evaluators in each rating category
+#         categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+#         for eval in evaluations_summary:
+#             if eval["average"] <= 1:
+#                 categories["poor"] += 1
+#             elif eval["average"] <= 2:
+#                 categories["fair"] += 1
+#             elif eval["average"] <= 3:
+#                 categories["good"] += 1
+#             elif eval["average"] <= 4:
+#                 categories["better"] += 1
+#             else:
+#                 categories["best"] += 1
+        
+#         # Calculate percentages
+#         percentages = {key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0 
+#                        for key, value in categories.items()}
+
+#         # Combine results
+#         return Response({
+#             "message": "Evaluations summary retrieved successfully.",
+#             "evaluations": evaluations_summary,
+#             "categories": categories,
+#             "total_evaluations": total_evaluations,
+#             "percentages": percentages,
+#         })
+#     except Exception as e:
+#         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # ATTENDANCE TEMPLATE -> KATONG CHECKLIST NGA LOGIC
 class AttendanceTemplateViewSet(viewsets.ModelViewSet):
@@ -1251,6 +1406,17 @@ class CreateAttendanceTemplateView(APIView):
     def post(self, request, project_id):
         # Validate project
         project = get_object_or_404(Project, projectID=project_id)
+
+        #Validate trainer_id if existing
+        trainer_id = request.data.get("trainer_id")
+        trainer_load = None
+        if trainer_id:
+            # Validate if associated ba ang trainer sa project
+            try:
+                trainer_load = LoadingOfTrainers.objects.get(LOTID=trainer_id, project=project)
+            except LoadingOfTrainers.DoesNotExist:
+                return Response({"error": "The specified trainer is not linked to this project."}, status=400)
+
 
         # Extract template fields
         fields = {
@@ -1274,14 +1440,20 @@ class CreateAttendanceTemplateView(APIView):
         
 
         # Create the template
-        attendance_template = AttendanceTemplate.objects.create(project=project, expiration_date=expiration_date, **fields)
+        attendance_template = AttendanceTemplate.objects.create(
+            project=project, 
+            trainerLoad=trainer_load, 
+            expiration_date=expiration_date,  
+            templateName=request.data.get("templateName"), 
+            **fields
+            )
 
-        # # Generate sharable link
-        # sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
+        # Generate sharable link
+        sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
 
-        # Use the frontend base URL for the sharable link
-        frontend_base_url = settings.FRONTEND_BASE_URL  # Retrieve the frontend URL from settings
-        sharable_link = f"{frontend_base_url}/attendance/fill/{attendance_template.token}/"
+        # # Use the frontend base URL for the sharable link
+        # frontend_base_url = settings.FRONTEND_BASE_URL  # Retrieve the frontend URL from settings
+        # sharable_link = f"{frontend_base_url}/attendance/fill/{attendance_template.token}/"
 
         # Save the sharable link sa database mismo -> added feature lang
         attendance_template.sharable_link = sharable_link
@@ -1481,5 +1653,9 @@ class CalculateTotalAttendeesView(APIView):
             }, 
             status=200
         )
-
         
+# Fetch list of trainers per project from docquestapp
+def get_trainers_by_project(request, project_id):
+    trainers = LoadingOfTrainers.objects.filter(project_id=project_id).values('LOTID', 'faculty', 'trainingLoad', 'hours')
+    return JsonResponse({'trainers': list(trainers)})
+
