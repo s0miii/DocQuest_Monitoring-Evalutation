@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 import secrets
 from datetime import date
+from django.utils.timezone import now
 
 # model for logging
 
@@ -243,7 +244,7 @@ class ProjectNarrative(models.Model):
 # Model for Evaluation Form
 class Evaluation(models.Model):
     trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluations")
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluations")
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name="evaluations")
     attendee_name = models.CharField(max_length=255)
 
     relevance_of_topics = models.IntegerField(choices=[(i, i) for i in range(6)])
@@ -276,6 +277,12 @@ class Evaluation(models.Model):
     
     class Meta:
         unique_together = ('trainer', 'project', 'attendee_name')
+
+    @property
+    def trainingLoad(self):
+        if self.trainer:
+            return self.trainer.trainingLoad
+        return None
 
     def save(self, *args, **kwargs):
         if self.project.status != 'approved':
@@ -323,13 +330,19 @@ class Evaluation(models.Model):
     def __str__(self):
         return f"Evaluation for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"
 
+def generate_token_32():
+    return secrets.token_urlsafe(16)  # Generates a 32-character token
 class EvaluationSharableLink(models.Model):
-    trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluation_links")
+    trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluation_links", null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluation_links")
-    token = models.CharField(max_length=64, unique=True, default=secrets.token_urlsafe(16))
+    token = models.CharField(default=generate_token_32, max_length=64, unique=True)    
     sharable_link = models.URLField(max_length=500, blank=True, null=True)
     expiration_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def trainingLoad(self):
+        return self.trainer.trainingLoad if self.trainer else None
 
     def save(self, *args, **kwargs):
         if not self.token:
@@ -339,19 +352,38 @@ class EvaluationSharableLink(models.Model):
         if not self.sharable_link:
             base_url = "http://127.0.0.1:8000/monitoring/evaluation/fill"
             self.sharable_link = f"{base_url}/{self.token}/"
-
+        
         super().save(*args, **kwargs)
 
     def is_valid(self):
         return not self.expiration_date or self.expiration_date >= timezone.now().date()
 
     def __str__(self):
-        return f"Sharable Link for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"    
+        if self.trainer:
+            return f"Sharable Link for Trainer {self.trainer.LOTID} - Project {self.project.projectID}"
+        return f"Sharable Link for Project {self.project.projectID} (No Trainer)"
+
+class EvaluationSummary(models.Model):
+    project = models.ForeignKey('docquestapp.Project', on_delete=models.CASCADE)
+    total_evaluations = models.IntegerField(default=0)
+    categories = models.JSONField(default=dict)  # For rating counts
+    percentages = models.JSONField(default=dict)  # For percentage calculations
+    last_updated = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return f"Summary for Project {self.project.projectTitle if self.project else 'Unknown'} (Last Updated: {self.last_updated})"
     
 # Attendance Template and Attendance Record Model
 class AttendanceTemplate(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attendance_templates")
     templateName = models.CharField(max_length=255, default="Attendance Template")    
+    trainerLoad = models.ForeignKey(
+        LoadingOfTrainers,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='attendance_templates'
+    )
 
     include_attendee_name = models.BooleanField(default=False)
     include_gender = models.BooleanField(default=False)
@@ -362,7 +394,7 @@ class AttendanceTemplate(models.Model):
     include_contact_number = models.BooleanField(default=False)
     
     sharable_link = models.URLField(max_length=500, blank=True, null=True)
-    token = models.CharField(max_length=32, unique=True, default=secrets.token_urlsafe(16))
+    token = models.CharField(default=generate_token_32, max_length=64, unique=True)
     expiration_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

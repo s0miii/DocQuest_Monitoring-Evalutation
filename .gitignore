@@ -3,6 +3,7 @@ venv/
 docquest/*.sqlite3
 Backend/*.sqlite3
 *.sqlite3
+db.sqlite3
 uploads/
 myvenv/
 venv/
@@ -45,3 +46,4 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+Backend/monitoring_evaluation/__pycache__/

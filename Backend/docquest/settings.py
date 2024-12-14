@@ -24,14 +24,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+6q5l+09zwkn(pp%p0i^mejaiy$3u&9v#!n#7dguz3gwk4=4=m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost', 
     'http://localhost:3000',
-    'docquest-production.up.railway.app'
-    'docquestmonitoring-evalutation-production.up.railway.app'
+    'docquest-production.up.railway.app',
+    'docquestmonitoring-evalutation-production.up.railway.app',
 ]
 
 
@@ -103,14 +103,14 @@ ASGI_APPLICATION = 'docquest.asgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",
-    }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / "db.sqlite3",
+    # }
 
-    # 'default': dj_database_url.config(
-    #     default=os.environ.get('DATABASE_URL', 'postgresql://postgres:vCjEKpnHRGmqseGNfKlAoZVDAOAesjrr@junction.proxy.rlwy.net:47567/railway')
-    # )
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgres://postgres:bAvxEnBBeqtgIXJTJmnvyZcFXLcXLjVB@junction.proxy.rlwy.net:27742/railway')
+    )
 }
 
 
@@ -189,7 +189,9 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'SERIALIZERS': {
-         'user_create': 'docquest.serializers.UserSignupSerializer',
-         'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
+        'user_create': 'docquest.serializers.UserSignupSerializer',
+        'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
     }
 }
+
+FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://127.0.0.1:3000')
