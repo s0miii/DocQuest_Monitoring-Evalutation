@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 from django.db import transaction
 from django.db.models import F, Q, ExpressionWrapper, IntegerField, Sum
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -104,7 +105,6 @@ def send_dynamic_reminder_email(request, project_id):
 class UserProjectsView(APIView):
     permission_classes = [IsAuthenticated]
 
-    # Define role_mapping inside the class
     role_mapping = {
         "pjld": "Project Leader",
         "ppnt": "Proponent",
@@ -113,36 +113,71 @@ class UserProjectsView(APIView):
     def get(self, request):
         user = request.user
         if not user:
-            return Response({"error": "Invalid session"}, status=403)
+            return Response({"error": "Invalid session"}, status=status.HTTP_403_FORBIDDEN)
 
         try:
-            # Filter projects where the user is a project leader or proponent
+            # Fetch projects and prefetch related data
             projects = Project.objects.filter(
                 Q(userID=user) | Q(proponents__userID=user.userID),
-                status="approved"
-            ).distinct()
+                status__in=["approved", "pending"]
+            ).distinct().prefetch_related('proponents')
 
             combined_projects = []
             for project in projects:
                 role = None
-                # Determine the role based on user association with the project
                 if project.userID == user:
-                    role = self.role_mapping.get("pjld")  # Map "pjld" role code
+                    role = self.role_mapping.get("pjld")
                 elif project.proponents.filter(userID=user.userID).exists():
-                    role = self.role_mapping.get("ppnt")  # Map "ppnt" role code
+                    role = self.role_mapping.get("ppnt")
 
-                if role:
-                    combined_projects.append({
-                        "projectID": project.projectID,
-                        "projectTitle": project.projectTitle,
-                        "background": project.background,
-                        "targetImplementation": f"{project.targetStartDateImplementation or 'N/A'} - {project.targetEndDateImplementation or 'N/A'}",
-                        "role": role,
-                    })
+                combined_projects.append({
+                    "projectID": project.projectID,
+                    "projectTitle": project.projectTitle,
+                    "background": project.background,
+                    "targetImplementation": f"{project.targetStartDateImplementation or 'N/A'} - {project.targetEndDateImplementation or 'N/A'}",
+                    "role": role,
+                })
 
-            return Response(combined_projects, status=200)
+
+            # Pagination logic
+            try:
+                page = int(request.GET.get('page', 1))
+                if page < 1:
+                    raise ValueError
+            except ValueError:
+                return Response({"error": "Invalid page number"}, status=status.HTTP_400_BAD_REQUEST)
+
+            page_size = min(int(request.GET.get('page_size', 5)), 100)  # Limit max page size
+            paginator = Paginator(combined_projects, page_size)
+
+            try:
+                paginated_projects = paginator.page(page)
+            except EmptyPage:
+                paginated_projects = []
+                return Response({
+                    "data": [],
+                    "meta": {
+                        "total_pages": paginator.num_pages,
+                        "current_page": int(page),
+                        "total_items": paginator.count,
+                    },
+                }, status=status.HTTP_200_OK)
+
+            return Response({
+                "data": paginated_projects.object_list,
+                "meta": {
+                    "total_pages": paginator.num_pages,
+                    "current_page": int(page),
+                    "total_items": paginator.count,
+                },
+            }, status=status.HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            logger.error(f"Error in UserProjectsView: {str(e)}")
+            return Response(
+                {"error": "An internal server error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 # retrieve projects for staff role
