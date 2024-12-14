@@ -110,6 +110,7 @@ urlpatterns = [
     # path('evaluation/<int:project_id>/', evaluation_form_view, name='evaluation_form_project_only'),
     
     path('evaluation/<int:trainer_id>/<int:project_id>/', evaluation_form_view, name='evaluation_form'),
+    
     # path('evaluation_links/', GenerateEvaluationSharableLinkView.as_view(), name="generate_evaluation_link"),
 
     # new url to generate evaluation link
