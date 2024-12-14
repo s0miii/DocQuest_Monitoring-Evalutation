@@ -1020,12 +1020,22 @@ class EvaluationViewSet(viewsets.ModelViewSet):
 class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
     queryset = EvaluationSharableLink.objects.all()
     serializer_class = EvaluationSharableLinkSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = {'project': ['exact']}
+
+    def get_queryset(self):
+        queryset = EvaluationSharableLink.objects.all()
+        project = self.request.query_params.get('project', None)
+        if project:
+            queryset = queryset.filter(project_id=project)
+            
+        return queryset
 
     def list(self, request, *args, **kwargs):
         # List all sharable links.
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response({"links": serializer.data})
 
     def retrieve(self, request, pk=None):
         # Retrieve a specific sharable link by ID.
