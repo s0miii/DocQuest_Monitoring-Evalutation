@@ -1,8 +1,12 @@
 {
   "dependencies": {
     "@react-pdf/renderer": "^4.1.5",
+    "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",
     "jspdf": "^2.5.2",
-    "jspdf-autotable": "^3.8.4"
+    "jspdf-autotable": "^3.8.4",
+    "react": "^19.0.0",
+    "react-datepicker": "^7.5.0",
+    "react-dom": "^19.0.0"
   }
 }
