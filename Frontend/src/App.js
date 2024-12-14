@@ -12,7 +12,6 @@ import ProjLeadProjects from "./pages/projectlead/ProjLeadProjects";
 import ProjLeadProjReq from "./pages/projectlead/ProjLeadProjReq";
 import ProjLeadAssignProponents from "./pages/projectlead/ProjLeadAssignProponents";
 import ProjLeadAccReport from "./pages/projectlead/ProjLeadAccReport";
-import ProjLeadCreateAccReport from "./pages/projectlead/ProjLeadCreateAccReport";
 import ProjLeadDailyAttRec from "./pages/projectlead/ProjLeadDailyAttRec";
 import ProjLeadEvalSum from "./pages/projectlead/ProjLeadEvalSum";
 import ProjLeadCvDtr from "./pages/projectlead/ProjLeadCvDtr";
@@ -51,6 +50,7 @@ import AttendanceReport from "./pages/attendance and evaluation/AttendanceReport
 
 
 
+
 function App() {
   return (
     <Routes>
@@ -75,15 +75,17 @@ function App() {
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
       <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
       <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />
-      <Route path="/projlead/proj/req/accomplishment-report" element={<ProjLeadAccReport />} />
-      <Route path="/projlead/project/:projectID/create-accomplishment-report" element={<ProjLeadCreateAccReport />} />
+      <Route path="/projlead/project/:projectID/accomplishment-report" element={<ProjLeadAccReport />} />
       <Route path="/projlead/project/:projectID/daily-attendance" element={<ProjLeadDailyAttRec />} />
       <Route path="/projlead/project/:projectID/summary-of-evaluation" element={<ProjLeadEvalSum />} />
+<<<<<<< HEAD
       <Route path="/projlead/project/:projectID/trainer-cv-dtr" element={<ProjLeadCvDtr />} />
+=======
+      <Route path="/projlead/project/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
+>>>>>>> 4dcf2ee558af63acc7ef5962ebd8a20fc9d2e1d1
       <Route path="/projlead/project/:projectID/lecture-notes" element={<ProjLeadLecNotes />} />
       <Route path="/projlead/project/:projectID/other-files" element={<ProjLeadOthers />} />
       <Route path="/projlead/project/:projectID/photo-documentations" element={<ProjLeadPhotoDocs />} />
-
 
 
       <Route path="/projects-dashboard" element={<ProjectsDashboard />} />
@@ -94,6 +96,8 @@ function App() {
       <Route path="/proponents/project/:projectID/modules-notes" element={<ProponentsLecNotes />} />
       <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
       <Route path="/proponents/project/:projectID/photo-documentations" element={<ProponentsPhotoDocs />} />
+      
+      
       <Route path="/eval" element={<EvaluationForm />} />
       <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
       <Route path="/projlead/attendance-records/:templateId" element={<AttendanceReport />} />

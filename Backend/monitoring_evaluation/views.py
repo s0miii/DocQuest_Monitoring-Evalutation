@@ -1618,7 +1618,9 @@ class CalculateTotalAttendeesView(APIView):
             }, 
             status=200
         )
+        
 # Fetch list of trainers per project from docquestapp
 def get_trainers_by_project(request, project_id):
     trainers = LoadingOfTrainers.objects.filter(project_id=project_id).values('LOTID', 'faculty', 'trainingLoad', 'hours')
-    return JsonResponse({'trainers': list(trainers)})       
+    return JsonResponse({'trainers': list(trainers)})
+
