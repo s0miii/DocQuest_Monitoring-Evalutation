@@ -14,11 +14,6 @@ const ProjLeadDailyAttRec = () => {
     const [submissions, setSubmissions] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [isProjectLeader, setIsProjectLeader] = useState(false);
-    const [date, setDate] = useState("");
-    const [description, setDescription] = useState("");
-    const [totalAttendees, setAttendees] = useState(0);
-    
-    const [attachedFiles, setAttachedFiles] = useState([]);
 
     const [templateName, setTemplateName] = useState('');
     const [includeAttendeeName, setIncludeAttendeeName] = useState(true);
@@ -30,6 +25,7 @@ const ProjLeadDailyAttRec = () => {
     const [includeContactNumber, setIncludeContactNumber] = useState(false);
     const [expirationDate, setExpirationDate] = useState('');
     const [templates, setTemplates] = useState([]);
+    const [totalAttendeesTable, setTotalAttendeesTable] = useState(null);
     const [averageAttendees, setAverageAttendees] = useState(null);
     const [numTemplates, setNumTemplates] = useState(null);
     const [isEditing, setIsEditing] = useState(false);  
@@ -38,6 +34,10 @@ const ProjLeadDailyAttRec = () => {
     const [choice, setChoice] = useState("uploadFiles");
     // Reference to the "Generated Attendance Links" section
     const linksSectionRef = useRef(null);
+    const [date, setDate] = useState("");
+    const [description, setDescription] = useState("");
+    const [totalAttendees, setAttendees] = useState(0);
+    const [attachedFiles, setAttachedFiles] = useState([]);
 
     const handleChoice = (choice) => {
         setChoice(choice); // set the choice based on user selection
@@ -137,7 +137,7 @@ const ProjLeadDailyAttRec = () => {
                     }
                 }
             );
-            setAttendees(response.data.total_attendees); 
+            setTotalAttendeesTable(response.data.total_attendees);
             setAverageAttendees(response.data.average_attendees);
             setNumTemplates(response.data.num_templates);
             alert('Attendance totals calculated successfully!');
@@ -267,82 +267,24 @@ const ProjLeadDailyAttRec = () => {
         }
     };
 
-    // Handle file attachments
-    const handleApprove = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
+    // Function to handle sorting
+    const handleSort = (key) => {
+        let direction = "asc";
+        if (sortConfig.key === key && sortConfig.direction === "asc") {
+            direction = "desc";
         }
+        setSortConfig({ key, direction });
 
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/daily_attendance/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Approved" }),
-                }
-            );
+        const sortedData = [...submissions].sort((a, b) => {
+            if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
+            if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+            return 0;
+        });
 
-            if (response.ok) {
-                alert("Submission approved successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error approving submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error approving submission:", error);
-            alert("An error occurred while approving the submission.");
-        }
+        setSubmissions(sortedData);
     };
 
-    const handleReject = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        const rejectionReason = prompt("Please provide a reason for rejection:");
-
-        if (!rejectionReason) {
-            alert("Rejection reason is required.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/daily_attendance/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Rejected", rejection_reason: rejectionReason }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission rejected successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error rejecting submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error rejecting submission:", error);
-            alert("An error occurred while rejecting the submission.");
-        }
-    };
-
+    
 
     // loading substitute
     if (loading) {
@@ -630,133 +572,133 @@ const ProjLeadDailyAttRec = () => {
                     {/* Conditional Rendering of Sections */}
                     {choice === "uploadFiles" && (
                         <div>
-                            {/* Submitted Files Section */}
-                            <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
-                                <h2 className="mb-4 text-xl font-semibold text-center">Submitted Files</h2>
-                                <div
-                                    className="overflow-y-auto"
-                                    style={{
-                                        maxHeight: "300px", // Limit the table height
-                                    }}
-                                >
-                                    <table className="min-w-full bg-white rounded-lg shadow-md table-auto">
-                                        <thead className="sticky top-0 z-10 bg-gray-100">
-                                            <tr className="border-b">
-                                                <th
-                                                    className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
-                                                    onClick={() => handleSort("file_name")}
-                                                >
-                                                    File Name
-                                                    {sortConfig.key === "file_name" &&
-                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                                </th>
-                                                <th
-                                                    className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
-                                                    onClick={() => handleSort("submitted_by")}
-                                                >
-                                                    Submitted By
-                                                    {sortConfig.key === "submitted_by" &&
-                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                                </th>
-                                                <th
-                                                    className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
-                                                    onClick={() => handleSort("date_uploaded")}
-                                                >
-                                                    Date Submitted
-                                                    {sortConfig.key === "date_uploaded" &&
-                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                                </th>
-                                                <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
-                                                    Description
-                                                </th>
-                                                <th
-                                                    className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
-                                                    onClick={() => handleSort("status")}
-                                                >
-                                                    Status
-                                                    {sortConfig.key === "status" &&
-                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                                </th>
-                                                <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
-                                                    Actions
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {submissions.length > 0 ? (
-                                                submissions.map((submission) => (
-                                                    <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
-                                                        <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                                                            <a
-                                                                href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="block text-center text-blue-600 truncate hover:underline"
+                        
+                        {/* Submitted Files Section */}
+                        <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
+                            <h2 className="mb-4 text-xl font-semibold text-center">Submitted Files</h2>
+                            <div
+                                className="overflow-y-auto"
+                                style={{
+                                    maxHeight: "300px", // Limit the table height
+                                }}
+                            >
+                                <table className="min-w-full bg-white rounded-lg shadow-md table-auto">
+                                    <thead className="sticky top-0 z-10 bg-gray-100">
+                                        <tr className="border-b">
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                onClick={() => handleSort("file_name")}
+                                            >
+                                                File Name
+                                                {sortConfig.key === "file_name" &&
+                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                            >
+                                                Total Attendees
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                onClick={() => handleSort("submitted_by")}
+                                            >
+                                                Submitted By
+                                                {sortConfig.key === "submitted_by" &&
+                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                onClick={() => handleSort("date_uploaded")}
+                                            >
+                                                Date Submitted
+                                                {sortConfig.key === "date_uploaded" &&
+                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                            </th>
+                                            <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
+                                                Description
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                onClick={() => handleSort("status")}
+                                            >
+                                                Status
+                                                {sortConfig.key === "status" &&
+                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                            </th>
+                                            <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {submissions.length > 0 ? (
+                                            submissions.map((submission) => (
+                                                <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
+                                                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                                                        <a
+                                                            href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="block text-center text-blue-600 truncate hover:underline"
+                                                        >
+                                                            {submission.file_name || "No File"}
+                                                        </a>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                        {submission.total_attendees || "Unknown"}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                        {submission.submitted_by || "Unknown"}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                        {new Date(submission.date_uploaded).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
+                                                        {submission.description || "No Description"}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <p
+                                                            className={` ${submission.status === "Approved"
+                                                                ? "text-green-600"
+                                                                : submission.status === "Pending"
+                                                                    ? "text-yellow-500"
+                                                                    : submission.status === "Rejected"
+                                                                        ? "text-red-600"
+                                                                        : "text-gray-600"
+                                                                }`}
+                                                        >
+                                                            {submission.status}
+                                                        </p>
+                                                        {submission.status === "Rejected" && submission.rejection_reason && (
+                                                            <p className="mt-1 text-xs text-red-600">{submission.rejection_reason}</p>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                        {submission.status === "Approved" ? (
+                                                            <span className="text-gray-500">Cannot Remove</span>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleDelete(submission.submission_id)}
+                                                                className="text-red-500 hover:text-red-700"
                                                             >
-                                                                {submission.file_name || "No File"}
-                                                            </a>
-                                                        </td>
-                                                        <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
-                                                            {submission.submitted_by || "Unknown"}
-                                                        </td>
-                                                        <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
-                                                            {new Date(submission.date_uploaded).toLocaleDateString()}
-                                                        </td>
-                                                        <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
-                                                            {submission.description || "No Description"}
-                                                        </td>
-                                                        <td className="px-6 py-4 text-center">
-                                                            <p
-                                                                className={` ${submission.status === "Approved"
-                                                                    ? "text-green-600"
-                                                                    : submission.status === "Pending"
-                                                                        ? "text-yellow-500"
-                                                                        : submission.status === "Rejected"
-                                                                            ? "text-red-600"
-                                                                            : "text-gray-600"
-                                                                    }`}
-                                                            >
-                                                                {submission.status}
-                                                            </p>
-                                                            {submission.status === "Rejected" && submission.rejection_reason && (
-                                                                <p className="mt-1 text-xs text-red-600">{submission.rejection_reason}</p>
-                                                            )}
-                                                        </td>
-                                                        <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
-                                                            {submission.status === "Approved" ? (
-                                                                <span className="text-gray-500">Approved</span>
-                                                            ) : submission.status === "Rejected" ? (
-                                                                <span className="text-gray-500">Rejected</span>
-                                                            ) : (
-                                                                <div className="space-x-2">
-                                                                    <button
-                                                                        onClick={() => handleApprove(submission.submission_id, submission.model)}
-                                                                        className="text-green-600 hover:text-green-800"
-                                                                    >
-                                                                        Approve
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleReject(submission.submission_id, submission.model)}
-                                                                        className="text-red-600 hover:text-red-800"
-                                                                    >
-                                                                        Reject
-                                                                    </button>
-                                                                </div>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={6} className="px-6 py-4 text-sm text-center text-gray-700">
-                                                        No submissions available
+                                                                Remove
+                                                            </button>
+                                                        )}
                                                     </td>
                                                 </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                                                    No submissions available.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
+                        </div>
+
                         </div>
                     )}
 
@@ -769,7 +711,7 @@ const ProjLeadDailyAttRec = () => {
                                     <div>
                                         <label className='block text-sm font-medium text-gray-600'>Total Attendees</label>
                                         <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
-                                            {totalAttendees !== null ? totalAttendees : 'Loading...'}
+                                            {totalAttendeesTable !== null ? totalAttendeesTable : 'Loading...'}
                                         </p>
                                     </div>
                                     <div>
@@ -859,7 +801,6 @@ const ProjLeadDailyAttRec = () => {
                                 </div>
                             </div>
 
-
                             {/* Template Creation and Editing Section */}
                             <div className='p-6 mb-6 bg-white rounded-lg shadow-md'>
                                 <h2 className='mb-4 text-2xl font-semibold text-center'>
@@ -937,6 +878,7 @@ const ProjLeadDailyAttRec = () => {
                             </div>
                         </div>
                     )}
+
                     {/* Add New Submission Section */}
                     <div className="p-8 bg-white rounded-lg shadow-lg">
                         <h2 className="mb-6 text-xl font-semibold text-center">

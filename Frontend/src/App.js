@@ -77,12 +77,8 @@ function App() {
       <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />
       <Route path="/projlead/project/:projectID/accomplishment-report" element={<ProjLeadAccReport />} />
       <Route path="/projlead/project/:projectID/daily-attendance" element={<ProjLeadDailyAttRec />} />
-      <Route path="/projlead/project/:projectID/summary-of-evaluation" element={<ProjLeadEvalSum />} />
-<<<<<<< HEAD
+      <Route path="/projlead/project/:projectID/evaluation-summary" element={<ProjLeadEvalSum />} />
       <Route path="/projlead/project/:projectID/trainer-cv-dtr" element={<ProjLeadCvDtr />} />
-=======
-      <Route path="/projlead/project/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
->>>>>>> 4dcf2ee558af63acc7ef5962ebd8a20fc9d2e1d1
       <Route path="/projlead/project/:projectID/lecture-notes" element={<ProjLeadLecNotes />} />
       <Route path="/projlead/project/:projectID/other-files" element={<ProjLeadOthers />} />
       <Route path="/projlead/project/:projectID/photo-documentations" element={<ProjLeadPhotoDocs />} />
