@@ -93,8 +93,9 @@ const ProjLeadEvalSum = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                setGeneratedLinks(data.links);
+                setGeneratedLinks(data.links || []);
             } else {
+                setGeneratedLinks([]); // Ensure it's an empty array on error
                 setErrorMessage("Failed to fetch links.");
             }
         } catch (error) {
@@ -148,8 +149,6 @@ const ProjLeadEvalSum = () => {
             project_id: projectID,
             expiration_date: expirationDate,
         };
-
-        console.log("Post Data being sent:", postData);
     
         try {
             const response = await fetch(
@@ -651,17 +650,43 @@ const ProjLeadEvalSum = () => {
                         <div className="mt-6">
                             {loadingLinks ? (
                                 <p>Loading generated links...</p>
-                            ) : (
+                            ) : generatedLinks && generatedLinks.length > 0 ? (
                                 <ul>
                                     {generatedLinks.map((link) => (
                                         <li key={link.id} className="mb-2">
                                             <div className="flex items-center justify-between">
-                                                <span>{link.link_url}</span>
-                                                <span>{link.expiration_date}</span>
+                                                {/* Trainer Name */}
+                                                <p className= "text-sm text-gray-700">
+                                                    <strong>Trainer:</strong> {link.trainer_name || "No trainer assigned"}
+                                                </p>
+                                                
+                                                {/* Sharable Link */}
+                                                <p className="text-sm text-gray-700">
+                                                    <strong>Link:</strong>{" "}
+                                                    {link.sharable_link ? (
+                                                        <a
+                                                            href={link.sharable_link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-blue-500 hover:underline"
+                                                        >
+                                                            {link.sharable_link}
+                                                        </a>
+                                                    ) : (
+                                                        "No link available"
+                                                    )}
+                                                </p>
+
+                                                {/* Expiration Date */}
+                                                <p className="text-sm text-gray-700">
+                                                    <strong>Expiration Date:</strong> {link.expiration_date || "No expiration date"}
+                                                </p>
                                             </div>
                                         </li>
                                     ))}
                                 </ul>
+                            ) : (
+                                <p>No generated links available</p>    
                             )}
                         </div>
                     </div>
