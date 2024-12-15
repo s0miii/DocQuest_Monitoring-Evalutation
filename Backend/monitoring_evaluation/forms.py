@@ -30,8 +30,8 @@ class AccomplishmentReportForm(forms.ModelForm):
         model = AccomplishmentReport
         fields = [
             'project', 'banner_program_title', 'flagship_program', 
-            'training_modality', 'actual_implementation_date', 
-            'total_number_of_days', 'prexc_achievement', 'project_narrative'
+            'training_modality', 'actualStartDateImplementation', 
+            'actualEndDateImplementation', 'prexc_achievement', 'project_narrative'
         ]  # Ensure fields are specified
 
 class PREXCAchievementForm(forms.ModelForm):

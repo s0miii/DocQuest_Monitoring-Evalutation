@@ -153,8 +153,9 @@ class AccomplishmentReport(models.Model):
         max_length=50,
         choices=[("Virtual", 'Virtual'), ("Face to Face", 'Face to Face'), ("Blended", 'Blended')]
     )
-    actual_implementation_date = models.DateField()
-    total_number_of_days = models.IntegerField()
+    actualStartDateImplementation = models.DateField()
+    actualEndDateImplementation = models.DateField()
+    total_number_of_days = models.IntegerField(editable=False, null=True, blank=True)
     submitted_by = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, related_name='submitted_accomplishments'
     )
@@ -167,6 +168,12 @@ class AccomplishmentReport(models.Model):
         'ProjectNarrative', on_delete=models.CASCADE, null=True, blank=True, related_name='accomplishment_report'
     )
 
+    # Dynamic calculation of total_number_of_days
+    def save(self, *args, **kwargs):
+        # Recalculate the total number of days based on attendance templates
+        self.total_number_of_days = self.project.attendance_templates.count()
+        super().save(*args, **kwargs)
+    
     # Properties to access fields from the Project model
     @property
     def project_title(self):

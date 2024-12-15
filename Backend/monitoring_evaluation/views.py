@@ -904,27 +904,42 @@ class ProponentSubmissionsView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 
-class AccomplishmentReportCreateView(LoginRequiredMixin, CreateView):
-    model = AccomplishmentReport
-    form_class = AccomplishmentReportForm
-    template_name = 'monitoring_evaluation/accomplishment_report_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:report_list')
-    permission_classes = [IsAuthenticated]
+# class AccomplishmentReportCreateView(LoginRequiredMixin, CreateView):
+#     model = AccomplishmentReport
+#     form_class = AccomplishmentReportForm
+#     template_name = 'monitoring_evaluation/accomplishment_report_form.html'
+#     success_url = reverse_lazy('monitoring_evaluation:report_list')
+#     permission_classes = [IsAuthenticated]
     
-    def form_valid(self, form):
-        form.instance.submitted_by = self.request.user
-        return super().form_valid(form)
+#     def form_valid(self, form):
+#         form.instance.submitted_by = self.request.user
+#         return super().form_valid(form)
 
-class AccomplishmentReportDetailView(LoginRequiredMixin, View):
-    permission_classes = [IsAuthenticated]
+# class AccomplishmentReportDetailView(LoginRequiredMixin, View):
+#     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        report = get_object_or_404(AccomplishmentReport, pk=pk)
-        return render(request, 'monitoring_evaluation/accomplishment_report_detail.html', {'report': report})
+#     def get(self, request, pk):
+#         report = get_object_or_404(AccomplishmentReport, pk=pk)
+#         return render(request, 'monitoring_evaluation/accomplishment_report_detail.html', {'report': report})
+
 
 class AccomplishmentReportViewSet(viewsets.ModelViewSet):
     queryset = AccomplishmentReport.objects.all()
     serializer_class = AccomplishmentReportSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Automatically set `submitted_by` and calculate `total_number_of_days`
+        serializer.save(
+            submitted_by=self.request.user,
+            total_number_of_days=serializer.validated_data['project'].attendance_templates.count()
+        )
+
+    def perform_update(self, serializer):
+        # Recalculate `total_number_of_days` when updating the report
+        serializer.save(
+            total_number_of_days=serializer.validated_data['project'].attendance_templates.count()
+        )
 
 
 class PREXCAchievementCreateView(LoginRequiredMixin, CreateView):

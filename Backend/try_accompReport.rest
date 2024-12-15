@@ -1,0 +1,17 @@
+
+###
+# Test Endpoint for Accompolishment Report Submission
+POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
+Content-Type: application/json
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+
+{
+  "project": 1,
+  "banner_program_title": "Sample Banner Program",
+  "flagship_program": "Sample Flagship Program",
+  "training_modality": "Face to Face",
+  "actualStartDateImplementation": "2024-01-01",
+  "actualEndDateImplementation": "2024-01-05",
+  "prexc_achievement": null,
+  "project_narrative": null
+}

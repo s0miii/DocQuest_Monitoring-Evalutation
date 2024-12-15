@@ -158,7 +158,9 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
         'banner_program_title', 
         'flagship_program', 
         'training_modality', 
-        'actual_implementation_date', 
+        # 'actual_implementation_date',
+        'actualStartDateImplementation',
+        'actualEndDateImplementation', 
         'total_number_of_days', 
         'submitted_by', 
         'project_title', 
@@ -181,11 +183,12 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
         'submitted_by__email',
     )
     list_filter = (
+        'actualStartDateImplementation',
+        'actualEndDateImplementation',
         'training_modality', 
-        'actual_implementation_date', 
         'project__status',
     )
-    ordering = ('-actual_implementation_date',)
+    ordering = ('-actualStartDateImplementation',)
 
 @admin.register(ProjectNarrative)
 class ProjectNarrativeAdmin(admin.ModelAdmin):
