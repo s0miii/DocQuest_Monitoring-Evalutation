@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routers, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
 // import CoordinatorTab from "./pages/coordinator/CoordinatorTab";
 // import UserList from "./pages/estaff/UserList";
@@ -33,7 +33,6 @@ import StaffPhotoDocs from "./pages/estaff/StaffPhotoDocs";
 import StaffOthers from "./pages/estaff/StaffOthers";
 import EStaffProjReq from "./pages/estaff/EStaffProjReq";
 import EStaffOP1OP2 from "./pages/estaff/EStaffOP1OP2";
-import ProponentsProjects from "./pages/proponents/ProjectsDashboard"
 import ProponentsProjReq from "./pages/proponents/ProponentsProjReq";
 import ProponentsDailyAttRec from "./pages/proponents/ProponentsDailyAttRec";
 import ProponentsEvalSum from "./pages/proponents/ProponentsEvalSum";
@@ -92,8 +91,8 @@ function App() {
       <Route path="/proponents/project/:projectID/modules-notes" element={<ProponentsLecNotes />} />
       <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
       <Route path="/proponents/project/:projectID/photo-documentations" element={<ProponentsPhotoDocs />} />
-      
-      
+
+
       <Route path="/eval" element={<EvaluationForm />} />
       <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
       <Route path="/projlead/attendance-records/:templateId" element={<AttendanceReport />} />
