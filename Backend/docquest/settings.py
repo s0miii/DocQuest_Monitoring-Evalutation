@@ -31,7 +31,7 @@ ALLOWED_HOSTS = [
     'localhost', 
     'http://localhost:3000',
     'docquest-production.up.railway.app',
-    'docquestmonitoring-evalutation-production.up.railway.app',
+    'https://docquest-monitoring-evalutation.onrender.com',
 ]
 
 
@@ -109,7 +109,9 @@ DATABASES = {
     # }
 
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:bAvxEnBBeqtgIXJTJmnvyZcFXLcXLjVB@postgres.railway.internal:5432/railway')
+        default=os.environ.get('DATABASE_PUBLIC_URL'),
+        conn_max_age=600,
+        ssl_require=True
     )
 }
 
