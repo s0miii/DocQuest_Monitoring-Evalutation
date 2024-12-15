@@ -122,7 +122,7 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
 
         fetchProjectDetails();
         fetchDocumentCounts();
-    }, [projectID]);
+    }, [projectID, navigate, token]);
 
     if (loading) {
         return (
