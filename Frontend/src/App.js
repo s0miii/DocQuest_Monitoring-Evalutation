@@ -94,7 +94,7 @@ function App() {
       <Route path="/proponents/project/:projectID/photo-documentations" element={<ProponentsPhotoDocs />} />
       
       
-      <Route path="/eval" element={<EvaluationForm />} />
+      <Route path="/monitoring/evaluation/fill/:token" element={<EvaluationForm />} />
       <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
       <Route path="/projlead/attendance-records/:templateId" element={<AttendanceReport />} />
     </Routes>
