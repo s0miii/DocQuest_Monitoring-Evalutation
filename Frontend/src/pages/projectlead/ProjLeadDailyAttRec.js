@@ -25,7 +25,7 @@ const ProjLeadDailyAttRec = () => {
     const [includeContactNumber, setIncludeContactNumber] = useState(false);
     const [expirationDate, setExpirationDate] = useState('');
     const [templates, setTemplates] = useState([]);
-    const [totalAttendees, setTotalAttendees] = useState(null);
+    const [totalAttendeesTable, setTotalAttendeesTable] = useState(null);
     const [averageAttendees, setAverageAttendees] = useState(null);
     const [numTemplates, setNumTemplates] = useState(null);
     const [isEditing, setIsEditing] = useState(false);  
@@ -34,6 +34,10 @@ const ProjLeadDailyAttRec = () => {
     const [choice, setChoice] = useState("uploadFiles");
     // Reference to the "Generated Attendance Links" section
     const linksSectionRef = useRef(null);
+    const [date, setDate] = useState("");
+    const [description, setDescription] = useState("");
+    const [totalAttendees, setAttendees] = useState(0);
+    const [attachedFiles, setAttachedFiles] = useState([]);
 
     const handleChoice = (choice) => {
         setChoice(choice); // set the choice based on user selection
@@ -133,7 +137,7 @@ const ProjLeadDailyAttRec = () => {
                     }
                 }
             );
-            setTotalAttendees(response.data.total_attendees);
+            setTotalAttendeesTable(response.data.total_attendees);
             setAverageAttendees(response.data.average_attendees);
             setNumTemplates(response.data.num_templates);
             alert('Attendance totals calculated successfully!');
@@ -175,6 +179,94 @@ const ProjLeadDailyAttRec = () => {
         }
     };
 
+    // Handle file attachments
+    const handleFileChange = (event) => {
+        const files = Array.from(event.target.files);
+        setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
+    };
+
+    const handleSubmit = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("User not logged in or invalid session.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("description", description);
+        formData.append("total_attendees", totalAttendees);
+
+        if (attachedFiles.length > 0) {
+            attachedFiles.forEach((file) => {
+                formData.append("attendance_file", file);
+            });
+        } else {
+            alert("Please attach at least one file.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/attendance/${projectID}/`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Token ${token}`,
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                alert("Submission successful!");
+                setDescription("");
+                setDate("");
+                setAttendees(0);
+                setAttachedFiles([]);
+                fetchUpdatedSubmissions(); // Update submissions list
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error || "Submission failed!"}`);
+            }
+        } catch (error) {
+            console.error("Error during submission:", error);
+            alert("An error occurred. Please try again later.");
+        }
+    };
+
+    const handleDelete = async (submissionId) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("User not logged in or invalid session.");
+            return;
+        }
+
+        const confirmDelete = window.confirm("Are you sure you want to delete this submission?");
+        if (!confirmDelete) return;
+
+        try {
+            // Adjust model_name to "daily_attendance"
+            const modelName = "daily_attendance";
+            const response = await fetch(
+                `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                    },
+                }
+            );
+
+            if (response.ok) {
+                alert("Submission deleted successfully!");
+                fetchUpdatedSubmissions(); // Update submissions list
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error || "Failed to delete submission."}`);
+            }
+        } catch (error) {
+            console.error("Error deleting submission:", error);
+            alert("An error occurred. Please try again.");
+        }
+    };
+
     // Function to handle sorting
     const handleSort = (key) => {
         let direction = "asc";
@@ -192,88 +284,15 @@ const ProjLeadDailyAttRec = () => {
         setSubmissions(sortedData);
     };
 
-    const handleApprove = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/daily_attendance/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Approved" }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission approved successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error approving submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error approving submission:", error);
-            alert("An error occurred while approving the submission.");
-        }
-    };
-
-    const handleReject = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        const rejectionReason = prompt("Please provide a reason for rejection:");
-
-        if (!rejectionReason) {
-            alert("Rejection reason is required.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/daily_attendance/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Rejected", rejection_reason: rejectionReason }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission rejected successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error rejecting submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error rejecting submission:", error);
-            alert("An error occurred while rejecting the submission.");
-        }
-    };
+    
 
     // loading substitute
     if (loading) {
         return (
             <div className="p-4">
-                <div className="bg-gray-200 animate-pulse h-6 w-3/4 mb-4 rounded"></div>
-                <div className="bg-gray-200 animate-pulse h-6 w-1/2 mb-4 rounded"></div>
-                <div className="bg-gray-200 animate-pulse h-6 w-full rounded"></div>
+                <div className="w-3/4 h-6 mb-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-1/2 h-6 mb-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-full h-6 bg-gray-200 rounded animate-pulse"></div>
             </div>
         );
     }
@@ -467,14 +486,14 @@ const ProjLeadDailyAttRec = () => {
 
 
     return (
-        <div className="bg-gray-200 min-h-screen flex">
-            <div className="w-1/5 fixed h-full">
+        <div className="flex min-h-screen bg-gray-200">
+            <div className="fixed w-1/5 h-full">
                 <ProjLeadSidebar />
             </div>
             {/* Main content area */}
             <div className="flex-1 ml-[20%]">
                 <Topbar />
-                <div className="flex flex-col mt-14 px-10">
+                <div className="flex flex-col px-10 mt-14">
                     <div className="flex items-center mb-5">
                         <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req/:projectID')}>
                             <FaArrowLeft />
@@ -483,8 +502,8 @@ const ProjLeadDailyAttRec = () => {
                     </div>
 
                     {/* Project Details */}
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">
+                    <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
+                        <h2 className="mb-4 text-xl font-semibold text-center">
                             Project Details
                         </h2>
                         <div className="grid grid-cols-2 gap-4">
@@ -492,7 +511,7 @@ const ProjLeadDailyAttRec = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Project Title
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.projectTitle}
                                 </p>
                             </div>
@@ -500,7 +519,7 @@ const ProjLeadDailyAttRec = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Project Leader
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.projectLeader}
                                 </p>
                             </div>
@@ -511,7 +530,7 @@ const ProjLeadDailyAttRec = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     College/Campus
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.college}
                                 </p>
                             </div>
@@ -519,7 +538,7 @@ const ProjLeadDailyAttRec = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Target Date
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.targetDate}
                                 </p>
                             </div>
@@ -527,7 +546,7 @@ const ProjLeadDailyAttRec = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Partner Agency
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.partnerAgency}
                                 </p>
                             </div>
@@ -535,7 +554,7 @@ const ProjLeadDailyAttRec = () => {
                     </div>
 
                     {/* Buttons to choose file upload or link generation */}
-                    <div className="flex space-x-4 mb-6">
+                    <div className="flex mb-6 space-x-4">
                         <button
                             className={`px-6 py-2 text-white ${choice === "uploadFiles" ? "bg-blue-500" : "bg-gray-500"} rounded-lg`}
                             onClick={() => handleChoice("uploadFiles")}
@@ -553,157 +572,157 @@ const ProjLeadDailyAttRec = () => {
                     {/* Conditional Rendering of Sections */}
                     {choice === "uploadFiles" && (
                         <div>
-                            {/* Submitted Files Section */}
-                            <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                                <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
-                                <div
-                                    className="overflow-y-auto"
-                                    style={{
-                                        maxHeight: "300px", // Limit the table height
-                                    }}
-                                >
-                                    <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
-                                        <thead className="sticky top-0 bg-gray-100 z-10">
-                                            <tr className="border-b">
-                                                <th
-                                                    className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
-                                                    onClick={() => handleSort("file_name")}
-                                                >
-                                                    File Name
-                                                    {sortConfig.key === "file_name" &&
-                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                                </th>
-                                                <th
-                                                    className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
-                                                    onClick={() => handleSort("submitted_by")}
-                                                >
-                                                    Submitted By
-                                                    {sortConfig.key === "submitted_by" &&
-                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                                </th>
-                                                <th
-                                                    className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
-                                                    onClick={() => handleSort("date_uploaded")}
-                                                >
-                                                    Date Submitted
-                                                    {sortConfig.key === "date_uploaded" &&
-                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                                </th>
-                                                <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                                    Description
-                                                </th>
-                                                <th
-                                                    className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
-                                                    onClick={() => handleSort("status")}
-                                                >
-                                                    Status
-                                                    {sortConfig.key === "status" &&
-                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                                </th>
-                                                <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                                    Actions
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {submissions.length > 0 ? (
-                                                submissions.map((submission) => (
-                                                    <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                                            <a
-                                                                href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-blue-600 hover:underline truncate block text-center"
+                        
+                        {/* Submitted Files Section */}
+                        <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
+                            <h2 className="mb-4 text-xl font-semibold text-center">Submitted Files</h2>
+                            <div
+                                className="overflow-y-auto"
+                                style={{
+                                    maxHeight: "300px", // Limit the table height
+                                }}
+                            >
+                                <table className="min-w-full bg-white rounded-lg shadow-md table-auto">
+                                    <thead className="sticky top-0 z-10 bg-gray-100">
+                                        <tr className="border-b">
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                onClick={() => handleSort("file_name")}
+                                            >
+                                                File Name
+                                                {sortConfig.key === "file_name" &&
+                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                            >
+                                                Total Attendees
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                onClick={() => handleSort("submitted_by")}
+                                            >
+                                                Submitted By
+                                                {sortConfig.key === "submitted_by" &&
+                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                onClick={() => handleSort("date_uploaded")}
+                                            >
+                                                Date Submitted
+                                                {sortConfig.key === "date_uploaded" &&
+                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                            </th>
+                                            <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
+                                                Description
+                                            </th>
+                                            <th
+                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                onClick={() => handleSort("status")}
+                                            >
+                                                Status
+                                                {sortConfig.key === "status" &&
+                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                            </th>
+                                            <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {submissions.length > 0 ? (
+                                            submissions.map((submission) => (
+                                                <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
+                                                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                                                        <a
+                                                            href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="block text-center text-blue-600 truncate hover:underline"
+                                                        >
+                                                            {submission.file_name || "No File"}
+                                                        </a>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                        {submission.total_attendees || "Unknown"}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                        {submission.submitted_by || "Unknown"}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                        {new Date(submission.date_uploaded).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
+                                                        {submission.description || "No Description"}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <p
+                                                            className={` ${submission.status === "Approved"
+                                                                ? "text-green-600"
+                                                                : submission.status === "Pending"
+                                                                    ? "text-yellow-500"
+                                                                    : submission.status === "Rejected"
+                                                                        ? "text-red-600"
+                                                                        : "text-gray-600"
+                                                                }`}
+                                                        >
+                                                            {submission.status}
+                                                        </p>
+                                                        {submission.status === "Rejected" && submission.rejection_reason && (
+                                                            <p className="mt-1 text-xs text-red-600">{submission.rejection_reason}</p>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                        {submission.status === "Approved" ? (
+                                                            <span className="text-gray-500">Cannot Remove</span>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleDelete(submission.submission_id)}
+                                                                className="text-red-500 hover:text-red-700"
                                                             >
-                                                                {submission.file_name || "No File"}
-                                                            </a>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                            {submission.submitted_by || "Unknown"}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                            {new Date(submission.date_uploaded).toLocaleDateString()}
-                                                        </td>
-                                                        <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
-                                                            {submission.description || "No Description"}
-                                                        </td>
-                                                        <td className="px-6 py-4 text-center">
-                                                            <p
-                                                                className={` ${submission.status === "Approved"
-                                                                    ? "text-green-600"
-                                                                    : submission.status === "Pending"
-                                                                        ? "text-yellow-500"
-                                                                        : submission.status === "Rejected"
-                                                                            ? "text-red-600"
-                                                                            : "text-gray-600"
-                                                                    }`}
-                                                            >
-                                                                {submission.status}
-                                                            </p>
-                                                            {submission.status === "Rejected" && submission.rejection_reason && (
-                                                                <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
-                                                            )}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                            {submission.status === "Approved" ? (
-                                                                <span className="text-gray-500">Approved</span>
-                                                            ) : submission.status === "Rejected" ? (
-                                                                <span className="text-gray-500">Rejected</span>
-                                                            ) : (
-                                                                <div className="space-x-2">
-                                                                    <button
-                                                                        onClick={() => handleApprove(submission.submission_id, submission.model)}
-                                                                        className="text-green-600 hover:text-green-800"
-                                                                    >
-                                                                        Approve
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleReject(submission.submission_id, submission.model)}
-                                                                        className="text-red-600 hover:text-red-800"
-                                                                    >
-                                                                        Reject
-                                                                    </button>
-                                                                </div>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-700">
-                                                        No submissions available
+                                                                Remove
+                                                            </button>
+                                                        )}
                                                     </td>
                                                 </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                                                    No submissions available.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
+                        </div>
+
                         </div>
                     )}
 
                     {choice === "generateLinks" && (
                         <div>
                             {/* Total Attendees Info Section */}
-                            <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
-                                <h2 className='text-2xl font-semibold text-center mb-4'>Total Attendance Information</h2>
-                                <div className='grid grid-cols-1 md:grid-cols-3 gap-6 text-center'>
+                            <div className='p-6 mb-6 bg-white rounded-lg shadow-md'>
+                                <h2 className='mb-4 text-2xl font-semibold text-center'>Total Attendance Information</h2>
+                                <div className='grid grid-cols-1 gap-6 text-center md:grid-cols-3'>
                                     <div>
                                         <label className='block text-sm font-medium text-gray-600'>Total Attendees</label>
-                                        <p className='bg-gray-100 rounded-lg p-3 mt-1'>
-                                            {totalAttendees !== null ? totalAttendees : 'Loading...'}
+                                        <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
+                                            {totalAttendeesTable !== null ? totalAttendeesTable : 'Loading...'}
                                         </p>
                                     </div>
                                     <div>
                                         <label className='block text-sm font-medium text-gray-600'>Average Attendees</label>
-                                        <p className='bg-gray-100 rounded-lg p-3 mt-1'>
+                                        <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
                                             {averageAttendees !== null ? averageAttendees : 'Loading...'}
                                         </p>
                                     </div>
                                     <div>
                                         <label className='block text-sm font-medium text-gray-600'>Number of Templates</label>
-                                        <p className='bg-gray-100 rounded-lg p-3 mt-1'>
+                                        <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
                                             {numTemplates !== null ? numTemplates : 'Loading...'}
                                         </p>
                                     </div>
@@ -719,18 +738,18 @@ const ProjLeadDailyAttRec = () => {
                             </div>
 
                             {/* Generated Attendance Links Section */}
-                            <div ref={linksSectionRef} className='bg-white shadow-md rounded-lg p-6 mb-6'>
-                                <h2 className='text-2xl font-semibold text-center mb-4'>Generated Attendance Links</h2>
-                                <div className='overflow-x-auto max-h-60 overflow-y-auto'> {/* Tailwind classes for scrolling */}
+                            <div ref={linksSectionRef} className='p-6 mb-6 bg-white rounded-lg shadow-md'>
+                                <h2 className='mb-4 text-2xl font-semibold text-center'>Generated Attendance Links</h2>
+                                <div className='overflow-x-auto overflow-y-auto max-h-60'> {/* Tailwind classes for scrolling */}
                                     <table className='w-full border border-gray-200'>
                                         <thead>
                                             <tr className='bg-gray-50'>
-                                                <th className='p-3 text-left text-gray-700 font-medium'>Template Name</th>
-                                                <th className='p-3 text-left text-gray-700 font-medium'>Link</th>
-                                                <th className='p-3 text-left text-gray-700 font-medium'>Date Created</th>
-                                                <th className='p-3 text-left text-gray-700 font-medium'>Expiration Date</th>
-                                                <th className='p-3 text-left text-gray-700 font-medium'>Actions</th>
-                                                <th className='p-3 text-left text-gray-700 font-medium'>Attendance Report</th>
+                                                <th className='p-3 font-medium text-left text-gray-700'>Template Name</th>
+                                                <th className='p-3 font-medium text-left text-gray-700'>Link</th>
+                                                <th className='p-3 font-medium text-left text-gray-700'>Date Created</th>
+                                                <th className='p-3 font-medium text-left text-gray-700'>Expiration Date</th>
+                                                <th className='p-3 font-medium text-left text-gray-700'>Actions</th>
+                                                <th className='p-3 font-medium text-left text-gray-700'>Attendance Report</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -762,7 +781,7 @@ const ProjLeadDailyAttRec = () => {
                                                             <>
                                                                 <button 
                                                                     onClick={() => handleDeleteTemplate(template.id)} 
-                                                                    className='text-red-500 mr-2'>
+                                                                    className='mr-2 text-red-500'>
                                                                     <FaTrash />
                                                                 </button>
                                                             </>
@@ -782,20 +801,19 @@ const ProjLeadDailyAttRec = () => {
                                 </div>
                             </div>
 
-
                             {/* Template Creation and Editing Section */}
-                            <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
-                                <h2 className='text-2xl font-semibold text-center mb-4'>
+                            <div className='p-6 mb-6 bg-white rounded-lg shadow-md'>
+                                <h2 className='mb-4 text-2xl font-semibold text-center'>
                                     {isEditing ? 'Edit Attendance Template' : 'Create New Attendance Template'}
                                 </h2>
-                                <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                                <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
                                     <div>
                                         <label className='block text-sm font-medium text-gray-600'>Template Name</label>
                                         <input
                                             type='text'
                                             value={templateName}
                                             onChange={(e) => setTemplateName(e.target.value)}
-                                            className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
+                                            className='w-full p-3 mt-1 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'
                                             disabled={isEditing}  // Disable in editing mode
                                         />
                                     </div>
@@ -805,12 +823,12 @@ const ProjLeadDailyAttRec = () => {
                                             type='date'
                                             value={expirationDate}
                                             onChange={(e) => setExpirationDate(e.target.value)}
-                                            className='bg-gray-100 rounded-lg p-3 mt-1 w-full border focus:outline-none focus:ring-2 focus:ring-blue-400'
+                                            className='w-full p-3 mt-1 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'
                                             min={todayDate}  // Ensure only future dates can be selected
                                         />
                                     </div>
                                 </div>
-                                <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mt-4'>
+                                <div className='grid grid-cols-2 gap-4 mt-4 md:grid-cols-3'>
                                     {[
                                         { label: 'Include Attendee Name', state: includeAttendeeName, setState: setIncludeAttendeeName },
                                         { label: 'Include Gender', state: includeGender, setState: setIncludeGender },
@@ -843,7 +861,7 @@ const ProjLeadDailyAttRec = () => {
                                             </button>
                                             <button
                                                 onClick={handleCancelEdit}
-                                                className='px-6 py-2 text-white bg-gray-500 rounded-lg hover:bg-gray-600 ml-4'
+                                                className='px-6 py-2 ml-4 text-white bg-gray-500 rounded-lg hover:bg-gray-600'
                                             >
                                                 Cancel
                                             </button>
@@ -860,6 +878,121 @@ const ProjLeadDailyAttRec = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* Add New Submission Section */}
+                    <div className="p-8 bg-white rounded-lg shadow-lg">
+                        <h2 className="mb-6 text-xl font-semibold text-center">
+                            Add New Submission
+                        </h2>
+
+                        <div className="grid grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Description
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                    placeholder="Enter a Short Description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Date
+                                </label>
+                                <input
+                                    type="date"
+                                    className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                    placeholder="Set Date"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Total Number of Attendees
+                                </label>
+                                <input
+                                    type="number"
+                                    className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                    placeholder="Number of Attendees"
+                                    value={totalAttendees}
+                                    onChange={(e) => setAttendees(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Preview of Attached Files */}
+                        <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
+                            <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
+                            {attachedFiles.length === 0 && (
+                                <div className="mb-3 text-gray-400">
+                                    <span className="block text-3xl text-center">+</span>
+                                </div>
+                            )}
+                            <input
+                                type="file"
+                                multiple
+                                onChange={handleFileChange}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
+                            />
+                            {attachedFiles.length > 0 && (
+                                <div
+                                    className="grid w-full grid-cols-5 gap-3 mt-4 overflow-y-auto"
+                                    style={{
+                                        maxHeight: "250px", // Scrollable height
+                                        paddingRight: "10px", // Space for scrollbar
+                                    }}
+                                >
+                                    {attachedFiles.map((file, index) => {
+                                        const fileExtension = file.name.split('.').pop().toUpperCase();
+                                        const filePreview = file.type.startsWith("image/")
+                                            ? (
+                                                <img
+                                                    src={URL.createObjectURL(file)}
+                                                    alt={`attachment-preview-${index}`}
+                                                    className="object-cover w-20 h-20 rounded-lg" // Deducted 10% width
+                                                />
+                                            )
+                                            : (
+                                                <div className="flex items-center justify-center w-20 h-20 text-gray-600 bg-gray-200 rounded-lg">
+                                                    <span className="text-lg">{fileExtension}</span>
+                                                </div>
+                                            );
+
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="flex flex-col items-center p-2 border border-gray-200 rounded-lg shadow-md"
+                                                title={file.name}
+                                                style={{ marginBottom: "10px" }}
+                                            >
+                                                {filePreview}
+                                                <p className="w-full mt-2 text-xs text-center truncate">{file.name}</p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+
+
+                        <div className="flex justify-center">
+                            <button
+                                type="button"
+                                onClick={handleSubmit}
+                                className="px-12 py-2 font-bold text-white transition bg-yellow-500 rounded-lg hover:bg-yellow-600"
+                            >
+                                Submit
+                            </button>
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
         </div>

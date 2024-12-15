@@ -14,7 +14,7 @@ import ProjLeadAssignProponents from "./pages/projectlead/ProjLeadAssignProponen
 import ProjLeadAccReport from "./pages/projectlead/ProjLeadAccReport";
 import ProjLeadDailyAttRec from "./pages/projectlead/ProjLeadDailyAttRec";
 import ProjLeadEvalSum from "./pages/projectlead/ProjLeadEvalSum";
-import ProjLeadTrainersCV from "./pages/projectlead/ProjLeadTrainersCV";
+import ProjLeadCvDtr from "./pages/projectlead/ProjLeadCvDtr";
 import ProjLeadLecNotes from "./pages/projectlead/ProjLeadLecNotes";
 import ProjLeadOthers from "./pages/projectlead/ProjLeadOthers";
 import ProjLeadPhotoDocs from "./pages/projectlead/ProjLeadPhotoDocs";
@@ -27,6 +27,7 @@ import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
 import StaffProjectsDashboard from "./pages/estaff/StaffProjectsDashboard";
 import StaffDailyAttRec from "./pages/estaff/StaffDailyAttRec";
+import StaffCvDtr from "./pages/estaff/StaffCvDtr";
 import StaffLecNotes from "./pages/estaff/StaffLecNotes";
 import StaffPhotoDocs from "./pages/estaff/StaffPhotoDocs";
 import StaffOthers from "./pages/estaff/StaffOthers";
@@ -38,7 +39,7 @@ import ProponentsProjects from "./pages/proponents/ProjectsDashboard"
 import ProponentsProjReq from "./pages/proponents/ProponentsProjReq";
 import ProponentsDailyAttRec from "./pages/proponents/ProponentsDailyAttRec";
 import ProponentsEvalSum from "./pages/proponents/ProponentsEvalSum";
-import ProponentsTrainerCVDTR from "./pages/proponents/ProponentsTrainerCVDTR";
+import ProponentsCvDtr from "./pages/proponents/ProponentsCvDtr";
 import ProponentsLecNotes from "./pages/proponents/ProponentsLecNotes";
 import ProponentsOtherFiles from "./pages/proponents/ProponentsOtherFiles";
 import ProponentsPhotoDocs from "./pages/proponents/ProponentsPhotoDocs";
@@ -69,6 +70,7 @@ function App() {
       <Route path="/estaff/projreq/:projectID" element={<EStaffProjReq />} />
       <Route path="/staff-projects-dashboard" element={<StaffProjectsDashboard />} />
       <Route path="/staff/project/:projectID/daily-attendance" element={<StaffDailyAttRec />} />
+      <Route path="/staff/project/:projectID/trainer-cv-dtr" element={<StaffCvDtr />} />
       <Route path="/staff/project/:projectID/lecture-notes" element={<StaffLecNotes />} />
       <Route path="/staff/project/:projectID/photo-documentations" element={<StaffPhotoDocs />} />
       <Route path="/staff/project/:projectID/other-files" element={<StaffOthers />} />
@@ -79,8 +81,8 @@ function App() {
       <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />
       <Route path="/projlead/project/:projectID/accomplishment-report" element={<ProjLeadAccReport />} />
       <Route path="/projlead/project/:projectID/daily-attendance" element={<ProjLeadDailyAttRec />} />
-      <Route path="/projlead/project/:projectID/summary-of-evaluation" element={<ProjLeadEvalSum />} />
-      <Route path="/projlead/project/trainer-cv-dtr" element={<ProjLeadTrainersCV />} />
+      <Route path="/projlead/project/:projectID/evaluation-summary" element={<ProjLeadEvalSum />} />
+      <Route path="/projlead/project/:projectID/trainer-cv-dtr" element={<ProjLeadCvDtr />} />
       <Route path="/projlead/project/:projectID/lecture-notes" element={<ProjLeadLecNotes />} />
       <Route path="/projlead/project/:projectID/other-files" element={<ProjLeadOthers />} />
       <Route path="/projlead/project/:projectID/photo-documentations" element={<ProjLeadPhotoDocs />} />
@@ -90,7 +92,7 @@ function App() {
       <Route path="/proponents/proj/req/:projectID" element={<ProponentsProjReq />} />
       <Route path="/proponents/project/:projectID/daily-attendance" element={<ProponentsDailyAttRec />} />
       <Route path="/proponents/project/:projectID/evaluation-summary" element={<ProponentsEvalSum />} />
-      <Route path="/proponents/proj/req/trainer-cv-dtr" element={<ProponentsTrainerCVDTR />} />
+      <Route path="/proponents/project/:projectID/trainer-cv-dtr" element={<ProponentsCvDtr />} />
       <Route path="/proponents/project/:projectID/modules-notes" element={<ProponentsLecNotes />} />
       <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
       <Route path="/proponents/project/:projectID/photo-documentations" element={<ProponentsPhotoDocs />} />

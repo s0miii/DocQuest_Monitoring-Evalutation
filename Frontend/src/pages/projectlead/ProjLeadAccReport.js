@@ -10,23 +10,23 @@ import GeneratePDFDocument from "../../components/Monitoring PDFs/GeneratePDFDoc
 
 const ProjLeadAccReport = () => {
     const [formData, setFormData] = useState({
-        banner_program_title: "Banner Program",
-        flagship_program: "Flagship Program",
-        project_title: "Project Title",
-        project_type: "Project Type",
-        research_title: "Research Title",
-        project_category: "Project Category",
-        proponents: "Proponents",
-        program: "Program",
-        accreditation_level: "Accorde Level",
-        college: "college",
-        target_groups_beneficiaries: "target Groups",
-        project_location: "project Location",
-        partner_agency: "partner Agency",
-        training_modality: "target Partner",
-        actual_implementation_date: "actrual",
-        total_number_of_days: "total",
-        submitted_by: "buy"
+        banner_program_title: "",
+        flagship_program: "",
+        project_title: "",
+        project_type: "",
+        research_title: "",
+        project_category: "",
+        proponents: "",
+        program: "",
+        accreditation_level: "",
+        college: "",
+        target_groups_beneficiaries: "",
+        project_location: "",
+        partner_agency: "",
+        training_modality: "",
+        actual_implementation_date: "",
+        total_number_of_days: "",
+        submitted_by: ""
     });
     const navigate = useNavigate();
     const { projectID } = useParams();
@@ -282,7 +282,7 @@ const ProjLeadAccReport = () => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/projlead/project/${projectID}')}>
+                        <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req/:projectID')}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Accomplishment Report</h1>
@@ -534,11 +534,11 @@ const ProjLeadAccReport = () => {
                         <div className="grid grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Actual Date of Implementation</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.actual_implementation_date}</p>
+                                <textarea className="bg-gray-100 rounded-lg p-3 mt-1 w-full resize-none" placeholder="Enter the range (e.g., 2024-01-01 to 2024-01-15)"></textarea>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Total Number of Days</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.total_number_of_days}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">ee{formData.total_number_of_days}</p>
                             </div>
                         </div>
 

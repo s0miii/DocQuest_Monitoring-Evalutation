@@ -93,8 +93,9 @@ const ProjLeadEvalSum = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                setGeneratedLinks(data.links);
+                setGeneratedLinks(data.links || []);
             } else {
+                setGeneratedLinks([]); // Ensure it's an empty array on error
                 setErrorMessage("Failed to fetch links.");
             }
         } catch (error) {
@@ -145,13 +146,13 @@ const ProjLeadEvalSum = () => {
     
         const postData = {
             trainer_id: trainer,
-            project: projectID,
+            project_id: projectID,
             expiration_date: expirationDate,
         };
     
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/evaluation_links/`,
+                `http://127.0.0.1:8000/monitoring/generate_evaluation_link/`,
                 {
                     method: "POST",
                     headers: {
@@ -306,9 +307,9 @@ const ProjLeadEvalSum = () => {
     if (loading) {
         return (
             <div className="p-4">
-                <div className="bg-gray-200 animate-pulse h-6 w-3/4 mb-4 rounded"></div>
-                <div className="bg-gray-200 animate-pulse h-6 w-1/2 mb-4 rounded"></div>
-                <div className="bg-gray-200 animate-pulse h-6 w-full rounded"></div>
+                <div className="w-3/4 h-6 mb-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-1/2 h-6 mb-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-full h-6 bg-gray-200 rounded animate-pulse"></div>
             </div>
         );
     }
@@ -318,13 +319,13 @@ const ProjLeadEvalSum = () => {
     }
 
     return (
-        <div className="bg-gray-200 min-h-screen flex">
-            <div className="w-1/5 fixed h-full">
+        <div className="flex min-h-screen bg-gray-200">
+            <div className="fixed w-1/5 h-full">
                 <ProjLeadSidebar />
             </div>
             <div className="flex-1 ml-[20%]">
                 <Topbar />
-                <div className="flex flex-col mt-14 px-10">
+                <div className="flex flex-col px-10 mt-14">
                     <div className="flex items-center mb-5">
                         <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req/:projectID')}>
                             <FaArrowLeft />
@@ -333,8 +334,8 @@ const ProjLeadEvalSum = () => {
                     </div>
 
                     {/* Project Details */}
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">
+                    <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
+                        <h2 className="mb-4 text-xl font-semibold text-center">
                             Project Details
                         </h2>
                         <div className="grid grid-cols-2 gap-4">
@@ -342,7 +343,7 @@ const ProjLeadEvalSum = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Project Title
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.projectTitle}
                                 </p>
                             </div>
@@ -350,7 +351,7 @@ const ProjLeadEvalSum = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Project Leader
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.projectLeader}
                                 </p>
                             </div>
@@ -360,7 +361,7 @@ const ProjLeadEvalSum = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     College/Campus
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.college}
                                 </p>
                             </div>
@@ -368,7 +369,7 @@ const ProjLeadEvalSum = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Target Date
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.targetDate}
                                 </p>
                             </div>
@@ -376,7 +377,7 @@ const ProjLeadEvalSum = () => {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Partner Agency
                                 </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
+                                <p className="p-3 mt-1 bg-gray-100 rounded-lg">
                                     {projectDetails.partnerAgency}
                                 </p>
                             </div>
@@ -385,19 +386,19 @@ const ProjLeadEvalSum = () => {
 
 
                     {/* Submitted Files Section */}
-                    {/* <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
+                    {/* <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
+                        <h2 className="mb-4 text-xl font-semibold text-center">Submitted Files</h2>
                         <div
                             className="overflow-y-auto"
                             style={{
                                 maxHeight: "300px", // Limit the table height
                             }}
                         >
-                            <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
-                                <thead className="sticky top-0 bg-gray-100 z-10">
+                            <table className="min-w-full bg-white rounded-lg shadow-md table-auto">
+                                <thead className="sticky top-0 z-10 bg-gray-100">
                                     <tr className="border-b">
                                         <th
-                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                            className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
                                             onClick={() => handleSort("file_name")}
                                         >
                                             File Name
@@ -405,7 +406,7 @@ const ProjLeadEvalSum = () => {
                                                 (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                                         </th>
                                         <th
-                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                            className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
                                             onClick={() => handleSort("submitted_by")}
                                         >
                                             Submitted By
@@ -413,25 +414,25 @@ const ProjLeadEvalSum = () => {
                                                 (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                                         </th>
                                         <th
-                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                            className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
                                             onClick={() => handleSort("date_uploaded")}
                                         >
                                             Date Submitted
                                             {sortConfig.key === "date_uploaded" &&
                                                 (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                                         </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
                                             Description
                                         </th>
                                         <th
-                                            className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
+                                            className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
                                             onClick={() => handleSort("status")}
                                         >
                                             Status
                                             {sortConfig.key === "status" &&
                                                 (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                                         </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
                                             Actions
                                         </th>
                                     </tr>
@@ -440,20 +441,20 @@ const ProjLeadEvalSum = () => {
                                     {submissions.length > 0 ? (
                                         submissions.map((submission) => (
                                             <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                                <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
                                                     <a
                                                         href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:underline truncate block text-center"
+                                                        className="block text-center text-blue-600 truncate hover:underline"
                                                     >
                                                         {submission.file_name || "No File"}
                                                     </a>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
                                                     {submission.submitted_by || "Unknown"}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
                                                     {new Date(submission.date_uploaded).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
@@ -473,10 +474,10 @@ const ProjLeadEvalSum = () => {
                                                         {submission.status}
                                                     </p>
                                                     {submission.status === "Rejected" && submission.rejection_reason && (
-                                                        <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
+                                                        <p className="mt-1 text-xs text-red-600">{submission.rejection_reason}</p>
                                                     )}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
                                                     {submission.status === "Approved" ? (
                                                         <span className="text-gray-500">Approved</span>
                                                     ) : submission.status === "Rejected" ? (
@@ -513,14 +514,14 @@ const ProjLeadEvalSum = () => {
                     </div> */}
 
                     {/* Evaluation Summary Section */}
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Summary of Evaluation</h2>
+                    <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
+                        <h2 className="mb-4 text-xl font-semibold text-center">Summary of Evaluation</h2>
                         <div className="overflow-x-auto">
-                            <table className="table-fixed w-full max-w-md mx-auto text-sm text-center border-collapse border border-gray-300">
+                            <table className="w-full max-w-md mx-auto text-sm text-center border border-collapse border-gray-300 table-fixed">
                                 <thead className="bg-gray-200">
                                     <tr>
-                                        <th className="px-4 py-2 border border-gray-300 w-2/3">Rating</th>
-                                        <th className="px-4 py-2 border border-gray-300 w-1/3">Total Responses</th>
+                                        <th className="w-2/3 px-4 py-2 border border-gray-300">Rating</th>
+                                        <th className="w-1/3 px-4 py-2 border border-gray-300">Total Responses</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -529,7 +530,7 @@ const ProjLeadEvalSum = () => {
                                         <td className="px-4 py-2 border border-gray-300">
                                             <input
                                                 type="number"
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
+                                                className="w-full p-2 text-center bg-gray-100 rounded-lg"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -539,7 +540,7 @@ const ProjLeadEvalSum = () => {
                                         <td className="px-4 py-2 border border-gray-300">
                                             <input
                                                 type="number"
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
+                                                className="w-full p-2 text-center bg-gray-100 rounded-lg"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -549,7 +550,7 @@ const ProjLeadEvalSum = () => {
                                         <td className="px-4 py-2 border border-gray-300">
                                             <input
                                                 type="number"
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
+                                                className="w-full p-2 text-center bg-gray-100 rounded-lg"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -559,7 +560,7 @@ const ProjLeadEvalSum = () => {
                                         <td className="px-4 py-2 border border-gray-300">
                                             <input
                                                 type="number"
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
+                                                className="w-full p-2 text-center bg-gray-100 rounded-lg"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -569,24 +570,24 @@ const ProjLeadEvalSum = () => {
                                         <td className="px-4 py-2 border border-gray-300">
                                             <input
                                                 type="number"
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
+                                                className="w-full p-2 text-center bg-gray-100 rounded-lg"
                                                 placeholder="0"
                                             />
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="font-semibold px-4 py-2 border border-gray-300">Sub Total</td>
-                                        <td className="font-semibold px-4 py-2 border border-gray-300">15</td>
+                                        <td className="px-4 py-2 font-semibold border border-gray-300">Sub Total</td>
+                                        <td className="px-4 py-2 font-semibold border border-gray-300">15</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 mt-4 max-w-2xl mx-auto">
+                        <div className="grid max-w-2xl grid-cols-2 gap-4 mx-auto mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Total Evaluations</label>
                                 <input
                                     type="text"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
                                     placeholder="Total Evaluations"
                                     readOnly
                                 />
@@ -595,7 +596,7 @@ const ProjLeadEvalSum = () => {
                                 <label className="block text-sm font-medium text-gray-700">Percentage</label>
                                 <input
                                     type="text"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
                                     placeholder="Percentage"
                                     readOnly
                                 />
@@ -605,8 +606,8 @@ const ProjLeadEvalSum = () => {
 
 
                     {/* Sharable Link Generation Section */}
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Generate Sharable Link</h2>
+                    <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
+                        <h2 className="mb-4 text-xl font-semibold text-center">Generate Sharable Link</h2>
 
                         <form onSubmit={handleGenerateLink}>
                             <div className="mb-4">
@@ -614,7 +615,7 @@ const ProjLeadEvalSum = () => {
                                 <select
                                     value={linkData.trainer}
                                     onChange={(e) => setLinkData({ ...linkData, trainer: e.target.value })}
-                                    className="bg-gray-100 rounded-lg p-2 w-full"
+                                    className="w-full p-2 bg-gray-100 rounded-lg"
                                 >
                                     <option value="">Select a Trainer</option>
                                     {Array.isArray(trainers) && trainers.map((trainer) => (
@@ -629,37 +630,63 @@ const ProjLeadEvalSum = () => {
                                     type="date"
                                     value={linkData.expirationDate}
                                     onChange={(e) => setLinkData({ ...linkData, expirationDate: e.target.value })}
-                                    className="bg-gray-100 rounded-lg p-2 w-full"
+                                    className="w-full p-2 bg-gray-100 rounded-lg"
                                 />
                             </div>
 
-                            <div className="text-center mt-4">
+                            <div className="mt-4 text-center">
                                 <button
                                     type="submit"
-                                    className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors"
+                                    className="px-6 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
                                 >
                                     Generate Link
                                 </button>
                             </div>
                         </form>
 
-                        {errorMessage && <p className="text-red-500 text-center mt-4">{errorMessage}</p>}
+                        {errorMessage && <p className="mt-4 text-center text-red-500">{errorMessage}</p>}
 
                         {/* Display Generated Links */}
                         <div className="mt-6">
                             {loadingLinks ? (
                                 <p>Loading generated links...</p>
-                            ) : (
+                            ) : generatedLinks && generatedLinks.length > 0 ? (
                                 <ul>
                                     {generatedLinks.map((link) => (
                                         <li key={link.id} className="mb-2">
-                                            <div className="flex justify-between items-center">
-                                                <span>{link.link_url}</span>
-                                                <span>{link.expiration_date}</span>
+                                            <div className="flex items-center justify-between">
+                                                {/* Trainer Name */}
+                                                <p className= "text-sm text-gray-700">
+                                                    <strong>Trainer:</strong> {link.trainer_name || "No trainer assigned"}
+                                                </p>
+                                                
+                                                {/* Sharable Link */}
+                                                <p className="text-sm text-gray-700">
+                                                    <strong>Link:</strong>{" "}
+                                                    {link.sharable_link ? (
+                                                        <a
+                                                            href={link.sharable_link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-blue-500 hover:underline"
+                                                        >
+                                                            {link.sharable_link}
+                                                        </a>
+                                                    ) : (
+                                                        "No link available"
+                                                    )}
+                                                </p>
+
+                                                {/* Expiration Date */}
+                                                <p className="text-sm text-gray-700">
+                                                    <strong>Expiration Date:</strong> {link.expiration_date || "No expiration date"}
+                                                </p>
                                             </div>
                                         </li>
                                     ))}
                                 </ul>
+                            ) : (
+                                <p>No generated links available</p>    
                             )}
                         </div>
                     </div>
