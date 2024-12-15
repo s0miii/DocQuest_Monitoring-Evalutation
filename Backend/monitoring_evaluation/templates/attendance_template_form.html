@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Attendance Template</title>
+    <script>
+        function addField() {
+            const fieldList = document.getElementById("field-list");
+            const newField = document.createElement("div");
+            newField.innerHTML = `
+                <input type="text" name="field_names" placeholder="Field Name" required>
+                <select name="field_types" required>
+                    <option value="text">Text</option>
+                    <option value="number">Number</option>
+                    <option value="select">Select</option>
+                </select>
+                <button type="button" onclick="removeField(this)">Remove</button>
+            `;
+            fieldList.appendChild(newField);
+        }
+
+        function removeField(button) {
+            button.parentElement.remove();
+        }
+    </script>
+</head>
+<body>
+    <h1>Create Attendance Template</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="project">Project:</label>
+        <select name="project" id="project" required>
+            <option value="" disabled selected> Select a project</option>
+            {% for project in projects %}
+            <option value="{{ project.id }}">{{ project.projectTitle }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="name">Template Name:</label>
+        <input type="text" name="name" id="name" required>
+        <br>
+        <label>Fields:</label>
+        <div id="field-list"></div>
+        <button type="button" onclick="addField()">Add Field</button>
+        <br>
+        <button type="submit">Create Template</button>
+    </form>
+</body>
+</html>
