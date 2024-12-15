@@ -109,7 +109,7 @@ DATABASES = {
     # }
 
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgres://postgres:bAvxEnBBeqtgIXJTJmnvyZcFXLcXLjVB@junction.proxy.rlwy.net:27742/railway')
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:bAvxEnBBeqtgIXJTJmnvyZcFXLcXLjVB@postgres.railway.internal:5432/railway')
     )
 }
 
