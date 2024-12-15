@@ -406,8 +406,8 @@ Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 
 {
-    "trainer_id": 1,
-    "project_id": 2,
+    "trainer_id": 3,
+    "project_id": 1,
     "expiration_date": "2024-12-31"
 }
 
@@ -416,6 +416,14 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 GET http://127.0.0.1:8000/monitoring/evaluation_links/
 Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+
+###
+# Retrieve All Evaluation Sharable Links - PER PROJECT
+# GET http://127.0.0.1:8000/monitoring/evaluation_links/?project=<project_id>
+GET http://127.0.0.1:8000/monitoring/evaluation_links/?project=1
+Content-Type: application/json
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+
 
 ###
 # Retrieve Specific Evaluation Sharable Link by ID
