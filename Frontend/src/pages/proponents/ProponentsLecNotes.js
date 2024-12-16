@@ -18,6 +18,13 @@ const ProponentsLecNotes = () => {
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const currentUser = localStorage.getItem("userFullName");
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
     };
@@ -39,7 +46,7 @@ const ProponentsLecNotes = () => {
                 }
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -78,7 +85,7 @@ const ProponentsLecNotes = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Lecture%20Notes/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Lecture%20Notes/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -126,7 +133,7 @@ const ProponentsLecNotes = () => {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/lecture_notes/${projectID}/`, {
+            const response = await fetch(`${API_URL}/monitoring/upload/lecture_notes/${projectID}/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`,
@@ -165,7 +172,7 @@ const ProponentsLecNotes = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
+                `${API_URL}/monitoring/submissions/${modelName}/${submissionId}/`,
                 {
                     method: "DELETE",
                     headers: {

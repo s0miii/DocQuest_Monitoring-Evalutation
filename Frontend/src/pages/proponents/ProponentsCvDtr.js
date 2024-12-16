@@ -20,6 +20,13 @@ const ProponentsCvDtr = () => {
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const currentUser = localStorage.getItem("userFullName");
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
     };
@@ -40,7 +47,7 @@ const ProponentsCvDtr = () => {
                 }
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -78,7 +85,7 @@ const ProponentsCvDtr = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Trainer%20CV%20DTR/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Trainer%20CV%20DTR/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -125,7 +132,7 @@ const ProponentsCvDtr = () => {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/trainer_cv_dtr/${projectID}/`, {
+            const response = await fetch(`${API_URL}/monitoring/upload/trainer_cv_dtr/${projectID}/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`,
@@ -163,7 +170,7 @@ const ProponentsCvDtr = () => {
             // Adjust model_name to "daily_attendance"
             const modelName = "trainer_cv_dtr";
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
+                `${API_URL}/monitoring/submissions/${modelName}/${submissionId}/`,
                 {
                     method: "DELETE",
                     headers: {

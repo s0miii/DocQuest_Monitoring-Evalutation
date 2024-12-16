@@ -7,6 +7,13 @@ import { FaArrowLeft } from "react-icons/fa";
 const ProponentsEvalSum = () => {
     const navigate = useNavigate();
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleViewClick = (path) => {
         navigate(path);
     }
@@ -49,7 +56,7 @@ const ProponentsEvalSum = () => {
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">Tabasan, Wynoah Louis</p>
                             </div>
                         </div>
-                        
+
                         {/* College/Campus, Target Date, Partner Agency */}
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
@@ -67,7 +74,7 @@ const ProponentsEvalSum = () => {
                         </div>
                     </div>
 
-                    
+
                     {/* Add New Entry Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Summary of Evaluation</h2>
@@ -83,9 +90,9 @@ const ProponentsEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Excellent (5)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -93,9 +100,9 @@ const ProponentsEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Very Satisfactory (4)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -103,9 +110,9 @@ const ProponentsEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Satisfactory (3)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -113,9 +120,9 @@ const ProponentsEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Fair (2)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -123,9 +130,9 @@ const ProponentsEvalSum = () => {
                                     <tr>
                                         <td className="px-4 py-2 border border-gray-300">Poor (1)</td>
                                         <td className="px-4 py-2 border border-gray-300">
-                                            <input 
-                                                type="number" 
-                                                className="bg-gray-100 rounded-lg p-2 text-center w-full" 
+                                            <input
+                                                type="number"
+                                                className="bg-gray-100 rounded-lg p-2 text-center w-full"
                                                 placeholder="0"
                                             />
                                         </td>
@@ -140,19 +147,19 @@ const ProponentsEvalSum = () => {
                         <div className="grid grid-cols-2 gap-4 mt-4 max-w-2xl mx-auto">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Total Evaluations</label>
-                                <input 
-                                    type="text" 
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full" 
-                                    placeholder="Total Evaluations" 
+                                <input
+                                    type="text"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Total Evaluations"
                                     readOnly
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Percentage</label>
-                                <input 
-                                    type="text" 
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full" 
-                                    placeholder="Percentage" 
+                                <input
+                                    type="text"
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Percentage"
                                     readOnly
                                 />
                             </div>

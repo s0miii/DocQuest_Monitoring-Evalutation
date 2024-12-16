@@ -14,6 +14,13 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
     const [projectProgress, setProjectProgress] = useState(0);
     const [loading, setLoading] = useState(true); // Loading state
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleViewClick = (path) => {
         navigate(path);
     }
@@ -45,7 +52,7 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
 
                 // Fetch project details
                 const projectResponse = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -65,7 +72,7 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
 
                 // Fetch project progress
                 const progressResponse = await fetch(
-                    `http://127.0.0.1:8000/monitoring/project/${projectID}/progress/`,
+                    `${API_URL}/monitoring/project/${projectID}/progress/`,
                     {
                         method: "GET",
                         headers: {
@@ -98,7 +105,7 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
 
             try {
                 const countsResponse = await fetch(
-                    `http://127.0.0.1:8000/monitoring/project/${projectID}/document_counts/`,
+                    `${API_URL}/monitoring/project/${projectID}/document_counts/`,
                     {
                         method: "GET",
                         headers: {
