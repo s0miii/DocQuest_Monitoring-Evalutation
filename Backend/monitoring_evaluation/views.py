@@ -24,6 +24,8 @@ from django.conf import settings
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from datetime import datetime
+from rest_framework.authentication import TokenAuthentication
+
 
 # Email
 @role_required(allowed_role_codes=["estf"])  # Restrict to EStaff
@@ -904,50 +906,216 @@ class ProponentSubmissionsView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 
-class AccomplishmentReportCreateView(LoginRequiredMixin, CreateView):
-    model = AccomplishmentReport
-    form_class = AccomplishmentReportForm
-    template_name = 'monitoring_evaluation/accomplishment_report_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:report_list')
-    permission_classes = [IsAuthenticated]
+# class AccomplishmentReportCreateView(LoginRequiredMixin, CreateView):
+#     model = AccomplishmentReport
+#     form_class = AccomplishmentReportForm
+#     template_name = 'monitoring_evaluation/accomplishment_report_form.html'
+#     success_url = reverse_lazy('monitoring_evaluation:report_list')
+#     permission_classes = [IsAuthenticated]
     
-    def form_valid(self, form):
-        form.instance.submitted_by = self.request.user
-        return super().form_valid(form)
+#     def form_valid(self, form):
+#         form.instance.submitted_by = self.request.user
+#         return super().form_valid(form)
 
-class AccomplishmentReportDetailView(LoginRequiredMixin, View):
-    permission_classes = [IsAuthenticated]
+# class AccomplishmentReportDetailView(LoginRequiredMixin, View):
+#     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        report = get_object_or_404(AccomplishmentReport, pk=pk)
-        return render(request, 'monitoring_evaluation/accomplishment_report_detail.html', {'report': report})
+#     def get(self, request, pk):
+#         report = get_object_or_404(AccomplishmentReport, pk=pk)
+#         return render(request, 'monitoring_evaluation/accomplishment_report_detail.html', {'report': report})
+
+
+# class AccomplishmentReportViewSet(viewsets.ModelViewSet):
+#     # queryset = AccomplishmentReport.objects.all()
+#     serializer_class = AccomplishmentReportSerializer
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = [TokenAuthentication]
+
+
+#     def get_queryset(self):
+#         user = self.request.user
+        
+#         if user.is_authenticated:
+#             return AccomplishmentReport.objects.filter(
+#                 Q(submitted_by=user) |  # User submitted the report
+#                 Q(
+#                     project__proponents=user, 
+#                     project__proponents__role__code='pjld'  # User is Project Leader
+#                 )
+#             ).distinct()  # Avoid duplicates
+#         return AccomplishmentReport.objects.none()
+
+#     def perform_create(self, serializer):
+#         # Automatically set `submitted_by` and calculate `total_number_of_days`
+
+#         project = serializer.validated_data['project']
+
+#         # Find the Project Leader (pjld role) for the project
+#         project_leader = project.proponents.filter(role__code='pjld').first()
+#         if not project_leader:
+#             raise ValueError("No Project Leader assigned to this project.")
+
+#         serializer.save(
+#             submitted_by=project_leader,
+#             total_number_of_days=project.attendance_templates.count()
+#         )
+
+#     def perform_update(self, serializer):
+#         # Recalculate 'total_number_of_days' on report update.
+        
+#         serializer.save(
+#             total_number_of_days=serializer.validated_data['project'].attendance_templates.count()
+#         )
 
 class AccomplishmentReportViewSet(viewsets.ModelViewSet):
-    queryset = AccomplishmentReport.objects.all()
     serializer_class = AccomplishmentReportSerializer
-
-
-class PREXCAchievementCreateView(LoginRequiredMixin, CreateView):
-    model = PREXCAchievement
-    form_class = PREXCAchievementForm
-    template_name = 'monitoring_evaluation/prexc_achievement_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:prexc_achievement_list')
     permission_classes = [IsAuthenticated]
-    
-    def form_valid(self, form):
-        form.instance.submitted_by = self.request.user
-        return super().form_valid(form)
-    
-class ProjectNarrativeCreateView(LoginRequiredMixin, CreateView):
-    model = ProjectNarrative
-    form_class = ProjectNarrativeForm
-    template_name = 'monitoring_evaluation/project_narrative_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:project_narrative_list')
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_authenticated:
+            queryset = AccomplishmentReport.objects.filter(
+                Q(submitted_by=user) |  
+                Q(
+                    project__proponents=user, 
+                    project__proponents__role__code='pjld'  
+                )
+            ).distinct().prefetch_related(
+                'project__photo_documentations'
+            )
+            print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
+            return queryset
+        print("User is not authenticated")
+        return AccomplishmentReport.objects.none()
+
+    def perform_create(self, serializer):
+        project = serializer.validated_data['project']
+
+        # Find the Project Leader (pjld role) for the project
+        project_leader = project.proponents.filter(
+            role__code='pjld',
+            email=self.request.user.email
+            ).first()
+        
+        print(f"Project Leader: {project_leader}")  # Debugging Project Leader
+        print(f"Authenticated User: {self.request.user}")  # Log user making the request
+        
+        if not project_leader:
+            print(f"No Project Leader found for Project ID: {project.id}")  # Debug error case
+            raise ValueError("The authenticated user is not the Project Leader for this project.")
+
+        # # Save the report with the Project Leader
+        # serializer.save(
+        #     submitted_by=project_leader,
+        #     total_number_of_days=project.attendance_templates.count()
+        # )
+
+        # Save the AccomplishmentReport instance
+        accomplishment_report = serializer.save(
+            submitted_by=project_leader,
+            total_number_of_days=project.attendance_templates.count()
+        )
+        print("Accomplishment Report successfully created.")
+
+        # Create the related PREXCAchievement instance
+        prexc_achievement = PREXCAchievement.objects.create(
+            accomplishment_report=accomplishment_report
+        )
+        
+
+        accomplishment_report.prexc_achievement = prexc_achievement
+        accomplishment_report.save()
+        
+        print("PREXC Achievement successfully created and linked.")
+
+    def retrieve(self, request, *args, **kwargs):
+        # Ensure approved photos are fetched dynamically
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+
+
+
+class PREXCAchievementViewSet(viewsets.ModelViewSet):
+    queryset = PREXCAchievement.objects.all()
+    serializer_class = PREXCAchievementSerializer
     permission_classes = [IsAuthenticated]
 
-    def form_valid(self, form):
-        form.instance.submitted_by = self.request.user
-        return super().form_valid(form)
+    def get_queryset(self):
+        accomplishment_report_id = self.request.query_params.get('accomplishment_report_id')
+        if accomplishment_report_id:
+            return self.queryset.filter(accomplishment_report_id=accomplishment_report_id)
+        return self.queryset
+
+    def perform_update(self, serializer):
+        # Hook to ensure related calculations are refreshed during updates.
+
+        instance = serializer.save()
+        instance.save()  # Trigger recalculation logic in the model's save method
+
+    def save(self, *args, **kwargs):
+        if hasattr(self, 'accomplishment_report'):
+            project = self.linked_accomplishment_report.project
+
+            # Fetch TotalAttendees data
+            total_attendees = getattr(project, "total_attendees", None)
+            if total_attendees:
+                self.actual_days_training = total_attendees.num_templates
+                self.actual_trainees = round(total_attendees.average_attendees)
+
+                # Determine multiplier
+                if self.actual_days_training >= 5:
+                    multiplier = 4
+                elif self.actual_days_training >= 3:
+                    multiplier = 3
+                elif self.actual_days_training == 2:
+                    multiplier = 2
+                elif self.actual_days_training == 1:
+                    multiplier = 1
+                else:
+                    multiplier = 0
+
+                self.persons_trained_weighted_days = self.actual_trainees * multiplier
+                self.persons_trained = self.actual_trainees * self.actual_days_training
+
+            # Fetch Evaluation Data
+            evaluations = project.evaluations.filter(overall_rating__gte=3)
+            self.satisfactory_trainees = evaluations.count()
+
+            # Calculate average rating percentage
+            all_ratings = project.evaluations.aggregate(Avg('overall_rating'))
+            self.rating_percentage = round(all_ratings['overall_rating__avg'] or 0, 2)
+
+        super().save(*args, **kwargs)
+
+
+
+class ProjectNarrativeViewSet(viewsets.ModelViewSet):
+    queryset = ProjectNarrative.objects.all()
+    serializer_class = ProjectNarrativeSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        # Customize the queryset to fetch only narratives created by the current user
+        user = self.request.user
+        return ProjectNarrative.objects.filter()  # No user filtering unless required
+    
+    def perform_create(self, serializer):
+        # Automatically populate the ProjectNarrative fields on creation.
+        
+        print(f"User '{self.request.user}' is creating a Project Narrative.")  # Debugging log
+        serializer.save()
+
+    def perform_update(self, serializer):
+        # Logic for updates if required. Defaults to regular save.
+        
+        print(f"User '{self.request.user}' is updating a Project Narrative.")  # Debugging log
+        serializer.save()
     
 # API Views
 class DailyAttendanceRecordViewSet(viewsets.ModelViewSet): 
@@ -980,20 +1148,20 @@ class ChecklistAssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = ChecklistAssignmentSerializer
     permission_classes = [IsAuthenticated]
     
-class AccomplishmentReportViewSet(viewsets.ModelViewSet):
-    queryset = AccomplishmentReport.objects.all()
-    serializer_class = AccomplishmentReportSerializer
-    permission_classes = [IsAuthenticated]
+# class AccomplishmentReportViewSet(viewsets.ModelViewSet):
+#     queryset = AccomplishmentReport.objects.all()
+#     serializer_class = AccomplishmentReportSerializer
+#     permission_classes = [IsAuthenticated]
 
-class PREXCAchievementViewSet(viewsets.ModelViewSet):
-    queryset = PREXCAchievement.objects.all()
-    serializer_class = PREXCAchievementSerializer
-    permission_classes = [IsAuthenticated]
+# class PREXCAchievementViewSet(viewsets.ModelViewSet):
+#     queryset = PREXCAchievement.objects.all()
+#     serializer_class = PREXCAchievementSerializer
+#     permission_classes = [IsAuthenticated]
 
-class ProjectNarrativeViewSet(viewsets.ModelViewSet):
-    queryset = ProjectNarrative.objects.all()
-    serializer_class = ProjectNarrativeSerializer
-    permission_classes = [IsAuthenticated]
+# class ProjectNarrativeViewSet(viewsets.ModelViewSet):
+#     queryset = ProjectNarrative.objects.all()
+#     serializer_class = ProjectNarrativeSerializer
+#     permission_classes = [IsAuthenticated]
 
 # Evaluation ViewSet for Evaluation Forms
 class EvaluationViewSet(viewsets.ModelViewSet):
@@ -1258,15 +1426,15 @@ def evaluation_summary_view(request, project_id):
                 return Response({
                     "message": "No evaluations found for this project.",
                     "evaluations": [],
-                    "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                    "categories": {"Poor": 0, "Fair": 0, "Satisfactory": 0, "Very Satisfactory": 0, "Excellent": 0},
                     "total_evaluations": 0,
-                    "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                    "percentages": {"Poor": 0, "Fair": 0, "Satisfactory": 0, "Very Satisfactory": 0, "Excellent": 0},
                     "detailed_evaluations": [],
 
                 }, status=200)
 
             # Count evaluators in each rating category
-            categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+            categories = {"poor": 0, "fair": 0, "Satisfactory": 0, "Very Satisfactory": 0, "Excellent": 0}
             total_evaluations = evaluations.count()
             for evaluation in evaluations:
                 avg = evaluation.overall_rating
@@ -1275,11 +1443,11 @@ def evaluation_summary_view(request, project_id):
                 elif avg <= 2:
                     categories["fair"] += 1
                 elif avg <= 3:
-                    categories["good"] += 1
+                    categories["Satisfactory"] += 1
                 elif avg <= 4:
-                    categories["better"] += 1
+                    categories["Very Satisfactory"] += 1
                 else:
-                    categories["best"] += 1
+                    categories["Excellent"] += 1
 
             # Calculate percentages
             percentages = {

@@ -30,15 +30,15 @@ class AccomplishmentReportForm(forms.ModelForm):
         model = AccomplishmentReport
         fields = [
             'project', 'banner_program_title', 'flagship_program', 
-            'training_modality', 'actual_implementation_date', 
-            'total_number_of_days', 'prexc_achievement', 'project_narrative'
+            'training_modality', 'actualStartDateImplementation', 
+            'actualEndDateImplementation', 'prexc_achievement', 'project_narrative'
         ]  # Ensure fields are specified
 
 class PREXCAchievementForm(forms.ModelForm):
     class Meta:
         model = PREXCAchievement
         fields = [
-            'project', 'persons_trained_weighted_days', 'actual_trainees', 
+            'persons_trained_weighted_days', 'actual_trainees', 
             'actual_days_training', 'persons_trained', 'satisfactory_trainees', 
             'rating_percentage'
         ]  # Ensure fields are specified
@@ -47,7 +47,7 @@ class ProjectNarrativeForm(forms.ModelForm):
     class Meta:
         model = ProjectNarrative
         fields = [
-            'project', 'phase_description', 'activities_topics', 
+            'phase_description', 'activities_topics', 
             'issues_challenges', 'participant_engagement_quality', 
             'discussion_comments', 'ways_forward_plans'
         ]  # Ensure fields are specified

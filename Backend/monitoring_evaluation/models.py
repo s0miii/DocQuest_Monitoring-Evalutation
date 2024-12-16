@@ -153,20 +153,31 @@ class AccomplishmentReport(models.Model):
         max_length=50,
         choices=[("Virtual", 'Virtual'), ("Face to Face", 'Face to Face'), ("Blended", 'Blended')]
     )
-    actual_implementation_date = models.DateField()
-    total_number_of_days = models.IntegerField()
+    actualStartDateImplementation = models.DateField()
+    actualEndDateImplementation = models.DateField()
+    total_number_of_days = models.IntegerField(editable=False, null=True, blank=True)
     submitted_by = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, related_name='submitted_accomplishments'
     )
 
     # Related models
     prexc_achievement = models.OneToOneField(
-        'PREXCAchievement', on_delete=models.CASCADE, null=True, blank=True, related_name='accomplishment_report'
+        'PREXCAchievement', on_delete=models.CASCADE, null=True, blank=True, related_name='linked_accomplishment_report'
     )
     project_narrative = models.OneToOneField(
         'ProjectNarrative', on_delete=models.CASCADE, null=True, blank=True, related_name='accomplishment_report'
     )
 
+    # Dynamic calculation of total_number_of_days
+    def save(self, *args, **kwargs):
+        # Recalculate the total number of days based on attendance templates
+        self.total_number_of_days = self.project.attendance_templates.count()
+
+        if self.prexc_achievement:
+            self.prexc_achievement.save()
+
+        super().save(*args, **kwargs)
+    
     # Properties to access fields from the Project model
     @property
     def project_title(self):
@@ -186,7 +197,7 @@ class AccomplishmentReport(models.Model):
 
     @property
     def proponents(self):
-        return self.project.proponents.all()  # Many-to-Many field
+        return ", ".join([str(p) for p in self.project.proponents.all()])
 
     @property
     def program(self):
@@ -210,36 +221,73 @@ class AccomplishmentReport(models.Model):
 
     @property
     def partner_agency(self):
-        return self.project.agency.all()  # Many-to-Many field
+        return ", ".join([str(a) for a in self.project.agency.all()])
 
     def __str__(self):
         return f"Accomplishment Report for {self.project.projectTitle}"
 
 # PREXC Achievement Model
 class PREXCAchievement(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="prexc_achievements")
-    persons_trained_weighted_days = models.DecimalField(max_digits=10, decimal_places=2)
-    actual_trainees = models.PositiveIntegerField()
-    actual_days_training = models.PositiveIntegerField()
-    persons_trained = models.PositiveIntegerField()
-    satisfactory_trainees = models.PositiveIntegerField()
-    rating_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    accomplishment_report = models.OneToOneField(
+        'AccomplishmentReport', on_delete=models.CASCADE, related_name='linked_prexc_achievement'
+    )
+    persons_trained_weighted_days = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    actual_trainees = models.PositiveIntegerField(default=0)
+    actual_days_training = models.PositiveIntegerField(default=0)
+    persons_trained = models.PositiveIntegerField(default=0)
+    satisfactory_trainees = models.PositiveIntegerField(default=0)
+    rating_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+
+    def save(self, *args, **kwargs):
+        # This will be called via AccomplishmentReport
+        if self.accomplishment_report and self.accomplishment_report.project:
+            project = self.accomplishment_report.project
+
+            # Fetch related TotalAttendees data
+            total_attendees = getattr(project, "total_attendees", None)
+            if total_attendees:
+                self.actual_days_training = total_attendees.num_templates
+                self.actual_trainees = round(total_attendees.average_attendees)
+
+                # Determine multiplier
+                if self.actual_days_training >= 5:
+                    multiplier = 4
+                elif self.actual_days_training >= 3:
+                    multiplier = 3
+                elif self.actual_days_training == 2:
+                    multiplier = 2
+                elif self.actual_days_training == 1:
+                    multiplier = 1
+                else:
+                    multiplier = 0
+
+                self.persons_trained_weighted_days = self.actual_trainees * multiplier
+                self.persons_trained = self.actual_trainees * self.actual_days_training
+
+            # Fetch Evaluation data for rating
+            evaluations = project.evaluations.filter(overall_rating__gte=3)
+            self.satisfactory_trainees = evaluations.count()
+
+            all_ratings = project.evaluations.aggregate(Avg('overall_rating'))
+            self.rating_percentage = round(all_ratings['overall_rating__avg'] or 0, 2)
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"PREXC Achievement for Project: {self.project.projectTitle}"
+        return f"PREXC Achievement linked to Accomplishment Report"
 
 # Project Narrative Model
 class ProjectNarrative(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_narratives')
-    phase_description = models.TextField()
-    activities_topics = models.TextField()
-    issues_challenges = models.TextField()
-    participant_engagement_quality = models.TextField()
-    discussion_comments = models.TextField()
-    ways_forward_plans = models.TextField()
+    phase_description = models.TextField(verbose_name="Phase Description")
+    activities_topics = models.TextField(verbose_name="Activities and Topics Covered")
+    issues_challenges = models.TextField(verbose_name="Issues and Challenges Encountered")
+    participant_engagement_quality = models.TextField(verbose_name="Quality of Participants' Engagement")
+    discussion_comments = models.TextField(verbose_name="Discussion and Comments")
+    ways_forward_plans = models.TextField(verbose_name="Ways Forward and Plans")
+    
 
     def __str__(self):
-        return f"Project Narrative for {self.project.projectTitle}"
+        return f"Project Narrative"
     
 # Model for Evaluation Form
 class Evaluation(models.Model):

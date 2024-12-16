@@ -158,7 +158,9 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
         'banner_program_title', 
         'flagship_program', 
         'training_modality', 
-        'actual_implementation_date', 
+        # 'actual_implementation_date',
+        'actualStartDateImplementation',
+        'actualEndDateImplementation', 
         'total_number_of_days', 
         'submitted_by', 
         'project_title', 
@@ -181,17 +183,17 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
         'submitted_by__email',
     )
     list_filter = (
+        'actualStartDateImplementation',
+        'actualEndDateImplementation',
         'training_modality', 
-        'actual_implementation_date', 
         'project__status',
     )
-    ordering = ('-actual_implementation_date',)
+    ordering = ('-actualStartDateImplementation',)
 
 @admin.register(ProjectNarrative)
 class ProjectNarrativeAdmin(admin.ModelAdmin):
     list_display = (
         'id', 
-        'project', 
         'phase_description', 
         'activities_topics', 
         'issues_challenges', 
@@ -202,6 +204,19 @@ class ProjectNarrativeAdmin(admin.ModelAdmin):
     search_fields = ('project__projectTitle', 'phase_description')
     ordering = ('-project__dateCreated',)
 
+@admin.register(PREXCAchievement)
+class PREXCAchievementAdmin(admin.ModelAdmin):
+    list_display = (
+        'persons_trained_weighted_days', 
+        'actual_trainees', 
+        'actual_days_training',
+        'persons_trained', 
+        'satisfactory_trainees', 
+        'rating_percentage'
+    )
+    search_fields = ('accomplishment_report__project__projectTitle',)
+    list_filter = ('rating_percentage', 'actual_days_training')
+    ordering = ('rating_percentage',)
 
 @admin.register(AttendanceTemplate)
 class AttendanceTemplateAdmin(admin.ModelAdmin):
