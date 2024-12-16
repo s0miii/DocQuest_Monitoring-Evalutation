@@ -18,6 +18,13 @@ const ProponentsOtherFiles = () => {
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const currentUser = localStorage.getItem("userFullName");
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
     };
@@ -39,7 +46,7 @@ const ProponentsOtherFiles = () => {
                 }
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -78,7 +85,7 @@ const ProponentsOtherFiles = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Other%20Files/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Other%20Files/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -131,7 +138,7 @@ const ProponentsOtherFiles = () => {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/other_files/${projectID}/`, {
+            const response = await fetch(`${API_URL}/monitoring/upload/other_files/${projectID}/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`, // Ensure the token is passed correctly
@@ -169,7 +176,7 @@ const ProponentsOtherFiles = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/other_files/${submissionId}/`,
+                `${API_URL}/monitoring/submissions/other_files/${submissionId}/`,
                 {
                     method: "DELETE",
                     headers: {

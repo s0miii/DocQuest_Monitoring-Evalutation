@@ -20,6 +20,13 @@ const ProponentsDailyAttRec = () => {
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const currentUser = localStorage.getItem("userFullName");
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
     };
@@ -40,7 +47,7 @@ const ProponentsDailyAttRec = () => {
                 }
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -78,7 +85,7 @@ const ProponentsDailyAttRec = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Daily%20Attendance/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Daily%20Attendance/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -127,7 +134,7 @@ const ProponentsDailyAttRec = () => {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/attendance/${projectID}/`, {
+            const response = await fetch(`${API_URL}/monitoring/upload/attendance/${projectID}/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`,
@@ -166,7 +173,7 @@ const ProponentsDailyAttRec = () => {
             // Adjust model_name to "daily_attendance"
             const modelName = "daily_attendance";
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
+                `${API_URL}/monitoring/submissions/${modelName}/${submissionId}/`,
                 {
                     method: "DELETE",
                     headers: {
