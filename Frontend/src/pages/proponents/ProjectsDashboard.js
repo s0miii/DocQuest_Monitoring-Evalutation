@@ -229,10 +229,10 @@ const ProjectsDashboard = () => {
                             onClick={() => setFilter("Completed")}
                         >
                             <h2 className="text-lg font-semibold">Completed</h2>
-                            <h2 className="text-4xl font-bold">
+                            <h2 className="text-4xl font-bold mt-2 underline">
                                 {projects.filter((p) => p.isCompleted).length}
                             </h2>
-                            <span className="mt-2 underline">View</span>
+
                         </div>
                         {/* Ongoing */}
                         <div
@@ -240,10 +240,10 @@ const ProjectsDashboard = () => {
                             onClick={() => setFilter("Ongoing")}
                         >
                             <h2 className="text-lg font-semibold">Ongoing</h2>
-                            <h2 className="text-4xl font-bold">
+                            <h2 className="text-4xl font-bold mt-2 underline">
                                 {projects.filter((p) => !p.isCompleted).length}
                             </h2>
-                            <span className="mt-2 underline">View</span>
+
                         </div>
                     </div>
 

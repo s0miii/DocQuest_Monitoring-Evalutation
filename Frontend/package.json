@@ -24,7 +24,8 @@
   },
   "scripts": {
     "start": "serve -s build -l $PORT",
-    "build": "CI=false react-scripts build"
+    "build": "CI=false react-scripts build",
+    "dev": "react-scripts start"
   },
   "eslintConfig": {
     "extends": [

@@ -9,8 +9,8 @@ const ProjLeadAssignProponents = () => {
     const { projectID } = useParams();
     const checklistItems = [
         "Attendance Sheet",
-        "Evaluation Sheets/Summary of Evaluation (in Excel form)",
-        // "Trainers CV/DTR",
+        "Evaluation Sheets/Summary of Evaluation",
+        "Trainers CV/DTR",
         "Modules/Lecture Notes",
         "Other Files",
         "Photo Documentations",
@@ -53,25 +53,31 @@ const ProjLeadAssignProponents = () => {
 
             if (response.ok) {
                 const data = await response.json();
+
+                // Map response to the checkbox state
                 const updatedProponents = data.proponents.map((proponent) => ({
-                    ...proponent,
+                    id: proponent.id,
+                    name: proponent.name,
+                    isEditing: false,
                     checkboxes: [
                         proponent.daily_attendance || false,
                         proponent.summary_of_evaluation || false,
+                        proponent.trainer_cv_dtr || false,
                         proponent.lecture_notes || false,
                         proponent.other_files || false,
                         proponent.photo_documentation || false,
                     ],
-                    isEditing: false,
                 }));
+
                 setProponents(updatedProponents);
             } else {
-                console.error("Failed to fetch proponents.");
+                console.error("Failed to fetch checklist data.");
             }
         } catch (error) {
-            console.error("Error fetching proponents:", error);
+            console.error("Error fetching checklist data:", error);
         }
     };
+
 
 
 
@@ -102,9 +108,10 @@ const ProjLeadAssignProponents = () => {
                 checklist_items: {
                     daily_attendance: proponent.checkboxes[0],
                     summary_of_evaluation: proponent.checkboxes[1],
-                    lecture_notes: proponent.checkboxes[2],
-                    other_files: proponent.checkboxes[3],
-                    photo_documentation: proponent.checkboxes[4],
+                    trainer_cv_dtr: proponent.checkboxes[2],
+                    lecture_notes: proponent.checkboxes[3],
+                    other_files: proponent.checkboxes[4],
+                    photo_documentation: proponent.checkboxes[5],
                 },
             };
 
@@ -141,7 +148,7 @@ const ProjLeadAssignProponents = () => {
             proponent: "Select Proponent",
             checkboxes:
                 activeTraining === "Training"
-                    ? [false, false, false, false, false]
+                    ? [false, false, false, false, false, false]
                     : [false, false],
         };
         if (activeTraining === "Training") {
@@ -179,6 +186,7 @@ const ProjLeadAssignProponents = () => {
             )
         );
     };
+
 
 
     const rows = activeTraining === "Training" ? trainingRows : NonTrainingRows;
@@ -246,50 +254,36 @@ const ProjLeadAssignProponents = () => {
                             <tbody>
                                 {proponents.map((proponent) => (
                                     <tr key={proponent.id} className="border-t border-gray-200">
+                                        {/* Proponent Name */}
                                         <td className="border border-gray-300 p-2">{proponent.name}</td>
-                                        {proponent.checkboxes.map((checked, index) => (
+
+                                        {/* Checkboxes for Checklist Items */}
+                                        {checklistItems.map((item, index) => (
                                             <td key={index} className="border border-gray-300 p-2 text-center">
                                                 <input
                                                     type="checkbox"
-                                                    checked={checked}
+                                                    checked={proponent.checkboxes[index] || false} // Default to false
                                                     disabled={!proponent.isEditing}
-                                                    onChange={() => {
-                                                        const updatedProponents = proponents.map((p) =>
-                                                            p.id === proponent.id
-                                                                ? {
-                                                                    ...p,
-                                                                    checkboxes: p.checkboxes.map((c, i) =>
-                                                                        i === index ? !c : c
-                                                                    ),
-                                                                }
-                                                                : p
-                                                        );
-                                                        setProponents(updatedProponents);
-                                                    }}
+                                                    onChange={() => handleCheckboxChange(proponent.id, index)}
                                                     className="w-4 h-4"
                                                 />
                                             </td>
                                         ))}
+
+                                        {/* Edit/Save Button */}
                                         <td className="border border-gray-300 p-2 text-center">
                                             <button
-                                                onClick={() => handleSubmit(proponent)}
+                                                onClick={() => toggleEditMode(proponent.id)}
                                                 className="text-blue-500 underline text-sm"
                                             >
-                                                Submit
+                                                {proponent.isEditing ? "Save" : "Edit"}
                                             </button>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
-                        <div className="mt-4 text-left">
-                            <button
-                                onClick={handleAddRow}
-                                className="text-blue-500 underline text-sm"
-                            >
-                                Add Row
-                            </button>
-                        </div>
+
                     </div>
                 </div>
             </div>
