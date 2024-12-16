@@ -12,6 +12,8 @@ const LoginPage = () => {
   const [lastname, setLastname] = useState('');
   const [roles, setRoles] = useState([]);
 
+  const API_URL = process.env.REACT_APP_API_URL;
+
   // New error state
   const [error, setError] = useState('');
 
@@ -23,7 +25,7 @@ const LoginPage = () => {
 
     try {
       // First request: Login to get the token
-      const loginResponse = await axios.post('http://127.0.0.1:8000/auth/token/login/', {
+      const loginResponse = await axios.post(`${API_URL}/auth/token/login/`, {
         email,
         password,
       });
@@ -33,7 +35,7 @@ const LoginPage = () => {
       localStorage.setItem('token', token);
 
       // Second request: Get user details
-      const userResponse = await axios.get('http://127.0.0.1:8000/name_and_roles', {
+      const userResponse = await axios.get(`${API_URL}/name_and_roles`, {
         headers: {
           'Authorization': `Token ${token}`,
         },
