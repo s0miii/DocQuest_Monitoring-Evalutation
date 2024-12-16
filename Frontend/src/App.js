@@ -47,8 +47,7 @@ import ProjectsDashboard from "./pages/proponents/ProjectsDashboard";
 
 import FillAttendanceForm from "./pages/attendance and evaluation/FillAttendanceForm"
 import AttendanceReport from "./pages/attendance and evaluation/AttendanceReport";
-
-
+import { TrainerProjectDetails, EvaluationReport } from "./pages/attendance and evaluation/Trainer&EvaluationReport";
 
 
 function App() {
@@ -97,6 +96,8 @@ function App() {
       <Route path="/monitoring/evaluation/fill/:token" element={<EvaluationForm />} />
       <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
       <Route path="/projlead/attendance-records/:templateId" element={<AttendanceReport />} />
+      <Route path="/trainer-project/:trainerID/:projectID" element={<TrainerProjectDetails />} />
+      <Route path="/evaluations/:trainerID/:projectID" element={<EvaluationReport />} />
     </Routes>
 
   );
