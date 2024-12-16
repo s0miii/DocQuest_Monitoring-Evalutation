@@ -37,11 +37,18 @@ const ProjLeadAssignProponents = () => {
     const [proponents, setProponents] = useState([]);
     const [notification, setNotification] = useState("");
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const fetchProponents = async () => {
         const token = localStorage.getItem("token");
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/assigned/`,
+                `${API_URL}/monitoring/project/${projectID}/assigned/`,
                 {
                     method: "GET",
                     headers: {
@@ -116,7 +123,7 @@ const ProjLeadAssignProponents = () => {
             };
 
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/assign-checklist/${projectID}/`,
+                `${API_URL}/monitoring/assign-checklist/${projectID}/`,
                 {
                     method: "POST",
                     headers: {

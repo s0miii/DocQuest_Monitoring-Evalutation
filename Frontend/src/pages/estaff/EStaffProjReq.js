@@ -15,6 +15,13 @@ const EStaffProjReq = () => {
     const [loading, setLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
 
     const handleViewClick = (path) => {
         navigate(path);
@@ -27,7 +34,7 @@ const EStaffProjReq = () => {
 
                 // Fetch project details
                 const projectResponse = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -47,7 +54,7 @@ const EStaffProjReq = () => {
 
                 // Fetch project progress
                 const progressResponse = await fetch(
-                    `http://127.0.0.1:8000/monitoring/project/${projectID}/progress/`,
+                    `${API_URL}/monitoring/project/${projectID}/progress/`,
                     {
                         method: "GET",
                         headers: {
@@ -80,7 +87,7 @@ const EStaffProjReq = () => {
 
             try {
                 const countsResponse = await fetch(
-                    `http://127.0.0.1:8000/monitoring/project/${projectID}/document_counts/`,
+                    `${API_URL}/monitoring/project/${projectID}/document_counts/`,
                     {
                         method: "GET",
                         headers: {
@@ -124,7 +131,7 @@ const EStaffProjReq = () => {
         setIsSending(true); // Show loading indicator
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/projects/${projectID}/send_dynamic_reminder/`,
+                `${API_URL}/monitoring/projects/${projectID}/send_dynamic_reminder/`,
                 {
                     method: "POST",
                     headers: {

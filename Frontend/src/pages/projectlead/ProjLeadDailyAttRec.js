@@ -28,9 +28,9 @@ const ProjLeadDailyAttRec = () => {
     const [totalAttendeesTable, setTotalAttendeesTable] = useState(null);
     const [averageAttendees, setAverageAttendees] = useState(null);
     const [numTemplates, setNumTemplates] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);  
+    const [isEditing, setIsEditing] = useState(false);
     const [templateId, setTemplateId] = useState(null);
-    const [editingTemplateId, setEditingTemplateId] = useState(null); 
+    const [editingTemplateId, setEditingTemplateId] = useState(null);
     const [choice, setChoice] = useState("uploadFiles");
     // Reference to the "Generated Attendance Links" section
     const linksSectionRef = useRef(null);
@@ -38,6 +38,13 @@ const ProjLeadDailyAttRec = () => {
     const [description, setDescription] = useState("");
     const [totalAttendees, setAttendees] = useState(0);
     const [attachedFiles, setAttachedFiles] = useState([]);
+
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
 
     const handleChoice = (choice) => {
         setChoice(choice); // set the choice based on user selection
@@ -64,7 +71,7 @@ const ProjLeadDailyAttRec = () => {
                 }
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -92,7 +99,7 @@ const ProjLeadDailyAttRec = () => {
         fetchUpdatedSubmissions();
     }, [projectID, navigate]);
 
-    
+
     // Fetch templates on component mount
     useEffect(() => {
         const token = localStorage.getItem("token"); // Move this inside useEffect
@@ -104,7 +111,7 @@ const ProjLeadDailyAttRec = () => {
 
         const fetchTemplates = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:8000/monitoring/attendance_templates/', {
+                const response = await axios.get(`${API_URL}/monitoring/attendance_templates/`, {
                     headers: { 'Authorization': `Token ${token}` }
                 });
                 setTemplates(response.data);
@@ -125,10 +132,10 @@ const ProjLeadDailyAttRec = () => {
                 navigate("/login");
                 return;
             }
-            
-            const projectId = 1; 
+
+            const projectId = 1;
             const response = await axios.post(
-                `http://127.0.0.1:8000/monitoring/calculate_attendees/${projectId}/`,
+                `${API_URL}/monitoring/calculate_attendees/${projectId}/`,
                 {},
                 {
                     headers: {
@@ -158,7 +165,7 @@ const ProjLeadDailyAttRec = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Daily%20Attendance/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Daily%20Attendance/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -206,7 +213,7 @@ const ProjLeadDailyAttRec = () => {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/attendance/${projectID}/`, {
+            const response = await fetch(`${API_URL}/monitoring/upload/attendance/${projectID}/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`,
@@ -245,7 +252,7 @@ const ProjLeadDailyAttRec = () => {
             // Adjust model_name to "daily_attendance"
             const modelName = "daily_attendance";
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
+                `${API_URL}/monitoring/submissions/${modelName}/${submissionId}/`,
                 {
                     method: "DELETE",
                     headers: {
@@ -284,7 +291,7 @@ const ProjLeadDailyAttRec = () => {
         setSubmissions(sortedData);
     };
 
-    
+
 
     // loading substitute
     if (loading) {
@@ -311,7 +318,7 @@ const ProjLeadDailyAttRec = () => {
             }
 
             const response = await axios.post(
-                'http://127.0.0.1:8000/monitoring/attendance_templates/',
+                `${API_URL}/monitoring/attendance_templates/`,
                 {
                     project: 1,
                     templateName,
@@ -381,7 +388,7 @@ const ProjLeadDailyAttRec = () => {
                 return;
             }
 
-            await axios.delete(`http://127.0.0.1:8000/monitoring/attendance_templates/${templateId}/`, {
+            await axios.delete(`${API_URL}/monitoring/attendance_templates/${templateId}/`, {
                 headers: { 'Authorization': `Token ${token}` },
             });
             setTemplates(templates.filter(template => template.id !== templateId));
@@ -418,8 +425,8 @@ const ProjLeadDailyAttRec = () => {
             }
 
             const response = await axios.put(
-                `http://127.0.0.1:8000/monitoring/attendance_templates/${templateId}/`,
-                `http://127.0.0.1:8000/monitoring/attendance_templates/${editingTemplateId}/`,
+                `${API_URL}/monitoring/attendance_templates/${templateId}/`,
+                `${API_URL}/monitoring/attendance_templates/${editingTemplateId}/`,
                 {
                     project: 1,
                     templateName,
@@ -433,7 +440,7 @@ const ProjLeadDailyAttRec = () => {
                     expiration_date: expirationDate,
                 },
                 {
-                    headers: { 
+                    headers: {
                         'Authorization': `Token ${token}`,
                         'Content-Type': 'application/json'
                     },
@@ -635,7 +642,7 @@ const ProjLeadDailyAttRec = () => {
                                                     <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
                                                         <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
                                                             <a
-                                                                href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
+                                                                href={`${API_URL}/media/${submission.directory}/${submission.file_name}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="block text-center text-blue-600 truncate hover:underline"
@@ -703,110 +710,110 @@ const ProjLeadDailyAttRec = () => {
                                     Add New Submission
                                 </h2>
 
-                            <div className="grid grid-cols-3 gap-4 mb-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Description
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                        placeholder="Enter a Short Description"
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                        placeholder="Set Date"
-                                        value={date}
-                                        onChange={(e) => setDate(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Total Number of Attendees
-                                    </label>
-                                    <input
-                                        type="number"
-                                        className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                        placeholder="Number of Attendees"
-                                        value={totalAttendees}
-                                        onChange={(e) => setAttendees(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Preview of Attached Files */}
-                            <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
-                                <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
-                                {attachedFiles.length === 0 && (
-                                    <div className="mb-3 text-gray-400">
-                                        <span className="block text-3xl text-center">+</span>
+                                <div className="grid grid-cols-3 gap-4 mb-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Description
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                            placeholder="Enter a Short Description"
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                        />
                                     </div>
-                                )}
-                                <input
-                                    type="file"
-                                    multiple
-                                    onChange={handleFileChange}
-                                    className="absolute inset-0 opacity-0 cursor-pointer"
-                                    style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
-                                />
-                                {attachedFiles.length > 0 && (
-                                    <div
-                                        className="grid w-full grid-cols-5 gap-3 mt-4 overflow-y-auto"
-                                        style={{
-                                            maxHeight: "250px", // Scrollable height
-                                            paddingRight: "10px", // Space for scrollbar
-                                        }}
-                                    >
-                                        {attachedFiles.map((file, index) => {
-                                            const fileExtension = file.name.split('.').pop().toUpperCase();
-                                            const filePreview = file.type.startsWith("image/")
-                                                ? (
-                                                    <img
-                                                        src={URL.createObjectURL(file)}
-                                                        alt={`attachment-preview-${index}`}
-                                                        className="object-cover w-20 h-20 rounded-lg" // Deducted 10% width
-                                                    />
-                                                )
-                                                : (
-                                                    <div className="flex items-center justify-center w-20 h-20 text-gray-600 bg-gray-200 rounded-lg">
-                                                        <span className="text-lg">{fileExtension}</span>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                            placeholder="Set Date"
+                                            value={date}
+                                            onChange={(e) => setDate(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Total Number of Attendees
+                                        </label>
+                                        <input
+                                            type="number"
+                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                            placeholder="Number of Attendees"
+                                            value={totalAttendees}
+                                            onChange={(e) => setAttendees(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Preview of Attached Files */}
+                                <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
+                                    <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
+                                    {attachedFiles.length === 0 && (
+                                        <div className="mb-3 text-gray-400">
+                                            <span className="block text-3xl text-center">+</span>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
+                                    />
+                                    {attachedFiles.length > 0 && (
+                                        <div
+                                            className="grid w-full grid-cols-5 gap-3 mt-4 overflow-y-auto"
+                                            style={{
+                                                maxHeight: "250px", // Scrollable height
+                                                paddingRight: "10px", // Space for scrollbar
+                                            }}
+                                        >
+                                            {attachedFiles.map((file, index) => {
+                                                const fileExtension = file.name.split('.').pop().toUpperCase();
+                                                const filePreview = file.type.startsWith("image/")
+                                                    ? (
+                                                        <img
+                                                            src={URL.createObjectURL(file)}
+                                                            alt={`attachment-preview-${index}`}
+                                                            className="object-cover w-20 h-20 rounded-lg" // Deducted 10% width
+                                                        />
+                                                    )
+                                                    : (
+                                                        <div className="flex items-center justify-center w-20 h-20 text-gray-600 bg-gray-200 rounded-lg">
+                                                            <span className="text-lg">{fileExtension}</span>
+                                                        </div>
+                                                    );
+
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className="flex flex-col items-center p-2 border border-gray-200 rounded-lg shadow-md"
+                                                        title={file.name}
+                                                        style={{ marginBottom: "10px" }}
+                                                    >
+                                                        {filePreview}
+                                                        <p className="w-full mt-2 text-xs text-center truncate">{file.name}</p>
                                                     </div>
                                                 );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
 
-                                            return (
-                                                <div
-                                                    key={index}
-                                                    className="flex flex-col items-center p-2 border border-gray-200 rounded-lg shadow-md"
-                                                    title={file.name}
-                                                    style={{ marginBottom: "10px" }}
-                                                >
-                                                    {filePreview}
-                                                    <p className="w-full mt-2 text-xs text-center truncate">{file.name}</p>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
+                                <div className="flex justify-center">
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmit}
+                                        className="px-12 py-2 font-bold text-white transition bg-blue-500 rounded-lg hover:bg-blue-600"
+                                    >
+                                        Submit
+                                    </button>
+                                </div>
                             </div>
-
-                            <div className="flex justify-center">
-                                <button
-                                    type="button"
-                                    onClick={handleSubmit}
-                                    className="px-12 py-2 font-bold text-white transition bg-blue-500 rounded-lg hover:bg-blue-600"
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        </div>
                         </div>
                     )}
 
@@ -887,8 +894,8 @@ const ProjLeadDailyAttRec = () => {
                                                             <span className='text-red-500'>Expired</span>
                                                         ) : (
                                                             <>
-                                                                <button 
-                                                                    onClick={() => handleDeleteTemplate(template.id)} 
+                                                                <button
+                                                                    onClick={() => handleDeleteTemplate(template.id)}
                                                                     className='mr-2 text-red-500'>
                                                                     <FaTrash />
                                                                 </button>
@@ -896,8 +903,8 @@ const ProjLeadDailyAttRec = () => {
                                                         )}
                                                     </td>
                                                     <td className='p-3 text-gray-600'>
-                                                        <button 
-                                                            onClick={() => handleViewAttendanceRecords(template.id)} 
+                                                        <button
+                                                            onClick={() => handleViewAttendanceRecords(template.id)}
                                                             className='text-blue-500 hover:text-blue-600'>
                                                             View Attendance Records
                                                         </button>

@@ -14,6 +14,13 @@ const StaffLecNotes = () => {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [isProjectLeader, setIsProjectLeader] = useState(false);
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
     };
@@ -35,7 +42,7 @@ const StaffLecNotes = () => {
                 }
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -74,7 +81,7 @@ const StaffLecNotes = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Lecture%20Notes/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Lecture%20Notes/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -105,7 +112,7 @@ const StaffLecNotes = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/lecture_notes/${submissionId}/`,
+                `${API_URL}/monitoring/submission/update/lecture_notes/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {
@@ -146,7 +153,7 @@ const StaffLecNotes = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/lecture_notes/${submissionId}/`,
+                `${API_URL}/monitoring/submission/update/lecture_notes/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {
@@ -180,7 +187,7 @@ const StaffLecNotes = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/lecture_notes/${submissionId}/`,
+                `${API_URL}/monitoring/submission/update/lecture_notes/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {
@@ -364,7 +371,7 @@ const StaffLecNotes = () => {
                                             <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                                     <a
-                                                        href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
+                                                        href={`${API_URL}/media/${submission.directory}/${submission.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:underline truncate block text-center"
