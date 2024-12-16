@@ -209,7 +209,10 @@ class AccomplishmentReport(models.Model):
 
     @property
     def college(self):
-        return self.project.college
+        program = self.project.program.first()
+        if program and program.collegeID:
+            return program.collegeID.title  # Return the college title
+        return "N/A"
 
     @property
     def target_groups_beneficiaries(self):
