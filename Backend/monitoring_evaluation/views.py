@@ -1025,16 +1025,39 @@ class PREXCAchievementCreateView(LoginRequiredMixin, CreateView):
         form.instance.submitted_by = self.request.user
         return super().form_valid(form)
     
-class ProjectNarrativeCreateView(LoginRequiredMixin, CreateView):
-    model = ProjectNarrative
-    form_class = ProjectNarrativeForm
-    template_name = 'monitoring_evaluation/project_narrative_form.html'
-    success_url = reverse_lazy('monitoring_evaluation:project_narrative_list')
-    permission_classes = [IsAuthenticated]
+# class ProjectNarrativeCreateView(LoginRequiredMixin, CreateView):
+#     model = ProjectNarrative
+#     form_class = ProjectNarrativeForm
+#     template_name = 'monitoring_evaluation/project_narrative_form.html'
+#     success_url = reverse_lazy('monitoring_evaluation:project_narrative_list')
+#     permission_classes = [IsAuthenticated]
 
-    def form_valid(self, form):
-        form.instance.submitted_by = self.request.user
-        return super().form_valid(form)
+#     def form_valid(self, form):
+#         form.instance.submitted_by = self.request.user
+#         return super().form_valid(form)
+
+class ProjectNarrativeViewSet(viewsets.ModelViewSet):
+    queryset = ProjectNarrative.objects.all()
+    serializer_class = ProjectNarrativeSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        # Customize the queryset to fetch only narratives created by the current user
+        user = self.request.user
+        return ProjectNarrative.objects.filter()  # No user filtering unless required
+    
+    def perform_create(self, serializer):
+        # Automatically populate the ProjectNarrative fields on creation.
+        
+        print(f"User '{self.request.user}' is creating a Project Narrative.")  # Debugging log
+        serializer.save()
+
+    def perform_update(self, serializer):
+        # Logic for updates if required. Defaults to regular save.
+        
+        print(f"User '{self.request.user}' is updating a Project Narrative.")  # Debugging log
+        serializer.save()
     
 # API Views
 class DailyAttendanceRecordViewSet(viewsets.ModelViewSet): 
@@ -1077,10 +1100,10 @@ class PREXCAchievementViewSet(viewsets.ModelViewSet):
     serializer_class = PREXCAchievementSerializer
     permission_classes = [IsAuthenticated]
 
-class ProjectNarrativeViewSet(viewsets.ModelViewSet):
-    queryset = ProjectNarrative.objects.all()
-    serializer_class = ProjectNarrativeSerializer
-    permission_classes = [IsAuthenticated]
+# class ProjectNarrativeViewSet(viewsets.ModelViewSet):
+#     queryset = ProjectNarrative.objects.all()
+#     serializer_class = ProjectNarrativeSerializer
+#     permission_classes = [IsAuthenticated]
 
 # Evaluation ViewSet for Evaluation Forms
 class EvaluationViewSet(viewsets.ModelViewSet):

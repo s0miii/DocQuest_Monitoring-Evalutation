@@ -97,8 +97,8 @@ urlpatterns = [
     # Accomplishment Report
     # path('create/report/', AccomplishmentReportCreateView.as_view(), name='report_create'),
     # path('report/<int:pk>/', AccomplishmentReportDetailView.as_view(), name='report_detail'),
-    path('create/prexc_achievement/', PREXCAchievementCreateView.as_view(), name='prexc_achievement_create'),
-    path('create/project_narrative/', ProjectNarrativeCreateView.as_view(), name='project_narrative_create'),
+    # path('create/prexc_achievement/', PREXCAchievementCreateView.as_view(), name='prexc_achievement_create'),
+    # path('create/project_narrative/', ProjectNarrativeCreateView.as_view(), name='project_narrative_create'),
 
     # Evaluation
     # path(

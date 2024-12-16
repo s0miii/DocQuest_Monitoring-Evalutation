@@ -5,13 +5,20 @@ Content-Type: application/json
 
 {
   "project": 1, 
-  "banner_program_title": "Try nga si Wyn",
+  "banner_program_title": "Trial With Proj Narrative",
   "flagship_program": "Sample Flagship Program",
   "training_modality": "Face to Face",
   "actualStartDateImplementation": "2024-01-01",
   "actualEndDateImplementation": "2024-01-05",
   "prexc_achievement": null,
-  "project_narrative": null
+  "project_narrative": {
+    "phase_description": "Initial Phase of Implementation",
+    "activities_topics": "Workshop on Environmental Awareness",
+    "issues_challenges": "Limited resources and time constraints",
+    "participant_engagement_quality": "High engagement and interaction",
+    "discussion_comments": "Positive feedback from participants",
+    "ways_forward_plans": "Follow-up sessions and resource allocation"
+  }
 }
 
 ###
@@ -22,13 +29,20 @@ Authorization: Token 85a475256adb3504c8836ffdac14bcb71cef48ec
 
 {
   "project": 2,
-  "banner_program_title": "PLEASE Dapat Wyn ang ProjLead",
+  "banner_program_title": "PLEASE Dapat ClAR ang ProjLead",
   "flagship_program": "Sample Flagship Program",
   "training_modality": "Face to Face",
   "actualStartDateImplementation": "2024-01-01",
   "actualEndDateImplementation": "2024-01-05",
   "prexc_achievement": null,
-  "project_narrative": null
+  "project_narrative": {
+    "phase_description": "Initial Phase of Implementation",
+    "activities_topics": "Workshop on Environmental Awareness",
+    "issues_challenges": "Limited resources and time constraints",
+    "participant_engagement_quality": "High engagement and interaction",
+    "discussion_comments": "Positive feedback from participants",
+    "ways_forward_plans": "Follow-up sessions and resource allocation"
+  }
 }
 
 

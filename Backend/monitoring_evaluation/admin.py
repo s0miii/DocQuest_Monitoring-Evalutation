@@ -194,7 +194,6 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
 class ProjectNarrativeAdmin(admin.ModelAdmin):
     list_display = (
         'id', 
-        'project', 
         'phase_description', 
         'activities_topics', 
         'issues_challenges', 

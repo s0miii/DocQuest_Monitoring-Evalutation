@@ -237,16 +237,16 @@ class PREXCAchievement(models.Model):
 
 # Project Narrative Model
 class ProjectNarrative(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_narratives')
-    phase_description = models.TextField()
-    activities_topics = models.TextField()
-    issues_challenges = models.TextField()
-    participant_engagement_quality = models.TextField()
-    discussion_comments = models.TextField()
-    ways_forward_plans = models.TextField()
+    phase_description = models.TextField(verbose_name="Phase Description")
+    activities_topics = models.TextField(verbose_name="Activities and Topics Covered")
+    issues_challenges = models.TextField(verbose_name="Issues and Challenges Encountered")
+    participant_engagement_quality = models.TextField(verbose_name="Quality of Participants' Engagement")
+    discussion_comments = models.TextField(verbose_name="Discussion and Comments")
+    ways_forward_plans = models.TextField(verbose_name="Ways Forward and Plans")
+    
 
     def __str__(self):
-        return f"Project Narrative for {self.project.projectTitle}"
+        return f"Project Narrative"
     
 # Model for Evaluation Form
 class Evaluation(models.Model):
