@@ -38,7 +38,7 @@ class PREXCAchievementForm(forms.ModelForm):
     class Meta:
         model = PREXCAchievement
         fields = [
-            'project', 'persons_trained_weighted_days', 'actual_trainees', 
+            'persons_trained_weighted_days', 'actual_trainees', 
             'actual_days_training', 'persons_trained', 'satisfactory_trainees', 
             'rating_percentage'
         ]  # Ensure fields are specified

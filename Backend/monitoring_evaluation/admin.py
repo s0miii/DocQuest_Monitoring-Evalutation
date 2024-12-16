@@ -204,6 +204,19 @@ class ProjectNarrativeAdmin(admin.ModelAdmin):
     search_fields = ('project__projectTitle', 'phase_description')
     ordering = ('-project__dateCreated',)
 
+@admin.register(PREXCAchievement)
+class PREXCAchievementAdmin(admin.ModelAdmin):
+    list_display = (
+        'persons_trained_weighted_days', 
+        'actual_trainees', 
+        'actual_days_training',
+        'persons_trained', 
+        'satisfactory_trainees', 
+        'rating_percentage'
+    )
+    search_fields = ('accomplishment_report__project__projectTitle',)
+    list_filter = ('rating_percentage', 'actual_days_training')
+    ordering = ('rating_percentage',)
 
 @admin.register(AttendanceTemplate)
 class AttendanceTemplateAdmin(admin.ModelAdmin):

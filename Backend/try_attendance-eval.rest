@@ -104,11 +104,11 @@ Authorization: Token <auth-token>
 #  Create Attendance Template -- working endpoint
 POST http://127.0.0.1:8000/monitoring/attendance_templates/
 Content-Type: application/json
-Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 {
     "project": 1,
-    "templateName": "Test Template Try",
+    "templateName": "Attendance Day 1- Project 1",
     "include_attendee_name": true,
     "include_gender": true,
     "include_college": false,
@@ -121,7 +121,7 @@ Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
 ### 
 # Retrieve All Attendance Templates
 GET http://127.0.0.1:8000/monitoring/attendance_templates/
-Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 
 ###
@@ -152,13 +152,13 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 ###
 # Delete an Attendance Template
 DELETE http://127.0.0.1:8000/monitoring/attendance_templates/1/
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 ###
 # Submit Attendance Record - working endpoint
 POST http://127.0.0.1:8000/monitoring/attendance_records/1/5/
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 {
     "attendee_name": "To Be Deleted",
@@ -177,12 +177,12 @@ Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 ###
 # Retrieve Attendance Record for a Specific Record ID - dapat authenticated ang token di pako sure unsaon but nag try rakog token from other user
 GET http://127.0.0.1:8000/monitoring/attendance_records/2/
-Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 ### 
 # Retrieve All Attendance Records for a Project - working endpoint
 GET http://127.0.0.1:8000/monitoring/attendance_records/project/1/
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 
 ###
@@ -230,11 +230,12 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 # If walay training then project lang ang i specify
 POST http://127.0.0.1:8000/monitoring/attendance_templates/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 {
-    "project": 2,
-    "templateName": "Naay trainer",
+    "project": 1,
+    "trainer_id": 2,
+    "templateName": "Attendance ni Donny 1?",
     "include_attendee_name": true,
     "include_gender": true,
     "include_college": false,
@@ -250,10 +251,10 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 # Project Id ang last - woking pero need pa specific id sa link
 POST http://127.0.0.1:8000/monitoring/attendance_templates/create/1/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 {
-    "templateName": "For Project 1",
+    "templateName": "Attendance Day 1- Project 1",
     "include_attendee_name": true,
     "include_gender": true,
     "include_college": false,
@@ -280,29 +281,27 @@ Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 ###
 #  List All Templates Created for specific template- working endpoint
 GET http://127.0.0.1:8000/monitoring/attendance_templates/
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 ###
 #  Test Token
-GET http://127.0.0.1:8000/monitoring/attendance/fill/AlKa1i0n5m-tjJSqHbmtkw/
+GET http://127.0.0.1:8000/monitoring/attendance/fill/K46UJMQzE7Q0fbqoGy0iDw/
 Content-Type: application/json
 
 ###
 #  Submit Attendance Record via Sharable Link
-POST http://127.0.0.1:8000/monitoring/attendance/fill/58nbGQ0ikmUGdvA06Ae4IA/
+POST http://127.0.0.1:8000/monitoring/attendance/fill/dZJLAcASNNjTEK5MLOL1Jg/
 Content-Type: application/json
 
 {
-    "attendee_name": "Apil Apil",
-    "gender": "Female",
-    "year_section": "4R6",
-    "contact_number": "1234567890"
+    "attendee_name": "FIve - Donny",
+    "gender": "Female"
 }
 
 ###
 #  Retrieve All Attendance Records for a Project - working endpoint
-GET http://127.0.0.1:8000/monitoring/attendance_records/project/2/
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+GET http://127.0.0.1:8000/monitoring/attendance_records/project/1/
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 ###
 #  Retrieve a Specific Attendance Record
@@ -313,19 +312,97 @@ Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
 ###
 # POST http://127.0.0.1:8000/monitoring/calculate_attendees/<project_id>/
 #Calculate Number of Attendees per Project
-POST http://127.0.0.1:8000/monitoring/calculate_attendees/9/
+POST http://127.0.0.1:8000/monitoring/calculate_attendees/1/
 Content-Type: application/json
-Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 
 
-# New Evaluation Endpoints
-###
-# Generate Sharable Link for Evaluation
-POST http://127.0.0.1:8000/monitoring/evaluation_links/
+# # New Evaluation Endpoints
+# ###
+# # Generate Sharable Link for Evaluation
+# POST http://127.0.0.1:8000/monitoring/evaluation_links/
+# Content-Type: application/json
+# Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
+
+
+# {
+#     "trainer_id": 1,
+#     "project_id": 1,
+#     "expiration_date": "2024-12-31"
+# }
+
+# ###
+# # Retrieve All Evaluation Sharable Links - working
+# GET http://127.0.0.1:8000/monitoring/evaluation_links/
+# Content-Type: application/json
+# Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
+
+
+# ###
+# # Retrieve Sharable Link Details Using Token
+# # GET http://127.0.0.1:8000/monitoring/evaluation/fill/TOKEN_HERE/
+# GET http://127.0.0.1:8000/monitoring/evaluation/fill/ggmQ1lJCsShOxPPC8htdAg/
+# Content-Type: application/json
+# Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
+
+
+
+# ###
+# # Submit Evaluation Form Using Sharable Link - Public Endpoint
+# # POST http://127.0.0.1:8000/monitoring/evaluation/fill/<TOKEN>/
+# POST http://127.0.0.1:8000/monitoring/evaluation/fill/ggmQ1lJCsShOxPPC8htdAg/
+# Content-Type: application/json
+
+# {
+    
+#     "attendee_name": "Attendee 5",
+#     "relevance_of_topics": 3,
+#     "organizational_flow": 3,
+#     "learning_methods": 3,
+#     "technology_use": 3,
+#     "time_efficiency": 3,
+#     "mastery_subject": 3,
+#     "preparedness": 3,
+#     "audience_participation": 3,
+#     "interest_level": 3,
+#     "handle_questions": 3,
+#     "voice_personality": 3,
+#     "visual_aids": 3,
+#     "venue_assessment": 3,
+#     "timeliness": 5,
+#     "overall_management": 4,
+#     "useful_concepts": "Very useful concepts covered.",
+#     "improvement_areas": "None noted.",
+#     "additional_comments": "Great presentation.",
+#     "remarks": "Excellent overall."
+# }
+
+# ### Get All Evaluations - working
+# GET http://127.0.0.1:8000/monitoring/evaluations/
+# Content-Type: application/json
+# Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
+
+# ### Filter Evaluations - working filter
+# GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=2&project=1
+# Content-Type: application/json
+# Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
+
+# ### Search Evaluations by Trainer Name or Project Title - working
+# GET http://127.0.0.1:8000/monitoring/evaluations/?search=Maris
+# Content-Type: application/json
+# Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+
+
+
+
+######################### FINAL FINAL
+### Generate Sharable Link for Evaluation - GenEvalview (API)
+# Remove trainer field for projects without trainers
+# POST http://127.0.0.1:8000/monitoring/evaluation_links/
+POST http://127.0.0.1:8000/monitoring/generate_evaluation_link/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
-
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 {
     "trainer_id": 2,
@@ -334,121 +411,43 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 }
 
 ###
-# Retrieve All Evaluation Sharable Links - working
-GET http://127.0.0.1:8000/monitoring/evaluation_links/
-Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
-
-
-###
-# Retrieve Sharable Link Details Using Token
-# GET http://127.0.0.1:8000/monitoring/evaluation/fill/TOKEN_HERE/
-GET http://127.0.0.1:8000/monitoring/evaluation/fill/OjPqwN6XCp_1k_Xc152FGg/
-Content-Type: application/json
-Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
-
-
-
-###
-# Submit Evaluation Form Using Sharable Link - Public Endpoint
-# POST http://127.0.0.1:8000/monitoring/evaluation/fill/<TOKEN>/
-POST http://127.0.0.1:8000/monitoring/evaluation/fill/OjPqwN6XCp_1k_Xc152FGg/
-Content-Type: application/json
-
-{
-    
-    "attendee_name": "Anthony Jennings",
-    "relevance_of_topics": 5,
-    "organizational_flow": 4,
-    "learning_methods": 5,
-    "technology_use": 4,
-    "time_efficiency": 5,
-    "mastery_subject": 4,
-    "preparedness": 5,
-    "audience_participation": 4,
-    "interest_level": 4,
-    "handle_questions": 3,
-    "voice_personality": 4,
-    "visual_aids": 3,
-    "venue_assessment": 4,
-    "timeliness": 5,
-    "overall_management": 4,
-    "useful_concepts": "Very useful concepts covered.",
-    "improvement_areas": "None noted.",
-    "additional_comments": "Great presentation.",
-    "remarks": "Excellent overall."
-}
-
-### Get All Evaluations - working
-GET http://127.0.0.1:8000/monitoring/evaluations/
-Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
-
-### Filter Evaluations - working filter
-GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=2&project=3
-Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
-
-### Search Evaluations by Trainer Name or Project Title - working
-GET http://127.0.0.1:8000/monitoring/evaluations/?search=Maris
-Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
-
-
-
-
-#########################
-### Generate Sharable Link for Evaluation - GenEvalview (API)
-# Remove trainer field for projects without trainers
-# POST http://127.0.0.1:8000/monitoring/evaluation_links/
-POST http://127.0.0.1:8000/monitoring/generate_evaluation_link/
-Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
-
-{
-    "trainer_id": 3,
-    "project_id": 1,
-    "expiration_date": "2024-12-31"
-}
-
-###
 # Retrieve All Evaluation Sharable Links
 GET http://127.0.0.1:8000/monitoring/evaluation_links/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 ###
 # Retrieve All Evaluation Sharable Links - PER PROJECT
 # GET http://127.0.0.1:8000/monitoring/evaluation_links/?project=<project_id>
 GET http://127.0.0.1:8000/monitoring/evaluation_links/?project=1
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 
 ###
 # Retrieve Specific Evaluation Sharable Link by ID
 # sharable link id ang last
-GET http://127.0.0.1:8000/monitoring/evaluation_links/{id}/
+GET http://127.0.0.1:8000/monitoring/evaluation_links/2/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 ###
 # Submit and Evaluation
 # token sa link ang last
-POST http://127.0.0.1:8000/monitoring/evaluation/fill/VesN8Q3Wjv028eVwA2yemA/
+POST http://127.0.0.1:8000/monitoring/evaluation/fill/bauz-d_DeTSyo54PvaRcQg/
 Content-Type: application/json
 
 {
-    "attendee_name": "3rd ni Belle",
+    "attendee_name": "5th ni Donny",
     "relevance_of_topics": 3,
     "organizational_flow": 3,
-    "learning_methods": 2,
-    "technology_use": 3,
+    "learning_methods": 5,
+    "technology_use": 5,
     "time_efficiency": 4,
     "mastery_subject": 4,
-    "preparedness": 4,
-    "audience_participation": 4,
-    "interest_level": 4,
+    "preparedness": 5,
+    "audience_participation": 5,
+    "interest_level": 5,
     "handle_questions": 4,
     "voice_personality": 4,
     "visual_aids": 4,
@@ -463,9 +462,9 @@ Content-Type: application/json
 ###
 # Retrieve All Submitted Evaluations
 #  last kay /?trainer=1&project=2
-GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=3&project=1
+GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=2&project=1
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 ###
 # Retrieve All Submitted Evaluations
@@ -487,15 +486,15 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 ###
 # Generate Evaluation Summary
 ### Retrieve Evaluation Summary for a Project
-GET http://127.0.0.1:8000/monitoring/project/2/evaluation_summary/
+GET http://127.0.0.1:8000/monitoring/project/1/evaluation_summary/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 # Replace {project_id} with the ID of the project you want to get the evaluation summary for.
 
 ### 
 # Fetch List of Trainers by Project ID
 # project id ang <id> next to project
-GET http://127.0.0.1:8000/monitoring/project/9/trainers/
+GET http://127.0.0.1:8000/monitoring/project/2/trainers/
 Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
