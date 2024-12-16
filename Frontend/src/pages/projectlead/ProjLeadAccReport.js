@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
@@ -39,6 +39,13 @@ const ProjLeadAccReport = () => {
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const [pdfUrl, setPdfUrl] = useState("");
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
     };
@@ -60,7 +67,7 @@ const ProjLeadAccReport = () => {
                 }
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -88,7 +95,7 @@ const ProjLeadAccReport = () => {
         fetchProjectDetails();
     }, [projectID, navigate]);
 
-    
+
     const fetchUpdatedSubmissions = async () => {
         const token = localStorage.getItem("token");
 
@@ -100,7 +107,7 @@ const ProjLeadAccReport = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Other%20Files/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Other%20Files/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -132,7 +139,7 @@ const ProjLeadAccReport = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/other_files/${submissionId}/`,
+                `${API_URL}/monitoring/submission/update/other_files/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {
@@ -173,7 +180,7 @@ const ProjLeadAccReport = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/other_files/${submissionId}/`,
+                `${API_URL}/monitoring/submission/update/other_files/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {
@@ -197,7 +204,7 @@ const ProjLeadAccReport = () => {
         }
     };
 
-    
+
     // Handle photo uploads
     const handleFileChange = (index, files) => {
         const newPhotos = [...photos];
@@ -394,7 +401,7 @@ const ProjLeadAccReport = () => {
                                                                 : submission.status === "Rejected"
                                                                     ? "text-red-600"
                                                                     : "text-gray-600"
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {submission.status}
                                                     </p>
@@ -451,7 +458,7 @@ const ProjLeadAccReport = () => {
                     {/* Main Form */}
                     <div className="bg-white shadow-lg rounded-lg p-8 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-6">Extension Accomplishment Report</h2>
-                        
+
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Banner Program Title</label>
                             <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.banner_program_title}</p>
@@ -461,7 +468,7 @@ const ProjLeadAccReport = () => {
                             <label className="block text-sm font-medium text-gray-700">Flagship Program</label>
                             <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.flagship_program}</p>
                         </div>
-                        
+
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Project Title</label>
                             <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_title}</p>
@@ -480,7 +487,7 @@ const ProjLeadAccReport = () => {
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Title of Research</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.research_title}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.research_title}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -577,7 +584,7 @@ const ProjLeadAccReport = () => {
                                         </td>
                                     </tr>
                                     <tr>
-                                    <td className="border border-gray-300 px-4 py-2 text-left"> Number of Trainees who evaluated the training to be at least satisfactory </td>
+                                        <td className="border border-gray-300 px-4 py-2 text-left"> Number of Trainees who evaluated the training to be at least satisfactory </td>
                                         <td className="border border-gray-300 px-4 py-2">
                                             <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{formData.satisfactoryEvaluation}</p>
                                         </td>
