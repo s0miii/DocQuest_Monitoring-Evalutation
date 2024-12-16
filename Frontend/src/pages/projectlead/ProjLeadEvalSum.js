@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 
 const ProjLeadEvalSum = () => {
     const navigate = useNavigate();
-    const { projectID } = useParams();
+    const { trainerID, projectID } = useParams();
     const [projectDetails, setProjectDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isProjectLeader, setIsProjectLeader] = useState(false);
@@ -244,8 +244,8 @@ const ProjLeadEvalSum = () => {
         }
     };
 
-    const handleEvaluationReport = (linkId) => {
-        navigate(`/project/${projectID}/evaluation-report/${linkId}`);
+    const viewEvaluationReport = () => {
+        navigate(`/evaluations/${trainerID}/${projectID}`);
     };
     
     // Handle file attachments
@@ -836,10 +836,7 @@ const ProjLeadEvalSum = () => {
                                                             )}
                                                         </td>
                                                         <td className='p-3'>
-                                                            <button
-                                                                onClick={() => handleEvaluationReport(link.id)}
-                                                                className="text-blue-500 hover:text-blue-600"
-                                                            >
+                                                            <button onClick={viewEvaluationReport}>
                                                                 View Evaluation Report
                                                             </button>
                                                         </td>

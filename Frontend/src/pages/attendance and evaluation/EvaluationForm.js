@@ -127,12 +127,31 @@ const EvaluationForm = () => {
         </div>
     );
 
+
     if (isSubmitted) {
-        return <div className="text-center text-lg">Thank you for submitting your evaluation!</div>;
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-cover bg-fixed" style={{ backgroundImage: `url("${process.env.PUBLIC_URL}/images/bg-login3.png")` }}>
+                <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-8 rounded-3xl shadow-2xl max-w-md mx-auto my-10">
+                    <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Thank You!</h2>
+                    <p className="text-lg text-gray-600 text-center">
+                        Your evaluation has been successfully submitted. We appreciate your feedback!
+                    </p>
+                </div>
+            </div>
+        );
     }
 
     if (error) {
-        return <div className="text-red-500 text-center">{error}</div>;
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-cover bg-fixed" style={{ backgroundImage: `url("${process.env.PUBLIC_URL}/images/bg-login3.png")` }}>
+                <div className="bg-gradient-to-r from-red-100 to-red-200 p-8 rounded-3xl shadow-2xl max-w-md mx-auto my-10">
+                    <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Error</h2>
+                    <p className="text-lg text-red-600 text-center">
+                        {error}
+                    </p>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -237,14 +256,12 @@ const EvaluationForm = () => {
                                 placeholder="Final remarks..."
                             />
                         </div>
-    
+                        
                         <button type="submit" disabled={isLoading} className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline">
                             Submit Evaluation
                         </button>
                     </form>
                 )}
-                {isSubmitted && <div className="text-center text-lg">Thank you for submitting your evaluation!</div>}
-                {error && <div className="text-red-500 text-center">{error}</div>}
             </div>
         </div>
     );
