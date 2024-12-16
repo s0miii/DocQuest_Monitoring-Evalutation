@@ -1368,15 +1368,15 @@ def evaluation_summary_view(request, project_id):
                 return Response({
                     "message": "No evaluations found for this project.",
                     "evaluations": [],
-                    "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                    "categories": {"Poor": 0, "Fair": 0, "Satisfactory": 0, "Very Satisfactory": 0, "Excellent": 0},
                     "total_evaluations": 0,
-                    "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
+                    "percentages": {"Poor": 0, "Fair": 0, "Satisfactory": 0, "Very Satisfactory": 0, "Excellent": 0},
                     "detailed_evaluations": [],
 
                 }, status=200)
 
             # Count evaluators in each rating category
-            categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
+            categories = {"poor": 0, "fair": 0, "Satisfactory": 0, "Very Satisfactory": 0, "Excellent": 0}
             total_evaluations = evaluations.count()
             for evaluation in evaluations:
                 avg = evaluation.overall_rating
@@ -1385,11 +1385,11 @@ def evaluation_summary_view(request, project_id):
                 elif avg <= 2:
                     categories["fair"] += 1
                 elif avg <= 3:
-                    categories["good"] += 1
+                    categories["Satisfactory"] += 1
                 elif avg <= 4:
-                    categories["better"] += 1
+                    categories["Very Satisfactory"] += 1
                 else:
-                    categories["best"] += 1
+                    categories["Excellent"] += 1
 
             # Calculate percentages
             percentages = {
