@@ -193,7 +193,7 @@ class AccomplishmentReport(models.Model):
 
     @property
     def proponents(self):
-        return self.project.proponents.all()  # Many-to-Many field
+        return ", ".join([str(p) for p in self.project.proponents.all()])
 
     @property
     def program(self):
@@ -217,7 +217,7 @@ class AccomplishmentReport(models.Model):
 
     @property
     def partner_agency(self):
-        return self.project.agency.all()  # Many-to-Many field
+        return ", ".join([str(a) for a in self.project.agency.all()])
 
     def __str__(self):
         return f"Accomplishment Report for {self.project.projectTitle}"

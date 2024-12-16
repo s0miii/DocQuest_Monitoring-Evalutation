@@ -24,6 +24,8 @@ from django.conf import settings
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from datetime import datetime
+from rest_framework.authentication import TokenAuthentication
+
 
 # Email
 @role_required(allowed_role_codes=["estf"])  # Restrict to EStaff
@@ -923,23 +925,93 @@ class ProponentSubmissionsView(APIView):
 #         return render(request, 'monitoring_evaluation/accomplishment_report_detail.html', {'report': report})
 
 
+# class AccomplishmentReportViewSet(viewsets.ModelViewSet):
+#     # queryset = AccomplishmentReport.objects.all()
+#     serializer_class = AccomplishmentReportSerializer
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = [TokenAuthentication]
+
+
+#     def get_queryset(self):
+#         user = self.request.user
+        
+#         if user.is_authenticated:
+#             return AccomplishmentReport.objects.filter(
+#                 Q(submitted_by=user) |  # User submitted the report
+#                 Q(
+#                     project__proponents=user, 
+#                     project__proponents__role__code='pjld'  # User is Project Leader
+#                 )
+#             ).distinct()  # Avoid duplicates
+#         return AccomplishmentReport.objects.none()
+
+#     def perform_create(self, serializer):
+#         # Automatically set `submitted_by` and calculate `total_number_of_days`
+
+#         project = serializer.validated_data['project']
+
+#         # Find the Project Leader (pjld role) for the project
+#         project_leader = project.proponents.filter(role__code='pjld').first()
+#         if not project_leader:
+#             raise ValueError("No Project Leader assigned to this project.")
+
+#         serializer.save(
+#             submitted_by=project_leader,
+#             total_number_of_days=project.attendance_templates.count()
+#         )
+
+#     def perform_update(self, serializer):
+#         # Recalculate 'total_number_of_days' on report update.
+        
+#         serializer.save(
+#             total_number_of_days=serializer.validated_data['project'].attendance_templates.count()
+#         )
+
 class AccomplishmentReportViewSet(viewsets.ModelViewSet):
-    queryset = AccomplishmentReport.objects.all()
     serializer_class = AccomplishmentReportSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_authenticated:
+            queryset = AccomplishmentReport.objects.filter(
+                Q(submitted_by=user) |  
+                Q(
+                    project__proponents=user, 
+                    project__proponents__role__code='pjld'  
+                )
+            ).distinct()
+            print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
+            return queryset
+        print("User is not authenticated")
+        return AccomplishmentReport.objects.none()
 
     def perform_create(self, serializer):
-        # Automatically set `submitted_by` and calculate `total_number_of_days`
-        serializer.save(
-            submitted_by=self.request.user,
-            total_number_of_days=serializer.validated_data['project'].attendance_templates.count()
-        )
+        project = serializer.validated_data['project']
 
-    def perform_update(self, serializer):
-        # Recalculate `total_number_of_days` when updating the report
+        # Find the Project Leader (pjld role) for the project
+        project_leader = project.proponents.filter(
+            role__code='pjld',
+            email=self.request.user.email
+            ).first()
+        
+        print(f"Project Leader: {project_leader}")  # Debugging Project Leader
+        print(f"Authenticated User: {self.request.user}")  # Log user making the request
+        
+        if not project_leader:
+            print(f"No Project Leader found for Project ID: {project.id}")  # Debug error case
+            raise ValueError("The authenticated user is not the Project Leader for this project.")
+
+        # Save the report with the Project Leader
         serializer.save(
-            total_number_of_days=serializer.validated_data['project'].attendance_templates.count()
+            submitted_by=project_leader,
+            total_number_of_days=project.attendance_templates.count()
         )
+        print("Accomplishment Report successfully created.")
+
+
 
 
 class PREXCAchievementCreateView(LoginRequiredMixin, CreateView):
@@ -995,10 +1067,10 @@ class ChecklistAssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = ChecklistAssignmentSerializer
     permission_classes = [IsAuthenticated]
     
-class AccomplishmentReportViewSet(viewsets.ModelViewSet):
-    queryset = AccomplishmentReport.objects.all()
-    serializer_class = AccomplishmentReportSerializer
-    permission_classes = [IsAuthenticated]
+# class AccomplishmentReportViewSet(viewsets.ModelViewSet):
+#     queryset = AccomplishmentReport.objects.all()
+#     serializer_class = AccomplishmentReportSerializer
+#     permission_classes = [IsAuthenticated]
 
 class PREXCAchievementViewSet(viewsets.ModelViewSet):
     queryset = PREXCAchievement.objects.all()

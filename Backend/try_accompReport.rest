@@ -1,13 +1,11 @@
-
-###
-# Test Endpoint for Accompolishment Report Submission
+### Create Accomplishment Report
 POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
-Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Content-Type: application/json
 
 {
-  "project": 1,
-  "banner_program_title": "Sample Banner Program",
+  "project": 1, 
+  "banner_program_title": "Try nga si Wyn",
   "flagship_program": "Sample Flagship Program",
   "training_modality": "Face to Face",
   "actualStartDateImplementation": "2024-01-01",
@@ -15,3 +13,31 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
   "prexc_achievement": null,
   "project_narrative": null
 }
+
+###
+# Test Endpoint for Accompolishment Report Submission
+POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
+Content-Type: application/json
+Authorization: Token 85a475256adb3504c8836ffdac14bcb71cef48ec
+
+{
+  "project": 2,
+  "banner_program_title": "PLEASE Dapat Wyn ang ProjLead",
+  "flagship_program": "Sample Flagship Program",
+  "training_modality": "Face to Face",
+  "actualStartDateImplementation": "2024-01-01",
+  "actualEndDateImplementation": "2024-01-05",
+  "prexc_achievement": null,
+  "project_narrative": null
+}
+
+
+###
+# Get Accomplishment Reports by User
+GET http://127.0.0.1:8000/monitoring/accomplishment_reports/
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+
+###
+# Delete Accomplishment Report by report ID
+DELETE http://127.0.0.1:8000/monitoring/accomplishment_reports/2/
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770

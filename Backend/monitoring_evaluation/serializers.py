@@ -58,6 +58,7 @@ class AccomplishmentReportSerializer(serializers.ModelSerializer):
     # project_location = serializers.CharField(source='project.projectLocationID', read_only=True)
     # partner_agency = serializers.StringRelatedField(source='project.agency', many=True, read_only=True)
     total_number_of_days = serializers.ReadOnlyField()
+    submitted_by = serializers.SerializerMethodField()
 
     class Meta:
         model = AccomplishmentReport
@@ -65,6 +66,11 @@ class AccomplishmentReportSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['submitted_by','total_number_of_days']
 
+    def get_submitted_by(self, obj):
+        if obj.submitted_by:
+            return f"{obj.submitted_by.firstname} {obj.submitted_by.lastname}"
+        return None
+    
     def validate(self, data):
         start_date = data.get('actualStartDateImplementation')
         end_date = data.get('actualEndDateImplementation')
