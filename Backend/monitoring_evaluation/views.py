@@ -982,7 +982,9 @@ class AccomplishmentReportViewSet(viewsets.ModelViewSet):
                     project__proponents=user, 
                     project__proponents__role__code='pjld'  
                 )
-            ).distinct()
+            ).distinct().prefetch_related(
+                'project__photo_documentations'
+            )
             print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
             return queryset
         print("User is not authenticated")
@@ -1027,6 +1029,13 @@ class AccomplishmentReportViewSet(viewsets.ModelViewSet):
         accomplishment_report.save()
         
         print("PREXC Achievement successfully created and linked.")
+
+    def retrieve(self, request, *args, **kwargs):
+        # Ensure approved photos are fetched dynamically
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
 
 
 

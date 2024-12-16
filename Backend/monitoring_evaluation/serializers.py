@@ -57,6 +57,7 @@ class AccomplishmentReportSerializer(serializers.ModelSerializer):
     total_number_of_days = serializers.ReadOnlyField()
     submitted_by = serializers.SerializerMethodField()
     project_narrative = ProjectNarrativeSerializer(required=True)
+    approved_photos = serializers.SerializerMethodField()
 
     class Meta:
         model = AccomplishmentReport
@@ -67,6 +68,12 @@ class AccomplishmentReportSerializer(serializers.ModelSerializer):
         if obj.submitted_by:
             return f"{obj.submitted_by.firstname} {obj.submitted_by.lastname}"
         return None
+    
+    def get_approved_photos(self, obj):
+        approved_photos = PhotoDocumentation.objects.filter(
+            project=obj.project, status="Approved"
+        )
+        return PhotoDocumentationSerializer(approved_photos, many=True).data
     
     def validate(self, data):
         start_date = data.get('actualStartDateImplementation')
