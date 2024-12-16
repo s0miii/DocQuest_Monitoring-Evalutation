@@ -11,44 +11,121 @@ const EStaffPREXC = () => {
         navigate(path);
     }
 
-    const [data, setData] = useState([
-        {
-            programNumbers: 1,
-            programPercent: 1,
-            facultyNumbers: 1,
-            facultyPercent: 1,
-            avgPercent: 1,
-            personsTrainedTarget: 1,
-            personsTrainedAccomp: 1,
-            personsTrainedVar: 1,
-            activePartnerTarget: 1,
-            activePartnerAccomp: 1,
-            activePartnerVar: 1,
-            percentOfBenefTarget: 1,
-            percentOfBenefAccomp: 1,
-            percentOfBenefVar: 1,
-            numOfExProgsTarget: 1,
-            numOfExProgsAccomp: 1,
-            numOfExProgsVar: 1,
-        },
-        
-    ]); // Array to hold input values for each row
+    // State to hold input values for JASAAN and CEA rows
+    const [rows, setRows] = useState({
+        CEA: Array(17).fill(""),
+        CITC: Array(17).fill(""),
+        CSM: Array(17).fill(""),
+        CSTE: Array(17).fill(""),
+        COT: Array(17).fill(""),
+        COM: Array(17).fill(""),
+        JASAAN: Array(17).fill(""),
+        PANAOAN: Array(17).fill(""),
+        OROQUIETA: Array(17).fill(""),
+        VILLANUEVA: Array(17).fill(""),
+        BALUBAL: Array(17).fill(""),
+        ALUBIJID: Array(17).fill(""),
+    });
 
+    // State to hold the user input for the "TOTAL" row's index 5
+    const [totalRowIndex5, setTotalRowIndex5] = useState(""); 
 
-    // Handle input change for each row
-    // const handleChange = (setData, inputs, index, e) => {
-    //     const rawValue = e.target.value;
+    // Function to handle input changes
+    const handleInputChange = (rowName, index, value) => {
+        setRows(prevRows => ({
+            ...prevRows,
+            [rowName]: prevRows[rowName].map((val, i) => (i === index ? value : val))
+        }));
+    };
 
-    //     // Allow only numeric values in the input
-    //     if (/^[0-9]*\.?[0-9]*$/.test(rawValue)) {
-    //     const updatedInputs = [...inputs];
-    //     updatedInputs[index] = rawValue; // Update the specific input for the row
-    //     setData(updatedInputs);
-    //     }
-    // };
+    // Function to calculate totals for the "TOTAL" row
+    const calculateTotal = (index, rowNames = ["CEA", "CITC", "CSM", "CSTE", "COT", "COM", "JASAAN", "PANAOAN", "OROQUIETA", "VILLANUEVA", "BALUBAL", "ALUBIJID"]) => {
+        if (index === 1) {
+            return rowNames
+                .map(rowName => parseFloat(calculatePercentage(rowName, 0, 0)) || 0)
+                .reduce((sum, val) => sum + val, 0)
+                .toFixed(2) + "%";
+        }
+        if (index === 3) {
+            return rowNames
+                .map(rowName => parseFloat(calculatePercentage(rowName, 2, 2)) || 0)
+                .reduce((sum, val) => sum + val, 0)
+                .toFixed(2) + "%";
+        }
+        if (index === 4) {
+            const totalPercentage = rowNames
+                .map(rowName => {
+                    const percentage1 = parseFloat(calculatePercentage(rowName, 0, 0)) || 0;
+                    const percentage2 = parseFloat(calculatePercentage(rowName, 2, 2)) || 0;
+                    return ((percentage1 + percentage2) / 2).toFixed(2);
+                })
+                .reduce((sum, val) => sum + parseFloat(val), 0); // Parse the strings back to numbers for summation
+        return totalPercentage.toFixed(2) + "%";
+        }
+        if (index === 5) {
+            return rowNames
+                .map(rowName => parseFloat(calculateIndex5(rowName)) || 0) // Ensure numeric values
+                .reduce((sum, val) => sum + val, 0) // Sum numeric results
+                .toFixed(2); // Format the total to two decimal points
+        }
+        if (index === 7) {
+            const total = rowNames
+                .map(rowName => {
+                    const index5 = parseFloat(calculateIndex5(rowName)) || 0;
+                    const index6 = parseFloat(rows[rowName][6]) || 0;
+                    return index5 - index6; // Perform the operation for each row
+                })
+                .reduce((sum, val) => sum + val, 0); // Sum the results
+            return total.toFixed(2); // Format the total to two decimal places
+        }
+        if (index === 10) {
+            return rowNames
+                .map(rowName => {
+                    const index9 = parseFloat(rows[rowName][9]) || 0;
+                    const index8 = parseFloat(rows[rowName][8]) || 0;
+                    return index9 - index8;
+                })
+                .reduce((sum, val) => sum + val, 0);
+        }
+        if (index >= 11 && index <= 13) {
+            return ""; // Blank cells for indexes 11 to 13
+        }
+        return rowNames
+            .map(rowName => parseFloat(rows[rowName][index]) || 0)
+            .reduce((sum, val) => sum + val, 0);
+    };
 
-    // Calculate the total sum of all inputs (convert to numbers)
-    // const totalInput = [...dataMain, ...dataSat].reduce((sum, value) => sum + (parseFloat(value) || 0), 0);
+    const calculatePercentage = (rowName, numeratorIndex, totalIndex) => {
+        const numerator = parseFloat(rows[rowName][numeratorIndex]) || 0;
+        const denominator = calculateTotal(totalIndex); // Use TOTAL row value
+        if (denominator === 0) return "0%";
+        return ((numerator / denominator) * 100).toFixed(2) + "%";
+    };
+
+    const calculatePercentageDecimal = (rowName) => {
+        // Get the numerator values for the required indices
+        const numerator1 = parseFloat(rows[rowName][0]) || 0; // First numerator (index 0)
+        const numerator2 = parseFloat(rows[rowName][2]) || 0; // Second numerator (index 2)
+    
+        // Get the denominator from the total (assumed to be index 0 for total row)
+        const denominator = calculateTotal(0); // This will get the "TOTAL" row value (index 0)
+    
+        // If the denominator is 0, return 0 to avoid division by zero
+        if (denominator === 0) return 0;
+    
+        // Calculate the sum of the two numerators and then divide by 2 (average)
+        const averageNumerator = (numerator1 + numerator2) / 2;
+    
+        // Convert the average to a decimal by dividing by the denominator and return
+        return (averageNumerator / denominator); // No need to multiply by 100, as we return a decimal
+    };
+    
+    const calculateIndex5 = (rowName) => {
+        const percentageDecimal = calculatePercentageDecimal(rowName); // Replace calculatePercentage for index 0
+        const totalIndex5Value = parseFloat(totalRowIndex5) || 0; // Validate TOTAL row index 5
+        if (!totalIndex5Value) return "0.00"; // Prevent invalid multiplication
+        return (percentageDecimal * totalIndex5Value).toFixed(2);
+    };
       
     return (
         <div className="flex min-h-screen bg-gray-200">
@@ -119,85 +196,553 @@ const EStaffPREXC = () => {
                             <tr class="bg-yellow-100 border-b border-gray-300">
                                 <td colspan="19" class="px-4 py-2 font-semibold text-left border-r border-gray-400">Cagayan de Oro Campus</td>
                             </tr>
-                            {data.map((row, index) => (
-                            <tr key={index} className="bg-white border-b border-gray-300">
+
+                            <tr className="bg-white border-b border-gray-300">
                                 <td className="px-4 py-2 text-left border-r border-gray-400">CEA</td>
-                                <td className="py-2 border-r border-gray-400 ">{row.programNumbers}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.programPercent}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.facultyNumbers}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.facultyPercent}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.avgPercent}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedTarget}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedAccomp}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedVar}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerTarget}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerAccomp}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerVar}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefTarget}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefAccomp}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefVar}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.numOfExProgsTarget}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.numOfExProgsAccomp}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.numOfExProgsVar}</td>
+                                {rows.CEA.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("CEA", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("CEA", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("CEA", 0, 0)) || 0) + (parseFloat(calculatePercentage("CEA", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("CEA")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("CEA")) || 0) - (parseFloat(rows.CEA[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("CEA", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
                             </tr>
-                            ))}
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">CITC</td>
+                                {rows.CITC.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("CITC", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("CITC", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("CITC", 0, 0)) || 0) + (parseFloat(calculatePercentage("CITC", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("CITC")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("CITC")) || 0) - (parseFloat(rows.CITC[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("CITC", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">CSM</td>
+                                {rows.CSM.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("CSM", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("CSM", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("CSM", 0, 0)) || 0) + (parseFloat(calculatePercentage("CSM", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("CSM")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("CSM")) || 0) - (parseFloat(rows.CSM[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("CSM", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">CSTE</td>
+                                {rows.CSTE.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("CSTE", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("CSTE", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("CSTE", 0, 0)) || 0) + (parseFloat(calculatePercentage("CSTE", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("CSTE")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("CSTE")) || 0) - (parseFloat(rows.CSTE[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("CSTE", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">COT</td>
+                                {rows.COT.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("COT", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("COT", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("COT", 0, 0)) || 0) + (parseFloat(calculatePercentage("COT", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("COT")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("COT")) || 0) - (parseFloat(rows.COT[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("COT", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">COM</td>
+                                {rows.COM.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("COM", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("COM", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("COM", 0, 0)) || 0) + (parseFloat(calculatePercentage("COM", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("COM")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("COM")) || 0) - (parseFloat(rows.COM[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("COM", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+
+                            <tr className="bg-blue-200 ">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">SUBTOTAL</td>
+                                {Array.from({ length: 17 }).map((_, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {calculateTotal(index, ["CEA", "CITC", "CSM", "CSTE", "COT", "COM"])}
+                                    </td>
+                                ))}
+                            </tr>
 
                             <tr class="bg-yellow-100 border-b border-gray-300">
                                 <td colspan="19" class="px-4 py-2 font-semibold text-left border-r border-gray-400">Satellite Campuses</td>
                             </tr>
 
-                            {/* {dataSat.map((row, index) => {
-                            // Calculate the percentage for this row, handling division by zero
-                            // let percentage = 0;
-                            // if (totalInput > 0) {
-                            //     percentage = (parseFloat(inputValue) || 0) / totalInput * 100;
-                            // }
-
-                            return (
-                            <tr key={index} className="bg-white border-b border-gray-300">
-                                <td className="px-4 py-2 text-left border-r border-gray-400">{row.campus}</td>
-                                <td className="py-2 border-r border-gray-400 ">{row.programNumbers}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.programPercent}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.facultyNumbers}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.facultyPercent}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedTarget}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedAccomp}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.personsTrainedVar}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerTarget}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerAccomp}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.activePartnerVar}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefTarget}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefAccomp}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">{row.percentOfBenefVar}</td>
-                                <td className="px-4 py-2 border-r border-gray-400">0</td>
-                                <td className="px-4 py-2 border-r border-gray-400">1</td>
-                                <td className="px-4 py-2 border-r border-gray-400">1</td>
-                                <td className="px-4 py-2">0</td>
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">JASAAN</td>
+                                {rows.JASAAN.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("JASAAN", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("JASAAN", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("JASAAN", 0, 0)) || 0) + (parseFloat(calculatePercentage("JASAAN", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("JASAAN")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("JASAAN")) || 0) - (parseFloat(rows.JASAAN[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("JASAAN", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
                             </tr>
-                            );
-                            })} */}
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">PANAOAN</td>
+                                {rows.PANAOAN.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("PANAOAN", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("PANAOAN", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("PANAOAN", 0, 0)) || 0) + (parseFloat(calculatePercentage("PANAOAN", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("PANAOAN")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("PANAOAN")) || 0) - (parseFloat(rows.PANAOAN[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("PANAOAN", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">OROQUIETA</td>
+                                {rows.OROQUIETA.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("OROQUIETA", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("OROQUIETA", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("OROQUIETA", 0, 0)) || 0) + (parseFloat(calculatePercentage("OROQUIETA", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("OROQUIETA")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("OROQUIETA")) || 0) - (parseFloat(rows.OROQUIETA[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("OROQUIETA", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">VILLANUEVA</td>
+                                {rows.VILLANUEVA.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("VILLANUEVA", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("VILLANUEVA", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("VILLANUEVA", 0, 0)) || 0) + (parseFloat(calculatePercentage("VILLANUEVA", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("VILLANUEVA")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("VILLANUEVA")) || 0) - (parseFloat(rows.VILLANUEVA[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("VILLANUEVA", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">BALUBAL</td>
+                                {rows.BALUBAL.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("BALUBAL", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("BALUBAL", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("BALUBAL", 0, 0)) || 0) + (parseFloat(calculatePercentage("BALUBAL", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("BALUBAL")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("BALUBAL")) || 0) - (parseFloat(rows.BALUBAL[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("BALUBAL", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                            <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">ALUBIJID</td>
+                                {rows.ALUBIJID.map((value, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {index === 1 ? (
+                                            <span>
+                                                {calculatePercentage("ALUBIJID", 0, 0)}
+                                            </span>
+                                        ) : index === 3 ? (
+                                            <span>
+                                                {calculatePercentage("ALUBIJID", 2, 2)}
+                                            </span>
+                                        ) : index === 4 ? (
+                                            // Calculate index 4 as the average of index 1 and index 3
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculatePercentage("ALUBIJID", 0, 0)) || 0) + (parseFloat(calculatePercentage("ALUBIJID", 2, 2)) || 0)
+                                                ) / 2 + "%"}
+                                            </span>
+                                        ) : index === 5 ? (
+                                            <span>{calculateIndex5("ALUBIJID")}</span>
+                                        ) : index === 7 ? (
+                                            <span>
+                                                {(
+                                                    (parseFloat(calculateIndex5("ALUBIJID")) || 0) - (parseFloat(rows.ALUBIJID[6]) || 0)
+                                                ).toFixed(2)}
+                                            </span>
+                                        ) : index === 10 ? (
+                                            <span></span>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="w-full px-2 py-1 text-center border border-gray-300 rounded"
+                                                value={value}
+                                                onChange={(e) =>
+                                                    handleInputChange("ALUBIJID", index, e.target.value)
+                                                }
+                                            />
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+
+                            <tr className="bg-blue-200 ">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">SUBTOTAL</td>
+                                {Array.from({ length: 17 }).map((_, index) => (
+                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                        {calculateTotal(index, ["JASAAN", "PANAOAN", "OROQUIETA", "VILLANUEVA", "BALUBAL", "ALUBIJID"])}
+                                    </td>
+                                ))}
+                            </tr>
 
                             {/* <!-- Example Row: Total --> */}
-                            <tr class="bg-blue-800 text-white font-bold">
-                                <td class="px-4 py-2 border-r border-gray-400">TOTAL</td>
-                                <td class="px-4 py-2 border-r border-gray-400">50</td>
-                                <td class="px-4 py-2 border-r border-gray-400">100%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">285</td>
-                                <td class="px-4 py-2 border-r border-gray-400">100%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">100%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">8,500.00</td>
-                                <td class="px-4 py-2 border-r border-gray-400">1,117.20</td>
-                                <td class="px-4 py-2 border-r border-gray-400">7,208.33</td>
-                                <td class="px-4 py-2 border-r border-gray-400">11</td>
-                                <td class="px-4 py-2 border-r border-gray-400">10</td>
-                                <td class="px-4 py-2 border-r border-gray-400">(1)</td>
-                                <td class="px-4 py-2 border-r border-gray-400">99%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">99%</td>
-                                <td class="px-4 py-2 border-r border-gray-400">0</td>
-                                <td class="px-4 py-2 border-r border-gray-400">11</td>
-                                <td class="px-4 py-2 border-r border-gray-400">3</td>
-                                <td class="px-4 py-2">(8)</td>
-                            </tr>
+                            <tr className="font-bold text-white bg-blue-800">
+                                                <td className="px-4 py-2 border-r border-gray-400">TOTAL</td>
+                                                {Array.from({ length: 17 }).map((_, index) => (
+                                                    <td key={index} className="px-4 py-2 border-r border-gray-400">
+                                                        {index === 5 ? (
+                                                            // User input for TOTAL row's index 5
+                                                            <input
+                                                                type="text"
+                                                                value={totalRowIndex5}
+                                                                onChange={(e) => setTotalRowIndex5(e.target.value)}
+                                                                className="w-full px-2 py-1 text-center bg-blue-800 border rounded"
+                                                                placeholder=""
+                                                            />
+                                                        ) : (calculateTotal(index))}
+                                                    </td>
+                                                ))}
+                                            </tr>
                             </tbody>
                             </div>
                         </table>
@@ -211,3 +756,24 @@ const EStaffPREXC = () => {
 };
 
 export default EStaffPREXC;
+
+{/* <tr className="bg-white border-b border-gray-300">
+                                <td className="px-4 py-2 text-left border-r border-gray-400">CEA</td>
+                                <td className="py-2 border-r border-gray-400 "></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                                <td className="px-4 py-2 border-r border-gray-400"></td>
+                            </tr> */}

@@ -32,7 +32,7 @@ import StaffLecNotes from "./pages/estaff/StaffLecNotes";
 import StaffPhotoDocs from "./pages/estaff/StaffPhotoDocs";
 import StaffOthers from "./pages/estaff/StaffOthers";
 import EStaffProjReq from "./pages/estaff/EStaffProjReq";
-import EstaffTrainerCVDTR from "./pages/estaff/EstaffTrainersCVDTR";
+// import EstaffTrainerCVDTR from "./pages/estaff/EstaffTrainersCVDTR";
 import EStaffOP1OP3 from "./pages/estaff/EStaffOP1OP3";
 import EStaffPREXC from "./pages/estaff/EStaffPREXC";
 import ProponentsProjects from "./pages/proponents/ProjectsDashboard"
@@ -66,7 +66,7 @@ function App() {
       <Route path="/estaff" element={<EstaffDashboard />} />
       <Route path="/estaff/prexc/op1-op3" element={<EStaffOP1OP3 />} />
       <Route path="/estaff/prexc/performance" element={<EStaffPREXC />} />
-      <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR />} />
+      {/* <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR />} /> */}
       <Route path="/estaff/projreq/:projectID" element={<EStaffProjReq />} />
       <Route path="/staff-projects-dashboard" element={<StaffProjectsDashboard />} />
       <Route path="/staff/project/:projectID/daily-attendance" element={<StaffDailyAttRec />} />
