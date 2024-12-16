@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 import dj_database_url
+import environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+6q5l+09zwkn(pp%p0i^mejaiy$3u&9v#!n#7dguz3gwk4=4=m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -33,6 +34,13 @@ ALLOWED_HOSTS = [
     'docquest-production.up.railway.app',
     'docquest-monitoring-evalutation.onrender.com',
 ]
+
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+
+DEBUG = env.bool("DEBUG", default=False)
+
+DEVELOPMENT_MODE = env.bool("DEVELOPMENT_MODE", default=False)
 
 
 # Application definition
@@ -102,18 +110,38 @@ ASGI_APPLICATION = 'docquest.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / "db.sqlite3",
-    # }
+# DATABASES = {
+#     # 'default': {
+#     #     'ENGINE': 'django.db.backends.sqlite3',
+#     #     'NAME': BASE_DIR / "db.sqlite3",
+#     # }
 
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True  # Forces SSL connection
-    )
-}
+#     'default': dj_database_url.config(
+#         default=os.environ.get('DATABASE_URL'),
+#         conn_max_age=600,
+#         ssl_require=True  # Forces SSL connection
+#     )
+# }
+
+if DEVELOPMENT_MODE:
+    # SQLite for local development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    # Use DATABASE_URL for production
+    DATABASE_URL = env("DATABASE_URL", default=None)
+    if DATABASE_URL:
+        DATABASES = {
+            "default": dj_database_url.parse(
+                DATABASE_URL, conn_max_age=600, ssl_require=True
+            )
+        }
+    else:
+        raise Exception("DATABASE_URL environment variable not defined")
 
 
 # Password validation
