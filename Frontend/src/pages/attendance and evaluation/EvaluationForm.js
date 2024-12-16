@@ -158,8 +158,8 @@ const EvaluationForm = () => {
         <div className="flex flex-col items-center justify-center min-h-screen bg-cover bg-fixed" style={{ backgroundImage: `url("${process.env.PUBLIC_URL}/images/bg-login3.png")` }}>
             <div className="bg-white shadow overflow-hidden sm:rounded-lg max-w-xl w-full p-8">
                 <h1 className="text-2xl font-bold text-center mb-6">Extension Activity Evaluation Form</h1>
-                <div className="bg-blue-500 p-3 rounded mb-4">
-                    <h3 className="text-black-600 font-bold">Personal Information</h3>
+                <div className="bg-blue-800 p-3 rounded mb-4">
+                    <h3 className="text-white font-bold">Personal Information</h3>
                 </div>
                 {!isSubmitted && (
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -175,8 +175,8 @@ const EvaluationForm = () => {
                             />
                         </div>
                         
-                        <div className="bg-blue-500 p-3 rounded">
-                            <h3 className="text-black-600 font-bold">Instructions</h3>
+                        <div className="bg-blue-800 p-3 rounded">
+                            <h3 className="text-white font-bold">Instructions</h3>
                         </div>
 
                         <div className="p-4 bg-gray-100 rounded">
@@ -257,7 +257,7 @@ const EvaluationForm = () => {
                             />
                         </div>
                         
-                        <button type="submit" disabled={isLoading} className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline">
+                        <button type="submit" disabled={isLoading} className="w-full bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline">
                             Submit Evaluation
                         </button>
                     </form>

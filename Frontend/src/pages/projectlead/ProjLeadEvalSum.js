@@ -531,7 +531,7 @@ const ProjLeadEvalSum = () => {
                                                                 href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="block text-center text-blue-600 truncate hover:underline"
+                                                                className="block text-center text-blue-900 truncate hover:underline"
                                                             >
                                                                 {submission.file_name || "No File"}
                                                             </a>
@@ -680,7 +680,7 @@ const ProjLeadEvalSum = () => {
                                 <button
                                     type="button"
                                     onClick={handleSubmit}
-                                    className="px-12 py-2 font-bold text-white transition bg-blue-500 rounded-lg hover:bg-blue-600"
+                                    className="px-12 py-2 font-bold text-white transition bg-blue-900 rounded-lg hover:bg-blue-900"
                                 >
                                     Submit
                                 </button>
@@ -885,7 +885,7 @@ const ProjLeadEvalSum = () => {
                                     <div className="mt-4 text-center">
                                         <button
                                             type="submit"
-                                            className="px-6 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+                                            className="px-6 py-2 text-white transition-colors bg-blue-900 rounded-lg hover:bg-blue-700"
                                         >
                                             Generate Link
                                         </button>
