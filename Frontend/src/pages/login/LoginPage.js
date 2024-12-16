@@ -12,7 +12,11 @@ const LoginPage = () => {
   const [lastname, setLastname] = useState('');
   const [roles, setRoles] = useState([]);
 
-  const API_URL = process.env.REACT_APP_API_URL;
+  // deployed
+  // const API_URL = process.env.REACT_APP_API_URL;
+
+  // local
+  const API_URL = 'http://127.0.0.1:8000/';
 
   // New error state
   const [error, setError] = useState('');

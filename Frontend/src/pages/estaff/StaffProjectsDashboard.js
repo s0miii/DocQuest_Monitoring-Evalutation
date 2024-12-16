@@ -9,13 +9,13 @@ const StaffProjectsDashboard = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
     const [projects, setProjects] = useState([]);
-    const [progress, setProgress] = useState({});
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const projectsPerPage = 5;
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+    const [filter, setFilter] = useState("Ongoing"); // Default to Ongoing projects
     const [error, setError] = useState(null);
+    const pageSize = 5; // Define the page size
 
     useEffect(() => {
         if (!token) {
@@ -33,79 +33,61 @@ const StaffProjectsDashboard = () => {
         }
     }, [token, navigate]);
 
+    const fetchProjects = async () => {
+        try {
+            let allProjects = [];
+            let page = 1;
+            let totalPages = 1;
+
+            // Fetch data from all pages
+            do {
+                const response = await axios.get(
+                    `http://127.0.0.1:8000/monitoring/staff-projects/?page=${page}&page_size=${pageSize}`,
+                    {
+                        headers: {
+                            'Authorization': `Token ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+
+                const { data, meta } = response.data;
+
+                // Combine current page data into allProjects
+                allProjects = [...allProjects, ...data];
+                totalPages = meta.total_pages;
+                page += 1; // Move to the next page
+            } while (page <= totalPages);
+
+            // Update the projects state with all fetched projects
+            setProjects(allProjects.map((project) => ({
+                ...project,
+                isCompleted: project.progress >= 100, // Mark completion status
+            })));
+            setError(null); // Clear any previous errors
+        } catch (error) {
+            console.error("Error fetching projects:", error);
+            setError(error.message || "Failed to fetch projects");
+            setProjects([]);
+        } finally {
+            setLoading(false); // Stop the loading spinner
+        }
+    };
+
     useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const response = await axios({
-                    method: "get",
-                    url: "http://127.0.0.1:8000/monitoring/staff-projects/",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                });
+        fetchProjects(currentPage); // Fetch projects when the component loads or page changes
+    }, [currentPage]);
 
-                if (!Array.isArray(response.data)) {
-                    console.error("Invalid data structure received:", response.data);
-                    setError("Invalid data format received from server");
-                    setProjects([]);
-                    return;
-                }
-
-                const formattedProjects = response.data.map((proj) => ({
-                    projectID: proj.projectID || "N/A",
-                    projectTitle: proj.projectTitle || "Untitled Project",
-                    projectLeader: proj.projectLeader || "N/A",
-                    targetImplementation: proj.targetImplementation || "N/A",
-                }));
-
-                setProjects(formattedProjects);
-                setError(null);
-
-                // Fetch progress for each project
-                fetchProjectProgress(formattedProjects);
-            } catch (error) {
-                console.error("Error fetching projects:", error);
-                setError(error.message || "Failed to fetch projects");
-                setProjects([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchProjectProgress = async (projects) => {
-            try {
-                const progressData = {};
-                for (const project of projects) {
-                    const response = await axios.get(
-                        `http://127.0.0.1:8000/monitoring/project/${project.projectID}/progress/`,
-                        {
-                            headers: {
-                                Authorization: `Token ${token}`,
-                            },
-                        }
-                    );
-                    progressData[project.projectID] = response.data.progress || 0;
-                }
-                setProgress(progressData); // Update progress state
-            } catch (error) {
-                console.error("Error fetching project progress:", error);
-            }
-        };
-
-        fetchProjects();
-    }, [token]);
-
-    // Filter projects
-    const filteredProjects = projects.filter((project) =>
-        project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Pagination logic
-    const indexOfLastProject = currentPage * projectsPerPage;
-    const indexOfFirstProject = indexOfLastProject - projectsPerPage;
-    const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
-    const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
+    const handleViewClick = (project) => {
+        const roles = JSON.parse(localStorage.getItem("roles")) || [];
+        if (roles.includes("estf")) {
+            navigate(`/estaff/projreq/${project.projectID}`);
+        } else if (roles.includes("coord")) {
+            navigate(`/coord/proj/${project.projectID}`);
+        } else {
+            alert("Unknown role or unauthorized access.");
+        }
+    };
 
     const handlePageChange = (newPage) => {
         if (newPage > 0 && newPage <= totalPages) {
@@ -113,6 +95,7 @@ const StaffProjectsDashboard = () => {
         }
     };
 
+    // Handle sorting
     const handleSort = (key) => {
         let direction = "asc";
         if (sortConfig.key === key && sortConfig.direction === "asc") {
@@ -128,6 +111,92 @@ const StaffProjectsDashboard = () => {
 
         setProjects(sortedProjects);
     };
+
+    const renderPagination = () => {
+        const paginationButtons = [];
+
+        // Previous Button
+        if (currentPage > 1) {
+            paginationButtons.push(
+                <button
+                    key="prev"
+                    className="px-3 py-1 border rounded hover:bg-gray-200"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                >
+                    Previous
+                </button>
+            );
+        }
+
+        // Current Page, Previous, and Next Buttons
+        if (currentPage > 1) {
+            paginationButtons.push(
+                <button
+                    key={currentPage - 1}
+                    className="px-3 py-1 border rounded hover:bg-gray-200"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                >
+                    {currentPage - 1}
+                </button>
+            );
+        }
+
+        paginationButtons.push(
+            <button
+                key={currentPage}
+                className="px-3 py-1 border rounded bg-gray-300 font-bold"
+                disabled
+            >
+                {currentPage}
+            </button>
+        );
+
+        if (currentPage < totalPages) {
+            paginationButtons.push(
+                <button
+                    key={currentPage + 1}
+                    className="px-3 py-1 border rounded hover:bg-gray-200"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                >
+                    {currentPage + 1}
+                </button>
+            );
+        }
+
+        // Next Button
+        if (currentPage < totalPages) {
+            paginationButtons.push(
+                <button
+                    key="next"
+                    className="px-3 py-1 border rounded hover:bg-gray-200"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                >
+                    Next
+                </button>
+            );
+        }
+
+        return paginationButtons;
+    };
+
+    // Filter projects by "Completed" or "Ongoing" and apply search term
+    const filteredProjects = projects
+        .filter((project) => {
+            if (filter === "Completed") {
+                return project.isCompleted;
+            }
+            return !project.isCompleted;
+        })
+        .filter((project) =>
+            project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+    // Calculate pagination details after defining filteredProjects
+    const totalPages = Math.ceil(filteredProjects.length / pageSize);
+    const currentProjects = filteredProjects.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
 
     if (loading) {
         return (
@@ -150,24 +219,34 @@ const StaffProjectsDashboard = () => {
                     <h1 className="text-2xl font-semibold mb-5">Projects Overview</h1>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-10">
                         {/* Completed */}
-                        <div className="bg-green-500 text-white rounded-lg p-6 flex flex-col items-center justify-center">
+                        <div
+                            className={`bg-green-500 text-white rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer ${filter === "Completed" ? "ring-4 ring-green-700" : ""}`}
+                            onClick={() => setFilter("Completed")}
+                        >
                             <h2 className="text-lg font-semibold">Completed</h2>
-                            <h2 className="text-4xl font-bold">
-                                {projects.filter((project) => progress[project.projectID] === 100).length}
+                            <h2 className="text-4xl font-bold mt-2 underline">
+                                {projects.filter((p) => p.isCompleted).length}
                             </h2>
+
                         </div>
                         {/* Ongoing */}
-                        <div className="bg-yellow-400 text-white rounded-lg p-6 flex flex-col items-center justify-center">
+                        <div
+                            className={`bg-yellow-400 text-white rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer ${filter === "Ongoing" ? "ring-4 ring-yellow-700" : ""}`}
+                            onClick={() => setFilter("Ongoing")}
+                        >
                             <h2 className="text-lg font-semibold">Ongoing</h2>
-                            <h2 className="text-4xl font-bold">
-                                {projects.filter((project) => progress[project.projectID] < 100).length}
+                            <h2 className="text-4xl font-bold mt-2 underline">
+                                {projects.filter((p) => !p.isCompleted).length}
                             </h2>
+
                         </div>
                     </div>
 
                     {/* Projects Table */}
                     <h1 className="text-2xl font-semibold mb-5">Projects</h1>
                     <div className="bg-white shadow-lg rounded-lg p-6">
+
+                        {/* Search Bar */}
                         <div className="flex items-center bg-gray-100 p-3 rounded-lg mb-6 max-w-sm mx-auto">
                             <FaSearch className="text-gray-500 mx-3" />
                             <input
@@ -207,53 +286,38 @@ const StaffProjectsDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {currentProjects.map((project) => (
-                                        <tr key={project.projectID}>
-                                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-300">{project.projectTitle}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center border-b border-gray-300">{project.projectLeader}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center border-b border-gray-300">{project.targetImplementation}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center border-b border-gray-300">
-                                                {progress[project.projectID]
-                                                    ? Number.isInteger(progress[project.projectID])
-                                                        ? `${progress[project.projectID]}%`
-                                                        : `${progress[project.projectID].toFixed(2)}%`
-                                                    : "0%"}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-300">
-                                                <button
-                                                    className="text-blue-500 hover:underline"
-                                                    onClick={() => {
-                                                        const roles = JSON.parse(localStorage.getItem("roles")) || []; // Fetch roles from local storage
-                                                        if (roles.includes("estf")) {
-                                                            navigate(`/estaff/projreq/${project.projectID}`);
-                                                        } else if (roles.includes("coord")) {
-                                                            navigate(`/coord/proj/${project.projectID}`);
-                                                        } else {
-                                                            alert("Unknown role or unauthorized access.");
-                                                        }
-                                                    }}
-                                                >
-                                                    View
-                                                </button>
+                                    {currentProjects.length > 0 ? (
+                                        currentProjects.map((project) => (
+                                            <tr key={project.projectID}>
+                                                <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-center">{project.projectLeader}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-center">{project.targetImplementation}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                    <button
+                                                        className="text-blue-500 hover:underline"
+                                                        onClick={() => handleViewClick(project)}
+                                                    >
+                                                        View
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                                                No projects found. Try changing the filter or search term.
                                             </td>
                                         </tr>
-                                    ))}
+                                    )}
                                 </tbody>
                             </table>
                         </div>
 
                         {/* Pagination */}
-                        <div className="mt-4 flex justify-between items-center">
-                            <div>Showing page {currentPage} out of {totalPages}</div>
-                            <div className="flex space-x-2">
-                                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-                                    Previous
-                                </button>
-                                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-                                    Next
-                                </button>
-                            </div>
+                        <div className="mt-4 flex justify-center items-center space-x-2">
+                            {filteredProjects.length > 0 && renderPagination()}
                         </div>
+
                     </div>
                 </div>
             </div>

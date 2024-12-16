@@ -51,6 +51,8 @@ const Topbar = () => {
         return 'Project Leader';
       } else if (role === 'ppnt') {
         return 'Proponent';
+      } else if (role === 'estf') {
+        return 'Estaff';
       } else if (role === 'prch') {
         return 'Program Chair';
       } else if (role === 'cldn') {

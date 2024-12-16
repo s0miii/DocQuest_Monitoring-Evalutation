@@ -120,7 +120,7 @@ class UserProjectsView(APIView):
             # Fetch projects and prefetch related data
             projects = Project.objects.filter(
                 Q(userID=user) | Q(proponents__userID=user.userID),
-                status__in=["approved", "pending"]
+                status__in=["approved"]
             ).distinct().prefetch_related('proponents')
 
             combined_projects = []
@@ -213,9 +213,45 @@ class StaffProjectsView(APIView):
                     "role": role,
                 })
 
-            return Response(combined_projects, status=200)
+            # Pagination logic
+            try:
+                page = int(request.GET.get('page', 1))
+                if page < 1:
+                    raise ValueError
+            except ValueError:
+                return Response({"error": "Invalid page number"}, status=status.HTTP_400_BAD_REQUEST)
+
+            page_size = min(int(request.GET.get('page_size', 5)), 100)  # Limit max page size
+            paginator = Paginator(combined_projects, page_size)
+
+            try:
+                paginated_projects = paginator.page(page)
+            except EmptyPage:
+                paginated_projects = []
+                return Response({
+                    "data": [],
+                    "meta": {
+                        "total_pages": paginator.num_pages,
+                        "current_page": int(page),
+                        "total_items": paginator.count,
+                    },
+                }, status=status.HTTP_200_OK)
+            
+            return Response({
+                "data": paginated_projects.object_list,
+                "meta": {
+                    "total_pages": paginator.num_pages,
+                    "current_page": int(page),
+                    "total_items": paginator.count,
+                },
+            }, status=status.HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            logger.error(f"Error in StaffProjectsView: {str(e)}")
+            return Response(
+                {"error": "An internal server error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     
 # Proponent Project Details
@@ -763,6 +799,7 @@ class AssignChecklistItemsView(APIView):
                     defaults={
                         "can_submit_daily_attendance": checklist_items.get("daily_attendance", False),
                         "can_submit_summary_of_evaluation": checklist_items.get("summary_of_evaluation", False),
+                        "can_submit_trainer_cv_dtr": checklist_items.get("trainer_cv_dtr", False),
                         "can_submit_modules_lecture_notes": checklist_items.get("lecture_notes", False),
                         "can_submit_other_files": checklist_items.get("other_files", False),
                         "can_submit_photo_documentation": checklist_items.get("photo_documentation", False),
@@ -786,22 +823,22 @@ class AssignChecklistItemsView(APIView):
 def get_proponent_checklist(request, project_id):
     try:
         # Fetch the project and related proponents
-        project = Project.objects.get(id=project_id)
+        project = Project.objects.get(projectID=project_id)
         proponents = project.proponents.all()
 
         # Fetch the checklist assignments for each proponent in the project
         data = []
         for proponent in proponents:
-            assignments = ChecklistAssignment.objects.filter(project=project, proponent=proponent)
+            assignments = ChecklistAssignment.objects.filter(project=project, proponent=proponent).first()
             checklist = {
-                "id": proponent.id,
-                "name": proponent.name,  # Adjust according to your user model
-                "daily_attendance": assignments.filter(item="daily_attendance").exists(),
-                "summary_of_evaluation": assignments.filter(item="summary_of_evaluation").exists(),
-                "trainer_cv_dtr": assignments.filter(item="trainer_cv_dtr").exists(),
-                "lecture_notes": assignments.filter(item="lecture_notes").exists(),
-                "other_files": assignments.filter(item="other_files").exists(),
-                "photo_documentation": assignments.filter(item="photo_documentation").exists(),
+                "id": proponent.userID,
+                "name": f"{proponent.firstname} {proponent.lastname}",
+                "daily_attendance": getattr(assignments, "can_submit_daily_attendance", False),
+                "summary_of_evaluation": getattr(assignments, "can_submit_summary_of_evaluation", False),
+                "trainer_cv_dtr": getattr(assignments, "can_submit_trainer_cv_dtr", False),
+                "lecture_notes": getattr(assignments, "can_submit_modules_lecture_notes", False),
+                "other_files": getattr(assignments, "can_submit_other_files", False),
+                "photo_documentation": getattr(assignments, "can_submit_photo_documentation", False),
             }
             data.append(checklist)
 
@@ -811,6 +848,9 @@ def get_proponent_checklist(request, project_id):
         return JsonResponse({"error": "Project not found"}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+
 
 ## View checklist assignments by project
 @role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
