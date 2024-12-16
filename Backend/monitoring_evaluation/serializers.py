@@ -93,9 +93,10 @@ class EvaluationSerializer(serializers.ModelSerializer):
 
         return data
 class EvaluationSharableLinkSerializer(serializers.ModelSerializer):
+    trainer_name = serializers.CharField(source="trainer.faculty", default="No trainer assigned", read_only=True)
     class Meta:
         model = EvaluationSharableLink
-        fields = ['trainer', 'project', 'expiration_date', 'token', 'sharable_link']
+        fields = ['id', 'trainer_name', 'project', 'expiration_date', 'token', 'sharable_link']
 
     def create(self, validated_data):
         # You can add custom creation logic here if needed

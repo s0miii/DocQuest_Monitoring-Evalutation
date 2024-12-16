@@ -192,22 +192,42 @@ const ProjLeadProjReq = () => {
                     <div className="assigned-requirements">
                         <div className="bg-white shadow-lg rounded-lg p-6">
                             <div className="space-y-4 text-lg">
-                                {Object.entries(documentCounts).map(([itemName, count]) => (
-                                    <div key={itemName} className="flex justify-between items-center">
-                                        <div>
-                                            <p>{itemName}</p>
-                                            <p className="text-gray-500 text-base">
-                                                {count} document(s) attached
-                                            </p>
-                                        </div>
-                                        <button
-                                            className="text-blue-500 hover:underline"
-                                            onClick={() => handleViewClick(`/projlead/project/${projectID}/${itemName.replace(/\s+/g, '-').toLowerCase()}`)}
-                                        >
-                                            View
-                                        </button>
+                                {/* Manually Add Accomplishment Report */}
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p>Accomplishment Report</p>
+                                        <p className="text-gray-500 text-base">
+                                            {documentCounts["Accomplishment Report"] || 0} document(s) attached
+                                        </p>
                                     </div>
-                                ))}
+                                    <button
+                                        className="text-blue-500 hover:underline"
+                                        onClick={() => handleViewClick(`/projlead/project/${projectID}/accomplishment-report`)}
+                                    >
+                                        View
+                                    </button>
+                                </div>
+
+                                {/* Render Remaining Requirements Dynamically */}
+                                {Object.entries(documentCounts).map(([itemName, count]) => {
+                                    if (itemName === "Accomplishment Report") return null; // Skip if already added
+                                    return (
+                                        <div key={itemName} className="flex justify-between items-center">
+                                            <div>
+                                                <p>{itemName}</p>
+                                                <p className="text-gray-500 text-base">
+                                                    {count} document(s) attached
+                                                </p>
+                                            </div>
+                                            <button
+                                                className="text-blue-500 hover:underline"
+                                                onClick={() => handleViewClick(`/projlead/project/${projectID}/${itemName.replace(/\s+/g, '-').toLowerCase()}`)}
+                                            >
+                                                View
+                                            </button>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

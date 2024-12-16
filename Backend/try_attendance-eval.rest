@@ -31,7 +31,7 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 GET http://127.0.0.1:8000/monitoring/evaluation/1/generate_evaluation_url/?project_id=1
 #GET http://127.0.0.1:8000/evaluation/<trainer_id>/generate_evaluation_url/?project_id=<project_id>
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 ###
 
@@ -73,9 +73,9 @@ Content-Type: application/json
 ###
 
 # Get Evaluation Details for a Trainer
-GET http://127.0.0.1:8000/evaluation/1/
+GET http://127.0.0.1:8000/evaluation/6/
 Content-Type: application/json
-Authorization: Token <auth-token>
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 ###
 
@@ -328,7 +328,7 @@ Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 
 {
-    "trainer_id": 1,
+    "trainer_id": 6,
     "project_id": 9,
     "expiration_date": "2024-12-31"
 }
@@ -337,26 +337,25 @@ Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 # Retrieve All Evaluation Sharable Links - working
 GET http://127.0.0.1:8000/monitoring/evaluation_links/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 
 ###
 # Retrieve Sharable Link Details Using Token
 # GET http://127.0.0.1:8000/monitoring/evaluation/fill/TOKEN_HERE/
-GET http://127.0.0.1:8000/monitoring/evaluation/fill/OjPqwN6XCp_1k_Xc152FGg/
+GET http://127.0.0.1:8000/monitoring/evaluation/fill/vxGWWYb56JM0W_a6nS7Y-w/
 Content-Type: application/json
-Authorization: Token d4da95e14d23aa86a54db20401f3850b96d94793
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 
 
 ###
 # Submit Evaluation Form Using Sharable Link - Public Endpoint
 # POST http://127.0.0.1:8000/monitoring/evaluation/fill/<TOKEN>/
-POST http://127.0.0.1:8000/monitoring/evaluation/fill/OjPqwN6XCp_1k_Xc152FGg/
+POST http://127.0.0.1:8000/monitoring/evaluation/fill/t1dOIzlV6gn5JOPWSoKDug/
 Content-Type: application/json
 
 {
-    
     "attendee_name": "Anthony Jennings",
     "relevance_of_topics": 5,
     "organizational_flow": 4,
@@ -382,12 +381,12 @@ Content-Type: application/json
 ### Get All Evaluations - working
 GET http://127.0.0.1:8000/monitoring/evaluations/
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 ### Filter Evaluations - working filter
-GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=2&project=3
+GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=6&project=9
 Content-Type: application/json
-Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 ### Search Evaluations by Trainer Name or Project Title - working
 GET http://127.0.0.1:8000/monitoring/evaluations/?search=Maris
@@ -398,15 +397,17 @@ Authorization: Token 8800e2c398d598c0f71677d95be49a9e6d72973c
 
 
 #########################
-### Generate Sharable Link for Evaluation
+### Generate Sharable Link for Evaluation - GenEvalview (API)
 # Remove trainer field for projects without trainers
-POST http://127.0.0.1:8000/monitoring/evaluation_links/
+# POST http://127.0.0.1:8000/monitoring/evaluation_links/
+POST http://127.0.0.1:8000/monitoring/generate_evaluation_link/
 Content-Type: application/json
-Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
+Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+
 
 {
-    "trainer_id": 1,
-    "project_id": 2,
+    "trainer_id": 3,
+    "project_id": 1,
     "expiration_date": "2024-12-31"
 }
 
@@ -417,11 +418,19 @@ Content-Type: application/json
 Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 
 ###
+# Retrieve All Evaluation Sharable Links - PER PROJECT
+# GET http://127.0.0.1:8000/monitoring/evaluation_links/?project=<project_id>
+GET http://127.0.0.1:8000/monitoring/evaluation_links/?project=9
+Content-Type: application/json
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
+
+
+###
 # Retrieve Specific Evaluation Sharable Link by ID
 # sharable link id ang last
-GET http://127.0.0.1:8000/monitoring/evaluation_links/{id}/
+GET http://127.0.0.1:8000/monitoring/evaluation_links/20/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 ###
 # Submit and Evaluation
@@ -451,12 +460,13 @@ Content-Type: application/json
     "additional_comments": "Thank you for the informative session!"
 }
 
-###
+### 
+#evaluation report per trainer
 # Retrieve All Submitted Evaluations
 #  last kay /?trainer=1&project=2
-GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=3&project=1
+GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=6&project=9
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 ###
 # Retrieve All Submitted Evaluations
@@ -469,9 +479,9 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 ###
 # Retrieve Specific Evaluation
 # eval id ang last
-GET http://127.0.0.1:8000/monitoring/evaluations/{id}/
+GET http://127.0.0.1:8000/monitoring/evaluation_links/20/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 
 
@@ -480,7 +490,7 @@ Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
 ### Retrieve Evaluation Summary for a Project
 GET http://127.0.0.1:8000/monitoring/project/2/evaluation_summary/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
 
 # Replace {project_id} with the ID of the project you want to get the evaluation summary for.
 
