@@ -149,7 +149,7 @@ const ProjLeadEvalSum = () => {
             const token = localStorage.getItem("token");
             if (!projectID || !token) {
                 console.error("Project ID is undefined or user is not logged in.");
-                setTrainers([]); // Ensures trainers is always an array
+                setTrainers([]); 
                 return;
             }
     

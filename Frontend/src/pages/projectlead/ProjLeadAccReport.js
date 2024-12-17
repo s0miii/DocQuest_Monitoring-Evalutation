@@ -286,163 +286,10 @@ const ProjLeadAccReport = () => {
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Accomplishment Report</h1>
-                    </div>
-
-                    {/* Project Details */}
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">
-                            Project Details
-                        </h2>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Project Title
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.projectTitle}
-                                </p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Project Leader
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.projectLeader}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4 mt-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    College/Campus
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.college}
-                                </p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Target Date
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.targetDate}
-                                </p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Partner Agency
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.partnerAgency}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Submitted Files Section */}
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <div
-                            className="overflow-y-auto"
-                            style={{
-                                maxHeight: "300px", // Limit the table height
-                            }}
-                        >
-                            <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
-                                <thead className="sticky top-0 bg-gray-100 z-10">
-                                    <tr className="border-b">
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            File
-                                        </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            Date Submitted
-                                        </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
-                                            Accomplishment Report
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {submissions.length > 0 ? (
-                                        submissions.map((submission) => (
-                                            <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                                    <a
-                                                        href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:underline truncate block text-center"
-                                                    >
-                                                        {submission.file_name || "No File"}
-                                                    </a>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                    {new Date(submission.date_uploaded).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <p
-                                                        className={` ${submission.status === "Approved"
-                                                            ? "text-green-600"
-                                                            : submission.status === "Pending"
-                                                                ? "text-yellow-500"
-                                                                : submission.status === "Rejected"
-                                                                    ? "text-red-600"
-                                                                    : "text-gray-600"
-                                                        }`}
-                                                    >
-                                                        {submission.status}
-                                                    </p>
-                                                    {submission.status === "Rejected" && submission.rejection_reason && (
-                                                        <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                    {submission.status === "Approved" ? (
-                                                        <span className="text-gray-500">Approved</span>
-                                                    ) : submission.status === "Rejected" ? (
-                                                        <span className="text-gray-500">Rejected</span>
-                                                    ) : (
-                                                        <div className="space-x-2">
-                                                            <button
-                                                                onClick={() => handleApprove(submission.submission_id, submission.model_name)}
-                                                                className="text-green-500 hover:text-green-700"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleReject(submission.submission_id, submission.model_name)}
-                                                                className="text-red-500 hover:text-red-700"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                                                No submissions available.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {/* Create Accomplishment Report Section */}
-                    <div className="container mx-auto px-4">
+                        
                         <button
                             onClick={() => GeneratePDFDocument(formData)}
-                            className="ml-auto bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md text-sm mt-3 flex items-center"
+                            className="ml-auto bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md text-sm mt-3 mb-3 flex items-center"
                         >
                             <FaFilePdf className="mr-2" />View PDF
                         </button>
@@ -464,7 +311,7 @@ const ProjLeadAccReport = () => {
                         
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Project Title</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_title}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectTitle}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -504,7 +351,7 @@ const ProjLeadAccReport = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">College</label>
-                                    <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.college}</p>
+                                    <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.college}</p>
                                 </div>
                             </div>
                         </div>
@@ -523,7 +370,7 @@ const ProjLeadAccReport = () => {
                         <div className="grid grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Partner Agency</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.partner_agency}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.partnerAgency}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Training Modality</label>
@@ -544,7 +391,7 @@ const ProjLeadAccReport = () => {
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Submitted By</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.submitted_by}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectLeader}</p>
                         </div>
 
                         {/* PREXC Achievement */}
@@ -704,6 +551,106 @@ const ProjLeadAccReport = () => {
                             </div>
                         )}
                     </div>
+
+                    
+                    {/* Submitted Files Section */}
+                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                        <div
+                            className="overflow-y-auto"
+                            style={{
+                                maxHeight: "300px", // Limit the table height
+                            }}
+                        >
+                            <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
+                                <thead className="sticky top-0 bg-gray-100 z-10">
+                                    <tr className="border-b">
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                            File
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                            Date Submitted
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
+                                            Accomplishment Report
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {submissions.length > 0 ? (
+                                        submissions.map((submission) => (
+                                            <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                                    <a
+                                                        href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 hover:underline truncate block text-center"
+                                                    >
+                                                        {submission.file_name || "No File"}
+                                                    </a>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                    {new Date(submission.date_uploaded).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <p
+                                                        className={` ${submission.status === "Approved"
+                                                            ? "text-green-600"
+                                                            : submission.status === "Pending"
+                                                                ? "text-yellow-500"
+                                                                : submission.status === "Rejected"
+                                                                    ? "text-red-600"
+                                                                    : "text-gray-600"
+                                                        }`}
+                                                    >
+                                                        {submission.status}
+                                                    </p>
+                                                    {submission.status === "Rejected" && submission.rejection_reason && (
+                                                        <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                                                    {submission.status === "Approved" ? (
+                                                        <span className="text-gray-500">Approved</span>
+                                                    ) : submission.status === "Rejected" ? (
+                                                        <span className="text-gray-500">Rejected</span>
+                                                    ) : (
+                                                        <div className="space-x-2">
+                                                            <button
+                                                                onClick={() => handleApprove(submission.submission_id, submission.model_name)}
+                                                                className="text-green-500 hover:text-green-700"
+                                                            >
+                                                                Approve
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleReject(submission.submission_id, submission.model_name)}
+                                                                className="text-red-500 hover:text-red-700"
+                                                            >
+                                                                Reject
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                                                No submissions available.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>

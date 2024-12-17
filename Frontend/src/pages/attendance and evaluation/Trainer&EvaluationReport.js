@@ -25,11 +25,42 @@ const TrainerProjectDetails = () => {
 
 const EvaluationReport = () => {
     const { trainerID, projectID } = useParams();
+    console.log(trainerID, projectID); 
+
+
+    
+    const [trainerName, setTrainerName] = useState('');
     const [evaluations, setEvaluations] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     
+
     useEffect(() => {
+        // Fetch Trainer's Name
+        const fetchTrainerName = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
+            const response = await fetch(`http://127.0.0.1:8000/monitoring/trainers/${trainerID}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Token ${token}`,
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setTrainerName(data.name);  // Assuming the response contains a 'name' field
+            } else {
+                alert("Failed to fetch trainer details");
+            }
+        };
+
         const fetchEvaluations = async () => {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -59,6 +90,7 @@ const EvaluationReport = () => {
             setLoading(false);
         };
 
+        fetchTrainerName();
         fetchEvaluations();
     }, [trainerID, projectID]);
 
@@ -135,7 +167,7 @@ const EvaluationReport = () => {
         });
     
         // Save PDF with dynamic name based on the trainer's name or a default
-        doc.save(`evaluation-report.pdf`);
+        doc.save(`evaluation-report-${trainerName}.pdf`);
     };
     
 
@@ -156,7 +188,7 @@ const EvaluationReport = () => {
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">
-                            Evaluation Report
+                            Evaluation Report for {trainerName || 'Trainer'}
                         </h1>
                         <button
                             onClick={generatePDF}

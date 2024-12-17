@@ -1181,6 +1181,9 @@ class EvaluationViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(project_id=project)
         if trainer:
             queryset = queryset.filter(trainer_id=trainer)
+            
+        if not trainer or not project:
+            raise ValueError("Missing trainer or project ID")
 
         print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
         return queryset
