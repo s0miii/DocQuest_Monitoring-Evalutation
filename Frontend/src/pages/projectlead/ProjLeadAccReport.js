@@ -24,7 +24,8 @@ const ProjLeadAccReport = () => {
         project_location: "",
         partner_agency: "",
         training_modality: "",
-        actual_implementation_date: "",
+        actual_start_date: "",
+        actual_end_date: "",
         total_number_of_days: "",
         submitted_by: ""
     });
@@ -356,15 +357,14 @@ const ProjLeadAccReport = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Target Groups/Beneficiaries</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.target_groups_beneficiaries}</p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Project Location</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_location}</p>
-                            </div>
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700">Target Groups/Beneficiaries</label>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.target_groups_beneficiaries}</p>
+                        </div>
+
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700">Project Location</label>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_location}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -378,10 +378,14 @@ const ProjLeadAccReport = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Actual Date of Implementation</label>
-                                <textarea className="bg-gray-100 rounded-lg p-3 mt-1 w-full resize-none" placeholder="Enter the range (e.g., 2024-01-01 to 2024-01-15)"></textarea>
+                                <label className="block text-sm font-medium text-gray-700">Actual Start Date of Implementation</label>
+                                <input type="date" className="bg-gray-100 rounded-lg p-3 mt-1 w-full" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Actual End Date of Implementation</label>
+                                <input type="date" className="bg-gray-100 rounded-lg p-3 mt-1 w-full" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Total Number of Days</label>

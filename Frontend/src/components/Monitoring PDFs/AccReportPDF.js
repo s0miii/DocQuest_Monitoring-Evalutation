@@ -61,6 +61,10 @@ const styles = StyleSheet.create({
         width: '50%',
         padding: '5',
     },
+    tableColthree: {
+        width: '33.33%',
+        padding: '5',
+    },
 });
 
 const Header = () => (
@@ -202,19 +206,25 @@ const AccReportPDF = ({ projectID }) => {
                 <View style={{ height: 10 }}></View>
                 
                 <View style={[{ flexDirection: 'row', border: 1, borderBottom: 0, backgroundColor: '#D1FFBD' }]}>
-                    <View style={[styles.tableColtwo, { flexDirection: 'row', borderRight: 1, justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
-                        <Text>ACTUAL DATE OF IMPLEMENTATION:</Text>
+                    <View style={[styles.tableColthree, { flexDirection: 'row', borderRight: 1, justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
+                        <Text style={{ textAlign: 'center' }}>ACTUAL START DATE OF{"\n"}IMPLEMENTATION:</Text>
                     </View>
-                    <View style={[styles.tableColtwo, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
+                    <View style={[styles.tableColthree, { flexDirection: 'row', borderRight: 1, justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
+                        <Text style={{ textAlign: 'center' }}>ACTUAL END DATE OF{"\n"}IMPLEMENTATION:</Text>
+                    </View>
+                    <View style={[styles.tableColthree, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
                         <Text>TOTAL NUMBER OF DAYS:</Text>
                     </View>
                 </View>
 
                 <View style={[{ flexDirection: 'row', border: 1, borderBottom: 0, backgroundColor: 'white' }]}>
-                    <View style={[styles.tableColtwo, { flexDirection: 'row', borderRight: 1, justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
-                        <Text>{formData.actual_implementation_date}</Text>
+                    <View style={[styles.tableColthree, { flexDirection: 'row', borderRight: 1, justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
+                        <Text>{formData.actual_start_date}</Text>
                     </View>
-                    <View style={[styles.tableColtwo, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
+                    <View style={[styles.tableColthree, { flexDirection: 'row', borderRight: 1, justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
+                        <Text>{formData.actual_end_date}</Text>
+                    </View>
+                    <View style={[styles.tableColthree, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: '1%', fontFamily: 'ArialB' }]}>
                         <Text>{formData.total_number_of_days}</Text>
                     </View>
                 </View>
@@ -248,7 +258,7 @@ const AccReportPDF = ({ projectID }) => {
                             <Text style={{ fontFamily: 'Arial', textAlign: 'center', marginTop: 'auto' }}>? {formData.traineesWeighted}</Text>
                         </View>
                         <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', borderRight: 1, padding: 5 }]}>
-                            <Text style={{ fontFamily: 'Arial', textAlign: 'center' }}> Actual Number of Trainees based on Attendance Sheets </Text>
+                            <Text style={{ fontFamily: 'Arial', textAlign: 'center' }}> Actual Number of Trainees based on{"\n"}Attendance Sheets </Text>
                             <Text style={{ fontFamily: 'Arial', textAlign: 'center', marginTop: 'auto' }}>? {formData.actualTrainees}</Text>
                         </View>
                         <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', borderRight: 1, padding: 5 }]}>
@@ -264,7 +274,7 @@ const AccReportPDF = ({ projectID }) => {
                     {/* Second Data Row */}
                     <View style={[{ flexDirection: 'row', backgroundColor: 'white' }]}>
                         <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', borderRight: 1, padding: 5 }]}>
-                            <Text style={{ fontFamily: 'Arial', textAlign: 'center' }}> Number of Trainees/Facilitator who evaluated the training to be at least <Text style={{ fontFamily: 'ArialB' }}>satisfactory</Text> </Text>
+                            <Text style={{ fontFamily: 'Arial', textAlign: 'center' }}> Number of Trainees/{"\n"}Facilitator who evaluated the training to be at least <Text style={{ fontFamily: 'ArialB' }}>satisfactory</Text> </Text>
                         </View>
                         <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 5, borderRight: 1 }]}>
                             <Text style={{ fontFamily: 'Arial', textAlign: 'center' }}>? {formData.satisfactoryEvaluation}</Text>
@@ -301,7 +311,7 @@ const AccReportPDF = ({ projectID }) => {
                     </View>
                     <View style={[{ flexDirection: 'row', border: 1, borderBottom: 0, backgroundColor: 'white' }]}>
                         <View style={[styles.tableColone30, { flexDirection: 'row', borderRight: 1, justifyContent: 'flex-start', alignItems: 'flex-start', padding: '1%', fontFamily: 'Arial' }]}>
-                            <Text>Issues and Challenges encountered</Text>
+                            <Text>Issues and Challenges{"\n"}encountered</Text>
                         </View>
                         <View style={[styles.tableColone70, { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', padding: '1%', fontFamily: 'Arial' }]}>
                             <Text>Input ni projlead</Text>
@@ -309,7 +319,7 @@ const AccReportPDF = ({ projectID }) => {
                     </View>
                     <View style={[{ flexDirection: 'row', border: 1, borderBottom: 0, backgroundColor: 'white' }]}>
                         <View style={[styles.tableColone30, { flexDirection: 'row', borderRight: 1, justifyContent: 'flex-start', alignItems: 'flex-start', padding: '1%', fontFamily: 'Arial' }]}>
-                            <Text>Quality of the Participants’ Engagement</Text>
+                            <Text>Quality of the Participants’{"\n"}Engagement</Text>
                         </View>
                         <View style={[styles.tableColone70, { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', padding: '1%', fontFamily: 'Arial' }]}>
                             <Text>Input ni projlead</Text>
@@ -317,7 +327,7 @@ const AccReportPDF = ({ projectID }) => {
                     </View>
                     <View style={[{ flexDirection: 'row', border: 1, borderBottom: 0, backgroundColor: 'white' }]}>
                         <View style={[styles.tableColone30, { flexDirection: 'row', borderRight: 1, justifyContent: 'flex-start', alignItems: 'flex-start', padding: '1%', fontFamily: 'Arial' }]}>
-                            <Text>Discussion of questions raised and comments from the participants</Text>
+                            <Text>Discussion of questions raised and comments from the{"\n"}participants</Text>
                         </View>
                         <View style={[styles.tableColone70, { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', padding: '1%', fontFamily: 'Arial' }]}>
                             <Text>Input ni projlead</Text>
