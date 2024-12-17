@@ -198,6 +198,13 @@ class ProponentProjectDetailsView(APIView):
             # Fetch project leader details
             project_leader_name = f"{project.userID.firstname} {project.userID.lastname}"
 
+            # Fetch related information from new models
+            program_categories = ", ".join([category.title for category in project.projectCategory.all()])
+            proponents = ", ".join([f"{user.firstname} {user.lastname}" for user in project.proponents.all()])
+            
+            # Access the project location (address) details
+            project_location = f"{project.projectLocationID.street}, {project.projectLocationID.barangayID.barangay}" if project.projectLocationID else "N/A"
+
             # Prepare project details
             project_details = {
                 "projectTitle": project.projectTitle,
@@ -205,6 +212,15 @@ class ProponentProjectDetailsView(APIView):
                 "targetDate": f"{project.targetStartDateImplementation or 'N/A'} - {project.targetEndDateImplementation or 'N/A'}",
                 "partnerAgency": ", ".join([agency.agencyName for agency in project.agency.all()]),
                 "projectLeader": project_leader_name,
+
+                "projectType": project.projectType,  # New field added
+                "programs": ", ".join([program.title for program in project.program.all()]),
+                "programCategories": program_categories,
+                "beneficiaries": project.beneficiaries,
+                "accreditationLevel": project.accreditationLevel,
+                "proponents": proponents,
+                "projectLocation": project_location,
+                
             }
 
             # Fetch assigned documentary requirements for the current proponent

@@ -318,17 +318,17 @@ const ProjLeadAccReport = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Type of Project</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_type}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectType}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Project Category</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_category}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.programCategories}</p>
                             </div>
                         </div>
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Title of Research</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.research_title}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.researchTitle}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -337,18 +337,18 @@ const ProjLeadAccReport = () => {
                                 <textarea
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full resize-none overflow-hidden"
                                     readOnly
-                                    value={formData.proponents}
+                                    value={projectDetails.proponents}
                                     style={{ height: 'auto', minHeight: '250px' }}
                                 />
                             </div>
                             <div>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700">Program</label>
-                                    <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.program}</p>
+                                    <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.programs}</p>
                                 </div>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700">Accreditation Level</label>
-                                    <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.accreditation_level}</p>
+                                    <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.accreditationLevel}</p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">College</label>
@@ -359,12 +359,12 @@ const ProjLeadAccReport = () => {
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Target Groups/Beneficiaries</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.target_groups_beneficiaries}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.beneficiaries}</p>
                         </div>
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Project Location</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.project_location}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectLocation}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
