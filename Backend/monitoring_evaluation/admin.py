@@ -287,14 +287,12 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
 class ProjectNarrativeAdmin(admin.ModelAdmin):
     list_display = (
         'id', 
-        'phase_description', 
         'activities_topics', 
         'issues_challenges', 
         'participant_engagement_quality', 
         'discussion_comments', 
         'ways_forward_plans',
     )
-    search_fields = ('project__projectTitle', 'phase_description')
     ordering = ('-project__dateCreated',)
 
 @admin.register(PREXCAchievement)

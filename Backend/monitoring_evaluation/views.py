@@ -928,7 +928,6 @@ class AccomplishmentReportViewSet(viewsets.ModelViewSet):
 
         # Extract narrative fields from the request
         project_narrative_data = {
-            'phase_description': self.request.data.get('phase_description'),
             'activities_topics': self.request.data.get('activities_topics'),
             'issues_challenges': self.request.data.get('issues_challenges'),
             'participant_engagement_quality': self.request.data.get('participant_engagement_quality'),

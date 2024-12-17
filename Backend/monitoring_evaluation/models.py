@@ -281,7 +281,6 @@ class PREXCAchievement(models.Model):
 
 # Project Narrative Model
 class ProjectNarrative(models.Model):
-    phase_description = models.TextField(verbose_name="Phase Description")
     activities_topics = models.TextField(verbose_name="Activities and Topics Covered")
     issues_challenges = models.TextField(verbose_name="Issues and Challenges Encountered")
     participant_engagement_quality = models.TextField(verbose_name="Quality of Participants' Engagement")

@@ -47,8 +47,7 @@ class ProjectNarrativeForm(forms.ModelForm):
     class Meta:
         model = ProjectNarrative
         fields = [
-            'phase_description', 'activities_topics', 
-            'issues_challenges', 'participant_engagement_quality', 
+            'activities_topics','issues_challenges', 'participant_engagement_quality', 
             'discussion_comments', 'ways_forward_plans'
         ]  # Ensure fields are specified
 
