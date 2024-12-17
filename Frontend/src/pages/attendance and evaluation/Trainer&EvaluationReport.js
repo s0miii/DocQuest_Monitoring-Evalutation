@@ -28,16 +28,24 @@ const EvaluationReport = () => {
     const [evaluations, setEvaluations] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-
+    
     useEffect(() => {
         const fetchEvaluations = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
             const response = await fetch(`http://127.0.0.1:8000/monitoring/evaluations/?trainer=${trainerID}&project=${projectID}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba'
+                    Authorization: `Token ${token}`,
                 }
             });
+            
             if (response.ok) {
                 const data = await response.json();
                 const enhancedData = data.map(item => ({
@@ -159,7 +167,7 @@ const EvaluationReport = () => {
                     </div>
 
                     {/* Evaluation Table with Border */}
-                    <h2 className="text-lg font-bold text-center mt-2">I - VI. Training Evaluation Rating</h2>
+                    <h2 className="text-lg font-bold text-center mt-1">I - VI. Training Evaluation Rating</h2>
                     <div className="overflow-x-auto mt-3 border border-black-300 shadow-sm sm:rounded-lg">
                         <table className="min-w-full divide-y divide-black-200">
                             <thead className="bg-blue-900">
@@ -193,7 +201,7 @@ const EvaluationReport = () => {
                     </div>
 
                     {/* Feedback and Remarks Section */}
-                    <h2 className="text-lg font-bold text-center mt-8">III. Feedback and Remarks</h2>
+                    <h2 className="text-lg font-bold text-center mt-6">III. Feedback and Remarks</h2>
                     <div className="overflow-x-auto mt-3 mb-10 border border-black-300 shadow-sm sm:rounded-lg">
                         <table className="min-w-full divide-y divide-black-200">
                             <thead className="bg-blue-900 text-center">

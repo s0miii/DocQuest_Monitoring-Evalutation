@@ -173,7 +173,13 @@ const ProjLeadEvalSum = () => {
     
         fetchTrainers();
     }, [projectID]);
-    
+
+    // Fetch generated links when the "generateLinks" tab is selected
+    useEffect(() => {
+        if (choice === "generateLinks") {
+            fetchGeneratedLinks(); // Fetch links automatically
+        }
+    }, [choice]); // When 'choice' changes to "generateLinks", this effect will run
 
     // Handle Sharable Link generation
     const handleGenerateLink = async (e) => {
@@ -465,7 +471,6 @@ const ProjLeadEvalSum = () => {
                             Generate Evaluation Links
                         </button>
                     </div>
-
 
                     {/* Conditional Rendering of Sections */}
                     {choice === "uploadFiles" && (
@@ -900,6 +905,5 @@ const ProjLeadEvalSum = () => {
         </div>
     );
 };
-
 
 export default ProjLeadEvalSum;

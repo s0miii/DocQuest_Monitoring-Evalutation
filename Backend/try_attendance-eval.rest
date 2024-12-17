@@ -420,9 +420,9 @@ Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 ###
 # Retrieve All Evaluation Sharable Links - PER PROJECT
 # GET http://127.0.0.1:8000/monitoring/evaluation_links/?project=<project_id>
-GET http://127.0.0.1:8000/monitoring/evaluation_links/?project=9
+GET http://127.0.0.1:8000/monitoring/evaluation_links/?project=1/
 Content-Type: application/json
-Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
+Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
 
 
 ###
@@ -464,24 +464,24 @@ Content-Type: application/json
 #evaluation report per trainer
 # Retrieve All Submitted Evaluations
 #  last kay /?trainer=1&project=2
-GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=6&project=9
+GET http://127.0.0.1:8000/monitoring/evaluations/?trainer=1&project=1
 Content-Type: application/json
-Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
+Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
 
 ###
 # Retrieve All Submitted Evaluations
 #  last kay /?trainer=1&project=2
 GET http://127.0.0.1:8000/monitoring/evaluations/
 Content-Type: application/json
-Authorization: Token d7d82c6001091d18c3b1752fd15fb31a135bb770
+Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
 
 
 ###
 # Retrieve Specific Evaluation
 # eval id ang last
-GET http://127.0.0.1:8000/monitoring/evaluation_links/20/
+GET http://127.0.0.1:8000/monitoring/evaluation_links/2/
 Content-Type: application/json
-Authorization: Token 78df3f539a7103e489f5ca314932eaf69ea0c6ba
+Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
 
 
 

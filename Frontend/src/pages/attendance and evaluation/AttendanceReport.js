@@ -9,6 +9,9 @@ import { jsPDF } from 'jspdf';
 const AttendanceReport = () => {
     const navigate = useNavigate();
     const { templateId } = useParams();
+    const { projectID } = useParams();
+    const [loading, setLoading] = useState(true);
+    const [projectDetails, setProjectDetails] = useState(null);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [templateName, setTemplateName] = useState('');
     const [templateAttributes, setTemplateAttributes] = useState({
@@ -21,6 +24,55 @@ const AttendanceReport = () => {
         includeContactNumber: false,
         includeSubmittedAt: true
     });
+
+    const handleViewClick = (path) => {
+        navigate(path.replace(":projectID", projectID));
+    };
+
+
+    // Fetch project details and submissions
+    useEffect(() => {
+        if (!projectID) {
+            console.error("Project ID is undefined.");
+            return;
+        }
+
+        const fetchProjectDetails = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("User not logged in. Please log in again.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(
+                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setProjectDetails(data.projectDetails);
+                } else {
+                    console.error("Failed to fetch project details.");
+                }
+            } catch (error) {
+                console.error("Error fetching project details:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProjectDetails();
+    }, [projectID, navigate]);
+    
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -121,7 +173,7 @@ const AttendanceReport = () => {
             y += 10;
         });
     
-        doc.save('attendance-report.pdf');
+        doc.save('attendance-record.pdf');
     };
     
 
@@ -134,7 +186,7 @@ const AttendanceReport = () => {
                 <Topbar />
                 <div className='flex flex-col mt-14 px-10'>
                     <div className='flex items-center mb-5'>
-                        <button className='mr-2' onClick={() => navigate('/projlead/proj/req/daily-attendance')}>
+                        <button className='mr-2' onClick={() => handleViewClick('/projlead/project/:projectID/daily-attendance')}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Attendance Records for {templateName}</h1>
