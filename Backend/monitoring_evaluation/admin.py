@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import *
 from django.urls import reverse
 from django.utils.html import format_html
+from django import forms
 
 # @admin.register(Checklist)
 # class ChecklistAdmin(admin.ModelAdmin):
@@ -150,30 +151,44 @@ class EvaluationSummaryAdmin(admin.ModelAdmin):
     search_fields = ('project__name',)
     list_filter = ('last_updated',)    
 
+
+# Custom Form for AccomplishmentReportAdmin
+class AccomplishmentReportForm(forms.ModelForm):
+    class Meta:
+        model = AccomplishmentReport
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ensure 'project' field displays available projects
+        self.fields['project'].queryset = Project.objects.filter(status='approved')
 @admin.register(AccomplishmentReport)
 class AccomplishmentReportAdmin(admin.ModelAdmin):
+    form = AccomplishmentReportForm  # Attach the custom form
+
     list_display = (
         'id', 
-        'project', 
+        'project_link', 
         'banner_program_title', 
         'flagship_program', 
         'training_modality', 
-        # 'actual_implementation_date',
         'actualStartDateImplementation',
         'actualEndDateImplementation', 
         'total_number_of_days', 
         'submitted_by', 
-        'project_title', 
-        'project_type', 
-        'project_category', 
-        'research_title', 
-        'proponents', 
-        'program', 
-        'accreditation_level', 
-        'college', 
-        'target_groups_beneficiaries', 
-        'project_location', 
-        'partner_agency',
+        'get_project_title', 
+        'get_project_type', 
+        'get_project_category', 
+        'get_research_title', 
+        'get_proponents', 
+        'get_program', 
+        'get_accreditation_level', 
+        'get_college', 
+        'get_target_groups_beneficiaries', 
+        'get_project_location', 
+        'get_partner_agency',
+        'get_prexc_achievement',
+        'get_project_narrative',
     )
     search_fields = (
         'banner_program_title', 
@@ -186,9 +201,87 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
         'actualStartDateImplementation',
         'actualEndDateImplementation',
         'training_modality', 
-        'project__status',
     )
     ordering = ('-actualStartDateImplementation',)
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.select_related(
+            'project', 
+            'submitted_by',
+            'prexc_achievement',
+            'project_narrative'
+        ).prefetch_related(
+            'project__proponents', 
+            'project__program', 
+            'project__agency'
+        )
+    
+    def project_link(self, obj):
+        if obj.project:
+            url = reverse("admin:docquestapp_project_change", args=[obj.project.projectID])
+            return format_html('<a href="{}">{}</a>', url, obj.project.projectTitle)
+        return "N/A"
+    project_link.short_description = "Project"
+
+    def get_project_title(self, obj):
+        return obj.project_title if obj.project else "N/A"
+    get_project_title.short_description = 'Project Title'
+
+    def get_project_type(self, obj):
+        return obj.project_type if obj.project else "N/A"
+    get_project_type.short_description = 'Project Type'
+
+    def get_project_category(self, obj):
+        if obj.project:
+            return ", ".join([category.title for category in obj.project.projectCategory.all()])
+        return "N/A"
+    get_project_category.short_description = 'Project Category'
+
+    def get_research_title(self, obj):
+        return obj.research_title if obj.project else "N/A"
+    get_research_title.short_description = 'Research Title'
+
+    def get_proponents(self, obj):
+        if obj.project:
+            return ", ".join([f"{proponent.firstname} {proponent.lastname}" for proponent in obj.project.proponents.all()])
+        return "N/A"
+
+    def get_program(self, obj):
+        if obj.project:
+            return ", ".join([program.title for program in obj.project.program.all()])
+        return "N/A"
+    get_program.short_description = 'Program'
+
+    def get_accreditation_level(self, obj):
+        return obj.accreditation_level if obj.project else "N/A"
+    get_accreditation_level.short_description = 'Accreditation Level'
+
+    def get_college(self, obj):
+        return obj.college if obj.project else "N/A"
+    get_college.short_description = 'College'
+
+    def get_target_groups_beneficiaries(self, obj):
+        return obj.target_groups_beneficiaries if obj.project else "N/A"
+    get_target_groups_beneficiaries.short_description = 'Beneficiaries'
+
+    def get_project_location(self, obj):
+        return obj.project_location if obj.project else "N/A"
+    get_project_location.short_description = 'Project Location'
+
+    def get_partner_agency(self, obj):
+        if obj.project:
+            return ", ".join([str(a) for a in obj.project.agency.all()])
+        return "N/A"
+    get_partner_agency.short_description = 'Partner Agency'
+
+    def get_prexc_achievement(self, obj):
+        return obj.prexc_achievement.id if obj.prexc_achievement else "N/A"
+    get_prexc_achievement.short_description = 'PREXC Achievement ID'
+
+    def get_project_narrative(self, obj):
+        return obj.project_narrative.id if obj.project_narrative else "N/A"
+    get_project_narrative.short_description = 'Project Narrative ID'
 
 @admin.register(ProjectNarrative)
 class ProjectNarrativeAdmin(admin.ModelAdmin):
