@@ -23,7 +23,7 @@ router.register(r'lecture_notes', ModulesLectureNotesViewSet)
 router.register(r'photo_documentations', PhotoDocumentationViewSet)
 router.register(r'other_files', OtherFilesViewSet)
 router.register(r'checklist_assignments', ChecklistAssignmentViewSet)
-router.register(r'accomplishment_reports', AccomplishmentReportViewSet, basename='accomplishment_report' )
+router.register(r'accomplishment_reports', AccomplishmentReportViewSet, basename='accomplishment_report')
 router.register(r'prexc_achievements', PREXCAchievementViewSet, basename='prexc_achievements')
 router.register(r'project_narratives', ProjectNarrativeViewSet)
 

@@ -189,7 +189,7 @@ class AccomplishmentReport(models.Model):
 
     @property
     def project_category(self):
-        return self.project.projectCategory
+        return ", ".join([category.title for category in self.project.projectCategory.all()])
 
     @property
     def research_title(self):
