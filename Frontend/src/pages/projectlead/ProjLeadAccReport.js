@@ -12,36 +12,127 @@ const ProjLeadAccReport = () => {
     const [formData, setFormData] = useState({
         banner_program_title: "",
         flagship_program: "",
-        project_title: "",
-        project_type: "",
-        research_title: "",
-        project_category: "",
-        proponents: "",
-        program: "",
-        accreditation_level: "",
-        college: "",
-        target_groups_beneficiaries: "",
-        project_location: "",
-        partner_agency: "",
         training_modality: "",
-        actual_start_date: "",
-        actual_end_date: "",
-        total_number_of_days: "",
-        submitted_by: ""
+        actualStartDateImplementation: "",
+        actualEndDateImplementation: "",
+        activities_topics: "",
+        issues_challenges: "",
+        participant_engagement_quality: "",
+        discussion_comments: "",
+        ways_forward_plans: "",
+        // PREXC Achievement fields
+        traineesWeighted: "",
+        actualTrainees: "",
+        actualDays: "",
+        personsTrained: "",
+        satisfactoryEvaluation: "",
     });
     const navigate = useNavigate();
-    const { projectID } = useParams();
+    const { projectID, accomplishmentReportID } = useParams();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [photos, setPhotos] = useState([{ file: null, description: '' }]);
-    const [modalPhoto, setModalPhoto] = useState(null);
     const [submissions, setSubmissions] = useState([]);
     const [projectDetails, setProjectDetails] = useState(null);
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const [pdfUrl, setPdfUrl] = useState("");
+    const [prexcAchievement, setPrexcAchievement] = useState(null);
 
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+
+    // Fetch data for the accomplishment report and PREXC achievement
+    useEffect(() => {
+        const fetchPrexcAchievement = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("User not logged in. Please log in again.");
+                    navigate("/login");
+                    return;
+                }
+
+                // Fetch PREXC achievement data
+                const response = await fetch(
+                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/prexc_achievement/?accomplishment_report_id=${accomplishmentReportID}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setPrexcAchievement(data);
+                    setFormData((prevData) => ({
+                        ...prevData,
+                        traineesWeighted: data.traineesWeighted,
+                        actualTrainees: data.actualTrainees,
+                        actualDays: data.actualDays,
+                        personsTrained: data.personsTrained,
+                        satisfactoryEvaluation: data.satisfactoryEvaluation,
+                    }));
+                } else {
+                    setError("Failed to fetch PREXC achievement data.");
+                }
+            } catch (error) {
+                setError("Error fetching data: " + error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPrexcAchievement();
+    }, [accomplishmentReportID, navigate]);
+
+    // Handle form submission
+    const handleSubmit = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
+            const formDataToSubmit = {
+                ...formData,
+                project: projectID, // Include project ID if required
+            };
+
+            const response = await axios.post(
+                'http://127.0.0.1:8000/monitoring/accomplishment_reports/',
+                formDataToSubmit,
+                {
+                    headers: {
+                        'Authorization': `Token ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (response.status === 201) {
+                navigate('/projlead/proj/req/accomplishment-report');
+            }
+        } catch (err) {
+            setError("An error occurred while submitting the report. Please try again.");
+            console.error("Submission error: ", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     // Fetch project details and submissions
@@ -198,66 +289,6 @@ const ProjLeadAccReport = () => {
         }
     };
 
-    
-    // Handle photo uploads
-    const handleFileChange = (index, files) => {
-        const newPhotos = [...photos];
-        newPhotos[index].files = files.map((file) => ({
-            name: file.name,
-            url: URL.createObjectURL(file),
-        }));
-        setPhotos(newPhotos);
-    };
-
-    const handlePhotoClick = (url) => {
-        setModalPhoto(url);
-    };
-
-    const handleDescriptionChange = (index, description) => {
-        const newPhotos = [...photos];
-        newPhotos[index].description = description;
-        setPhotos(newPhotos);
-    };
-
-    const addPhotoField = () => {
-        setPhotos([...photos, { file: null, description: '' }]);
-    };
-
-
-    // Handle form submission
-    const handleSubmit = async () => {
-        setLoading(true);
-        try {
-            // Prepare form data
-            const formDataToSubmit = {
-                ...formData,
-                photos: photos.map((photo) => ({
-                    files: photo.files,
-                    description: photo.description,
-                })),
-            };
-
-            // Make API request to backend (update URL to match your backend endpoint)
-            const response = await axios.post('/api/accomplishment-reports/', formDataToSubmit, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Add authorization token if needed
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                },
-            });
-
-            // Handle successful submission
-            if (response.status === 201) {
-                navigate('/projlead/proj/req/accomplishment-report');
-            }
-        } catch (err) {
-            setError("An error occurred while submitting the report. Please try again.");
-            console.error("Submission error: ", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     // loading substitute
     if (loading) {
         return (
@@ -268,6 +299,7 @@ const ProjLeadAccReport = () => {
             </div>
         );
     }
+
     if (!projectDetails) {
         return <div>Project not found.</div>;
     }
@@ -302,12 +334,26 @@ const ProjLeadAccReport = () => {
                         
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Banner Program Title</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.banner_program_title}</p>
+                            <input
+                                type="text"
+                                name="banner_program_title"
+                                value={formData.banner_program_title}
+                                onChange={handleChange}
+                                className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                placeholder="Enter input here..."
+                            />
                         </div>
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Flagship Program</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.flagship_program}</p>
+                            <input
+                                type="text"
+                                name="flagship_program"
+                                value={formData.flagship_program}
+                                onChange={handleChange}
+                                className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                placeholder="Enter input here..."
+                            />
                         </div>
                         
                         <div className="mt-4">
@@ -315,7 +361,7 @@ const ProjLeadAccReport = () => {
                             <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectTitle}</p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="mt-4 grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Type of Project</label>
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectType}</p>
@@ -327,8 +373,15 @@ const ProjLeadAccReport = () => {
                         </div>
 
                         <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700">Title of Research</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.researchTitle}</p>
+                        <label className="block text-sm font-medium text-gray-700">Title of Research</label>
+                            <input
+                                type="text"
+                                name="researchTitle"
+                                value={formData.researchTitle}
+                                onChange={handleChange}
+                                className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                placeholder="Enter input here..."
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -374,18 +427,37 @@ const ProjLeadAccReport = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Training Modality</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.training_modality}</p>
+                                <input
+                                    type="text"
+                                    name="training_modality"
+                                    value={formData.training_modality}
+                                    onChange={handleChange}
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                    placeholder="Enter input here..."
+                                />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Actual Start Date of Implementation</label>
-                                <input type="date" className="bg-gray-100 rounded-lg p-3 mt-1 w-full" />
+                                <input
+                                    type="date"
+                                    name="actualStartDateImplementation"
+                                    value={formData.actualStartDateImplementation}
+                                    onChange={handleChange}
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Actual End Date of Implementation</label>
-                                <input type="date" className="bg-gray-100 rounded-lg p-3 mt-1 w-full" />
+                                <input
+                                    type="date"
+                                    name="actualEndDateImplementation"
+                                    value={formData.actualEndDateImplementation}
+                                    onChange={handleChange}
+                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Total Number of Days</label>
@@ -415,22 +487,22 @@ const ProjLeadAccReport = () => {
                                 <tbody>
                                     <tr>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{formData.traineesWeighted}</p>
+                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{prexcAchievement?.traineesWeighted || 'N/A'}</p>
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{formData.actualTrainees}</p>
+                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{prexcAchievement?.actualTrainees || 'N/A'}</p>
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{formData.actualDays}</p>
+                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{prexcAchievement?.actualDays || 'N/A'}</p>
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{formData.personsTrained}</p>
+                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{prexcAchievement?.personsTrained || 'N/A'}</p>
                                         </td>
                                     </tr>
                                     <tr>
-                                    <td className="border border-gray-300 px-4 py-2 text-left"> Number of Trainees who evaluated the training to be at least satisfactory </td>
+                                        <td className="border border-gray-300 px-4 py-2 text-left">Number of Trainees who evaluated the training to be at least satisfactory</td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{formData.satisfactoryEvaluation}</p>
+                                            <p className="bg-gray-100 rounded-lg p-2 w-full text-center">{prexcAchievement?.satisfactoryEvaluation || 'N/A'}</p>
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
                                             <div className="w-full bg-gray-100 rounded-lg p-2 text-center">Rating 100%</div>
@@ -448,85 +520,61 @@ const ProjLeadAccReport = () => {
                         <div className="grid grid-cols-1 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Description of Major Activities and Topics Covered</label>
-                                <textarea className="bg-gray-100 rounded-lg p-3 w-full mt-4" rows="4" placeholder="Enter input here..."></textarea>
+                                <textarea
+                                    name="activities_topics"
+                                    value={formData.activities_topics}
+                                    onChange={handleChange}
+                                    className="bg-gray-100 rounded-lg p-3 w-full mt-4"
+                                    rows="4"
+                                    placeholder="Enter input here..."
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Issues and Challenges Encountered</label>
-                                <textarea className="bg-gray-100 rounded-lg p-3 w-full mt-4" rows="4" placeholder="Enter input here..."></textarea>
+                                <textarea
+                                    name="issues_challenges"
+                                    value={formData.issues_challenges}
+                                    onChange={handleChange}
+                                    className="bg-gray-100 rounded-lg p-3 w-full mt-4"
+                                    rows="4"
+                                    placeholder="Enter input here..."
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Quality of the Participants' Engagement</label>
-                                <textarea className="bg-gray-100 rounded-lg p-3 w-full mt-4" rows="4" placeholder="Enter input here..."></textarea>
+                                <textarea
+                                    name="participant_engagement_quality"
+                                    value={formData.participant_engagement_quality}
+                                    onChange={handleChange}
+                                    className="bg-gray-100 rounded-lg p-3 w-full mt-4"
+                                    rows="4"
+                                    placeholder="Enter input here..."
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Discussion of Questions Raised and Comments from the Participants</label>
-                                <textarea className="bg-gray-100 rounded-lg p-3 w-full mt-4" rows="4" placeholder="Enter input here..."></textarea>
+                                <textarea
+                                    name="discussion_comments"
+                                    value={formData.discussion_comments}
+                                    onChange={handleChange}
+                                    className="bg-gray-100 rounded-lg p-3 w-full mt-4"
+                                    rows="4"
+                                    placeholder="Enter input here..."
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Ways Forward and Plans</label>
-                                <textarea className="bg-gray-100 rounded-lg p-3 w-full mt-4" rows="4" placeholder="Enter input here..."></textarea>
+                                <textarea
+                                    name="ways_forward_plans"
+                                    value={formData.ways_forward_plans}
+                                    onChange={handleChange}
+                                    className="bg-gray-100 rounded-lg p-3 w-full mt-4"
+                                    rows="4"
+                                    placeholder="Enter input here..."
+                                />
                             </div>
                         </div>
-
-                        {/* Photo Documentation */}
-                        <h2 className="text-xl font-semibold text-center mb-4 mt-8">Photo Documentation</h2>
-                        {photos.map((photo, index) => (
-                            <div
-                                key={index}
-                                className="border border-gray-300 rounded-lg p-4 grid grid-cols-1 gap-2 mb-4"
-                            >
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Attached Photo {index + 1}
-                                    </label>
-                                    <input
-                                        type="file"
-                                        multiple
-                                        className="w-full cursor-pointer file:bg-gray-50 file:border-0 file:p-2 rounded-lg mt-1"
-                                        onChange={(e) => handleFileChange(index, Array.from(e.target.files))}
-                                    />
-                                </div>
-                                {photo.files && photo.files.length > 0 && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Attached Files
-                                        </label>
-                                        <ul className="list-disc list-inside">
-                                            {photo.files.map((file, fileIndex) => (
-                                                <li
-                                                    key={fileIndex}
-                                                    className="text-blue-500 cursor-pointer hover:underline"
-                                                    onClick={() => handlePhotoClick(file.url)}
-                                                >
-                                                    {file.name}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Description
-                                    </label>
-                                    <textarea
-                                        className="bg-gray-100 rounded-lg p-3 mt-1 w-full resize-none"
-                                        placeholder="Enter description"
-                                        value={photo.description}
-                                        onChange={(e) => handleDescriptionChange(index, e.target.value)}
-                                        rows={1}
-                                    />
-                                </div>
-                            </div>
-                        ))}
-                        <div className="flex justify-start mb-4">
-                            <span
-                                className="text-blue-500 cursor-pointer hover:underline"
-                                onClick={addPhotoField}
-                            >
-                                Attach Another Photo
-                            </span>
-                        </div>
-                        <div className="flex justify-center">
+                        <div className="mt-4 flex justify-center">
                             <button
                                 type="button"
                                 className="bg-blue-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-blue-600 transition"
@@ -535,27 +583,7 @@ const ProjLeadAccReport = () => {
                                 Submit
                             </button>
                         </div>
-
-                        {/* Modal for Photo View */}
-                        {modalPhoto && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                <div className="bg-white rounded-lg p-4 relative">
-                                    <img
-                                        src={modalPhoto}
-                                        alt="Preview"
-                                        className="max-w-full max-h-[80vh] rounded-lg"
-                                    />
-                                    <button
-                                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2"
-                                        onClick={() => setModalPhoto(null)}
-                                    >
-                                        X
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                     </div>
-
                     
                     {/* Submitted Files Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
