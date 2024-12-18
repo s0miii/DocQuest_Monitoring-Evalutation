@@ -17,6 +17,7 @@ const ProjLeadAccReport = () => {
         actualEndDateImplementation: "",
         activities_topics: "",
         issues_challenges: "",
+        total_number_of_days: "",
         participant_engagement_quality: "",
         discussion_comments: "",
         ways_forward_plans: "",
@@ -454,7 +455,7 @@ const ProjLeadAccReport = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Total Number of Days</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">ee{formData.total_number_of_days}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.total_number_of_days}</p>
                             </div>
                         </div>
 

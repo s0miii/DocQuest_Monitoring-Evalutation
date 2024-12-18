@@ -697,7 +697,7 @@ const ProjLeadEvalSum = () => {
                     {choice === "generateLinks" && (
                         <div>
                             {/* Evaluation Summary Section */}
-                            {/* <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
+                            <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
                                 <h2 className="mb-4 text-xl font-semibold text-center">Summary of Evaluation</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full max-w-md mx-auto text-sm text-center border border-collapse border-gray-300 table-fixed">
@@ -785,7 +785,7 @@ const ProjLeadEvalSum = () => {
                                         />
                                     </div>
                                 </div>
-                            </div> */}
+                            </div>
 
                             {/* Generated Evaluation Links Section */}
                             <div ref={linksSectionRef} className='p-6 mb-6 bg-white rounded-lg shadow-md'>
