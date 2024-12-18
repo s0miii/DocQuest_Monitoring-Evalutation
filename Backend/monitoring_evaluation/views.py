@@ -920,140 +920,10 @@ class ProponentSubmissionsView(APIView):
         }
 
         return Response(result, status=status.HTTP_200_OK)
-
-
-# class AccomplishmentReportCreateView(LoginRequiredMixin, CreateView):
-#     model = AccomplishmentReport
-#     form_class = AccomplishmentReportForm
-#     template_name = 'monitoring_evaluation/accomplishment_report_form.html'
-#     success_url = reverse_lazy('monitoring_evaluation:report_list')
-#     permission_classes = [IsAuthenticated]
     
-#     def form_valid(self, form):
-#         form.instance.submitted_by = self.request.user
-#         return super().form_valid(form)
 
-# class AccomplishmentReportDetailView(LoginRequiredMixin, View):
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request, pk):
-#         report = get_object_or_404(AccomplishmentReport, pk=pk)
-#         return render(request, 'monitoring_evaluation/accomplishment_report_detail.html', {'report': report})
-
-
-# class AccomplishmentReportViewSet(viewsets.ModelViewSet):
-#     # queryset = AccomplishmentReport.objects.all()
-#     serializer_class = AccomplishmentReportSerializer
-#     permission_classes = [IsAuthenticated]
-#     authentication_classes = [TokenAuthentication]
-
-
-#     def get_queryset(self):
-#         user = self.request.user
-        
-#         if user.is_authenticated:
-#             return AccomplishmentReport.objects.filter(
-#                 Q(submitted_by=user) |  # User submitted the report
-#                 Q(
-#                     project__proponents=user, 
-#                     project__proponents__role__code='pjld'  # User is Project Leader
-#                 )
-#             ).distinct()  # Avoid duplicates
-#         return AccomplishmentReport.objects.none()
-
-#     def perform_create(self, serializer):
-#         # Automatically set `submitted_by` and calculate `total_number_of_days`
-
-#         project = serializer.validated_data['project']
-
-#         # Find the Project Leader (pjld role) for the project
-#         project_leader = project.proponents.filter(role__code='pjld').first()
-#         if not project_leader:
-#             raise ValueError("No Project Leader assigned to this project.")
-
-#         serializer.save(
-#             submitted_by=project_leader,
-#             total_number_of_days=project.attendance_templates.count()
-#         )
-
-#     def perform_update(self, serializer):
-#         # Recalculate 'total_number_of_days' on report update.
-        
-#         serializer.save(
-#             total_number_of_days=serializer.validated_data['project'].attendance_templates.count()
-#         )
-
-# ACCCOMPLISHMENT REPORT NGA LIBOG - Working but complex
-# class AccomplishmentReportViewSet(viewsets.ModelViewSet):
-#     serializer_class = AccomplishmentReportSerializer
-#     permission_classes = [IsAuthenticated]
-#     authentication_classes = [TokenAuthentication]
-
-#     def get_queryset(self):
-#         user = self.request.user
-
-#         if user.is_authenticated:
-#             queryset = AccomplishmentReport.objects.filter(
-#                 Q(submitted_by=user) |  
-#                 Q(
-#                     project__proponents=user, 
-#                     project__proponents__role__code='pjld'  
-#                 )
-#             ).distinct().prefetch_related(
-#                 'project__photo_documentations'
-#             )
-#             print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
-#             return queryset
-#         print("User is not authenticated")
-#         return AccomplishmentReport.objects.none()
-
-#     def perform_create(self, serializer):
-#         project = serializer.validated_data['project']
-
-#         # Find the Project Leader (pjld role) for the project
-#         project_leader = project.proponents.filter(
-#             role__code='pjld',
-#             email=self.request.user.email
-#             ).first()
-        
-#         print(f"Project Leader: {project_leader}")  # Debugging Project Leader
-#         print(f"Authenticated User: {self.request.user}")  # Log user making the request
-        
-#         if not project_leader:
-#             print(f"No Project Leader found for Project ID: {project.id}")  # Debug error case
-#             raise ValueError("The authenticated user is not the Project Leader for this project.")
-
-#         # # Save the report with the Project Leader
-#         # serializer.save(
-#         #     submitted_by=project_leader,
-#         #     total_number_of_days=project.attendance_templates.count()
-#         # )
-
-#         # Save the AccomplishmentReport instance
-#         accomplishment_report = serializer.save(
-#             submitted_by=project_leader,
-#             total_number_of_days=project.attendance_templates.count()
-#         )
-#         print("Accomplishment Report successfully created.")
-
-#         # Create the related PREXCAchievement instance
-#         prexc_achievement = PREXCAchievement.objects.create(
-#             accomplishment_report=accomplishment_report
-#         )
-        
-
-#         accomplishment_report.prexc_achievement = prexc_achievement
-#         accomplishment_report.save()
-        
-#         print("PREXC Achievement successfully created and linked.")
-
-#     def retrieve(self, request, *args, **kwargs):
-#         # Ensure approved photos are fetched dynamically
-#         instance = self.get_object()
-#         serializer = self.get_serializer(instance)
-#         return Response(serializer.data)
-
-    # New Accomplishment Report - Refined
+# Create Accomplishment Report - pjld only
+# New Accomplishment Report - Refined
 @role_required(allowed_role_codes=["pjld"])  # Only Project Leaders can create
 class AccomplishmentReportViewSet(viewsets.ModelViewSet):
     queryset = AccomplishmentReport.objects.all()
@@ -1074,7 +944,6 @@ class AccomplishmentReportViewSet(viewsets.ModelViewSet):
 
         # Extract narrative fields from the request
         project_narrative_data = {
-            'phase_description': self.request.data.get('phase_description'),
             'activities_topics': self.request.data.get('activities_topics'),
             'issues_challenges': self.request.data.get('issues_challenges'),
             'participant_engagement_quality': self.request.data.get('participant_engagement_quality'),
