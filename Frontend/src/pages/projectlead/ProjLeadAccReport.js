@@ -373,15 +373,8 @@ const ProjLeadAccReport = () => {
                         </div>
 
                         <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700">Title of Research</label>
-                            <input
-                                type="text"
-                                name="researchTitle"
-                                value={formData.researchTitle}
-                                onChange={handleChange}
-                                className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                placeholder="Enter input here..."
-                            />
+                            <label className="block text-sm font-medium text-gray-700">Title of Research</label>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.researchTitle}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">

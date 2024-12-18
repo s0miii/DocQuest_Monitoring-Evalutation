@@ -213,6 +213,7 @@ class ProponentProjectDetailsView(APIView):
                 "partnerAgency": ", ".join([agency.agencyName for agency in project.agency.all()]),
                 "projectLeader": project_leader_name,
 
+                "researchTitle": project.researchTitle,
                 "projectType": project.projectType,  # New field added
                 "programs": ", ".join([program.title for program in project.program.all()]),
                 "programCategories": program_categories,
