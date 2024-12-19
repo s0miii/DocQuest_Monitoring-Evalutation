@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import Topbar from "../../components/Topbar";
-import { useNavigate } from 'react-router-dom';
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 import { FaArrowLeft, FaCopy, FaTrash } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const ProjLeadEvalSum = () => {
     const navigate = useNavigate();
@@ -24,6 +23,8 @@ const ProjLeadEvalSum = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
     const linksSectionRef = useRef(null);
     const isExpired = (expirationDate) => new Date(expirationDate) < new Date();
+    const [categories, setCategories] = useState({});
+    const [totalEvaluations, setTotalEvaluations] = useState();
 
     const handleChoice = (choice) => {
         setChoice(choice); // set the choice based on user selection
@@ -373,6 +374,41 @@ const ProjLeadEvalSum = () => {
             alert('Failed to copy link.');
         });
     };
+
+
+    useEffect(() => {
+        const fetchSummaryData = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/monitoring/project/${projectID}/evaluation_summary/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Token ${token}`,
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data);  // Log to see the exact structure
+                    setCategories(data.categories);
+                    setTotalEvaluations(data.total_evaluations);
+                } else {
+                    alert("Failed to fetch evaluation summary");
+                }
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+            }
+        };
+
+        fetchSummaryData();
+    }, [projectID]);
     
     // loading substitute
     if (loading) {
@@ -708,59 +744,15 @@ const ProjLeadEvalSum = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Excellent (5)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Very Satisfactory (4)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Satisfactory (3)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Fair (2)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Poor (1)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
-                                                </td>
-                                            </tr>
+                                            {Object.entries(categories).map(([key, value], index) => (
+                                                <tr key={index}>
+                                                    <td className="px-4 py-2 border border-gray-300">{key}</td>
+                                                    <td className="px-4 py-2 border border-gray-300">{value}</td>
+                                                </tr>
+                                            ))}
                                             <tr>
                                                 <td className="px-4 py-2 font-semibold border border-gray-300">Sub Total</td>
-                                                <td className="px-4 py-2 font-semibold border border-gray-300">15</td>
+                                                <td className="px-4 py-2 font-semibold border border-gray-300">{totalEvaluations}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -771,7 +763,7 @@ const ProjLeadEvalSum = () => {
                                         <input
                                             type="text"
                                             className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            placeholder="Total Evaluations"
+                                            value={totalEvaluations}
                                             readOnly
                                         />
                                     </div>
@@ -780,7 +772,7 @@ const ProjLeadEvalSum = () => {
                                         <input
                                             type="text"
                                             className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            placeholder="Percentage"
+                                            value={`${(totalEvaluations / totalEvaluations * 100).toFixed(2)}%`} 
                                             readOnly
                                         />
                                     </div>

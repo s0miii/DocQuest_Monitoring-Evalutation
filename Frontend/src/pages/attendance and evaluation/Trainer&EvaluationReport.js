@@ -25,10 +25,6 @@ const TrainerProjectDetails = () => {
 
 const EvaluationReport = () => {
     const { trainerID, projectID } = useParams();
-    console.log(trainerID, projectID); 
-
-
-    
     const [trainerName, setTrainerName] = useState('');
     const [evaluations, setEvaluations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -159,7 +155,7 @@ const EvaluationReport = () => {
                 halign: 'center'
             },
             columnStyles: {
-                16: { cellWidth: 24 } // AVERAGE column width
+                16: { cellWidth: 24 }
             },
             theme: 'grid',
             margin: { horizontal: 10 },
