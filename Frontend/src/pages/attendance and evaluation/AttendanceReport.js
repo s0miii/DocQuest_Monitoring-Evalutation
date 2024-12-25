@@ -186,7 +186,7 @@ const AttendanceReport = () => {
                 <Topbar />
                 <div className='flex flex-col mt-14 px-10'>
                     <div className='flex items-center mb-5'>
-                        <button className='mr-2' onClick={() => handleViewClick('/projlead/project/:projectID/daily-attendance')}>
+                        <button className="mr-2" onClick={() => navigate(-1)}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Attendance Records for {templateName}</h1>

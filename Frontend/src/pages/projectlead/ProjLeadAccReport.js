@@ -2,141 +2,37 @@ import React, {useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
-import { FaArrowLeft, FaFilePdf } from "react-icons/fa";
+import { FaArrowLeft, FaFilePdf, FaEdit } from "react-icons/fa";
 import { useParams } from "react-router-dom";
-import axios from 'axios';
 import { PDFViewer } from '@react-pdf/renderer';
 import GeneratePDFDocument from "../../components/Monitoring PDFs/GeneratePDFDocument";
+import axios from 'axios';
 
 const ProjLeadAccReport = () => {
-    const [formData, setFormData] = useState({
-        banner_program_title: "",
-        flagship_program: "",
-        training_modality: "",
-        actualStartDateImplementation: "",
-        actualEndDateImplementation: "",
-        activities_topics: "",
-        issues_challenges: "",
-        total_number_of_days: "",
-        participant_engagement_quality: "",
-        discussion_comments: "",
-        ways_forward_plans: "",
-        // PREXC Achievement fields
-        traineesWeighted: "",
-        actualTrainees: "",
-        actualDays: "",
-        personsTrained: "",
-        satisfactoryEvaluation: "",
-    });
     const navigate = useNavigate();
-    const { projectID, accomplishmentReportID } = useParams();
+    const { projectID } = useParams();
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [submissions, setSubmissions] = useState([]);
+    const [submittedFiles, setSubmittedFiles] = useState([]);
     const [projectDetails, setProjectDetails] = useState(null);
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const [pdfUrl, setPdfUrl] = useState("");
     const [prexcAchievement, setPrexcAchievement] = useState(null);
+    const [formData, setFormData] = useState({
+        total_number_of_days: '',
+        submitted_by: '',
+        banner_program_title: '',
+        flagship_program: '',
+        training_modality: '',
+        actualStartDateImplementation: '',
+        actualEndDateImplementation: '',
+        activities_topics: '',
+        issues_challenges: '',
+        participant_engagement_quality: '',
+        discussion_comments: '',
+        ways_forward_plans: ''
+    });
 
-    const handleViewClick = (path) => {
-        navigate(path.replace(":projectID", projectID));
-    };
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
-
-
-    // Fetch data for the accomplishment report and PREXC achievement
-    useEffect(() => {
-        const fetchPrexcAchievement = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) {
-                    alert("User not logged in. Please log in again.");
-                    navigate("/login");
-                    return;
-                }
-
-                // Fetch PREXC achievement data
-                const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/prexc_achievement/?accomplishment_report_id=${accomplishmentReportID}`,
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Token ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setPrexcAchievement(data);
-                    setFormData((prevData) => ({
-                        ...prevData,
-                        traineesWeighted: data.traineesWeighted,
-                        actualTrainees: data.actualTrainees,
-                        actualDays: data.actualDays,
-                        personsTrained: data.personsTrained,
-                        satisfactoryEvaluation: data.satisfactoryEvaluation,
-                    }));
-                } else {
-                    setError("Failed to fetch PREXC achievement data.");
-                }
-            } catch (error) {
-                setError("Error fetching data: " + error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPrexcAchievement();
-    }, [accomplishmentReportID, navigate]);
-
-    // Handle form submission
-    const handleSubmit = async () => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                alert("User not logged in. Please log in again.");
-                navigate("/login");
-                return;
-            }
-
-            const formDataToSubmit = {
-                ...formData,
-                project: projectID, // Include project ID if required
-            };
-
-            const response = await axios.post(
-                'http://127.0.0.1:8000/monitoring/accomplishment_reports/',
-                formDataToSubmit,
-                {
-                    headers: {
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
-
-            if (response.status === 201) {
-                navigate('/projlead/proj/req/accomplishment-report');
-            }
-        } catch (err) {
-            setError("An error occurred while submitting the report. Please try again.");
-            console.error("Submission error: ", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Fetch project details and submissions
+    // Fetch project details 
     useEffect(() => {
         if (!projectID) {
             console.error("Project ID is undefined.");
@@ -181,113 +77,101 @@ const ProjLeadAccReport = () => {
         fetchProjectDetails();
     }, [projectID, navigate]);
 
-    
-    const fetchUpdatedSubmissions = async () => {
-        const token = localStorage.getItem("token");
+    useEffect(() => {
+        const fetchDetails = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
 
-        if (!token) {
-            alert("User not logged in. Please log in again.");
-            navigate("/login");
-            return;
-        }
+            try {
+                const response = await fetch(
+                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/${projectID}/`,
+                    {
+                        headers: { Authorization: `Token ${token}` }
+                    }
+                );
 
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Other%20Files/submissions/`,
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            if (response.ok) {
                 const data = await response.json();
-                setSubmissions(data.submissions); // Dynamically update submissions
-            } else {
-                console.error("Failed to fetch submissions.");
+                if (response.ok) {
+                    setProjectDetails(data);
+                    // Pre-populate form if editing an existing report
+                    setFormData({
+                        total_number_of_days: data.total_number_of_days,
+                        submitted_by: data.submitted_by,
+                        banner_program_title: data.banner_program_title,
+                        flagship_program: data.flagship_program,
+                        training_modality: data.training_modality,
+                        actualStartDateImplementation: data.actualStartDateImplementation,
+                        actualEndDateImplementation: data.actualEndDateImplementation,
+                        activities_topics: data.project_narrative.activities_topics,
+                        issues_challenges: data.project_narrative.issues_challenges,
+                        participant_engagement_quality: data.project_narrative.participant_engagement_quality,
+                        discussion_comments: data.project_narrative.discussion_comments,
+                        ways_forward_plans: data.project_narrative.ways_forward_plans
+                    });
+                } else {
+                    console.error("Failed to fetch project details.");
+                }
+            } catch (error) {
+                console.error("Error fetching project details:", error);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error("Error fetching submissions:", error);
-        }
+        };
+
+        fetchDetails();
+    }, [projectID, navigate]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-
-    const handleApprove = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/other_files/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Approved" }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission approved successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error approving submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error approving submission:", error);
-            alert("An error occurred while approving the submission.");
-        }
+    const handleSubmit = (e) => {
+        e.preventDefault();
+    
+        const newReport = {
+            ...formData,
+            dateSubmitted: new Date().toLocaleDateString(), // Current date
+            id: 1 // Use a constant ID because only one accomplishment report exists
+        };
+    
+        // Update the state with the new or edited accomplishment report
+        setSubmittedFiles([newReport]); // Replace existing report
+    
+        // Save to local storage for persistence
+        localStorage.setItem("submittedReport", JSON.stringify(newReport));
+    
+        console.log("Form submitted successfully:", newReport);
+    
+        // Optional: Reset the form fields after submission (if not in edit mode)
+        setFormData({
+            banner_program_title: "",
+            flagship_program: "",
+            training_modality: "",
+            actualStartDateImplementation: "",
+            actualEndDateImplementation: "",
+            activities_topics: "",
+            issues_challenges: "",
+            participant_engagement_quality: "",
+            discussion_comments: "",
+            ways_forward_plans: ""
+        });
     };
 
-    const handleReject = async (submissionId, modelName) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You are not logged in. Please log in and try again.");
-            return;
+    useEffect(() => {
+        const savedReport = localStorage.getItem("submittedReport");
+        if (savedReport) {
+            setSubmittedFiles([JSON.parse(savedReport)]);
         }
+    }, []);
 
-        const rejectionReason = prompt("Please provide a reason for rejection:");
-
-        if (!rejectionReason) {
-            alert("Rejection reason is required.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submission/update/other_files/${submissionId}/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ status: "Rejected", rejection_reason: rejectionReason }),
-                }
-            );
-
-            if (response.ok) {
-                alert("Submission rejected successfully!");
-                fetchUpdatedSubmissions(); // Refresh the submissions
-            } else {
-                const errorData = await response.json();
-                alert(`Error rejecting submission: ${errorData.error || "An error occurred."}`);
-            }
-        } catch (error) {
-            console.error("Error rejecting submission:", error);
-            alert("An error occurred while rejecting the submission.");
-        }
+    const handleEdit = (report) => {
+        setFormData(report); // Load the selected report into the form for editing
+        console.log("Editing report:", report);
     };
 
     // loading substitute
@@ -316,17 +200,10 @@ const ProjLeadAccReport = () => {
                 <Topbar />
                 <div className="flex flex-col mt-14 px-10">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req/:projectID')}>
+                        <button className="mr-2" onClick={() => navigate(-1)}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Accomplishment Report</h1>
-                        
-                        <button
-                            onClick={() => GeneratePDFDocument(formData)}
-                            className="ml-auto bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md text-sm mt-3 mb-3 flex items-center"
-                        >
-                            <FaFilePdf className="mr-2" />View PDF
-                        </button>
                     </div>
 
                     {/* Main Form */}
@@ -341,7 +218,7 @@ const ProjLeadAccReport = () => {
                                 value={formData.banner_program_title}
                                 onChange={handleChange}
                                 className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                placeholder="Enter input here..."
+                                placeholder="Enter Banner Program Title..."
                             />
                         </div>
 
@@ -353,7 +230,7 @@ const ProjLeadAccReport = () => {
                                 value={formData.flagship_program}
                                 onChange={handleChange}
                                 className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                placeholder="Enter input here..."
+                                placeholder="Enter Flagship Program..."
                             />
                         </div>
                         
@@ -427,7 +304,6 @@ const ProjLeadAccReport = () => {
                                     value={formData.training_modality}
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Enter input here..."
                                 />
                             </div>
                         </div>
@@ -461,7 +337,7 @@ const ProjLeadAccReport = () => {
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Submitted By</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectLeader}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.submitted_by}</p>
                         </div>
 
                         {/* PREXC Achievement */}
@@ -520,7 +396,7 @@ const ProjLeadAccReport = () => {
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
-                                    placeholder="Enter input here..."
+                                    placeholder="Enter activities and topics covered..."
                                 />
                             </div>
                             <div>
@@ -531,7 +407,7 @@ const ProjLeadAccReport = () => {
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
-                                    placeholder="Enter input here..."
+                                    placeholder="Enter issues and challenges encountered..."
                                 />
                             </div>
                             <div>
@@ -542,7 +418,7 @@ const ProjLeadAccReport = () => {
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
-                                    placeholder="Enter input here..."
+                                    placeholder="Enter quality of participants' engagement..."
                                 />
                             </div>
                             <div>
@@ -553,7 +429,7 @@ const ProjLeadAccReport = () => {
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
-                                    placeholder="Enter input here..."
+                                    placeholder="Enter discussion comments..."
                                 />
                             </div>
                             <div>
@@ -564,23 +440,23 @@ const ProjLeadAccReport = () => {
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
-                                    placeholder="Enter input here..."
+                                    placeholder="Enter ways forward and plans..."
                                 />
                             </div>
                         </div>
-                        <div className="mt-4 flex justify-center">
+                        <form onSubmit={handleSubmit} div className="mt-4 flex justify-center">
                             <button
-                                type="button"
+                                type="submit"
                                 className="bg-blue-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-blue-600 transition"
-                                onClick={handleSubmit}
                             >
                                 Submit
                             </button>
-                        </div>
+                        </form>
                     </div>
-                    
-                    {/* Submitted Files Section */}
+
+                    {/* Submitted File Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-center mb-4">Submitted File</h2>
                         <div
                             className="overflow-y-auto"
                             style={{
@@ -608,67 +484,33 @@ const ProjLeadAccReport = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {submissions.length > 0 ? (
-                                        submissions.map((submission) => (
-                                            <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                                    <a
-                                                        href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:underline truncate block text-center"
-                                                    >
-                                                        {submission.file_name || "No File"}
-                                                    </a>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                    {new Date(submission.date_uploaded).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <p
-                                                        className={` ${submission.status === "Approved"
-                                                            ? "text-green-600"
-                                                            : submission.status === "Pending"
-                                                                ? "text-yellow-500"
-                                                                : submission.status === "Rejected"
-                                                                    ? "text-red-600"
-                                                                    : "text-gray-600"
-                                                        }`}
-                                                    >
-                                                        {submission.status}
-                                                    </p>
-                                                    {submission.status === "Rejected" && submission.rejection_reason && (
-                                                        <p className="text-xs text-red-600 mt-1">{submission.rejection_reason}</p>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                                                    {submission.status === "Approved" ? (
-                                                        <span className="text-gray-500">Approved</span>
-                                                    ) : submission.status === "Rejected" ? (
-                                                        <span className="text-gray-500">Rejected</span>
-                                                    ) : (
-                                                        <div className="space-x-2">
-                                                            <button
-                                                                onClick={() => handleApprove(submission.submission_id, submission.model_name)}
-                                                                className="text-green-500 hover:text-green-700"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleReject(submission.submission_id, submission.model_name)}
-                                                                className="text-red-500 hover:text-red-700"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
+                                    {submittedFiles.map((file) => (
+                                        <tr key={file.id} className="border-b">
+                                            <td className="px-6 py-4 text-center text-sm text-gray-900">Accomplishment Report {file.id}</td>
+                                            <td className="px-6 py-4 text-center text-sm text-gray-500">{file.dateSubmitted}</td>
+                                            <td className="px-6 py-4 text-center text-sm text-gray-500">Submitted</td>
+                                            <td className="px-6 py-4 text-center text-l">
+                                                <button 
+                                                    className='mr-2 text-blue-500'
+                                                    onClick={() => handleEdit(file)}
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                            </td>
+                                            <td className="flex justify-center px-6 py-4 text-center text-sm">
+                                                <button
+                                                    onClick={() => GeneratePDFDocument(formData, projectDetails)}
+                                                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md text-s flex items-center"
+                                                >
+                                                    <FaFilePdf className="mr-2" />View PDF
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {submittedFiles.length === 0 && (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                                                No submissions available.
+                                            <td colSpan="5" className="text-center text-gray-500 py-4">
+                                                No files submitted yet.
                                             </td>
                                         </tr>
                                     )}
@@ -676,7 +518,6 @@ const ProjLeadAccReport = () => {
                             </table>
                         </div>
                     </div>
-                    
                 </div>
             </div>
         </div>
