@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Document, Page, View, Text, Image, StyleSheet, Font } from '@react-pdf/renderer';
-import axios from 'axios';
 
 // Font registration
 Font.register({ family: 'Arial', src: '/fonts/arial.TTF' });

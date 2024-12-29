@@ -4,9 +4,7 @@ import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 import { FaArrowLeft, FaFilePdf, FaEdit } from "react-icons/fa";
 import { useParams } from "react-router-dom";
-import { PDFViewer } from '@react-pdf/renderer';
 import GeneratePDFDocument from "../../components/Monitoring PDFs/GeneratePDFDocument";
-import axios from 'axios';
 
 const ProjLeadAccReport = () => {
     const navigate = useNavigate();
@@ -125,49 +123,66 @@ const ProjLeadAccReport = () => {
         fetchDetails();
     }, [projectID, navigate]);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e) => {
+    
+    const handleSubmit = async (e) => {
         e.preventDefault();
     
         const newReport = {
             ...formData,
-            dateSubmitted: new Date().toLocaleDateString(), // Current date
-            id: 1 // Use a constant ID because only one accomplishment report exists
+            dateSubmitted: new Date().toLocaleDateString(),
         };
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("User not logged in. Please log in again.");
+            navigate("/login");
+            return;
+        }
     
-        // Update the state with the new or edited accomplishment report
-        setSubmittedFiles([newReport]); // Replace existing report
+        try {
+            // Send the data to the backend API
+            const response = await fetch('http://127.0.0.1:8000/monitoring/accomplishment_reports/', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Token ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newReport),
+            });
     
-        // Save to local storage for persistence
-        localStorage.setItem("submittedReport", JSON.stringify(newReport));
+            if (response.ok) {
+                const savedReport = await response.json();
+                console.log("Report saved to database:", savedReport);
     
-        console.log("Form submitted successfully:", newReport);
+                // Update the state with the saved report (if needed)
+                setSubmittedFiles([savedReport]);
     
-        // Optional: Reset the form fields after submission (if not in edit mode)
-        setFormData({
-            banner_program_title: "",
-            flagship_program: "",
-            training_modality: "",
-            actualStartDateImplementation: "",
-            actualEndDateImplementation: "",
-            activities_topics: "",
-            issues_challenges: "",
-            participant_engagement_quality: "",
-            discussion_comments: "",
-            ways_forward_plans: ""
-        });
+                // Optional: Reset the form fields after submission
+                setFormData({
+                    banner_program_title: "",
+                    flagship_program: "",
+                    training_modality: "",
+                    actualStartDateImplementation: "",
+                    actualEndDateImplementation: "",
+                    activities_topics: "",
+                    issues_challenges: "",
+                    participant_engagement_quality: "",
+                    discussion_comments: "",
+                    ways_forward_plans: ""
+                });
+            } else {
+                console.error("Failed to save report:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error submitting report:", error);
+        }
     };
 
-    useEffect(() => {
-        const savedReport = localStorage.getItem("submittedReport");
-        if (savedReport) {
-            setSubmittedFiles([JSON.parse(savedReport)]);
-        }
-    }, []);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleEdit = (report) => {
         setFormData(report); // Load the selected report into the form for editing
