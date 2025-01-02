@@ -8,14 +8,14 @@ import GeneratePDFDocument from "../../components/Monitoring PDFs/GeneratePDFDoc
 
 const ProjLeadAccReport = () => {
     const navigate = useNavigate();
-    const { projectID } = useParams();
+    const { projectID, id } = useParams();
     const [loading, setLoading] = useState(true);
     const [submittedFiles, setSubmittedFiles] = useState([]);
     const [projectDetails, setProjectDetails] = useState(null);
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const [pdfUrl, setPdfUrl] = useState("");
     const [prexcAchievement, setPrexcAchievement] = useState(null);
-    const [formData, setFormData] = useState({
+    const [accReport, setAccReport] = useState({
         total_number_of_days: '',
         submitted_by: '',
         banner_program_title: '',
@@ -86,7 +86,7 @@ const ProjLeadAccReport = () => {
 
             try {
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/${projectID}/`,
+                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/${id}/`,
                     {
                         headers: { Authorization: `Token ${token}` }
                     }
@@ -96,7 +96,7 @@ const ProjLeadAccReport = () => {
                 if (response.ok) {
                     setProjectDetails(data);
                     // Pre-populate form if editing an existing report
-                    setFormData({
+                    setAccReport({
                         total_number_of_days: data.total_number_of_days,
                         submitted_by: data.submitted_by,
                         banner_program_title: data.banner_program_title,
@@ -121,14 +121,14 @@ const ProjLeadAccReport = () => {
         };
 
         fetchDetails();
-    }, [projectID, navigate]);
+    }, [id, navigate]);
 
     
     const handleSubmit = async (e) => {
         e.preventDefault();
     
         const newReport = {
-            ...formData,
+            ...accReport,
             dateSubmitted: new Date().toLocaleDateString(),
         };
 
@@ -142,7 +142,7 @@ const ProjLeadAccReport = () => {
     
         try {
             // Send the data to the backend API
-            const response = await fetch('http://127.0.0.1:8000/monitoring/accomplishment_reports/', {
+            const response = await fetch(`http://127.0.0.1:8000/monitoring/accomplishment_reports/${id}/`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Token ${token}`,
@@ -159,7 +159,7 @@ const ProjLeadAccReport = () => {
                 setSubmittedFiles([savedReport]);
     
                 // Optional: Reset the form fields after submission
-                setFormData({
+                setAccReport({
                     banner_program_title: "",
                     flagship_program: "",
                     training_modality: "",
@@ -181,11 +181,11 @@ const ProjLeadAccReport = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setAccReport(prev => ({ ...prev, [name]: value }));
     };
 
     const handleEdit = (report) => {
-        setFormData(report); // Load the selected report into the form for editing
+        setAccReport(report); // Load the selected report into the form for editing
         console.log("Editing report:", report);
     };
 
@@ -230,7 +230,7 @@ const ProjLeadAccReport = () => {
                             <input
                                 type="text"
                                 name="banner_program_title"
-                                value={formData.banner_program_title}
+                                value={accReport.banner_program_title}
                                 onChange={handleChange}
                                 className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
                                 placeholder="Enter Banner Program Title..."
@@ -242,7 +242,7 @@ const ProjLeadAccReport = () => {
                             <input
                                 type="text"
                                 name="flagship_program"
-                                value={formData.flagship_program}
+                                value={accReport.flagship_program}
                                 onChange={handleChange}
                                 className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
                                 placeholder="Enter Flagship Program..."
@@ -316,7 +316,7 @@ const ProjLeadAccReport = () => {
                                 <input
                                     type="text"
                                     name="training_modality"
-                                    value={formData.training_modality}
+                                    value={accReport.training_modality}
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
                                 />
@@ -329,7 +329,7 @@ const ProjLeadAccReport = () => {
                                 <input
                                     type="date"
                                     name="actualStartDateImplementation"
-                                    value={formData.actualStartDateImplementation}
+                                    value={accReport.actualStartDateImplementation}
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
                                 />
@@ -339,20 +339,20 @@ const ProjLeadAccReport = () => {
                                 <input
                                     type="date"
                                     name="actualEndDateImplementation"
-                                    value={formData.actualEndDateImplementation}
+                                    value={accReport.actualEndDateImplementation}
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Total Number of Days</label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.total_number_of_days}</p>
+                                <p className="bg-gray-100 rounded-lg p-3 mt-1">{accReport.total_number_of_days}</p>
                             </div>
                         </div>
 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Submitted By</label>
-                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{formData.submitted_by}</p>
+                            <p className="bg-gray-100 rounded-lg p-3 mt-1">{accReport.submitted_by}</p>
                         </div>
 
                         {/* PREXC Achievement */}
@@ -407,7 +407,7 @@ const ProjLeadAccReport = () => {
                                 <label className="block text-sm font-medium text-gray-700">Description of Major Activities and Topics Covered</label>
                                 <textarea
                                     name="activities_topics"
-                                    value={formData.activities_topics}
+                                    value={accReport.activities_topics}
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
@@ -418,7 +418,7 @@ const ProjLeadAccReport = () => {
                                 <label className="block text-sm font-medium text-gray-700">Issues and Challenges Encountered</label>
                                 <textarea
                                     name="issues_challenges"
-                                    value={formData.issues_challenges}
+                                    value={accReport.issues_challenges}
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
@@ -429,7 +429,7 @@ const ProjLeadAccReport = () => {
                                 <label className="block text-sm font-medium text-gray-700">Quality of the Participants' Engagement</label>
                                 <textarea
                                     name="participant_engagement_quality"
-                                    value={formData.participant_engagement_quality}
+                                    value={accReport.participant_engagement_quality}
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
@@ -440,7 +440,7 @@ const ProjLeadAccReport = () => {
                                 <label className="block text-sm font-medium text-gray-700">Discussion of Questions Raised and Comments from the Participants</label>
                                 <textarea
                                     name="discussion_comments"
-                                    value={formData.discussion_comments}
+                                    value={accReport.discussion_comments}
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
@@ -451,7 +451,7 @@ const ProjLeadAccReport = () => {
                                 <label className="block text-sm font-medium text-gray-700">Ways Forward and Plans</label>
                                 <textarea
                                     name="ways_forward_plans"
-                                    value={formData.ways_forward_plans}
+                                    value={accReport.ways_forward_plans}
                                     onChange={handleChange}
                                     className="bg-gray-100 rounded-lg p-3 w-full mt-4"
                                     rows="4"
@@ -514,7 +514,7 @@ const ProjLeadAccReport = () => {
                                             </td>
                                             <td className="flex justify-center px-6 py-4 text-center text-sm">
                                                 <button
-                                                    onClick={() => GeneratePDFDocument(formData, projectDetails)}
+                                                    onClick={() => GeneratePDFDocument(accReport, projectDetails)}
                                                     className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md text-s flex items-center"
                                                 >
                                                     <FaFilePdf className="mr-2" />View PDF
