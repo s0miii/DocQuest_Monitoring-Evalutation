@@ -660,7 +660,7 @@ MODEL_MAP = {
     "daily_attendance": DailyAttendanceRecord,
     "summary_of_evaluation": SummaryOfEvaluation,
     "trainer_cv_dtr": TrainerCvDtr,
-    "modules_lecture_notes": ModulesLectureNotes,
+    "lecture_notes": ModulesLectureNotes,
     "photo_documentations": PhotoDocumentation,
     "other_files": OtherFiles,
 }
@@ -706,6 +706,7 @@ class ChecklistItemSubmissionsView(APIView):
             project = get_object_or_404(Project, projectID=project_id, status="approved")
 
             # Determine roles for the user
+            is_coord = user.role.filter(code="coord").exists()
             is_estaff = user.role.filter(code="estf").exists()
             is_project_leader = project.userID == user
             is_proponent = project.proponents.filter(userID=user.userID).exists()
@@ -736,6 +737,9 @@ class ChecklistItemSubmissionsView(APIView):
             if is_project_leader:
                 # Fetch records for project leader and all proponents
                 records = model.objects.filter(project=project, proponent__in=[user] + list(project.proponents.all()))
+            elif is_coord:
+                # Fetch all records for EStaff
+                records = model.objects.filter(project=project, status="approved")
             elif is_estaff:
                 # Fetch all records for EStaff
                 records = model.objects.filter(project=project)

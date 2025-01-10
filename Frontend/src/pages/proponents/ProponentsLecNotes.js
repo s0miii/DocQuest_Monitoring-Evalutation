@@ -383,7 +383,7 @@ const ProponentsLecNotes = () => {
                                                         <span className="text-gray-500">Cannot Remove</span>
                                                     ) : (
                                                         <button
-                                                            onClick={() => handleDelete(submission.submission_id, "modules_lecture_notes")} // Use the correct model name
+                                                            onClick={() => handleDelete(submission.submission_id, "lecture_notes")} // Use the correct model name
                                                             className="text-red-500 hover:text-red-700"
                                                         >
                                                             Remove

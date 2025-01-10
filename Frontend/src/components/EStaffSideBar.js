@@ -10,10 +10,17 @@ function EStaffSideBar({ onFilterChange }) {
     // Helper function to check if the pathname is related to a specific section
     const isPathActive = (path) => location.pathname.startsWith(path);
 
+    // deployed
+    // const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleLogout = async () => {
         const token = localStorage.getItem('token');
         try {
-            await axios.post('https://web-production-4b16.up.railway.app/auth/token/logout/', {}, {
+            await axios.post(`${API_URL}/auth/token/logout/`, {}, {
                 headers: {
                     'Authorization': `Token ${token}`,
                 },

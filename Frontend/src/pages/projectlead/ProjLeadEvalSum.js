@@ -25,6 +25,13 @@ const ProjLeadEvalSum = () => {
     const linksSectionRef = useRef(null);
     const isExpired = (expirationDate) => new Date(expirationDate) < new Date();
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     const handleChoice = (choice) => {
         setChoice(choice); // set the choice based on user selection
     };
@@ -50,7 +57,7 @@ const ProjLeadEvalSum = () => {
                 }
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -78,7 +85,7 @@ const ProjLeadEvalSum = () => {
         fetchUpdatedSubmissions();
     }, [projectID, navigate]);
 
-    
+
     const fetchUpdatedSubmissions = async () => {
         const token = localStorage.getItem("token");
 
@@ -90,7 +97,7 @@ const ProjLeadEvalSum = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Daily%20Attendance/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Summary%20of%20Evaluation/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -119,7 +126,7 @@ const ProjLeadEvalSum = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/evaluation_links/?project=${projectID}`,
+                `${API_URL}/monitoring/evaluation_links/?project=${projectID}`,
                 {
                     method: "GET",
                     headers: {
@@ -152,9 +159,9 @@ const ProjLeadEvalSum = () => {
                 setTrainers([]); // Ensures trainers is always an array
                 return;
             }
-    
+
             try {
-                const response = await fetch(`http://127.0.0.1:8000/monitoring/project/${projectID}/trainers/`, {
+                const response = await fetch(`${API_URL}/monitoring/project/${projectID}/trainers/`, {
                     headers: {
                         Authorization: `Token ${token}`,
                         "Content-Type": "application/json",
@@ -170,10 +177,10 @@ const ProjLeadEvalSum = () => {
                 setTrainers([]); // Ensures trainers is always an array on error
             }
         };
-    
+
         fetchTrainers();
     }, [projectID]);
-    
+
 
     // Handle Sharable Link generation
     const handleGenerateLink = async (e) => {
@@ -181,16 +188,16 @@ const ProjLeadEvalSum = () => {
         const { trainer, expirationDate } = linkData;
         const token = localStorage.getItem("token");
         if (!token) return;
-    
+
         const postData = {
             trainer_id: trainer,
             project_id: projectID,
             expiration_date: expirationDate,
         };
-    
+
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/generate_evaluation_link/`,
+                `${API_URL}/monitoring/generate_evaluation_link/`,
                 {
                     method: "POST",
                     headers: {
@@ -200,7 +207,7 @@ const ProjLeadEvalSum = () => {
                     body: JSON.stringify(postData),
                 }
             );
-    
+
             const data = await response.json(); // Assuming the server always returns JSON
             if (response.ok) {
                 setLinkData({ trainer: "", expirationDate: "" });  // Reset form on success
@@ -221,10 +228,10 @@ const ProjLeadEvalSum = () => {
             alert("User not logged in. Please log in again.");
             return;
         }
-    
+
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/evaluation_links/${linkId}/`,
+                `${API_URL}/monitoring/evaluation_links/${linkId}/`,
                 {
                     method: "DELETE",
                     headers: {
@@ -232,7 +239,7 @@ const ProjLeadEvalSum = () => {
                     },
                 }
             );
-    
+
             if (response.ok) {
                 alert("Link deleted successfully.");
                 setGeneratedLinks((prevLinks) => prevLinks.filter((link) => link.id !== linkId));
@@ -247,7 +254,7 @@ const ProjLeadEvalSum = () => {
     const viewEvaluationReport = () => {
         navigate(`/evaluations/${trainerID}/${projectID}`);
     };
-    
+
     // Handle file attachments
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files);
@@ -266,7 +273,7 @@ const ProjLeadEvalSum = () => {
 
         if (attachedFiles.length > 0) {
             attachedFiles.forEach((file) => {
-                formData.append("attendance_file", file);
+                formData.append("summary_file", file);
             });
         } else {
             alert("Please attach at least one file.");
@@ -274,7 +281,7 @@ const ProjLeadEvalSum = () => {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/attendance/${projectID}/`, {
+            const response = await fetch(`${API_URL}/monitoring/upload/evaluation/${projectID}/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`,
@@ -310,9 +317,9 @@ const ProjLeadEvalSum = () => {
 
         try {
             // Adjust model_name to "daily_attendance"
-            const modelName = "daily_attendance";
+            const modelName = "summary_of_evaluation";
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
+                `${API_URL}/monitoring/submissions/${modelName}/${submissionId}/`,
                 {
                     method: "DELETE",
                     headers: {
@@ -352,14 +359,14 @@ const ProjLeadEvalSum = () => {
     };
 
     const handleCopyLink = link => {
-        // Example backend link: 'http://127.0.0.1:8000/monitoring/evaluation/fill/{token}'
+        // Example backend link: '${API_URL}/monitoring/evaluation/fill/{token}'
         // Assume the frontend route is similar but on a different port: 'http://127.0.0.1:3000/monitoring/evaluation/fill/{token}'
-    
-        const backendBaseURL = "127.0.0.1:8000";
-        const frontendBaseURL = "127.0.0.1:3000";
-    
+
+        const backendBaseURL = "https://docquest-monitoring-evalutation.onrender.com";
+        const frontendBaseURL = "https://doc-quest-monitoring-evalutation-2.vercel.app/";
+
         const frontendLink = link.replace(backendBaseURL, frontendBaseURL);
-    
+
         navigator.clipboard.writeText(frontendLink).then(() => {
             alert('Link copied to clipboard!');
         }).catch(err => {
@@ -367,7 +374,7 @@ const ProjLeadEvalSum = () => {
             alert('Failed to copy link.');
         });
     };
-    
+
     // loading substitute
     if (loading) {
         return (
@@ -449,7 +456,7 @@ const ProjLeadEvalSum = () => {
                         </div>
                     </div>
 
-                    
+
                     {/* Buttons to choose file upload or link generation */}
                     <div className="flex mb-6 space-x-4">
                         <button
@@ -528,7 +535,7 @@ const ProjLeadEvalSum = () => {
                                                     <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
                                                         <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
                                                             <a
-                                                                href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
+                                                                href={`${API_URL}/media/${submission.directory}/${submission.file_name}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="block text-center text-blue-600 truncate hover:underline"
@@ -594,98 +601,98 @@ const ProjLeadEvalSum = () => {
                                     Add New Submission
                                 </h2>
 
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Description
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                        placeholder="Enter a Short Description"
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                        placeholder="Set Date"
-                                        value={date}
-                                        onChange={(e) => setDate(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Preview of Attached Files */}
-                            <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
-                                <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
-                                {attachedFiles.length === 0 && (
-                                    <div className="mb-3 text-gray-400">
-                                        <span className="block text-3xl text-center">+</span>
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Description
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                            placeholder="Enter a Short Description"
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                        />
                                     </div>
-                                )}
-                                <input
-                                    type="file"
-                                    multiple
-                                    onChange={handleFileChange}
-                                    className="absolute inset-0 opacity-0 cursor-pointer"
-                                    style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
-                                />
-                                {attachedFiles.length > 0 && (
-                                    <div
-                                        className="grid w-full grid-cols-5 gap-3 mt-4 overflow-y-auto"
-                                        style={{
-                                            maxHeight: "250px", // Scrollable height
-                                            paddingRight: "10px", // Space for scrollbar
-                                        }}
-                                    >
-                                        {attachedFiles.map((file, index) => {
-                                            const fileExtension = file.name.split('.').pop().toUpperCase();
-                                            const filePreview = file.type.startsWith("image/")
-                                                ? (
-                                                    <img
-                                                        src={URL.createObjectURL(file)}
-                                                        alt={`attachment-preview-${index}`}
-                                                        className="object-cover w-20 h-20 rounded-lg" // Deducted 10% width
-                                                    />
-                                                )
-                                                : (
-                                                    <div className="flex items-center justify-center w-20 h-20 text-gray-600 bg-gray-200 rounded-lg">
-                                                        <span className="text-lg">{fileExtension}</span>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                            placeholder="Set Date"
+                                            value={date}
+                                            onChange={(e) => setDate(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Preview of Attached Files */}
+                                <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
+                                    <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
+                                    {attachedFiles.length === 0 && (
+                                        <div className="mb-3 text-gray-400">
+                                            <span className="block text-3xl text-center">+</span>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
+                                    />
+                                    {attachedFiles.length > 0 && (
+                                        <div
+                                            className="grid w-full grid-cols-5 gap-3 mt-4 overflow-y-auto"
+                                            style={{
+                                                maxHeight: "250px", // Scrollable height
+                                                paddingRight: "10px", // Space for scrollbar
+                                            }}
+                                        >
+                                            {attachedFiles.map((file, index) => {
+                                                const fileExtension = file.name.split('.').pop().toUpperCase();
+                                                const filePreview = file.type.startsWith("image/")
+                                                    ? (
+                                                        <img
+                                                            src={URL.createObjectURL(file)}
+                                                            alt={`attachment-preview-${index}`}
+                                                            className="object-cover w-20 h-20 rounded-lg" // Deducted 10% width
+                                                        />
+                                                    )
+                                                    : (
+                                                        <div className="flex items-center justify-center w-20 h-20 text-gray-600 bg-gray-200 rounded-lg">
+                                                            <span className="text-lg">{fileExtension}</span>
+                                                        </div>
+                                                    );
+
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className="flex flex-col items-center p-2 border border-gray-200 rounded-lg shadow-md"
+                                                        title={file.name}
+                                                        style={{ marginBottom: "10px" }}
+                                                    >
+                                                        {filePreview}
+                                                        <p className="w-full mt-2 text-xs text-center truncate">{file.name}</p>
                                                     </div>
                                                 );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
 
-                                            return (
-                                                <div
-                                                    key={index}
-                                                    className="flex flex-col items-center p-2 border border-gray-200 rounded-lg shadow-md"
-                                                    title={file.name}
-                                                    style={{ marginBottom: "10px" }}
-                                                >
-                                                    {filePreview}
-                                                    <p className="w-full mt-2 text-xs text-center truncate">{file.name}</p>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
+                                <div className="flex justify-center">
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmit}
+                                        className="px-12 py-2 font-bold text-white transition bg-blue-500 rounded-lg hover:bg-blue-600"
+                                    >
+                                        Submit
+                                    </button>
+                                </div>
                             </div>
-
-                            <div className="flex justify-center">
-                                <button
-                                    type="button"
-                                    onClick={handleSubmit}
-                                    className="px-12 py-2 font-bold text-white transition bg-blue-500 rounded-lg hover:bg-blue-600"
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        </div>
                         </div>
                     )}
 

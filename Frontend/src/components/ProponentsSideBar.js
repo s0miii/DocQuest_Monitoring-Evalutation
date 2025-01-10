@@ -1,13 +1,37 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import axios from "axios";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 function ProponentsSideBar() {
     const location = useLocation();
+    // deployed
+    // const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
 
     const isRequirementsPath = location.pathname.startsWith("/requirements");
 
     const [isSubMenuVisible, setIsSubMenuVisible] = useState(false);
     const [isRequirementsSubMenuVisible, setIsRequirementsSubMenuVisible] = useState(isRequirementsPath);
+
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.post(`${API_URL}/auth/token/logout/`, {}, {
+                headers: {
+                    'Authorization': `Token ${token}`,
+                },
+            });
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+        localStorage.clear();
+        navigate('/login');
+    };
 
     const toggleSubMenu = () => {
         setIsSubMenuVisible(!isSubMenuVisible);
@@ -29,8 +53,15 @@ function ProponentsSideBar() {
             <nav>
                 <ul>
                     <li><Link to="#" className={`text-lg font-bold block px-6 py-3 ${isActive(["/user"]) ? "text-yellow-500" : ""}`}>Dashboard</Link></li>
-                    <li><Link to="/projects-dashboard" className="text-lg block px-6 py-3 hover:text-yellow-500">Project Monitoring</Link></li>
-                    <li><Link to="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Log out</Link></li>
+                    <li><Link to="/projects-dashboard" className={`text-lg block px-6 py-3 hover:text-yellow-500 ${isActive(["/projects-dashboard"]) ? "text-yellow-500" : ""}`}>Project Monitoring</Link></li>
+                    <li>
+                        <button
+                            onClick={handleLogout}
+                            className="text-lg text-white block px-6 py-3 hover:text-red-600 w-full text-left"
+                        >
+                            Log out
+                        </button>
+                    </li>
                 </ul>
             </nav>
         </div>

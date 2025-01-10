@@ -17,6 +17,7 @@ const LoginPage = () => {
 
   // local
   // const API_URL = 'http://127.0.0.1:8000/';
+  // ${API_URL}
 
   // New error state
   const [error, setError] = useState('');

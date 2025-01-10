@@ -3,6 +3,7 @@ import { FaSearch, FaFilter } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProjLeadSideBar from "../../components/ProjLeadSideBar";
+import ProponentsSideBar from "../../components/ProponentsSideBar";
 import axios from "axios";
 
 const ProjectsDashboard = () => {
@@ -223,7 +224,17 @@ const ProjectsDashboard = () => {
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
-                <ProjLeadSideBar />
+                {(() => {
+                    const roles = JSON.parse(localStorage.getItem("roles")) || [];
+
+                    if (roles.includes("pjld")) { // pjld AND ppnt or pjld ONLY
+                        return <ProjLeadSideBar />;
+                    } else if (roles.includes("ppnt")) { // ppnt ONLY
+                        return <ProponentsSideBar />;
+                    } else {
+                        return <div>No Sidebar Available</div>;
+                    }
+                })()}
             </div>
             <div className="flex-1 ml-[20%]">
                 <Topbar />

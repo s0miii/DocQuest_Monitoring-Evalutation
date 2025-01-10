@@ -17,6 +17,13 @@ const StaffProjectsDashboard = () => {
     const [error, setError] = useState(null);
     const pageSize = 5; // Define the page size
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     useEffect(() => {
         if (!token) {
             localStorage.clear();
@@ -42,7 +49,7 @@ const StaffProjectsDashboard = () => {
             // Fetch data from all pages
             do {
                 const response = await axios.get(
-                    `http://127.0.0.1:8000/monitoring/staff-projects/?page=${page}&page_size=${pageSize}`,
+                    `${API_URL}/monitoring/staff-projects/?page=${page}&page_size=${pageSize}`,
                     {
                         headers: {
                             'Authorization': `Token ${token}`,
