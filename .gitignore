@@ -1,4 +1,5 @@
 ### back end
+.env
 venv/
 docquest/*.sqlite3
 Backend/*.sqlite3
