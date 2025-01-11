@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routers, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
 // import CoordinatorTab from "./pages/coordinator/CoordinatorTab";
 // import UserList from "./pages/estaff/UserList";
@@ -21,6 +21,10 @@ import ProjLeadPhotoDocs from "./pages/projectlead/ProjLeadPhotoDocs";
 // import Topbar from "./components/Topbar";
 // import DeptOffSideBar from './components/DeptOffSideBar';
 import DeptOffDashboard from "./pages/deptoff/DeptOffDashboard";
+import DeptOffProjectsDashboard from "./pages/deptoff/DeptOffProjectsDashboard.js";
+
+import CollegeDeanProjectsDashboard from "./pages/collegeDean/CollegeDeanProjectsDashboard.js";
+
 // import DeptOffGenerateDocument from "./pages/deptoff/DeptOffGenerateDocument";
 // import DeptOffProfilePage from "./pages/deptoff/DeptOffProfilePage";
 import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
@@ -33,7 +37,7 @@ import StaffPhotoDocs from "./pages/estaff/StaffPhotoDocs";
 import StaffOthers from "./pages/estaff/StaffOthers";
 import EStaffProjReq from "./pages/estaff/EStaffProjReq";
 import EStaffOP1OP2 from "./pages/estaff/EStaffOP1OP2";
-import ProponentsProjects from "./pages/proponents/ProjectsDashboard"
+// import ProponentsProjects from "./pages/proponents/ProjectsDashboard"
 import ProponentsProjReq from "./pages/proponents/ProponentsProjReq";
 import ProponentsDailyAttRec from "./pages/proponents/ProponentsDailyAttRec";
 import ProponentsEvalSum from "./pages/proponents/ProponentsEvalSum";
@@ -56,8 +60,17 @@ function App() {
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/user" element={<ProjLeadDashboard />} />
+      
       <Route path="/deptoff" element={<DeptOffDashboard />} />
+      <Route path="/deptoff-projects-dashboard" element={<DeptOffProjectsDashboard />} />
+
+      
+      <Route path="/collegedean-projects-dashboard" element={<CollegeDeanProjectsDashboard />} />
+
+      
+      
       <Route path="/coordinator" element={<CoordinatorDashboard />} />
+
       <Route path="/signatory" element={<SignatoryDashboard />} />
 
       <Route path="/estaff" element={<EstaffDashboard />} />
@@ -91,7 +104,6 @@ function App() {
       <Route path="/proponents/project/:projectID/modules-notes" element={<ProponentsLecNotes />} />
       <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
       <Route path="/proponents/project/:projectID/photo-documentations" element={<ProponentsPhotoDocs />} />
-      
       
       <Route path="/monitoring/evaluation/fill/:token" element={<EvaluationForm />} />
       <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />

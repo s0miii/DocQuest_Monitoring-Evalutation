@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
 
 function DeptOffSideBar() {
     const [isSubMenuVisible, setIsSubMenuVisible] = useState(false);
@@ -15,13 +16,23 @@ function DeptOffSideBar() {
             <nav>
                 <ul>
                     <li>
-                        <a href="#" className="text-lg font-bold block px-6 py-3 text-yellow-500">Dashboard</a>
+                        <a href="#" className="text-lg font-bold block px-6 py-3 hover:text-yellow-500">Dashboard</a>
                     </li>
                     <li>
                         <button onClick={toggleSubMenu} className="text-lg w-full text-left block px-6 py-3 hover:text-yellow-500 focus:outline-none">
                             Documents
                         </button>
                     </li>
+                    <li>
+                        <NavLink
+                            to="/deptoff-projects-dashboard"
+                            className={({ isActive }) =>
+                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                        >
+                            Project Monitoring
+                        </NavLink>
+                    </li>
+
                     <li><a href="#" className="text-lg block px-6 py-3 hover:text-yellow-500">Log out</a></li>
                 </ul>
             </nav>

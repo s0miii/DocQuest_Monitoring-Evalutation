@@ -11,8 +11,8 @@ function CollegeDeanSidebar({ onFilterChange }) {
     useEffect(() => {
         // Check if token is present
         if (!token) {
-          navigate('/login', { replace: true });
-          return;
+            navigate('/login', { replace: true });
+            return;
         }
     
         // Retrieve roles from localStorage
@@ -20,9 +20,9 @@ function CollegeDeanSidebar({ onFilterChange }) {
         
         // Redirect if "ecrd" role is not found
         if (!roles.includes("cldn")) {
-          navigate('/login', { replace: true });
+            navigate('/login', { replace: true });
         }
-      }, [token, navigate]);
+    }, [token, navigate]);
 
     // Helper function to check if the pathname is related to a specific section
     const isPathActive = (path) => location.pathname.startsWith(path);
@@ -85,6 +85,16 @@ function CollegeDeanSidebar({ onFilterChange }) {
                             }
                         >
                             Project Proposal Review
+                        </NavLink>
+                    </li>
+
+                    <li>
+                        <NavLink
+                            to="/collegedean-projects-dashboard"
+                            className={({ isActive }) =>
+                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                        >
+                            Project Monitoring
                         </NavLink>
                     </li>
 
