@@ -768,6 +768,7 @@ class ChecklistItemSubmissionsView(APIView):
                     "submitted_by": f"{record.proponent.firstname} {record.proponent.lastname}" if record.proponent else "Unknown",
                     "file_name": file_field.name.split('/')[-1] if file_field else "No File",
                     "directory": directory,
+                    "file_url": file_field.url if file_field else None,
                 })
 
             return Response({"submissions": submissions}, status=status.HTTP_200_OK)
