@@ -97,6 +97,8 @@ const ProponentsDailyAttRec = () => {
 
             if (response.ok) {
                 const data = await response.json();
+                console.log("API Response:", data);
+                console.log("File URLs:", data.submissions.map(s => s.file_url));
                 setSubmissions(data.submissions); // Dynamically update submissions
             } else {
                 console.error("Failed to fetch submissions.");
