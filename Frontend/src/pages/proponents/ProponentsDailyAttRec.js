@@ -223,7 +223,8 @@ const ProponentsDailyAttRec = () => {
         );
     }
 
-
+    // debug
+    console.log("Submission data:", submissions);
 
 
     return (

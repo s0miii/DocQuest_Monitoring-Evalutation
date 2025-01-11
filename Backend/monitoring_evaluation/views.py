@@ -771,6 +771,9 @@ class ChecklistItemSubmissionsView(APIView):
                     "file_url": file_field.url if file_field else None,
                 })
 
+                #debug
+                print("File URL:", file_field.url if file_field else None)
+
             return Response({"submissions": submissions}, status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f"Error in ChecklistItemSubmissionsView: {str(e)}")
