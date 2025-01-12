@@ -226,7 +226,10 @@ const ProponentsDailyAttRec = () => {
     }
 
     // debug
-    console.log("Submission data:", submissions);
+    console.log("Submission debug:", submissions.map(s => ({
+        file_name: s.file_name,
+        file_url: s.file_url
+    })));
 
 
     return (
