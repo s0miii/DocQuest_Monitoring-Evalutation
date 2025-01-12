@@ -758,6 +758,13 @@ class ChecklistItemSubmissionsView(APIView):
                     getattr(record, 'file', None)
                 )
 
+                #debug prints
+                print("===== Debug Info =====")
+                print(f"Record ID: {record.id}")
+                print(f"File field: {file_field}")
+                print(f"Storage backend: {type(file_field.storage).__name__ if file_field else None}")
+                print(f"File URL: {file_field.url if file_field else None}")
+
                 submissions.append({
                     "submission_id": record.id,
                     "status": getattr(record, "status", "N/A"),
@@ -771,8 +778,6 @@ class ChecklistItemSubmissionsView(APIView):
                     "file_url": file_field.url if file_field else None,
                 })
 
-                #debug
-                print("File URL:", file_field.url if file_field else None)
 
             return Response({"submissions": submissions}, status=status.HTTP_200_OK)
         except Exception as e:
