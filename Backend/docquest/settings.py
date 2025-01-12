@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     'http://localhost:3000',
     'docquest-production.up.railway.app',
     'docquest-monitoring-evalutation.onrender.com',
+    'doc-quest-monitoring-evalutation-2.vercel.app',
 ]
 
 env = environ.Env()
