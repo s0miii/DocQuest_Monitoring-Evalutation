@@ -150,7 +150,7 @@ else:
     else:
         raise Exception("DATABASE_URL environment variable not defined")
     
-    MEDIA_URL = f'https://docquest-files-bucket.s3.ap-southeast-2.amazonaws.com/'
+    MEDIA_URL = env('AWS_MEDIA_URL')
 
     # S3 Storage Settings
     AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
