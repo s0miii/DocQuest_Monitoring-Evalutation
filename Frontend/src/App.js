@@ -87,7 +87,6 @@ function App() {
       <Route path="/staff/project/:projectID/photo-documentations" element={<StaffPhotoDocs />} />
       <Route path="/staff/project/:projectID/other-files" element={<StaffOthers />} />
 
-
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
       <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
       <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />

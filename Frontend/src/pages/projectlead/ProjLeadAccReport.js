@@ -7,7 +7,7 @@ import GeneratePDFDocument from "../../components/Monitoring PDFs/GeneratePDFDoc
 
 const ProjLeadAccReport = () => {
     const navigate = useNavigate();
-    const { projectID} = useParams();
+    const { projectID, id} = useParams();
     const [loading, setLoading] = useState(true);
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const [pdfUrl, setPdfUrl] = useState("");
@@ -86,7 +86,7 @@ const ProjLeadAccReport = () => {
 
             try {
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/18/`,
+                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/${id}/`,
                     {
                         headers: { Authorization: `Token ${token}` }
                     }
@@ -121,29 +121,25 @@ const ProjLeadAccReport = () => {
         };
 
         fetchDetails();
-    }, [projectID, navigate]);
-
-    const isDataValid = () => {
-        // Example validation: ensure all required fields are filled
-        return accReport.banner_program_title && accReport.flagship_program &&
-            accReport.training_modality && accReport.actualStartDateImplementation &&
-            accReport.actualEndDateImplementation;
-    }
-
+    }, [id, navigate]);
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+        
         const token = localStorage.getItem("token");
         if (!token) {
             alert("User not logged in. Please log in again.");
             navigate("/login");
             return;
         }
-    
+        
+        const method = id ? 'PUT' : 'POST'; // Use PUT if id exists, POST otherwise
+        const url = id 
+            ? `http://127.0.0.1:8000/monitoring/accomplishment_reports/${id}/` 
+            : `http://127.0.0.1:8000/monitoring/accomplishment_reports/`;
+        
         try {
-            // Send the data to the backend API
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/accomplishment_reports/`, {
-                method: 'POST',
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     Authorization: `Token ${token}`,
                     "Content-Type": "application/json",
@@ -152,9 +148,10 @@ const ProjLeadAccReport = () => {
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.detail || "Failed to submit report.");
-    
-            // Update the submittedFiles state
-            setSubmittedFiles([...submittedFiles, {...data, dateSubmitted: new Date().toLocaleDateString()}]);
+            
+            // Assuming data includes the new ID and dateSubmitted from the server
+            const newFile = { ...data, dateSubmitted: new Date(data.dateSubmitted).toLocaleDateString() };
+            setSubmittedFiles([...submittedFiles, newFile]);
             alert("Report submitted successfully!");
         } catch (error) {
             console.error("Error submitting report:", error);
@@ -162,7 +159,6 @@ const ProjLeadAccReport = () => {
             alert(error.message);
         }
     };
-    
 
     const handleEdit = (report) => {
         setAccReport(report); // Load the selected report into the form for editing

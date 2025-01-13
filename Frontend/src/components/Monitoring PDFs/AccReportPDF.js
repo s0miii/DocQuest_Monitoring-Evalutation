@@ -339,7 +339,7 @@ const AccReportPDF = ({ accReport, projectDetails }) => {
                 <Text style={{ fontFamily: 'ArialB', fontSize: 12, textAlign: 'center' }}> Photo Documentation </Text>
             </View>
 
-            {/* <View style={{ marginTop: 10, paddingHorizontal: 20 }}>
+            <View style={{ marginTop: 10, paddingHorizontal: 20 }}>
                 <Text style={{ fontFamily: 'Arial', fontSize: 10 }}>Prepared by:</Text>
                 <Text style={{ fontFamily: 'ArialB', fontSize: 10, marginTop: 5, textDecoration: 'underline', }} >
                     Dr/Engr/Mr/Ms. John Doe PhD/MEd/MSc/MD
@@ -357,7 +357,7 @@ const AccReportPDF = ({ accReport, projectDetails }) => {
                 <Text style={{ fontFamily: 'Arial', fontSize: 10, marginTop: 5 }}>
                     Director, Extension and Community Relations Division
                 </Text>
-            </View> */}
+            </View>
             <Footer pageNumber={3} />
         </Page>
         </Document>
