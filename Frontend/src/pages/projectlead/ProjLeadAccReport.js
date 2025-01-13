@@ -63,6 +63,7 @@ const ProjLeadAccReport = () => {
                     setProjectDetails(data.projectDetails);
                     setIsProjectLeader(data.isProjectLeader);
                     setPdfUrl(data.projectDetails.pdfUrl);
+
                 } else {
                     console.error("Failed to fetch project details.");
                 }
@@ -75,6 +76,44 @@ const ProjLeadAccReport = () => {
 
         fetchProjectDetails();
     }, [projectID, navigate]);
+    
+
+    useEffect(() => {
+        const fetchSubmittedReports = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+    
+            try {
+                const response = await fetch(
+                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/${id}`, // Adjust the URL as needed
+                    {
+                        headers: { Authorization: `Token ${token}` }
+                    }
+                );
+    
+                if (response.ok) {
+                    const reportsData = await response.json();
+                    // Check if the response is an array before setting the state
+                    if (Array.isArray(reportsData)) {
+                        setSubmittedFiles(reportsData); // Ensure it's an array
+                    } else {
+                        console.error('Expected an array of reports, but received:', reportsData);
+                        setSubmittedFiles([]); // Set as empty array if not an array
+                    }
+                } else {
+                    console.error("Failed to fetch submitted reports.");
+                }
+            } catch (error) {
+                console.error("Error fetching submitted reports:", error);
+            }
+        };
+    
+        if (id) fetchSubmittedReports();
+    }, [id, navigate]);    
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -112,6 +151,7 @@ const ProjLeadAccReport = () => {
                         ways_forward_plans: data.project_narrative.ways_forward_plans,
                         total_number_of_days: data.total_number_of_days,
                         submitted_by: data.submitted_by,
+                        approved_photos: data.approved_photos,
                     });
                 } else {
                     console.error("Failed to fetch project details.");
@@ -125,6 +165,7 @@ const ProjLeadAccReport = () => {
 
         fetchDetails();
     }, [id, navigate]);
+    
     
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -153,9 +194,9 @@ const ProjLeadAccReport = () => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.detail || "Failed to submit report.");
             
-            // Assuming data includes the new ID and dateSubmitted from the server
+            // Update state carefully, check if the response data includes the necessary properties
             const newFile = { ...data, dateSubmitted: new Date(data.dateSubmitted).toLocaleDateString() };
-            setSubmittedFiles([...submittedFiles, newFile]);
+            setSubmittedFiles(prevFiles => [...prevFiles, newFile]);
             alert("Report submitted successfully!");
         } catch (error) {
             console.error("Error submitting report:", error);
@@ -447,7 +488,22 @@ const ProjLeadAccReport = () => {
                                 />
                             </div>
                         </div>
-
+                        
+                        {/* Photo Documentation */}
+                        <h2 className="text-xl font-semibold text-center mb-6 mt-8">Photo Documentation</h2>
+                        <div className="grid grid-cols-1 gap-4">
+                            {accReport.approved_photos && accReport.approved_photos.length > 0 ? (
+                                accReport.approved_photos.map(photo => (
+                                    <div key={photo.id} className="rounded-lg">
+                                        <p className="text-sm text-gray-700">{photo.description || 'No description provided.'}</p>
+                                        <p className="text-xs text-gray-500">Uploaded on: {new Date(photo.date_uploaded).toLocaleDateString()}</p>
+                                        <img src={`http://127.0.0.1:8000${photo.photo}`} alt="Documented Activity" className="w-full h-auto rounded-lg mt-2" />
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-center text-gray-500">No approved photos available.</p>
+                            )}
+                        </div>
 
                         
                         <form onSubmit={handleSubmit} div className="mt-4 flex justify-center">

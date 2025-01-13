@@ -337,20 +337,30 @@ const AccReportPDF = ({ accReport, projectDetails, approvedPhotos }) => {
             <Header />
             <View style={{ marginTop: 20, marginBottom: 20 }}>
                 <Text style={{ fontFamily: 'ArialB', fontSize: 12, textAlign: 'center' }}> Photo Documentation </Text>
-            </View>
-            {approvedPhotos.map(photo => (
-                <View key={photo.id} style={{ marginBottom: 20, alignItems: 'center' }}>
-                    <Text style={{ marginTop: 5, fontFamily: 'Arial', fontSize: 10 }}>
-                        Description: {photo.description}
+                {approvedPhotos.length > 0 ? (
+                    approvedPhotos.map(photo => (
+                        <View key={photo.id} style={{ marginVertical: 5, paddingHorizontal: 20 }}>
+                            <Text style={{ fontFamily: 'Arial', fontSize: 10 }}>
+                                {photo.description || 'No description provided.'}
+                            </Text>
+                            <Text style={{ fontFamily: 'Arial', fontSize: 8, color: '#666', marginTop: 1 }}>
+                                Uploaded on: {new Date(photo.date_uploaded).toLocaleDateString()}
+                            </Text>
+                            <Image
+                                style={{ width: '100%', height: 'auto', marginTop: 5, marginBottom: 5 }}
+                                src={`http://127.0.0.1:8000${photo.photo}`}
+                            />
+                        </View>
+                    ))
+                ) : (
+                    <Text style={{ fontFamily: 'Arial', fontSize: 10, textAlign: 'center' }}>
+                        No approved photos available.
                     </Text>
-                    <Image
-                        style={{ width: 300, height: 200 }}
-                        src={photo.photo}
-                    />
-                </View>
-            ))}
+                )}
+            </View>
+            
 
-            <View style={{ marginTop: 10, paddingHorizontal: 20 }}>
+            {/* <View style={{ marginTop: 10, paddingHorizontal: 20 }}>
                 <Text style={{ fontFamily: 'Arial', fontSize: 10 }}>Prepared by:</Text>
                 <Text style={{ fontFamily: 'ArialB', fontSize: 10, marginTop: 5, textDecoration: 'underline', }} >
                     Dr/Engr/Mr/Ms. John Doe PhD/MEd/MSc/MD
@@ -368,7 +378,7 @@ const AccReportPDF = ({ accReport, projectDetails, approvedPhotos }) => {
                 <Text style={{ fontFamily: 'Arial', fontSize: 10, marginTop: 5 }}>
                     Director, Extension and Community Relations Division
                 </Text>
-            </View>
+            </View> */}
             <Footer pageNumber={3} />
         </Page>
         </Document>
