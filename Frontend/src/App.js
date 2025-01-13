@@ -90,7 +90,7 @@ function App() {
       <Route path="/projlead/proj" element={<ProjLeadProjects />} />
       <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
       <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />
-      <Route path="/projlead/project/:projectID/accomplishment-report" element={<ProjLeadAccReport />} />
+      <Route path="/projlead/project/:projectID/accomplishment-report/:id" element={<ProjLeadAccReport />} />
       <Route path="/projlead/project/:projectID/daily-attendance" element={<ProjLeadDailyAttRec />} />
       <Route path="/projlead/project/:projectID/evaluation-summary" element={<ProjLeadEvalSum />} />
       <Route path="/projlead/project/:projectID/trainer-cv-dtr" element={<ProjLeadCvDtr />} />

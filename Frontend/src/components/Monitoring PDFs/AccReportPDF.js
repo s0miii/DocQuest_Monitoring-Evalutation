@@ -92,7 +92,7 @@ const Footer = ({ pageNumber }) => (
     </View>
 );
 
-const AccReportPDF = ({ accReport, projectDetails }) => {
+const AccReportPDF = ({ accReport, projectDetails, approvedPhotos }) => {
 
     return (
         <Document>
@@ -338,6 +338,17 @@ const AccReportPDF = ({ accReport, projectDetails }) => {
             <View style={{ marginTop: 20, marginBottom: 20 }}>
                 <Text style={{ fontFamily: 'ArialB', fontSize: 12, textAlign: 'center' }}> Photo Documentation </Text>
             </View>
+            {approvedPhotos.map(photo => (
+                <View key={photo.id} style={{ marginBottom: 20, alignItems: 'center' }}>
+                    <Text style={{ marginTop: 5, fontFamily: 'Arial', fontSize: 10 }}>
+                        Description: {photo.description}
+                    </Text>
+                    <Image
+                        style={{ width: 300, height: 200 }}
+                        src={photo.photo}
+                    />
+                </View>
+            ))}
 
             <View style={{ marginTop: 10, paddingHorizontal: 20 }}>
                 <Text style={{ fontFamily: 'Arial', fontSize: 10 }}>Prepared by:</Text>

@@ -23,10 +23,11 @@ const ProjLeadAccReport = () => {
         issues_challenges: '',
         participant_engagement_quality: '',
         discussion_comments: '',
-        ways_forward_plans: ''
+        ways_forward_plans: '', 
+        total_number_of_days: '',
+        submitted_by: '',
     });
     const [submittedFiles, setSubmittedFiles] = useState([]);
-    const [submittedReports, setSubmittedReports] = useState([]);
     const [projectDetails, setProjectDetails] = useState({});
     const [error, setError] = useState('');
 
@@ -108,7 +109,9 @@ const ProjLeadAccReport = () => {
                         issues_challenges: data.project_narrative.issues_challenges,
                         participant_engagement_quality: data.project_narrative.participant_engagement_quality,
                         discussion_comments: data.project_narrative.discussion_comments,
-                        ways_forward_plans: data.project_narrative.ways_forward_plans
+                        ways_forward_plans: data.project_narrative.ways_forward_plans,
+                        total_number_of_days: data.total_number_of_days,
+                        submitted_by: data.submitted_by,
                     });
                 } else {
                     console.error("Failed to fetch project details.");
@@ -122,6 +125,7 @@ const ProjLeadAccReport = () => {
 
         fetchDetails();
     }, [id, navigate]);
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -160,9 +164,9 @@ const ProjLeadAccReport = () => {
         }
     };
 
-    const handleEdit = (report) => {
-        setAccReport(report); // Load the selected report into the form for editing
-        console.log("Editing report:", report);
+    const handleEdit = (file) => {
+        setAccReport(file); // Make sure 'file' contains all fields expected in the form
+        console.log("Editing report:", file);
     };
 
     const handleChange = (event) => {
@@ -443,6 +447,9 @@ const ProjLeadAccReport = () => {
                                 />
                             </div>
                         </div>
+
+
+                        
                         <form onSubmit={handleSubmit} div className="mt-4 flex justify-center">
                             <button
                                 type="submit"

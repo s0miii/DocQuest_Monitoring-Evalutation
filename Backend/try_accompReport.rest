@@ -46,7 +46,7 @@
 
 ###
 # Get Accomplishment Reports by User
-GET http://127.0.0.1:8000/monitoring/accomplishment_reports/
+GET http://127.0.0.1:8000/monitoring/accomplishment_reports/18
 Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
 
 ###

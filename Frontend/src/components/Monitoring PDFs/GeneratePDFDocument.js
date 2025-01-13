@@ -5,7 +5,7 @@ import AccReportPDF from './AccReportPDF';
 const GeneratePDFDocument = async (accReport, projectDetails) => {
     try {
         // Generate PDF Blob
-        const blob = await pdf(<AccReportPDF accReport={accReport} projectDetails={projectDetails} />).toBlob();
+        const blob = await pdf(<AccReportPDF accReport={accReport} projectDetails={projectDetails} approvedPhotos={accReport.approved_photos} />).toBlob();
 
         // Create a temporary URL for the PDF and open it in a new tab
         const url = URL.createObjectURL(blob);
