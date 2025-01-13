@@ -31,7 +31,7 @@ function EStaffSideBar({ onFilterChange }) {
     };
 
     return (
-        <div className="w-1/5 bg-vlu text-white h-screen fixed z-50">
+        <div className="fixed z-50 w-1/5 h-screen overflow-y-auto text-white bg-vlu">
             <div className="flex justify-center">
                 <img src="/images/logo2.png" alt="DocQuestLogo" className="w-52" />
             </div>
@@ -83,6 +83,54 @@ function EStaffSideBar({ onFilterChange }) {
                             Project Monitoring
                         </NavLink>
                     </li>
+                    <li>
+                        <button
+                            onClick={() => toggleDropdown('prexc')}
+                            className={`text-lg block px-6 py-3 w-full text-left ${activeDropdown === 'prexc' ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                        >
+                            PREXC Report
+                        </button>
+                        {activeDropdown === 'prexc' && (
+                            <ul className="pl-6">
+                                <li>
+                                    <NavLink
+                                        to="/estaff/prexc/op1-op3"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        Extension Program OP 1 & OP 3
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink
+                                        to="/estaff/prexc/op2"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        Extension Program OP 2
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink
+                                        to="/estaff/prexc/oc"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        Extension Program OC
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink
+                                        to="/estaff/prexc/performance"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        College Campus Performance
+                                    </NavLink>
+                                </li>
+                            </ul>
+                        )}
+                    </li>
 
                     {/* Accounts Dropdown */}
                     <li>
@@ -120,7 +168,7 @@ function EStaffSideBar({ onFilterChange }) {
                     <li>
                         <button
                             onClick={handleLogout}
-                            className="text-lg text-white block px-6 py-3 hover:text-red-600 w-full text-left"
+                            className="block w-full px-6 py-3 text-lg text-left text-white hover:text-red-600"
                         >
                             Log out
                         </button>
