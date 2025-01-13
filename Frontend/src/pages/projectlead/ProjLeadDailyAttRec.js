@@ -126,9 +126,8 @@ const ProjLeadDailyAttRec = () => {
                 return;
             }
             
-            const projectId = 1; 
             const response = await axios.post(
-                `http://127.0.0.1:8000/monitoring/calculate_attendees/${projectId}/`,
+                `http://127.0.0.1:8000/monitoring/calculate_attendees/${projectID}/`,
                 {},
                 {
                     headers: {
@@ -572,133 +571,241 @@ const ProjLeadDailyAttRec = () => {
                     {/* Conditional Rendering of Sections */}
                     {choice === "uploadFiles" && (
                         <div>
-                        
-                        {/* Submitted Files Section */}
-                        <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
-                            <h2 className="mb-4 text-xl font-semibold text-center">Submitted Files</h2>
-                            <div
-                                className="overflow-y-auto"
-                                style={{
-                                    maxHeight: "300px", // Limit the table height
-                                }}
-                            >
-                                <table className="min-w-full bg-white rounded-lg shadow-md table-auto">
-                                    <thead className="sticky top-0 z-10 bg-gray-100">
-                                        <tr className="border-b">
-                                            <th
-                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
-                                                onClick={() => handleSort("file_name")}
-                                            >
-                                                File Name
-                                                {sortConfig.key === "file_name" &&
-                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                            </th>
-                                            <th
-                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
-                                            >
-                                                Total Attendees
-                                            </th>
-                                            <th
-                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
-                                                onClick={() => handleSort("submitted_by")}
-                                            >
-                                                Submitted By
-                                                {sortConfig.key === "submitted_by" &&
-                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                            </th>
-                                            <th
-                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
-                                                onClick={() => handleSort("date_uploaded")}
-                                            >
-                                                Date Submitted
-                                                {sortConfig.key === "date_uploaded" &&
-                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                            </th>
-                                            <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
-                                                Description
-                                            </th>
-                                            <th
-                                                className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
-                                                onClick={() => handleSort("status")}
-                                            >
-                                                Status
-                                                {sortConfig.key === "status" &&
-                                                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
-                                            </th>
-                                            <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {submissions.length > 0 ? (
-                                            submissions.map((submission) => (
-                                                <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
-                                                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                                                        <a
-                                                            href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="block text-center text-blue-600 truncate hover:underline"
-                                                        >
-                                                            {submission.file_name || "No File"}
-                                                        </a>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
-                                                        {submission.total_attendees || "Unknown"}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
-                                                        {submission.submitted_by || "Unknown"}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
-                                                        {new Date(submission.date_uploaded).toLocaleDateString()}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
-                                                        {submission.description || "No Description"}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-center">
-                                                        <p
-                                                            className={` ${submission.status === "Approved"
-                                                                ? "text-green-600"
-                                                                : submission.status === "Pending"
-                                                                    ? "text-yellow-500"
-                                                                    : submission.status === "Rejected"
-                                                                        ? "text-red-600"
-                                                                        : "text-gray-600"
-                                                                }`}
-                                                        >
-                                                            {submission.status}
-                                                        </p>
-                                                        {submission.status === "Rejected" && submission.rejection_reason && (
-                                                            <p className="mt-1 text-xs text-red-600">{submission.rejection_reason}</p>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
-                                                        {submission.status === "Approved" ? (
-                                                            <span className="text-gray-500">Cannot Remove</span>
-                                                        ) : (
-                                                            <button
-                                                                onClick={() => handleDelete(submission.submission_id)}
-                                                                className="text-red-500 hover:text-red-700"
+                            {/* Submitted Files Section */}
+                            <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
+                                <h2 className="mb-4 text-xl font-semibold text-center">Submitted Files</h2>
+                                <div
+                                    className="overflow-y-auto"
+                                    style={{
+                                        maxHeight: "300px", // Limit the table height
+                                    }}
+                                >
+                                    <table className="min-w-full bg-white rounded-lg shadow-md table-auto">
+                                        <thead className="sticky top-0 z-10 bg-gray-100">
+                                            <tr className="border-b">
+                                                <th
+                                                    className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                    onClick={() => handleSort("file_name")}
+                                                >
+                                                    File Name
+                                                    {sortConfig.key === "file_name" &&
+                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                                </th>
+                                                <th
+                                                    className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                >
+                                                    Total Attendees
+                                                </th>
+                                                <th
+                                                    className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                    onClick={() => handleSort("submitted_by")}
+                                                >
+                                                    Submitted By
+                                                    {sortConfig.key === "submitted_by" &&
+                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                                </th>
+                                                <th
+                                                    className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                    onClick={() => handleSort("date_uploaded")}
+                                                >
+                                                    Date Submitted
+                                                    {sortConfig.key === "date_uploaded" &&
+                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                                </th>
+                                                <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
+                                                    Description
+                                                </th>
+                                                <th
+                                                    className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
+                                                    onClick={() => handleSort("status")}
+                                                >
+                                                    Status
+                                                    {sortConfig.key === "status" &&
+                                                        (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                                                </th>
+                                                <th className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {submissions.length > 0 ? (
+                                                submissions.map((submission) => (
+                                                    <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
+                                                        <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                                                            <a
+                                                                href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="block text-center text-blue-600 truncate hover:underline"
                                                             >
-                                                                Remove
-                                                            </button>
-                                                        )}
+                                                                {submission.file_name || "No File"}
+                                                            </a>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                            {submission.total_attendees || "Unknown"}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                            {submission.submitted_by || "Unknown"}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                            {new Date(submission.date_uploaded).toLocaleDateString()}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-gray-700" style={{ maxWidth: "200px", wordWrap: "break-word" }}>
+                                                            {submission.description || "No Description"}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-center">
+                                                            <p
+                                                                className={` ${submission.status === "Approved"
+                                                                    ? "text-green-600"
+                                                                    : submission.status === "Pending"
+                                                                        ? "text-yellow-500"
+                                                                        : submission.status === "Rejected"
+                                                                            ? "text-red-600"
+                                                                            : "text-gray-600"
+                                                                    }`}
+                                                            >
+                                                                {submission.status}
+                                                            </p>
+                                                            {submission.status === "Rejected" && submission.rejection_reason && (
+                                                                <p className="mt-1 text-xs text-red-600">{submission.rejection_reason}</p>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-center text-gray-700 whitespace-nowrap">
+                                                            {submission.status === "Approved" ? (
+                                                                <span className="text-gray-500">Cannot Remove</span>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleDelete(submission.submission_id)}
+                                                                    className="text-red-500 hover:text-red-700"
+                                                                >
+                                                                    Remove
+                                                                </button>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                                                        No submissions available.
                                                     </td>
                                                 </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                                                    No submissions available.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* Add New Submission Section */}
+                            <div className="p-8 bg-white rounded-lg shadow-lg">
+                                <h2 className="mb-6 text-xl font-semibold text-center">
+                                    Add New Submission
+                                </h2>
+
+                            <div className="grid grid-cols-3 gap-4 mb-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Description
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                        placeholder="Enter a Short Description"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                        placeholder="Set Date"
+                                        value={date}
+                                        onChange={(e) => setDate(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Total Number of Attendees
+                                    </label>
+                                    <input
+                                        type="number"
+                                        className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                        placeholder="Number of Attendees"
+                                        value={totalAttendees}
+                                        onChange={(e) => setAttendees(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Preview of Attached Files */}
+                            <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
+                                <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
+                                {attachedFiles.length === 0 && (
+                                    <div className="mb-3 text-gray-400">
+                                        <span className="block text-3xl text-center">+</span>
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    multiple
+                                    onChange={handleFileChange}
+                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                    style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
+                                />
+                                {attachedFiles.length > 0 && (
+                                    <div
+                                        className="grid w-full grid-cols-5 gap-3 mt-4 overflow-y-auto"
+                                        style={{
+                                            maxHeight: "250px", // Scrollable height
+                                            paddingRight: "10px", // Space for scrollbar
+                                        }}
+                                    >
+                                        {attachedFiles.map((file, index) => {
+                                            const fileExtension = file.name.split('.').pop().toUpperCase();
+                                            const filePreview = file.type.startsWith("image/")
+                                                ? (
+                                                    <img
+                                                        src={URL.createObjectURL(file)}
+                                                        alt={`attachment-preview-${index}`}
+                                                        className="object-cover w-20 h-20 rounded-lg" // Deducted 10% width
+                                                    />
+                                                )
+                                                : (
+                                                    <div className="flex items-center justify-center w-20 h-20 text-gray-600 bg-gray-200 rounded-lg">
+                                                        <span className="text-lg">{fileExtension}</span>
+                                                    </div>
+                                                );
+
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="flex flex-col items-center p-2 border border-gray-200 rounded-lg shadow-md"
+                                                    title={file.name}
+                                                    style={{ marginBottom: "10px" }}
+                                                >
+                                                    {filePreview}
+                                                    <p className="w-full mt-2 text-xs text-center truncate">{file.name}</p>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex justify-center">
+                                <button
+                                    type="button"
+                                    onClick={handleSubmit}
+                                    className="px-12 py-2 font-bold text-white transition bg-blue-500 rounded-lg hover:bg-blue-600"
+                                >
+                                    Submit
+                                </button>
                             </div>
                         </div>
-
                         </div>
                     )}
 
@@ -878,121 +985,6 @@ const ProjLeadDailyAttRec = () => {
                             </div>
                         </div>
                     )}
-
-                    {/* Add New Submission Section */}
-                    <div className="p-8 bg-white rounded-lg shadow-lg">
-                        <h2 className="mb-6 text-xl font-semibold text-center">
-                            Add New Submission
-                        </h2>
-
-                        <div className="grid grid-cols-3 gap-4 mb-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Description
-                                </label>
-                                <input
-                                    type="text"
-                                    className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                    placeholder="Enter a Short Description"
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Date
-                                </label>
-                                <input
-                                    type="date"
-                                    className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                    placeholder="Set Date"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Total Number of Attendees
-                                </label>
-                                <input
-                                    type="number"
-                                    className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                    placeholder="Number of Attendees"
-                                    value={totalAttendees}
-                                    onChange={(e) => setAttendees(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Preview of Attached Files */}
-                        <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
-                            <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
-                            {attachedFiles.length === 0 && (
-                                <div className="mb-3 text-gray-400">
-                                    <span className="block text-3xl text-center">+</span>
-                                </div>
-                            )}
-                            <input
-                                type="file"
-                                multiple
-                                onChange={handleFileChange}
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
-                            />
-                            {attachedFiles.length > 0 && (
-                                <div
-                                    className="grid w-full grid-cols-5 gap-3 mt-4 overflow-y-auto"
-                                    style={{
-                                        maxHeight: "250px", // Scrollable height
-                                        paddingRight: "10px", // Space for scrollbar
-                                    }}
-                                >
-                                    {attachedFiles.map((file, index) => {
-                                        const fileExtension = file.name.split('.').pop().toUpperCase();
-                                        const filePreview = file.type.startsWith("image/")
-                                            ? (
-                                                <img
-                                                    src={URL.createObjectURL(file)}
-                                                    alt={`attachment-preview-${index}`}
-                                                    className="object-cover w-20 h-20 rounded-lg" // Deducted 10% width
-                                                />
-                                            )
-                                            : (
-                                                <div className="flex items-center justify-center w-20 h-20 text-gray-600 bg-gray-200 rounded-lg">
-                                                    <span className="text-lg">{fileExtension}</span>
-                                                </div>
-                                            );
-
-                                        return (
-                                            <div
-                                                key={index}
-                                                className="flex flex-col items-center p-2 border border-gray-200 rounded-lg shadow-md"
-                                                title={file.name}
-                                                style={{ marginBottom: "10px" }}
-                                            >
-                                                {filePreview}
-                                                <p className="w-full mt-2 text-xs text-center truncate">{file.name}</p>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-
-
-
-                        <div className="flex justify-center">
-                            <button
-                                type="button"
-                                onClick={handleSubmit}
-                                className="px-12 py-2 font-bold text-white transition bg-yellow-500 rounded-lg hover:bg-yellow-600"
-                            >
-                                Submit
-                            </button>
-                        </div>
-
-                    </div>
-
                 </div>
             </div>
         </div>

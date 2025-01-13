@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import EstaffSideBar from "../../components/EstaffSideBar";
+import EstaffSideBar from "../../components/EStaffSideBar";
 import Topbar from "../../components/Topbar";
 import { NavLink } from 'react-router-dom';
 
@@ -78,13 +78,13 @@ const LoadTrainers = () => {
     };
 
     return (
-        <div className="bg-gray-200 min-h-screen flex">
-            <div className="w-1/5 fixed h-full">
+        <div className="flex min-h-screen bg-gray-200">
+            <div className="fixed w-1/5 h-full">
                 <EstaffSideBar />
             </div>
             <div className="flex-1 ml-[20%]">
                 <Topbar />
-                <div className="flex flex-col mt-14 px-10 pt-5">
+                <div className="flex flex-col px-10 pt-5 mt-14">
                     <div className="flex justify-between mb-5">
                         <h1 className="text-2xl font-semibold">Documents</h1>
                         <div className="flex">
@@ -96,7 +96,7 @@ const LoadTrainers = () => {
                                 onChange={handleSearch}
                             />
                             <select
-                                className="ml-3 p-2 border"
+                                className="p-2 ml-3 border"
                                 value={documentType}
                                 onChange={handleDocumentTypeFilter}
                             >
@@ -108,30 +108,30 @@ const LoadTrainers = () => {
                     </div>
                     <table className="min-w-full bg-white border">
                         <thead>
-                            <tr className="bg-vlu text-white">
-                                <th className="py-2 px-4">Project Leader</th>
-                                <th className="py-2 px-4">Document Type</th>
-                                <th className="py-2 px-4">Date</th>
-                                <th className="py-2 px-4">Status</th>
-                                <th className="py-2 px-4">Action</th>
+                            <tr className="text-white bg-vlu">
+                                <th className="px-4 py-2">Project Leader</th>
+                                <th className="px-4 py-2">Document Type</th>
+                                <th className="px-4 py-2">Date</th>
+                                <th className="px-4 py-2">Status</th>
+                                <th className="px-4 py-2">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {documents.map((doc, index) => (
                                 <tr key={index} className="bg-white">
-                                    <td className="py-2 px-4">{doc.projectLeader}</td>
-                                    <td className="py-2 px-4">{doc.documentType}</td>
-                                    <td className="py-2 px-4">{doc.date}</td>
-                                    <td className="py-2 px-4">
+                                    <td className="px-4 py-2">{doc.projectLeader}</td>
+                                    <td className="px-4 py-2">{doc.documentType}</td>
+                                    <td className="px-4 py-2">{doc.date}</td>
+                                    <td className="px-4 py-2">
                                         <span className={`px-3 py-1 rounded-full ${getStatusClass(doc.status)}`}>
                                             {doc.status}
                                         </span>
                                     </td>
-                                    <td className="py-2 px-4">
+                                    <td className="px-4 py-2">
                                         <div className="flex space-x-4">
                                             <NavLink
                                                 to={`/view-download/${doc.id}`} // Replace with appropriate link
-                                                className="bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
+                                                className="px-4 py-2 font-semibold text-white transition duration-300 bg-blue-600 rounded-lg hover:bg-blue-700"
                                             >
                                                 View
                                             </NavLink>
@@ -141,7 +141,7 @@ const LoadTrainers = () => {
                                                     setCurrentDocument(doc); // Set the current document to be downloaded
                                                     setShowDownloadModal(true); // Open the download modal
                                                 }}
-                                                className="bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition duration-300"
+                                                className="px-4 py-2 font-semibold text-white transition duration-300 bg-green-600 rounded-lg hover:bg-green-700"
                                             >
                                                 Download
                                             </button>
@@ -150,7 +150,7 @@ const LoadTrainers = () => {
                                             {doc.status === 'Approved' && (
                                                 <NavLink
                                                     to="/scan-copy" // Static route to the Scan Copy page
-                                                    className="bg-yellow-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-yellow-700 transition duration-300"
+                                                    className="px-4 py-2 font-semibold text-white transition duration-300 bg-yellow-600 rounded-lg hover:bg-yellow-700"
                                                 >
                                                     Upload Copy
                                                 </NavLink>
@@ -165,14 +165,14 @@ const LoadTrainers = () => {
                         <button
                             onClick={handlePreviousPage}
                             disabled={currentPage === 1}
-                            className="px-4 py-2 bg-gray-300 disabled:opacity-50 rounded-lg"
+                            className="px-4 py-2 bg-gray-300 rounded-lg disabled:opacity-50"
                         >
                             Previous
                         </button>
                         <button
                             onClick={handleNextPage}
                             disabled={currentPage === totalPages}
-                            className="px-4 py-2 bg-gray-300 disabled:opacity-50 rounded-lg"
+                            className="px-4 py-2 bg-gray-300 rounded-lg disabled:opacity-50"
                         >
                             Next
                         </button>
@@ -184,25 +184,25 @@ const LoadTrainers = () => {
             {/* Download Modal */}
             {showDownloadModal && currentDocument && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded shadow-md">
-                        <h2 className="text-lg font-bold mb-4">Choose File Format</h2>
+                    <div className="p-6 bg-white rounded shadow-md">
+                        <h2 className="mb-4 text-lg font-bold">Choose File Format</h2>
                         <div className="flex justify-between">
                             <button
                                 onClick={() => handleDownload('PDF')}
-                                className="px-4 py-2 bg-blue-500 text-white rounded mr-2"
+                                className="px-4 py-2 mr-2 text-white bg-blue-500 rounded"
                             >
                                 PDF
                             </button>
                             <button
                                 onClick={() => handleDownload('MS Word')}
-                                className="px-4 py-2 bg-green-500 text-white rounded"
+                                className="px-4 py-2 text-white bg-green-500 rounded"
                             >
                                 MS Word
                             </button>
                         </div>
                         <button
                             onClick={() => setShowDownloadModal(false)}
-                            className="mt-4 px-4 py-2 bg-gray-300 rounded"
+                            className="px-4 py-2 mt-4 bg-gray-300 rounded"
                         >
                             Cancel
                         </button>

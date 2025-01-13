@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routers, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
 // import CoordinatorTab from "./pages/coordinator/CoordinatorTab";
 // import UserList from "./pages/estaff/UserList";
@@ -21,6 +21,10 @@ import ProjLeadPhotoDocs from "./pages/projectlead/ProjLeadPhotoDocs";
 // import Topbar from "./components/Topbar";
 // import DeptOffSideBar from './components/DeptOffSideBar';
 import DeptOffDashboard from "./pages/deptoff/DeptOffDashboard";
+import DeptOffProjectsDashboard from "./pages/deptoff/DeptOffProjectsDashboard.js";
+
+import CollegeDeanProjectsDashboard from "./pages/collegeDean/CollegeDeanProjectsDashboard.js";
+
 // import DeptOffGenerateDocument from "./pages/deptoff/DeptOffGenerateDocument";
 // import DeptOffProfilePage from "./pages/deptoff/DeptOffProfilePage";
 import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
@@ -32,7 +36,9 @@ import StaffLecNotes from "./pages/estaff/StaffLecNotes";
 import StaffPhotoDocs from "./pages/estaff/StaffPhotoDocs";
 import StaffOthers from "./pages/estaff/StaffOthers";
 import EStaffProjReq from "./pages/estaff/EStaffProjReq";
-import EStaffOP1OP2 from "./pages/estaff/EStaffOP1OP2";
+// import EstaffTrainerCVDTR from "./pages/estaff/EstaffTrainersCVDTR";
+import EStaffOP1OP3 from "./pages/estaff/EStaffOP1OP3";
+import EStaffPREXC from "./pages/estaff/EStaffPREXC";
 import ProponentsProjects from "./pages/proponents/ProjectsDashboard"
 import ProponentsProjReq from "./pages/proponents/ProponentsProjReq";
 import ProponentsDailyAttRec from "./pages/proponents/ProponentsDailyAttRec";
@@ -47,8 +53,7 @@ import ProjectsDashboard from "./pages/proponents/ProjectsDashboard";
 
 import FillAttendanceForm from "./pages/attendance and evaluation/FillAttendanceForm"
 import AttendanceReport from "./pages/attendance and evaluation/AttendanceReport";
-
-
+import { TrainerProjectDetails, EvaluationReport } from "./pages/attendance and evaluation/Trainer&EvaluationReport";
 
 
 function App() {
@@ -57,12 +62,23 @@ function App() {
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/user" element={<ProjLeadDashboard />} />
+      
       <Route path="/deptoff" element={<DeptOffDashboard />} />
+      <Route path="/deptoff-projects-dashboard" element={<DeptOffProjectsDashboard />} />
+
+      
+      <Route path="/collegedean-projects-dashboard" element={<CollegeDeanProjectsDashboard />} />
+
+      
+      
       <Route path="/coordinator" element={<CoordinatorDashboard />} />
+
       <Route path="/signatory" element={<SignatoryDashboard />} />
 
       <Route path="/estaff" element={<EstaffDashboard />} />
-      <Route path="/estaff/prexc/op1-op2" element={<EStaffOP1OP2 />} />
+      <Route path="/estaff/prexc/op1-op3" element={<EStaffOP1OP3 />} />
+      <Route path="/estaff/prexc/performance" element={<EStaffPREXC />} />
+      {/* <Route path="/estaff/proj/monitoring/trainer-cv-dtr" element={<EstaffTrainerCVDTR />} /> */}
       <Route path="/estaff/projreq/:projectID" element={<EStaffProjReq />} />
       <Route path="/staff-projects-dashboard" element={<StaffProjectsDashboard />} />
       <Route path="/staff/project/:projectID/daily-attendance" element={<StaffDailyAttRec />} />
@@ -93,10 +109,11 @@ function App() {
       <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
       <Route path="/proponents/project/:projectID/photo-documentations" element={<ProponentsPhotoDocs />} />
       
-      
-      <Route path="/eval" element={<EvaluationForm />} />
+      <Route path="/monitoring/evaluation/fill/:token" element={<EvaluationForm />} />
       <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
       <Route path="/projlead/attendance-records/:templateId" element={<AttendanceReport />} />
+      <Route path="/trainer-project/:trainerID/:projectID" element={<TrainerProjectDetails />} />
+      <Route path="/evaluations/:trainerID/:projectID" element={<EvaluationReport />} />
     </Routes>
 
   );
