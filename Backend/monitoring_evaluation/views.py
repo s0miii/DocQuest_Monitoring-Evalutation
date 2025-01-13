@@ -12,6 +12,7 @@ from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponse
 from docquestapp.models import Roles, Project, LoadingOfTrainers
 from .models import *
 from .forms import *
@@ -99,6 +100,31 @@ def send_dynamic_reminder_email(request, project_id):
         )
 
     return Response({"message": "Reminder email sent successfully."}, status=200)
+
+### file uploads
+
+# upload file
+# def upload_file(request):
+#     if request.method == 'POST' and request.FILES.get('file'):
+#         uploaded_file = request.FILES['file']
+#         file_instance = UploadedFile(
+#             name=uploaded_file.name,
+#             content_type=uploaded_file.content_type,
+#             file_data=uploaded_file.read()
+#         )
+#         file_instance.save()
+#         return JsonResponse({'message':'File uploaded successfully'})
+#     return JsonResponse({'error': 'No file uploaded'}, status=400)
+
+# # serve file
+# def serve_file(request, file_id):
+#     try:
+#         file_instance = UploadedFile.objects.get(id=file_id)
+#         response = HttpResponse(file_instance.file_data, content_type=file_instance.content_type)
+#         response['Content-Disposition'] = f'attachment; filename="{file_instance.name}"'
+#         return response
+#     except UploadedFile.DoesNotExist:
+#         return HttpResponse('File not found', status=404)
 
 
 # retrieve projects based on user role each project

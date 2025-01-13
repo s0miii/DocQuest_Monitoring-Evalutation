@@ -23,6 +23,16 @@ class NotificationLog(models.Model):
     def __str__(self):
         return f"Notification from {self.sender} to {self.recipient_email} for {self.project.projectTitle}"
 
+# # model for files
+
+# class UploadedFile(models.Model):
+#     name = models.CharField(max_length=255)
+#     content_type = models.CharField(max_length=50)
+#     file_data = models.BinaryField()
+#     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+
 
 ### Checklist Items
 
@@ -41,7 +51,15 @@ class DailyAttendanceRecord(models.Model):
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     rejection_reason = models.TextField(null=True, blank=True)
-    
+
+    # fields for BLOB storage
+    # attendance_blob = models.BinaryField(null=True, blank=True)
+    # content_type = models.CharField(max_length=50, null=True, blank=True)
+
+    # def save_blob(self, uploaded_file):
+    #     # method to save file as BLOB
+    #     self.attendance_blob = uploaded_file.read()
+    #     self.content_type = uploaded_file.content_type
 
     def __str__(self):
         return f"Attendance Record for {self.project.projectTitle} by {self.proponent.firstname} + {self.proponent.lastname} on {self.date_uploaded.date()}"
@@ -60,6 +78,15 @@ class SummaryOfEvaluation(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     rejection_reason = models.TextField(null=True, blank=True)
 
+    # fields for BLOB storage
+    # evaluation_blob = models.BinaryField(null=True, blank=True)
+    # content_type = models.CharField(max_length=50, null=True, blank=True)
+
+    # def save_blob(self, uploaded_file):
+    #     # method to save file as BLOB
+    #     self.evaluation_blob = uploaded_file.read()
+    #     self.content_type = uploaded_file.content_type
+
 # Trainer's CV/DTR
 class TrainerCvDtr(models.Model):
     STATUS_CHOICES = [
@@ -74,6 +101,15 @@ class TrainerCvDtr(models.Model):
     date_uploaded = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     rejection_reason = models.TextField(null=True, blank=True)
+
+    # fields for BLOB storage
+    # cvDtr_blob = models.BinaryField(null=True, blank=True)
+    # content_type = models.CharField(max_length=50, null=True, blank=True)
+
+    # def save_blob(self, uploaded_file):
+    #     # method to save file as BLOB
+    #     self.cvDtr_blob = uploaded_file.read()
+    #     self.content_type = uploaded_file.content_type
 
 # Modules/Lecture Notes
 class ModulesLectureNotes(models.Model):
@@ -90,6 +126,15 @@ class ModulesLectureNotes(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     rejection_reason = models.TextField(null=True, blank=True)
 
+    # fields for BLOB storage
+    # notes_blob = models.BinaryField(null=True, blank=True)
+    # content_type = models.CharField(max_length=50, null=True, blank=True)
+
+    # def save_blob(self, uploaded_file):
+    #     # method to save file as BLOB
+    #     self.notes_blob = uploaded_file.read()
+    #     self.content_type = uploaded_file.content_type
+
 # Photo Documentation
 class PhotoDocumentation(models.Model):
     STATUS_CHOICES = [
@@ -105,6 +150,15 @@ class PhotoDocumentation(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     rejection_reason = models.TextField(null=True, blank=True)
 
+    # fields for BLOB storage
+    # photoDocs_blob = models.BinaryField(null=True, blank=True)
+    # content_type = models.CharField(max_length=50, null=True, blank=True)
+
+    # def save_blob(self, uploaded_file):
+    #     # method to save file as BLOB
+    #     self.photoDocs_blob = uploaded_file.read()
+    #     self.content_type = uploaded_file.content_type
+
 # Other FIles
 class OtherFiles(models.Model):
     STATUS_CHOICES = [
@@ -119,6 +173,15 @@ class OtherFiles(models.Model):
     date_uploaded = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     rejection_reason = models.TextField(null=True, blank=True)
+
+    # fields for BLOB storage
+    # otherFiles_blob = models.BinaryField(null=True, blank=True)
+    # content_type = models.CharField(max_length=50, null=True, blank=True)
+
+    # def save_blob(self, uploaded_file):
+    #     # method to save file as BLOB
+    #     self.otherFiles_blob = uploaded_file.read()
+    #     self.content_type = uploaded_file.content_type
 
 ## Assign Checklist Item
 CustomUser = get_user_model()
