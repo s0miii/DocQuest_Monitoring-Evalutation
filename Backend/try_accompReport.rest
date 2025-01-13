@@ -67,12 +67,11 @@ Content-Type: application/json
 
 {
   "project": 1,
-  "banner_program_title": "PANG TEST SA BAGO NGA AR",
+  "banner_program_title": "PHASE DESCRIPTION NOT INCLUDED",
   "flagship_program": "Flagship Program 1",
   "training_modality": "Face to Face",
   "actualStartDateImplementation": "2024-12-01",
   "actualEndDateImplementation": "2024-12-05",
-  "phase_description": "Initial phase description for the project.",
   "activities_topics": "Workshops and discussions on advanced topics.",
   "issues_challenges": "Lack of participation on day 2.",
   "participant_engagement_quality": "Highly interactive session.",
