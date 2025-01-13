@@ -51,7 +51,7 @@ Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
 
 ###
 # Delete Accomplishment Report by report ID
-DELETE http://127.0.0.1:8000/monitoring/accomplishment_reports/17/
+DELETE http://127.0.0.1:8000/monitoring/accomplishment_reports/1/
 Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
 
 

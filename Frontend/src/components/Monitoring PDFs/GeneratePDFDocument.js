@@ -2,10 +2,10 @@ import React from 'react';
 import { pdf } from '@react-pdf/renderer';
 import AccReportPDF from './AccReportPDF';
 
-const GeneratePDFDocument = async (formData, projectDetails) => {
+const GeneratePDFDocument = async (accReport, projectDetails) => {
     try {
         // Generate PDF Blob
-        const blob = await pdf(<AccReportPDF formData={formData} projectDetails={projectDetails} />).toBlob();
+        const blob = await pdf(<AccReportPDF accReport={accReport} projectDetails={projectDetails} />).toBlob();
 
         // Create a temporary URL for the PDF and open it in a new tab
         const url = URL.createObjectURL(blob);

@@ -1,23 +1,19 @@
 import React, {useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 import { FaArrowLeft, FaFilePdf, FaEdit } from "react-icons/fa";
-import { useParams } from "react-router-dom";
 import GeneratePDFDocument from "../../components/Monitoring PDFs/GeneratePDFDocument";
 
 const ProjLeadAccReport = () => {
     const navigate = useNavigate();
-    const { projectID, id } = useParams();
+    const { projectID} = useParams();
     const [loading, setLoading] = useState(true);
-    const [submittedFiles, setSubmittedFiles] = useState([]);
-    const [projectDetails, setProjectDetails] = useState(null);
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const [pdfUrl, setPdfUrl] = useState("");
     const [prexcAchievement, setPrexcAchievement] = useState(null);
     const [accReport, setAccReport] = useState({
-        total_number_of_days: '',
-        submitted_by: '',
+        project: '',
         banner_program_title: '',
         flagship_program: '',
         training_modality: '',
@@ -29,6 +25,10 @@ const ProjLeadAccReport = () => {
         discussion_comments: '',
         ways_forward_plans: ''
     });
+    const [submittedFiles, setSubmittedFiles] = useState([]);
+    const [submittedReports, setSubmittedReports] = useState([]);
+    const [projectDetails, setProjectDetails] = useState({});
+    const [error, setError] = useState('');
 
     // Fetch project details 
     useEffect(() => {
@@ -86,7 +86,7 @@ const ProjLeadAccReport = () => {
 
             try {
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/${id}/`,
+                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/18/`,
                     {
                         headers: { Authorization: `Token ${token}` }
                     }
@@ -97,8 +97,8 @@ const ProjLeadAccReport = () => {
                     setProjectDetails(data);
                     // Pre-populate form if editing an existing report
                     setAccReport({
-                        total_number_of_days: data.total_number_of_days,
-                        submitted_by: data.submitted_by,
+                        ...accReport,
+                        project: data.project,
                         banner_program_title: data.banner_program_title,
                         flagship_program: data.flagship_program,
                         training_modality: data.training_modality,
@@ -121,19 +121,19 @@ const ProjLeadAccReport = () => {
         };
 
         fetchDetails();
-    }, [id, navigate]);
+    }, [projectID, navigate]);
 
-    
+    const isDataValid = () => {
+        // Example validation: ensure all required fields are filled
+        return accReport.banner_program_title && accReport.flagship_program &&
+            accReport.training_modality && accReport.actualStartDateImplementation &&
+            accReport.actualEndDateImplementation;
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
     
-        const newReport = {
-            ...accReport,
-            dateSubmitted: new Date().toLocaleDateString(),
-        };
-
         const token = localStorage.getItem("token");
-
         if (!token) {
             alert("User not logged in. Please log in again.");
             navigate("/login");
@@ -142,51 +142,36 @@ const ProjLeadAccReport = () => {
     
         try {
             // Send the data to the backend API
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/accomplishment_reports/${id}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/monitoring/accomplishment_reports/`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Token ${token}`,
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(newReport),
+                body: JSON.stringify(accReport),
             });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || "Failed to submit report.");
     
-            if (response.ok) {
-                const savedReport = await response.json();
-                console.log("Report saved to database:", savedReport);
-    
-                // Update the state with the saved report (if needed)
-                setSubmittedFiles([savedReport]);
-    
-                // Optional: Reset the form fields after submission
-                setAccReport({
-                    banner_program_title: "",
-                    flagship_program: "",
-                    training_modality: "",
-                    actualStartDateImplementation: "",
-                    actualEndDateImplementation: "",
-                    activities_topics: "",
-                    issues_challenges: "",
-                    participant_engagement_quality: "",
-                    discussion_comments: "",
-                    ways_forward_plans: ""
-                });
-            } else {
-                console.error("Failed to save report:", response.statusText);
-            }
+            // Update the submittedFiles state
+            setSubmittedFiles([...submittedFiles, {...data, dateSubmitted: new Date().toLocaleDateString()}]);
+            alert("Report submitted successfully!");
         } catch (error) {
             console.error("Error submitting report:", error);
+            setError(error.message);
+            alert(error.message);
         }
     };
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setAccReport(prev => ({ ...prev, [name]: value }));
-    };
+    
 
     const handleEdit = (report) => {
         setAccReport(report); // Load the selected report into the form for editing
         console.log("Editing report:", report);
+    };
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setAccReport({ ...accReport, [name]: value });
     };
 
     // loading substitute
@@ -313,13 +298,16 @@ const ProjLeadAccReport = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Training Modality</label>
-                                <input
-                                    type="text"
+                                <select
                                     name="training_modality"
                                     value={accReport.training_modality}
                                     onChange={handleChange}
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                />
+                                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                >
+                                    <option value="Face to Face">Face to Face</option>
+                                    <option value="Virtual">Virtual</option>
+                                    <option value="Blended">Blended</option>
+                                </select>
                             </div>
                         </div>
 
@@ -469,7 +457,7 @@ const ProjLeadAccReport = () => {
                         </form>
                     </div>
 
-                    {/* Submitted File Section */}
+                    {/* Display submitted report */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Submitted File</h2>
                         <div
@@ -532,7 +520,7 @@ const ProjLeadAccReport = () => {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </div> 
                 </div>
             </div>
         </div>
