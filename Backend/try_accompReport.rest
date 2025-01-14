@@ -67,7 +67,7 @@ Content-Type: application/json
 
 {
   "project": 1,
-  "banner_program_title": "TRY FOR CLAR",
+  "banner_program_title": "TISTING KUNG GAGANA NI ANG POST REQUEST",
   "flagship_program": "Flagship Program 1",
   "training_modality": "Face to Face",
   "actualStartDateImplementation": "2024-12-01",

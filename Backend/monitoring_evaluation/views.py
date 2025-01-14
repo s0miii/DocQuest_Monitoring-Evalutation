@@ -1754,3 +1754,52 @@ def get_trainers_by_project(request, project_id):
     trainers = LoadingOfTrainers.objects.filter(project_id=project_id).values('LOTID', 'faculty', 'trainingLoad', 'hours')
     return JsonResponse({'trainers': list(trainers)})
 
+
+
+# Views for PREXC Report
+# For OP 1 & OP 3
+
+# For OP2
+@role_required(allowed_role_codes=["estf"])
+class ExtensionProgramOp2ViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing extension program op2 entries.
+    Only accessible by users with the "estf" role.
+    """
+    queryset = ExtensionProgramOp2.objects.all()
+    serializer_class = ExtensionProgramOp2Serializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        """
+        Handle creating a new ExtensionProgramOp2 entry.
+        """
+        try:
+            # Call the default create method from ModelViewSet
+            response = super().create(request, *args, **kwargs)
+
+            # Return the created entry with a 201 status (created)
+            return Response(response.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Handle any exceptions if necessary and log them
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Override the list method to fetch ExtensionProgramOp2 entries.
+        """
+        try:
+            # Fetch all entries from the queryset
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+
+            # Return the serialized data
+            return Response(serializer.data)
+        except Exception as e:
+            # Handle exceptions and provide an error message
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# For OC
+
+# For Campus Performance
+

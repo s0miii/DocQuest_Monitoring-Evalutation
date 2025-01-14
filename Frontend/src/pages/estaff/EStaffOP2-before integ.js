@@ -1,30 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar";
 import { FaArrowLeft } from "react-icons/fa";
-import axios from 'axios';
 
 const EStaffOP2 = () => {
   const navigate = useNavigate();
+
   const [data, setData] = useState([]); // Start with an empty table
   const [editIndex, setEditIndex] = useState(null); // Track the row being edited
 
-  // Fetch data from backend when component mounts
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/monitoring/extension_program_op2/");
-        setData(response.data);  // Set the fetched data
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Handle adding a new row
+  // Add a new empty row
   const handleAddRow = () => {
     setData([
       ...data,
@@ -47,57 +33,15 @@ const EStaffOP2 = () => {
     setData(newData);
   };
 
-  // Handle saving changes for a row (POST request)
-const handleSaveClick = async (index) => {
-    try {
-      const rowData = data[index]; // Get the data for the current row
-      const token = localStorage.getItem("auth_token"); // Get the token from localStorage
-  
-      // Send POST request with token authentication
-      await axios.post(
-        "http://127.0.0.1:8000/monitoring/extension_program_op2/",
-        rowData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,  // Ensure the token is sent in the headers
-          },
-        }
-      );
-  
-      // After saving, clear edit index and re-fetch data
-      setEditIndex(null);
-  
-      const response = await axios.get("http://127.0.0.1:8000/monitoring/extension_program_op2/", {
-        headers: {
-          Authorization: `Token ${token}`,  // Send token to authenticate the GET request
-        },
-      });
-  
-      setData(response.data); // Re-fetch data after saving
-    } catch (error) {
-      console.error("Error saving data:", error);
-      // Optionally, display a message to the user indicating an error
-    }
+  // Handle saving changes for a row
+  const handleSaveClick = () => {
+    setEditIndex(null); // Exit edit mode
   };
-  
+
   // Handle deleting a row
-  const handleDeleteRow = async (index) => {
-    try {
-      const rowId = data[index].id; // Get the row ID to delete
-
-      // Send DELETE request to remove the row
-      await axios.delete(
-        `http://127.0.0.1:8000/monitoring/extension_program_op2/${rowId}/`,
-        {}
-      );
-
-      // After deletion, remove the row from the data
-      const newData = data.filter((_, rowIndex) => rowIndex !== index);
-      setData(newData);
-    } catch (error) {
-      console.error("Error deleting data:", error);
-    }
+  const handleDeleteRow = (index) => {
+    const newData = data.filter((_, rowIndex) => rowIndex !== index);
+    setData(newData);
   };
 
   return (
@@ -114,6 +58,7 @@ const handleSaveClick = async (index) => {
           <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
             <h1 className="mb-5 text-2xl font-medium">Extension Program Op2</h1>
             <div className="w-full p-4 overflow-x-auto bg-gray-100">
+              {/* Scrollable Table Container */}
               <div className="min-w-full bg-white border border-gray-300">
                 <table className="min-w-full text-sm text-center border-collapse table-auto">
                   <thead>
@@ -198,7 +143,7 @@ const handleSaveClick = async (index) => {
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[150px]">
                               <button
-                                onClick={() => handleSaveClick(index)}
+                                onClick={handleSaveClick}
                                 className="px-4 py-1 text-white bg-green-500 rounded"
                               >
                                 Save
