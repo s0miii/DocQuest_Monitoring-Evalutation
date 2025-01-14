@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar";
@@ -10,20 +10,48 @@ const EStaffOC = () => {
   const [data, setData] = useState([]); // Start with an empty table
   const [editIndex, setEditIndex] = useState(null); // Track the row being edited
 
+
+  useEffect(() => {
+    const fetchOCData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("User not logged in. Please log in again.");
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/monitoring/extension_program_oc/', {
+          headers: {
+            Authorization: `Token ${token}`,
+            Accept: 'application/json',
+          },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch');
+        const fetchedData = await response.json();
+        setData(fetchedData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchOCData();
+  }, [navigate]);
+
   // Add a new empty row
   const handleAddRow = () => {
-    setData([
-      ...data,
-      {
-        moa: "",
-        program: "",
-        fromDate: "",
-        toDate: "",
-        campus: "",
-        remarks: "",
-      },
-    ]);
-    setEditIndex(data.length); // Automatically set the new row to edit mode
+    const newRow = {
+      memorandum_of_agreements: "",
+      extension_program: "",
+      from_date: "",
+      to_date: "",
+      campus: "",
+      remarks: "",
+      id: null, // This will be filled after saving the new entry
+    };
+    setData([...data, newRow]);
+    setEditIndex(data.length); // Set edit index to the last current item
   };
 
   // Handle input changes
@@ -34,15 +62,80 @@ const EStaffOC = () => {
   };
 
   // Handle saving changes for a row
-  const handleSaveClick = () => {
-    setEditIndex(null); // Exit edit mode
+  const handleSaveClick = async (index) => {
+    const entry = data[index];
+    if (!entry) {
+      console.error("Attempted to save undefined entry at index:", index);
+      return; // Stop function if entry is undefined
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("User not logged in. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
+    const url = entry.id ? `http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/` : `http://127.0.0.1:8000/monitoring/extension_program_oc/`;
+    const method = entry.id ? 'PUT' : 'POST';
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          Authorization: `Token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          memorandum_of_agreements: entry.memorandum_of_agreements,
+          extension_program: entry.extension_program,
+          from_date: entry.from_date,
+          to_date: entry.to_date,
+          campus: entry.campus,
+          remarks: entry.remarks,
+        }),
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const updatedEntry = await response.json();
+
+      const updatedData = [...data];
+      updatedData[index] = {...updatedData[index], ...updatedEntry, id: updatedEntry.id || updatedData[index].id};
+      setData(updatedData);
+      setEditIndex(null);
+    } catch (error) {
+      console.error('Error saving data:', error);
+    }
   };
 
-  // Handle deleting a row
-  const handleDeleteRow = (index) => {
-    const newData = data.filter((_, rowIndex) => rowIndex !== index);
-    setData(newData);
+  const handleDeleteRow = async (index) => {
+    const entry = data[index];
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("User not logged in. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
+    if (!entry.id) {
+      setData(data.filter((_, i) => i !== index));
+      return;
+    }
+
+    try {
+      await fetch(`http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Token ${token}`,
+          Accept: 'application/json',
+        },
+      });
+      setData(data.filter((_, i) => i !== index));  // Update local state to remove the entry
+    } catch (error) {
+      console.error('Error deleting data:', error);
+    }
   };
+
 
   return (
     <div className="flex min-h-screen bg-gray-200">
@@ -96,32 +189,32 @@ const EStaffOC = () => {
                             <td className="px-4 py-2 border border-gray-400 max-w-[200px]">
                               <input
                                 type="text"
-                                value={row.moa}
-                                onChange={(e) => handleInputChange(e, "moa", index)}
+                                value={row.memorandum_of_agreements}
+                                onChange={(e) => handleInputChange(e, "memorandum_of_agreements", index)}
                                 className="w-full px-2 py-1 truncate border border-gray-300"
                               />
                             </td>
                             <td className="px-4 py-2 border border-gray-400 max-w-[200px]">
                               <input
                                 type="text"
-                                value={row.program}
-                                onChange={(e) => handleInputChange(e, "program", index)}
+                                value={row.extension_program}
+                                onChange={(e) => handleInputChange(e, "extension_program", index)}
                                 className="w-full px-2 py-1 truncate border border-gray-300"
                               />
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[100px]">
                               <input
                                 type="date"
-                                value={row.fromDate}
-                                onChange={(e) => handleInputChange(e, "fromDate", index)}
+                                value={row.from_date}
+                                onChange={(e) => handleInputChange(e, "from_date", index)}
                                 className="w-full px-2 py-1 border border-gray-300"
                               />
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[100px]">
                               <input
                                 type="date"
-                                value={row.toDate}
-                                onChange={(e) => handleInputChange(e, "toDate", index)}
+                                value={row.to_date}
+                                onChange={(e) => handleInputChange(e, "to_date", index)}
                                 className="w-full px-2 py-1 border border-gray-300"
                               />
                             </td>
@@ -153,16 +246,16 @@ const EStaffOC = () => {
                         ) : (
                           <>
                             <td className="px-4 py-2 break-words border border-gray-400 max-w-[200px]">
-                              {row.moa}
+                              {row.memorandum_of_agreements}
                             </td>
                             <td className="px-4 py-2 break-words border border-gray-400 max-w-[200px]">
-                              {row.program}
+                              {row.extension_program}
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[100px]">
-                              {row.fromDate}
+                              {row.from_date}
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[100px]">
-                              {row.toDate}
+                              {row.to_date}
                             </td>
                             <td className="px-4 py-2 break-words border border-gray-400 max-w-[150px]">
                               {row.campus}
