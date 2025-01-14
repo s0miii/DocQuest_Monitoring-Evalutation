@@ -519,7 +519,7 @@ class ExtensionProgramOp2(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
 
     def __str__(self):
-        return f"{self.academic_program} - {self.extension_program} ({self.from_date} to {self.to_date})"
+        return f"{self.mandated_priority_program} - {self.quarter} ({self.from_date} to {self.to_date})"
 
 # OC
 class ExtensionProgramOC(models.Model):
