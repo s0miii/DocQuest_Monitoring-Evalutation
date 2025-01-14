@@ -37,9 +37,9 @@ const EStaffOP2 = () => {
       {
         quarter: "",
         mandated_priority_program: "",
-        extensionProgram: "",
-        fromDate: "",
-        toDate: "",
+        extension_program: "",
+        from_date: "",
+        to_date: "",
         campus: "",
         remarks: "",
         id: null,
@@ -84,22 +84,27 @@ const EStaffOP2 = () => {
           body: JSON.stringify({
               quarter: entry.quarter,
               mandated_priority_program: entry.mandated_priority_program,
-              extension_program: entry.extensionProgram,
-              from_date: entry.fromDate,
-              to_date: entry.toDate,
+              extension_program: entry.extension_program,
+              from_date: entry.from_date,
+              to_date: entry.to_date,
               campus: entry.campus,
               remarks: entry.remarks,
           }),
       })
-      .then(response => response.json())
+      .then(response => {
+        console.log('Status:', response.status); // Log the status code
+        return response.json();
+      })
       .then(updatedEntry => {
-          const updatedData = [...data];
-          if (!entry.id) {
+          if (updatedEntry && !entry.id) {
+              const updatedData = [...data];
               updatedData[index] = {...entry, id: updatedEntry.id};  // Update local state with new ID from the backend
-          } else {
+              setData(updatedData);
+          } else if (updatedEntry) {
+              const updatedData = [...data];
               updatedData[index] = updatedEntry;  // Update local state with updated entry from the backend
+              setData(updatedData);
           }
-          setData(updatedData);
           setEditIndex(null);
       })
       .catch(error => console.error('Error saving data:', error));
@@ -207,24 +212,24 @@ const EStaffOP2 = () => {
                             <td className="px-4 py-2 border border-gray-400 max-w-[200px]">
                               <input
                                 type="text"
-                                value={row.extensionProgram}
-                                onChange={(e) => handleInputChange(e, "extensionProgram", index)}
+                                value={row.extension_program}
+                                onChange={(e) => handleInputChange(e, "extension_program", index)}
                                 className="w-full px-2 py-1 truncate border border-gray-300"
                               />
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[100px]">
                               <input
                                 type="date"
-                                value={row.fromDate}
-                                onChange={(e) => handleInputChange(e, "fromDate", index)}
+                                value={row.from_date}
+                                onChange={(e) => handleInputChange(e, "from_date", index)}
                                 className="w-full px-2 py-1 border border-gray-300"
                               />
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[100px]">
                               <input
                                 type="date"
-                                value={row.toDate}
-                                onChange={(e) => handleInputChange(e, "toDate", index)}
+                                value={row.to_date}
+                                onChange={(e) => handleInputChange(e, "to_date", index)}
                                 className="w-full px-2 py-1 border border-gray-300"
                               />
                             </td>
@@ -260,13 +265,13 @@ const EStaffOP2 = () => {
                               {row.mandated_priority_program}
                             </td>
                             <td className="px-4 py-2 break-words border border-gray-400 max-w-[200px]">
-                              {row.extensionProgram}
+                              {row.extension_program}
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[100px]">
-                              {row.fromDate}
+                              {row.from_date}
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[100px]">
-                              {row.toDate}
+                              {row.to_date}
                             </td>
                             <td className="px-4 py-2 break-words border border-gray-400 max-w-[150px]">
                               {row.campus}
