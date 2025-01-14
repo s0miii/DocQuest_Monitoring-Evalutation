@@ -56,17 +56,10 @@ const ProjectsDashboard = () => {
                     {
                         headers: {
                             'Authorization': `Token ${token}`,
-                            'Cozntent-Type': 'application/json',
+                            'Content-Type': 'application/json',
                         },
                     }
                 );
-
-                if (!Array.isArray(response.data)) {
-                    console.error("Invalid data structure received:", response.data);
-                    setError("Invalid data format received from server");
-                    setProjects([]);
-                    return;
-                }
 
                 const { data, meta } = response.data;
 
@@ -75,7 +68,6 @@ const ProjectsDashboard = () => {
                 totalPages = meta.total_pages;
                 page += 1; // Move to the next page
             } while (page <= totalPages);
-
 
             // Update the projects state with all fetched projects
             setProjects(allProjects.map((project) => ({
@@ -106,11 +98,11 @@ const ProjectsDashboard = () => {
         }
     };
 
-    // const handlePageChange = (newPage) => {
-    //     if (newPage > 0 && newPage <= totalPages) {
-    //         setCurrentPage(newPage);
-    //     }
-    // };
+    const handlePageChange = (newPage) => {
+        if (newPage > 0 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+        }
+    };
 
 
     // Handle sorting
@@ -218,28 +210,6 @@ const ProjectsDashboard = () => {
         currentPage * pageSize
     );
 
-    // Filter projects by search term
-    const searchedProjects = projects.filter((project) =>
-        project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Logic for completed and ongoing projects
-    const completedProjects = projects.filter(project => project.status === "completed");
-    const ongoingProjects = projects.filter(project => project.status !== "completed");
-
-
-    // // Calculate the displayed projects based on pagination
-    // const indexOfLastProject = currentPage * projectsPerPage;
-    // const indexOfFirstProject = indexOfLastProject - projectsPerPage;
-    // const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
-
-    // const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
-
-    const handlePageChange = (newPage) => {
-        if (newPage > 0 && newPage <= totalPages) {
-            setCurrentPage(newPage);
-        }
-    };
 
     if (loading) {
         return (
