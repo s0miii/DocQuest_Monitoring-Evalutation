@@ -317,3 +317,21 @@ class AttendanceTemplateAdmin(admin.ModelAdmin):
 @admin.register(CreatedAttendanceRecord)
 class CreatedAttendanceRecordAdmin(admin.ModelAdmin):
     list_display = ['id', 'project', 'attendee_name', 'submitted_at']
+
+
+#For PREXC Report
+# OP2
+@admin.register(ExtensionProgramOp2)
+class ExtensionProgramOp2Admin(admin.ModelAdmin):
+    list_display = ('id', 'mandated_priority_program','quarter','extension_program', 'from_date', 'to_date', 'campus', 'remarks', 'created_at')
+    search_fields = ('mandated_priority_program','quarter', 'extension_program', 'campus')
+    list_filter = ('from_date', 'to_date') 
+    ordering = ('-created_at',)  
+
+@admin.register(ExtensionProgramOC)
+class ExtensionProgramOCAdmin(admin.ModelAdmin):
+    list_display = ('memorandum_of_agreements', 'extension_program', 'from_date', 'to_date', 'campus', 'created_at')
+    search_fields = ('memorandum_of_agreements', 'extension_program', 'campus')
+    list_filter = ('from_date', 'to_date', 'campus')
+    ordering = ('-created_at',)
+    

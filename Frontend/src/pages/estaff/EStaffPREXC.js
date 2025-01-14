@@ -151,7 +151,7 @@ const EStaffPREXC = () => {
                             </tr>
                             <tr class="bg-gray-200 text-gray-800">
                                 <th colspan="15" class="px-4 py-2 text-center">
-                                SUMMARY OF ACCOMPLISHMENT AS OF APRIL 2024
+                                SUMMARY OF ACCOMPLISHMENT AS OF JANUARY 2025
                                 </th>
                             </tr>
                             </thead>

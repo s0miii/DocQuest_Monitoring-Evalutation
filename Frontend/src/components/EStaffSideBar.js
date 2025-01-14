@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation, NavLink } from "react-router-dom";
 
@@ -7,8 +7,12 @@ function EStaffSideBar({ onFilterChange }) {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Helper function to check if the pathname is related to a specific section
-    const isPathActive = (path) => location.pathname.startsWith(path);
+    useEffect(() => {
+        // Automatically open and highlight the PREXC Report dropdown if the path is related
+        if (location.pathname.includes('/estaff/prexc')) {
+            setActiveDropdown('prexc');
+        }
+    }, [location.pathname]);
 
     // deployed
     // const API_URL = process.env.REACT_APP_API_URL;
@@ -37,6 +41,12 @@ function EStaffSideBar({ onFilterChange }) {
         setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
     };
 
+    // Custom isActive function for better control over active link state
+    const getIsActive = (path) => {
+        // Only consider exactly matching path as active
+        return location.pathname === path;
+    };
+
     return (
         <div className="w-1/5 bg-vlu text-white h-screen fixed z-50">
             <div className="flex justify-center">
@@ -48,7 +58,9 @@ function EStaffSideBar({ onFilterChange }) {
                         <NavLink
                             to="/estaff"
                             className={({ isActive }) =>
-                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                `text-lg block px-6 py-3 ${isActive && !location.pathname.includes('/estaff/prexc') ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`
+                            }
+                            isActive={() => getIsActive("/estaff")}
                         >
                             Dashboard
                         </NavLink>
@@ -89,6 +101,55 @@ function EStaffSideBar({ onFilterChange }) {
                         >
                             Project Monitoring
                         </NavLink>
+                    </li>
+                    <li>
+                        <button
+                            onClick={() => toggleDropdown('prexc')}
+                            className={`text-lg block px-6 py-3 w-full text-left ${activeDropdown === 'prexc' ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'
+                                }`}
+                        >
+                            PREXC Report
+                        </button>
+                        {activeDropdown === 'prexc' && (
+                            <ul className="pl-6">
+                                <li>
+                                    <NavLink
+                                        to="/estaff/prexc/op1-op3"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        Extension Program OP 1 & OP 3
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink
+                                        to="/estaff/prexc/op2"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        Extension Program OP 2
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink
+                                        to="/estaff/prexc/oc"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        Extension Program OC
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink
+                                        to="/estaff/prexc/performance"
+                                        className={({ isActive }) =>
+                                            `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                    >
+                                        College Campus Performance
+                                    </NavLink>
+                                </li>
+                            </ul>
+                        )}
                     </li>
 
                     {/* Accounts Dropdown */}

@@ -189,4 +189,9 @@ class CreatedAttendanceRecordSerializer(serializers.ModelSerializer):
 class ExtensionProgramOp2Serializer(serializers.ModelSerializer):
     class Meta:
         model = ExtensionProgramOp2
-        fields = ['id', 'academic_program', 'extension_program', 'from_date', 'to_date', 'campus', 'remarks', 'created_at']
+        fields = ['id', 'mandated_priority_program', 'quarter', 'extension_program', 'from_date', 'to_date', 'campus', 'remarks', 'created_at']
+
+class ExtensionProgramOCSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExtensionProgramOC
+        fields = '__all__'        

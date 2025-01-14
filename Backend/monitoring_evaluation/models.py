@@ -500,8 +500,18 @@ class CreatedAttendanceRecord(models.Model):
 
 
  # Models for PREXC Report
+ 
+ # OP2
 class ExtensionProgramOp2(models.Model):
-    academic_program = models.CharField(max_length=255)
+    mandated_priority_program = models.CharField(max_length=255)
+    quarter = models.CharField(
+        max_length=50,
+        choices=[
+            ("1st Quarter", "1st Quarter"),
+            ("2nd Quarter", "2nd Quarter"),
+            ("3rd Quarter", "3rd Quarter"),
+            ("4th Quarter", "4th Quarter"),
+        ])
     extension_program = models.CharField(max_length=255)
     from_date = models.DateField()
     to_date = models.DateField()
@@ -510,4 +520,18 @@ class ExtensionProgramOp2(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
 
     def __str__(self):
-        return f"{self.academic_program} - {self.extension_program} ({self.from_date} to {self.to_date})"   
+        return f"{self.mandated_priority_program} - {self.extension_program} for {self.quarter} ({self.from_date} to {self.to_date})"
+
+# OC
+class ExtensionProgramOC(models.Model):
+    memorandum_of_agreements = models.TextField()  # Allows longer text for flexibility
+    extension_program = models.TextField()  # For detailed program descriptions
+    from_date = models.DateField()
+    to_date = models.DateField()
+    campus = models.CharField(max_length=255)
+    remarks = models.TextField(blank=True, null=True)  # Optional remarks or links
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+
+    def __str__(self):
+        return f"{self.memorandum_of_agreements} - {self.extension_program} ({self.from_date} to {self.to_date})"
+    

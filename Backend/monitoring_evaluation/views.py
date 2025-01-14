@@ -1750,8 +1750,43 @@ def get_trainers_by_project(request, project_id):
 
 # # For OC
 
-# @role_required(allowed_role_codes=["estf"])
-# class ExtensionProgramOCViewSet(viewsets.ModelViewSet):
-#     queryset = ExtensionProgramOC.objects.all().order_by('-created_at')  # Show the newest entries first
-#     serializer_class = ExtensionProgramOCSerializer
-#     permission_classes = [IsAuthenticated]
+# For OP2
+@role_required(allowed_role_codes=["estf"])
+class ExtensionProgramOp2ViewSet(viewsets.ModelViewSet):
+    queryset = ExtensionProgramOp2.objects.all()
+    serializer_class = ExtensionProgramOp2Serializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            # Call the default create method from ModelViewSet
+            response = super().create(request, *args, **kwargs)
+
+            # Return the created entry with a 201 status (created)
+            return Response(response.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Handle any exceptions if necessary and log them
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            # Fetch all entries from the queryset
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+
+            # Return the serialized data
+            return Response(serializer.data)
+        except Exception as e:
+            # Handle exceptions and provide an error message
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# For OC
+
+@role_required(allowed_role_codes=["estf"])
+class ExtensionProgramOCViewSet(viewsets.ModelViewSet):
+    queryset = ExtensionProgramOC.objects.all().order_by('-created_at')  # Show the newest entries first
+    serializer_class = ExtensionProgramOCSerializer
+    permission_classes = [IsAuthenticated]
+
+# For Campus Performance
+
