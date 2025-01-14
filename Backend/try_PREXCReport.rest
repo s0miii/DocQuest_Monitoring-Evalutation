@@ -2,14 +2,14 @@
 
 ### Fetch All Extension Program OP2 Entries
 GET http://127.0.0.1:8000/monitoring/extension_program_op2/
-Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
 Accept: application/json
 
 ###
 
 ### Create a New Extension Program OP2 Entry
 POST http://127.0.0.1:8000/monitoring/extension_program_op2/
-Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
 Content-Type: application/json
 
 {
@@ -25,7 +25,7 @@ Content-Type: application/json
 
 ### Update an Existing Extension Program OP2 Entry (Replace <id> with an actual record ID)
 PUT http://127.0.0.1:8000/monitoring/extension_program_op2/1/
-Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
 Content-Type: application/json
 
 {
@@ -41,7 +41,7 @@ Content-Type: application/json
 
 ### Delete an Extension Program OP2 Entry (Replace <id> with an actual record ID)
 DELETE http://127.0.0.1:8000/monitoring/extension_program_op2/2/
-Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
 Accept: application/json
 
 
@@ -50,14 +50,14 @@ Accept: application/json
 
 ### Fetch All Extension Program OC Entries
 GET http://127.0.0.1:8000/monitoring/extension_program_oc/
-Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
 Accept: application/json
 
 ###
 
 ### Create a New Extension Program OC Entry
 POST http://127.0.0.1:8000/monitoring/extension_program_oc/
-Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
 Content-Type: application/json
 
 {
@@ -73,7 +73,7 @@ Content-Type: application/json
 
 ### Update an Existing Extension Program OC Entry (Replace <id> with an actual record ID)
 PUT http://127.0.0.1:8000/monitoring/extension_program_oc/1/
-Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
 Content-Type: application/json
 
 {
@@ -89,5 +89,5 @@ Content-Type: application/json
 
 ### Delete an Extension Program OC Entry (Replace <id> with an actual record ID)
 DELETE http://127.0.0.1:8000/monitoring/extension_program_oc/1/
-Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
 Accept: application/json
