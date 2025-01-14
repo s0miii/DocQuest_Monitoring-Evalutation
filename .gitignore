@@ -12,6 +12,7 @@ venv-wyn/
 venv_/
 venv3/
 __pycache__/
+staticfiles/
 *.pyc
 .vscode
 .history/

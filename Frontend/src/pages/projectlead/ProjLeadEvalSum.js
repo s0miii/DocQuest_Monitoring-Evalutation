@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import Topbar from "../../components/Topbar";
-import { useNavigate } from 'react-router-dom';
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
 import { FaArrowLeft, FaCopy, FaTrash } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const ProjLeadEvalSum = () => {
     const navigate = useNavigate();
@@ -31,6 +30,8 @@ const ProjLeadEvalSum = () => {
     // local
     // const API_URL = 'http://127.0.0.1:8000/';
     // ${API_URL}
+    const [categories, setCategories] = useState({});
+    const [totalEvaluations, setTotalEvaluations] = useState();
 
     const handleChoice = (choice) => {
         setChoice(choice); // set the choice based on user selection
@@ -84,7 +85,6 @@ const ProjLeadEvalSum = () => {
         fetchProjectDetails();
         fetchUpdatedSubmissions();
     }, [projectID, navigate]);
-
 
     const fetchUpdatedSubmissions = async () => {
         const token = localStorage.getItem("token");
@@ -181,6 +181,12 @@ const ProjLeadEvalSum = () => {
         fetchTrainers();
     }, [projectID]);
 
+    // Fetch generated links when the "generateLinks" tab is selected
+    useEffect(() => {
+        if (choice === "generateLinks") {
+            fetchGeneratedLinks(); // Fetch links automatically
+        }
+    }, [choice]); // When 'choice' changes to "generateLinks", this effect will run
 
     // Handle Sharable Link generation
     const handleGenerateLink = async (e) => {
@@ -188,7 +194,6 @@ const ProjLeadEvalSum = () => {
         const { trainer, expirationDate } = linkData;
         const token = localStorage.getItem("token");
         if (!token) return;
-
         const postData = {
             trainer_id: trainer,
             project_id: projectID,
@@ -207,7 +212,6 @@ const ProjLeadEvalSum = () => {
                     body: JSON.stringify(postData),
                 }
             );
-
             const data = await response.json(); // Assuming the server always returns JSON
             if (response.ok) {
                 setLinkData({ trainer: "", expirationDate: "" });  // Reset form on success
@@ -239,7 +243,6 @@ const ProjLeadEvalSum = () => {
                     },
                 }
             );
-
             if (response.ok) {
                 alert("Link deleted successfully.");
                 setGeneratedLinks((prevLinks) => prevLinks.filter((link) => link.id !== linkId));
@@ -254,7 +257,6 @@ const ProjLeadEvalSum = () => {
     const viewEvaluationReport = () => {
         navigate(`/evaluations/${trainerID}/${projectID}`);
     };
-
     // Handle file attachments
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files);
@@ -375,6 +377,41 @@ const ProjLeadEvalSum = () => {
         });
     };
 
+
+    useEffect(() => {
+        const fetchSummaryData = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/monitoring/project/${projectID}/evaluation_summary/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Token ${token}`,
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data);  // Log to see the exact structure
+                    setCategories(data.categories);
+                    setTotalEvaluations(data.total_evaluations);
+                } else {
+                    alert("Failed to fetch evaluation summary");
+                }
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+            }
+        };
+
+        fetchSummaryData();
+    }, [projectID]);
+
     // loading substitute
     if (loading) {
         return (
@@ -456,7 +493,6 @@ const ProjLeadEvalSum = () => {
                         </div>
                     </div>
 
-
                     {/* Buttons to choose file upload or link generation */}
                     <div className="flex mb-6 space-x-4">
                         <button
@@ -472,7 +508,6 @@ const ProjLeadEvalSum = () => {
                             Generate Evaluation Links
                         </button>
                     </div>
-
 
                     {/* Conditional Rendering of Sections */}
                     {choice === "uploadFiles" && (
@@ -773,7 +808,7 @@ const ProjLeadEvalSum = () => {
                                         <input
                                             type="text"
                                             className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            placeholder="Total Evaluations"
+                                            value={totalEvaluations}
                                             readOnly
                                         />
                                     </div>
@@ -782,7 +817,7 @@ const ProjLeadEvalSum = () => {
                                         <input
                                             type="text"
                                             className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            placeholder="Percentage"
+                                            value={`${(totalEvaluations / totalEvaluations * 100).toFixed(2)}%`}
                                             readOnly
                                         />
                                     </div>
@@ -892,7 +927,7 @@ const ProjLeadEvalSum = () => {
                                     <div className="mt-4 text-center">
                                         <button
                                             type="submit"
-                                            className="px-6 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+                                            className="px-6 py-2 text-white transition-colors bg-blue-900 rounded-lg hover:bg-blue-700"
                                         >
                                             Generate Link
                                         </button>
@@ -907,6 +942,5 @@ const ProjLeadEvalSum = () => {
         </div>
     );
 };
-
 
 export default ProjLeadEvalSum;

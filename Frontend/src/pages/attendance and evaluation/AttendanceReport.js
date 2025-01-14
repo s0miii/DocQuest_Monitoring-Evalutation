@@ -9,6 +9,9 @@ import { jsPDF } from 'jspdf';
 const AttendanceReport = () => {
     const navigate = useNavigate();
     const { templateId } = useParams();
+    const { projectID } = useParams();
+    const [loading, setLoading] = useState(true);
+    const [projectDetails, setProjectDetails] = useState(null);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [templateName, setTemplateName] = useState('');
     const [templateAttributes, setTemplateAttributes] = useState({
@@ -21,6 +24,55 @@ const AttendanceReport = () => {
         includeContactNumber: false,
         includeSubmittedAt: true
     });
+
+    const handleViewClick = (path) => {
+        navigate(path.replace(":projectID", projectID));
+    };
+
+
+    // Fetch project details and submissions
+    useEffect(() => {
+        if (!projectID) {
+            console.error("Project ID is undefined.");
+            return;
+        }
+
+        const fetchProjectDetails = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("User not logged in. Please log in again.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(
+                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setProjectDetails(data.projectDetails);
+                } else {
+                    console.error("Failed to fetch project details.");
+                }
+            } catch (error) {
+                console.error("Error fetching project details:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProjectDetails();
+    }, [projectID, navigate]);
+
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -51,7 +103,7 @@ const AttendanceReport = () => {
                     headers: { Authorization: `Token ${token}` },
                 });
                 setAttendanceRecords(attendanceResponse.data);
-            } catch ( error ) {
+            } catch (error) {
                 console.error('Error fetching data', error);
                 alert('Failed to fetch template or attendance records.');
             }
@@ -73,20 +125,20 @@ const AttendanceReport = () => {
             templateAttributes.includeContactNumber ? "Contact Number" : null,
             templateAttributes.includeSubmittedAt ? "Submitted At" : null
         ].filter(Boolean).length;
-    
+
         // Assume more than 5 columns may need landscape mode for better visibility
         const orientation = columnsCount > 4 ? 'landscape' : 'portrait';
-    
+
         const doc = new jsPDF({
             orientation: orientation,
             unit: 'mm',
             format: 'a4'
         });
-    
+
         doc.setFontSize(16);
         doc.text('Attendance Records', 14, 20);
         doc.text(`Template: ${templateName}`, 14, 30);
-    
+
         const headers = [
             'No.',
             ...(templateAttributes.includeAttendeeName ? ["Attendee Name"] : []),
@@ -98,13 +150,13 @@ const AttendanceReport = () => {
             ...(templateAttributes.includeContactNumber ? ["Contact Number"] : []),
             ...(templateAttributes.includeSubmittedAt ? ["Submitted At"] : [])
         ];
-    
+
         let y = 40;
         doc.setFontSize(12);
         headers.forEach((header, index) => {
             doc.text(header, 14 + index * 40, y);
         });
-    
+
         y += 10;
         attendanceRecords.forEach((record, index) => {
             let x = 14;
@@ -120,10 +172,10 @@ const AttendanceReport = () => {
             if (templateAttributes.includeSubmittedAt) { doc.text(new Date(record.submitted_at).toLocaleString(), x, y); x += 40; }
             y += 10;
         });
-    
-        doc.save('attendance-report.pdf');
+
+        doc.save('attendance-record.pdf');
     };
-    
+
 
     return (
         <div className='bg-gray-200 min-h-screen flex'>
@@ -134,7 +186,7 @@ const AttendanceReport = () => {
                 <Topbar />
                 <div className='flex flex-col mt-14 px-10'>
                     <div className='flex items-center mb-5'>
-                        <button className='mr-2' onClick={() => navigate('/projlead/proj/req/daily-attendance')}>
+                        <button className="mr-2" onClick={() => navigate(-1)}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Attendance Records for {templateName}</h1>

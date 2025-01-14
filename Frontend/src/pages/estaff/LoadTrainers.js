@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import EstaffSideBar from "../../components/EstaffSideBar";
+import EstaffSideBar from "../../components/EStaffSideBar";
 import Topbar from "../../components/Topbar";
 import { NavLink } from 'react-router-dom';
 

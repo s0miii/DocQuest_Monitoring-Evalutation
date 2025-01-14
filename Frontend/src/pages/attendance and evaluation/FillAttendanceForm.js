@@ -55,14 +55,16 @@ const FillAttendanceForm = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-cover bg-fixed" style={{ backgroundImage: `url("${process.env.PUBLIC_URL}/images/bg-login3.png")` }}>
             {/* Show Thank You message after submission */}
             {submitted ? (
-                <div className="bg-gradient-to-r from-blue-50 to-blue-50 p-8 rounded-3xl shadow-2xl max-w-md mx-auto my-10">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Thank You!</h2>
-                    <p className="text-lg text-gray-600 mb-6 text-center">
-                        Your attendance has been successfully recorded. We appreciate your participation!
-                    </p>
+                <div className="flex flex-col items-center justify-center min-h-screen bg-cover bg-fixed" style={{ backgroundImage: `url("${process.env.PUBLIC_URL}/images/bg-login3.png")` }}>
+                    <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-8 rounded-3xl shadow-2xl max-w-md mx-auto my-10">
+                        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Thank You!</h2>
+                        <p className="text-lg text-gray-600 text-center">
+                            Your attendance has been successfully recorded. We appreciate your participation!
+                        </p>
+                    </div>
                 </div>
             ) : (
                 <div className="bg-white shadow-lg rounded-3xl p-8 w-full max-w-lg my-10">

@@ -99,7 +99,6 @@ const ProjLeadDailyAttRec = () => {
         fetchUpdatedSubmissions();
     }, [projectID, navigate]);
 
-
     // Fetch templates on component mount
     useEffect(() => {
         const token = localStorage.getItem("token"); // Move this inside useEffect
@@ -290,7 +289,6 @@ const ProjLeadDailyAttRec = () => {
 
         setSubmissions(sortedData);
     };
-
 
 
     // loading substitute
@@ -813,189 +811,191 @@ const ProjLeadDailyAttRec = () => {
                                         Submit
                                     </button>
                                 </div>
-                            </div>
-                        </div>
+                            </div >
+                        </div >
                     )}
 
-                    {choice === "generateLinks" && (
-                        <div>
-                            {/* Total Attendees Info Section */}
-                            <div className='p-6 mb-6 bg-white rounded-lg shadow-md'>
-                                <h2 className='mb-4 text-2xl font-semibold text-center'>Total Attendance Information</h2>
-                                <div className='grid grid-cols-1 gap-6 text-center md:grid-cols-3'>
-                                    <div>
-                                        <label className='block text-sm font-medium text-gray-600'>Total Attendees</label>
-                                        <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
-                                            {totalAttendeesTable !== null ? totalAttendeesTable : 'Loading...'}
-                                        </p>
+                    {
+                        choice === "generateLinks" && (
+                            <div>
+                                {/* Total Attendees Info Section */}
+                                <div className='p-6 mb-6 bg-white rounded-lg shadow-md'>
+                                    <h2 className='mb-4 text-2xl font-semibold text-center'>Total Attendance Information</h2>
+                                    <div className='grid grid-cols-1 gap-6 text-center md:grid-cols-3'>
+                                        <div>
+                                            <label className='block text-sm font-medium text-gray-600'>Total Attendees</label>
+                                            <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
+                                                {totalAttendeesTable !== null ? totalAttendeesTable : 'Loading...'}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className='block text-sm font-medium text-gray-600'>Average Attendees</label>
+                                            <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
+                                                {averageAttendees !== null ? averageAttendees : 'Loading...'}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className='block text-sm font-medium text-gray-600'>Number of Templates</label>
+                                            <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
+                                                {numTemplates !== null ? numTemplates : 'Loading...'}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className='block text-sm font-medium text-gray-600'>Average Attendees</label>
-                                        <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
-                                            {averageAttendees !== null ? averageAttendees : 'Loading...'}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className='block text-sm font-medium text-gray-600'>Number of Templates</label>
-                                        <p className='p-3 mt-1 bg-gray-100 rounded-lg'>
-                                            {numTemplates !== null ? numTemplates : 'Loading...'}
-                                        </p>
+                                    <div className="flex justify-center mt-4"> {/* This div centers the button horizontally */}
+                                        <button
+                                            onClick={calculateTotalAttendees}
+                                            className="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                                        >
+                                            Calculate Total Attendees
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="flex justify-center mt-4"> {/* This div centers the button horizontally */}
-                                    <button
-                                        onClick={calculateTotalAttendees}
-                                        className="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                                    >
-                                        Calculate Total Attendees
-                                    </button>
-                                </div>
-                            </div>
 
-                            {/* Generated Attendance Links Section */}
-                            <div ref={linksSectionRef} className='p-6 mb-6 bg-white rounded-lg shadow-md'>
-                                <h2 className='mb-4 text-2xl font-semibold text-center'>Generated Attendance Links</h2>
-                                <div className='overflow-x-auto overflow-y-auto max-h-60'> {/* Tailwind classes for scrolling */}
-                                    <table className='w-full border border-gray-200'>
-                                        <thead>
-                                            <tr className='bg-gray-50'>
-                                                <th className='p-3 font-medium text-left text-gray-700'>Template Name</th>
-                                                <th className='p-3 font-medium text-left text-gray-700'>Link</th>
-                                                <th className='p-3 font-medium text-left text-gray-700'>Date Created</th>
-                                                <th className='p-3 font-medium text-left text-gray-700'>Expiration Date</th>
-                                                <th className='p-3 font-medium text-left text-gray-700'>Actions</th>
-                                                <th className='p-3 font-medium text-left text-gray-700'>Attendance Report</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {templates.map((template, index) => (
-                                                <tr key={index} className='border-t'>
-                                                    <td className='p-3 text-gray-600'>{template.templateName}</td>
-                                                    <td className='p-3'>
-                                                        <button
-                                                            onClick={() => handleCopyLink(template.sharable_link)}
-                                                            className={`flex items-center ${isExpired(template.expiration_date) ? 'cursor-not-allowed opacity-50 text-gray-500' : 'text-blue-500'}`}
-                                                            disabled={isExpired(template.expiration_date)}
-                                                        >
+                                {/* Generated Attendance Links Section */}
+                                <div ref={linksSectionRef} className='p-6 mb-6 bg-white rounded-lg shadow-md'>
+                                    <h2 className='mb-4 text-2xl font-semibold text-center'>Generated Attendance Links</h2>
+                                    <div className='overflow-x-auto overflow-y-auto max-h-60'> {/* Tailwind classes for scrolling */}
+                                        <table className='w-full border border-gray-200'>
+                                            <thead>
+                                                <tr className='bg-gray-50'>
+                                                    <th className='p-3 font-medium text-left text-gray-700'>Template Name</th>
+                                                    <th className='p-3 font-medium text-left text-gray-700'>Link</th>
+                                                    <th className='p-3 font-medium text-left text-gray-700'>Date Created</th>
+                                                    <th className='p-3 font-medium text-left text-gray-700'>Expiration Date</th>
+                                                    <th className='p-3 font-medium text-left text-gray-700'>Actions</th>
+                                                    <th className='p-3 font-medium text-left text-gray-700'>Attendance Report</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {templates.map((template, index) => (
+                                                    <tr key={index} className='border-t'>
+                                                        <td className='p-3 text-gray-600'>{template.templateName}</td>
+                                                        <td className='p-3'>
+                                                            <button
+                                                                onClick={() => handleCopyLink(template.sharable_link)}
+                                                                className={`flex items-center ${isExpired(template.expiration_date) ? 'cursor-not-allowed opacity-50 text-gray-500' : 'text-blue-500'}`}
+                                                                disabled={isExpired(template.expiration_date)}
+                                                            >
+                                                                {isExpired(template.expiration_date) ? (
+                                                                    <span>Expired</span>
+                                                                ) : (
+                                                                    <>
+                                                                        <FaCopy className='mr-1' />
+                                                                        Copy Link
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </td>
+                                                        <td className='p-3 text-gray-600'>{new Date(template.created_at).toLocaleDateString()}</td>
+                                                        <td className='p-3 text-gray-600'>{template.expiration_date || 'N/A'}</td>
+                                                        <td className='p-3'>
                                                             {isExpired(template.expiration_date) ? (
-                                                                <span>Expired</span>
+                                                                <span className='text-red-500'>Expired</span>
                                                             ) : (
                                                                 <>
-                                                                    <FaCopy className='mr-1' />
-                                                                    Copy Link
+                                                                    <button
+                                                                        onClick={() => handleDeleteTemplate(template.id)}
+                                                                        className='mr-2 text-red-500'>
+                                                                        <FaTrash />
+                                                                    </button>
                                                                 </>
-                                                            )}
-                                                        </button>
-                                                    </td>
-                                                    <td className='p-3 text-gray-600'>{new Date(template.created_at).toLocaleDateString()}</td>
-                                                    <td className='p-3 text-gray-600'>{template.expiration_date || 'N/A'}</td>
-                                                    <td className='p-3'>
-                                                        {isExpired(template.expiration_date) ? (
-                                                            <span className='text-red-500'>Expired</span>
-                                                        ) : (
-                                                            <>
-                                                                <button
-                                                                    onClick={() => handleDeleteTemplate(template.id)}
-                                                                    className='mr-2 text-red-500'>
-                                                                    <FaTrash />
-                                                                </button>
-                                                            </>
-                                                        )}
-                                                    </td>
-                                                    <td className='p-3 text-gray-600'>
-                                                        <button
-                                                            onClick={() => handleViewAttendanceRecords(template.id)}
-                                                            className='text-blue-500 hover:text-blue-600'>
-                                                            View Attendance Records
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                                                            )
+                                                            }
+                                                        </td >
+                                                        <td className='p-3 text-gray-600'>
+                                                            <button
+                                                                onClick={() => handleViewAttendanceRecords(template.id)}
+                                                                className='text-blue-500 hover:text-blue-600'>
+                                                                View Attendance Records
+                                                            </button>
+                                                        </td >
+                                                    </tr >
+                                                ))}
+                                            </tbody >
+                                        </table >
+                                    </div >
+                                </div >
 
-                            {/* Template Creation and Editing Section */}
-                            <div className='p-6 mb-6 bg-white rounded-lg shadow-md'>
-                                <h2 className='mb-4 text-2xl font-semibold text-center'>
-                                    {isEditing ? 'Edit Attendance Template' : 'Create New Attendance Template'}
-                                </h2>
-                                <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-                                    <div>
-                                        <label className='block text-sm font-medium text-gray-600'>Template Name</label>
-                                        <input
-                                            type='text'
-                                            value={templateName}
-                                            onChange={(e) => setTemplateName(e.target.value)}
-                                            className='w-full p-3 mt-1 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'
-                                            disabled={isEditing}  // Disable in editing mode
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className='block text-sm font-medium text-gray-600'>Expiration Date</label>
-                                        <input
-                                            type='date'
-                                            value={expirationDate}
-                                            onChange={(e) => setExpirationDate(e.target.value)}
-                                            className='w-full p-3 mt-1 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'
-                                            min={todayDate}  // Ensure only future dates can be selected
-                                        />
-                                    </div>
-                                </div>
-                                <div className='grid grid-cols-2 gap-4 mt-4 md:grid-cols-3'>
-                                    {[
-                                        { label: 'Include Attendee Name', state: includeAttendeeName, setState: setIncludeAttendeeName },
-                                        { label: 'Include Gender', state: includeGender, setState: setIncludeGender },
-                                        { label: 'Include College', state: includeCollege, setState: setIncludeCollege },
-                                        { label: 'Include Department', state: includeDepartment, setState: setIncludeDepartment },
-                                        { label: 'Include Year/Section', state: includeYearSection, setState: setIncludeYearSection },
-                                        { label: 'Include Agency/Office', state: includeAgencyOffice, setState: setIncludeAgencyOffice },
-                                        { label: 'Include Contact Number', state: includeContactNumber, setState: setIncludeContactNumber },
-                                    ].map((item, idx) => (
-                                        <div key={idx} className='flex items-center'>
+                                {/* Template Creation and Editing Section */}
+                                < div className='p-6 mb-6 bg-white rounded-lg shadow-md' >
+                                    <h2 className='mb-4 text-2xl font-semibold text-center'>
+                                        {isEditing ? 'Edit Attendance Template' : 'Create New Attendance Template'}
+                                    </h2>
+                                    <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+                                        <div>
+                                            <label className='block text-sm font-medium text-gray-600'>Template Name</label>
                                             <input
-                                                type='checkbox'
-                                                checked={item.state}
-                                                onChange={() => item.setState(!item.state)}
-                                                className='mr-2'
+                                                type='text'
+                                                value={templateName}
+                                                onChange={(e) => setTemplateName(e.target.value)}
+                                                className='w-full p-3 mt-1 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'
                                                 disabled={isEditing}  // Disable in editing mode
                                             />
-                                            <label className='text-sm text-gray-700'>{item.label}</label>
                                         </div>
-                                    ))}
-                                </div>
-                                <div className='mt-6 text-center'>
-                                    {isEditing ? (
-                                        <>
+                                        <div>
+                                            <label className='block text-sm font-medium text-gray-600'>Expiration Date</label>
+                                            <input
+                                                type='date'
+                                                value={expirationDate}
+                                                onChange={(e) => setExpirationDate(e.target.value)}
+                                                className='w-full p-3 mt-1 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400'
+                                                min={todayDate}  // Ensure only future dates can be selected
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className='grid grid-cols-2 gap-4 mt-4 md:grid-cols-3'>
+                                        {[
+                                            { label: 'Include Attendee Name', state: includeAttendeeName, setState: setIncludeAttendeeName },
+                                            { label: 'Include Gender', state: includeGender, setState: setIncludeGender },
+                                            { label: 'Include College', state: includeCollege, setState: setIncludeCollege },
+                                            { label: 'Include Department', state: includeDepartment, setState: setIncludeDepartment },
+                                            { label: 'Include Year/Section', state: includeYearSection, setState: setIncludeYearSection },
+                                            { label: 'Include Agency/Office', state: includeAgencyOffice, setState: setIncludeAgencyOffice },
+                                            { label: 'Include Contact Number', state: includeContactNumber, setState: setIncludeContactNumber },
+                                        ].map((item, idx) => (
+                                            <div key={idx} className='flex items-center'>
+                                                <input
+                                                    type='checkbox'
+                                                    checked={item.state}
+                                                    onChange={() => item.setState(!item.state)}
+                                                    className='mr-2'
+                                                    disabled={isEditing}  // Disable in editing mode
+                                                />
+                                                <label className='text-sm text-gray-700'>{item.label}</label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className='mt-6 text-center'>
+                                        {isEditing ? (
+                                            <>
+                                                <button
+                                                    onClick={handleSaveTemplate}
+                                                    className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
+                                                >
+                                                    Save Template
+                                                </button>
+                                                <button
+                                                    onClick={handleCancelEdit}
+                                                    className='px-6 py-2 ml-4 text-white bg-gray-500 rounded-lg hover:bg-gray-600'
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </>
+                                        ) : (
                                             <button
-                                                onClick={handleSaveTemplate}
+                                                onClick={handleCreateTemplate}
                                                 className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
                                             >
-                                                Save Template
+                                                Create Template
                                             </button>
-                                            <button
-                                                onClick={handleCancelEdit}
-                                                className='px-6 py-2 ml-4 text-white bg-gray-500 rounded-lg hover:bg-gray-600'
-                                            >
-                                                Cancel
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button
-                                            onClick={handleCreateTemplate}
-                                            className='px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
-                                        >
-                                            Create Template
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+                                        )}
+                                    </div>
+                                </div >
+                            </div >
+                        )}
+                </div >
+            </div >
+        </div >
     );
 };
 

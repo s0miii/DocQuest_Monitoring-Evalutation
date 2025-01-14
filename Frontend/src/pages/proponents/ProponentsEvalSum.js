@@ -56,7 +56,6 @@ const ProponentsEvalSum = () => {
                                 <p className="bg-gray-100 rounded-lg p-3 mt-1">Tabasan, Wynoah Louis</p>
                             </div>
                         </div>
-
                         {/* College/Campus, Target Date, Partner Agency */}
                         <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
@@ -73,7 +72,6 @@ const ProponentsEvalSum = () => {
                             </div>
                         </div>
                     </div>
-
 
                     {/* Add New Entry Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">

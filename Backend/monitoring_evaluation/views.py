@@ -1748,3 +1748,10 @@ def get_trainers_by_project(request, project_id):
     trainers = LoadingOfTrainers.objects.filter(project_id=project_id).values('LOTID', 'faculty', 'trainingLoad', 'hours')
     return JsonResponse({'trainers': list(trainers)})
 
+# # For OC
+
+# @role_required(allowed_role_codes=["estf"])
+# class ExtensionProgramOCViewSet(viewsets.ModelViewSet):
+#     queryset = ExtensionProgramOC.objects.all().order_by('-created_at')  # Show the newest entries first
+#     serializer_class = ExtensionProgramOCSerializer
+#     permission_classes = [IsAuthenticated]

@@ -116,9 +116,8 @@ const EvaluationForm = () => {
                         key={num}
                         type="button"
                         onClick={() => handleInputChange({ target: { name, value: num, type: 'number' } })}
-                        className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-full border-2 ${
-                            num === evaluationData.ratings[name] ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-500 border-gray-300'
-                        }`}
+                        className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-full border-2 ${num === evaluationData.ratings[name] ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-500 border-gray-300'
+                            }`}
                     >
                         {num}
                     </button>
@@ -158,8 +157,8 @@ const EvaluationForm = () => {
         <div className="flex flex-col items-center justify-center min-h-screen bg-cover bg-fixed" style={{ backgroundImage: `url("${process.env.PUBLIC_URL}/images/bg-login3.png")` }}>
             <div className="bg-white shadow overflow-hidden sm:rounded-lg max-w-xl w-full p-8">
                 <h1 className="text-2xl font-bold text-center mb-6">Extension Activity Evaluation Form</h1>
-                <div className="bg-blue-500 p-3 rounded mb-4">
-                    <h3 className="text-black-600 font-bold">Personal Information</h3>
+                <div className="bg-blue-800 p-3 rounded mb-4">
+                    <h3 className="text-white font-bold">Personal Information</h3>
                 </div>
                 {!isSubmitted && (
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -174,9 +173,9 @@ const EvaluationForm = () => {
                                 required
                             />
                         </div>
-                        
-                        <div className="bg-blue-500 p-3 rounded">
-                            <h3 className="text-black-600 font-bold">Instructions</h3>
+
+                        <div className="bg-blue-800 p-3 rounded">
+                            <h3 className="text-white font-bold">Instructions</h3>
                         </div>
 
                         <div className="p-4 bg-gray-100 rounded">
@@ -192,21 +191,21 @@ const EvaluationForm = () => {
                                 <li>0 – Not Applicable</li>
                             </ul>
                         </div>
-    
+
                         <h3 className="text-lg font-semibold">I. Activity</h3>
                         <div className="ml-5">
                             {['relevance_of_topics', 'organizational_flow', 'learning_methods', 'technology_use', 'time_efficiency'].map(key => (
                                 <RatingBox key={key} name={key} label={categoryLabels[key]} />
                             ))}
                         </div>
-    
+
                         <h3 className="text-lg font-semibold mt-4">II. Speaker/Trainer/Facilitator</h3>
                         <div className="ml-5">
                             {['mastery_subject', 'preparedness', 'audience_participation', 'interest_level', 'handle_questions', 'voice_personality', 'visual_aids'].map(key => (
                                 <RatingBox key={key} name={key} label={categoryLabels[key]} />
                             ))}
                         </div>
-    
+
                         <h3 className="text-lg font-semibold mt-4">III. Feedback</h3>
                         <div className="mb-4 ml-5">
                             <label className="block text-sm font-medium text-gray-700">1. Which concept/information/activity did you find useful in your organization?</label>
@@ -238,7 +237,7 @@ const EvaluationForm = () => {
                                 placeholder="Any additional feedback..."
                             />
                         </div>
-    
+
                         <h3 className="text-lg font-semibold mt-4">IV-VI. Other Ratings</h3>
                         <div className="ml-5">
                             <RatingBox name="venue_assessment" label={categoryLabels['venue_assessment']} />
@@ -256,8 +255,8 @@ const EvaluationForm = () => {
                                 placeholder="Final remarks..."
                             />
                         </div>
-                        
-                        <button type="submit" disabled={isLoading} className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline">
+
+                        <button type="submit" disabled={isLoading} className="w-full bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline">
                             Submit Evaluation
                         </button>
                     </form>

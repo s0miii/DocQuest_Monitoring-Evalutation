@@ -43,26 +43,92 @@ class ChecklistAssignmentSerializer(serializers.ModelSerializer):
         model = ChecklistAssignment
         fields = '__all__'
         
+class PREXCAchievementSerializer(serializers.ModelSerializer):
+    class Meta: model = PREXCAchievement
+    fields = '__all__'
+
+class ProjectNarrativeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectNarrative
+        fields = '__all__'
 
 # Accomplishment Report Serializer
+# class AccomplishmentReportSerializer(serializers.ModelSerializer):
+#     total_number_of_days = serializers.ReadOnlyField()
+#     submitted_by = serializers.SerializerMethodField()
+#     project_narrative = ProjectNarrativeSerializer(required=True)
+#     approved_photos = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = AccomplishmentReport
+#         fields = '__all__'
+#         read_only_fields = ['submitted_by','total_number_of_days']
+
+#     def get_submitted_by(self, obj):
+#         if obj.submitted_by:
+#             return f"{obj.submitted_by.firstname} {obj.submitted_by.lastname}"
+#         return None
+    
+#     def get_approved_photos(self, obj):
+#         approved_photos = PhotoDocumentation.objects.filter(
+#             project=obj.project, status="Approved"
+#         )
+#         return PhotoDocumentationSerializer(approved_photos, many=True).data
+    
+#     def validate(self, data):
+#         start_date = data.get('actualStartDateImplementation')
+#         end_date = data.get('actualEndDateImplementation')
+        
+#         if start_date and end_date and start_date > end_date:
+#             raise serializers.ValidationError("Start date must be before or equal to the end date.")
+#         return data
+    
+#     def create(self, validated_data):
+#         project_narrative_data = validated_data.pop('project_narrative')
+#         project_narrative = ProjectNarrative.objects.create(**project_narrative_data)
+
+#         accomplishment_report = AccomplishmentReport.objects.create(
+#             project_narrative=project_narrative,
+#             **validated_data
+#         )
+#         return accomplishment_report
+
+#     def update(self, instance, validated_data):
+#         project_narrative_data = validated_data.pop('project_narrative', None)
+#         if project_narrative_data:
+#             ProjectNarrative.objects.update_or_create(
+#                 accomplishment_report=instance,
+#                 defaults=project_narrative_data
+#             )
+#         return super().update(instance, validated_data)
+
 class AccomplishmentReportSerializer(serializers.ModelSerializer):
-    project_title = serializers.CharField(source='project.projectTitle', read_only=True)
-    project_type = serializers.CharField(source='project.projectType', read_only=True)
-    project_category = serializers.StringRelatedField(source='project.projectCategory', many=True, read_only=True)
-    research_title = serializers.CharField(source='project.researchTitle', read_only=True)
-    proponents = serializers.StringRelatedField(source='project.proponents', many=True, read_only=True)
-    program = serializers.StringRelatedField(source='project.program', many=True, read_only=True)
-    accreditation_level = serializers.CharField(source='project.accreditationLevel', read_only=True)
-    college = serializers.CharField(source='project.college', read_only=True)
-    target_groups_beneficiaries = serializers.CharField(source='project.beneficiaries', read_only=True)
-    project_location = serializers.CharField(source='project.projectLocationID', read_only=True)
-    partner_agency = serializers.StringRelatedField(source='project.agency', many=True, read_only=True)
+    total_number_of_days = serializers.ReadOnlyField()
+    submitted_by = serializers.SerializerMethodField()
+    project_narrative = ProjectNarrativeSerializer(required=False, allow_null=True)  # Optional
+    approved_photos = serializers.SerializerMethodField()
 
     class Meta:
         model = AccomplishmentReport
-        fields = ['id', 'banner_program_title', 'flagship_program', 'training_modality', 'actual_implementation_date', 'total_number_of_days', 'submitted_by', 'prexc_achievement', 'project_narrative', 'project_title', 'project_type', 'project_category', 'research_title', 'proponents', 'program', 'accreditation_level', 'college', 'target_groups_beneficiaries', 'project_location', 'partner_agency']
+        fields = '__all__'
+        read_only_fields = ['submitted_by', 'total_number_of_days']
 
-        
+    def get_submitted_by(self, obj):
+        return f"{obj.submitted_by.firstname} {obj.submitted_by.lastname}" if obj.submitted_by else None
+
+    def get_approved_photos(self, obj):
+        approved_photos = PhotoDocumentation.objects.filter(project=obj.project, status="Approved")
+        return PhotoDocumentationSerializer(approved_photos, many=True).data
+
+    def validate(self, data):
+        # Validation for start and end dates
+        start_date = data.get('actualStartDateImplementation')
+        end_date = data.get('actualEndDateImplementation')
+        if start_date and end_date and start_date > end_date:
+            raise serializers.ValidationError("Start date must be before or equal to the end date.")
+        return data
+
+    
 class EvaluationSerializer(serializers.ModelSerializer):
     trainerLoad = serializers.ReadOnlyField()
     class Meta:
@@ -101,15 +167,6 @@ class EvaluationSharableLinkSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # You can add custom creation logic here if needed
         return super().create(validated_data)
-    
-class PREXCAchievementSerializer(serializers.ModelSerializer):
-    class Meta: model = PREXCAchievement
-    fields = '__all__'
-
-class ProjectNarrativeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProjectNarrative
-        fields = '__all__'
 
 class AttendanceTemplateSerializer(serializers.ModelSerializer):
     sharable_link = serializers.SerializerMethodField()
@@ -126,3 +183,10 @@ class CreatedAttendanceRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreatedAttendanceRecord
         fields = '__all__'
+
+
+# PREXC Report Serializer
+class ExtensionProgramOp2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExtensionProgramOp2
+        fields = ['id', 'academic_program', 'extension_program', 'from_date', 'to_date', 'campus', 'remarks', 'created_at']
