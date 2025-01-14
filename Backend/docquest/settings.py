@@ -13,7 +13,7 @@ import os
 import dj_database_url
 import environ
 from pathlib import Path
-from django.contrib.auth.models import User
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -151,12 +151,6 @@ else:
     else:
         raise Exception("DATABASE_URL environment variable not defined")
 
-    if not User.objects.filter(username=os.environ.get("DJANGO_SUPERUSER_USERNAME")).exists():
-        User.objects.create_superuser(
-            os.environ.get("DJANGO_SUPERUSER_USERNAME"),
-            os.environ.get("DJANGO_SUPERUSER_EMAIL"),
-            os.environ.get("DJANGO_SUPERUSER_PASSWORD")
-        )
 
     
     MEDIA_URL = env('AWS_MEDIA_URL')
