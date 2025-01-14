@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar";
@@ -6,9 +6,29 @@ import { FaArrowLeft } from "react-icons/fa";
 
 const EStaffOP2 = () => {
   const navigate = useNavigate();
-
   const [data, setData] = useState([]); // Start with an empty table
   const [editIndex, setEditIndex] = useState(null); // Track the row being edited
+
+  // Fetch all entries on component mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("User not logged in. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
+    fetch('http://127.0.0.1:8000/monitoring/extension_program_op2/', {
+      headers: {
+        Authorization: `Token ${token}`,
+        Accept: 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => setData(data))
+    .catch(error => console.error('Error fetching data:', error));
+  }, [navigate]);
+
 
   // Add a new empty row
   const handleAddRow = () => {
@@ -22,6 +42,7 @@ const EStaffOP2 = () => {
         toDate: "",
         campus: "",
         remarks: "",
+        id: null,
       },
     ]);
     setEditIndex(data.length); // Automatically set the new row to edit mode
@@ -34,15 +55,82 @@ const EStaffOP2 = () => {
     setData(newData);
   };
 
-  // Handle saving changes for a row
-  const handleSaveClick = () => {
-    setEditIndex(null); // Exit edit mode
+  const handleSaveClick = index => {
+      // Ensure the entry exists
+      const entry = data[index];
+      if (!entry) {
+          console.error('Error: No entry found at this index.');
+          return; // Stop the function if no entry is found
+      }
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+          alert("User not logged in. Please log in again.");
+          navigate("/login");
+          return;
+      }
+
+      const url = entry.id
+          ? `http://127.0.0.1:8000/monitoring/extension_program_op2/${entry.id}/`
+          : `http://127.0.0.1:8000/monitoring/extension_program_op2/`;
+      const method = entry.id ? 'PUT' : 'POST';
+
+      fetch(url, {
+          method,
+          headers: {
+              Authorization: `Token ${token}`,
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              quarter: entry.quarter,
+              mandated_priority_program: entry.mandated_priority_program,
+              extension_program: entry.extensionProgram,
+              from_date: entry.fromDate,
+              to_date: entry.toDate,
+              campus: entry.campus,
+              remarks: entry.remarks,
+          }),
+      })
+      .then(response => response.json())
+      .then(updatedEntry => {
+          const updatedData = [...data];
+          if (!entry.id) {
+              updatedData[index] = {...entry, id: updatedEntry.id};  // Update local state with new ID from the backend
+          } else {
+              updatedData[index] = updatedEntry;  // Update local state with updated entry from the backend
+          }
+          setData(updatedData);
+          setEditIndex(null);
+      })
+      .catch(error => console.error('Error saving data:', error));
   };
 
-  // Handle deleting a row
-  const handleDeleteRow = (index) => {
-    const newData = data.filter((_, rowIndex) => rowIndex !== index);
-    setData(newData);
+
+  const handleDeleteRow = index => {
+    const entry = data[index];
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("User not logged in. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
+    if (!entry.id) {
+      setData(data.filter((_, i) => i !== index));
+      return;
+    }
+
+    fetch(`http://127.0.0.1:8000/monitoring/extension_program_op2/${entry.id}/`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Token ${token}`,
+        Accept: 'application/json',
+      },
+    })
+    .then(() => {
+      setData(data.filter((_, i) => i !== index));  // Update local state to remove the entry
+    })
+    .catch(error => console.error('Error deleting data:', error));
   };
 
   return (
