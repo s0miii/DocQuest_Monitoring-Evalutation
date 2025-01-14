@@ -496,3 +496,18 @@ class CreatedAttendanceRecord(models.Model):
 
     def __str__(self):
         return f"Record for {self.project.projectTitle} submitted at {self.submitted_at}"
+    
+
+
+ # Models for PREXC Report
+class ExtensionProgramOp2(models.Model):
+    academic_program = models.CharField(max_length=255)
+    extension_program = models.CharField(max_length=255)
+    from_date = models.DateField()
+    to_date = models.DateField()
+    campus = models.CharField(max_length=255)
+    remarks = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+
+    def __str__(self):
+        return f"{self.academic_program} - {self.extension_program} ({self.from_date} to {self.to_date})"   

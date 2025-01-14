@@ -46,29 +46,32 @@
 
 ###
 # Get Accomplishment Reports by User
-GET http://127.0.0.1:8000/monitoring/accomplishment_reports/18
-Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
+GET http://127.0.0.1:8000/monitoring/accomplishment_reports/
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 
 ###
 # Delete Accomplishment Report by report ID
-DELETE http://127.0.0.1:8000/monitoring/accomplishment_reports/1/
-Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
+DELETE http://127.0.0.1:8000/monitoring/accomplishment_reports/2/
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
+
+
+
+
 
 
 # SA REFINED NI NGA ACCOMPLISHMENT - input fields ang naa here
 ###
 POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
-Authorization: Token 7a961f2dd7e07f76e350375b85048d4e40b4f15c
+Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 Content-Type: application/json
 
 {
   "project": 1,
-  "banner_program_title": "PANG TEST SA BAGO NGA AR - clarice",
+  "banner_program_title": "TISTING KUNG GAGANA NI ANG POST REQUEST",
   "flagship_program": "Flagship Program 1",
   "training_modality": "Face to Face",
   "actualStartDateImplementation": "2024-12-01",
   "actualEndDateImplementation": "2024-12-05",
-  "phase_description": "Initial phase description for the project.",
   "activities_topics": "Workshops and discussions on advanced topics.",
   "issues_challenges": "Lack of participation on day 2.",
   "participant_engagement_quality": "Highly interactive session.",

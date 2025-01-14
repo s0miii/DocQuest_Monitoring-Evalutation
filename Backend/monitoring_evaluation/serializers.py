@@ -183,3 +183,10 @@ class CreatedAttendanceRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreatedAttendanceRecord
         fields = '__all__'
+
+
+# PREXC Report Serializer
+class ExtensionProgramOp2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExtensionProgramOp2
+        fields = ['id', 'academic_program', 'extension_program', 'from_date', 'to_date', 'campus', 'remarks', 'created_at']

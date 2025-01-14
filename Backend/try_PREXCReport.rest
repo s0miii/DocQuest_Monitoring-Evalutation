@@ -1,0 +1,45 @@
+# FOR OP 2
+
+### Fetch All Extension Program OP2 Entries
+GET http://127.0.0.1:8000/monitoring/extension_program_op2/
+Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Accept: application/json
+
+###
+
+### Create a New Extension Program OP2 Entry
+POST http://127.0.0.1:8000/monitoring/extension_program_op2/
+Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Content-Type: application/json
+
+{
+    "academic_program": "Example Academic Program",
+    "extension_program": "Example Extension Program",
+    "from_date": "2024-01-01",
+    "to_date": "2024-12-31",
+    "campus": "Example Campus",
+    "remarks": "Some remarks"
+}
+
+###
+
+### Update an Existing Extension Program OP2 Entry (Replace <id> with an actual record ID)
+PUT http://127.0.0.1:8000/monitoring/extension_program_op2/1/
+Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Content-Type: application/json
+
+{
+    "academic_program": "Updated Academic Program",
+    "extension_program": "Updated Extension Program",
+    "from_date": "2024-02-01",
+    "to_date": "2024-12-31",
+    "campus": "Updated Campus",
+    "remarks": "Updated remarks"
+}
+
+###
+
+### Delete an Extension Program OP2 Entry (Replace <id> with an actual record ID)
+DELETE http://127.0.0.1:8000/monitoring/extension_program_op2/1/
+Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Accept: application/json
