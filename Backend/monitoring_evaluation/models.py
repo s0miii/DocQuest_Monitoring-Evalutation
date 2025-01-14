@@ -512,6 +512,7 @@ class ExtensionProgramOp2(models.Model):
             ("3rd Quarter", "3rd Quarter"),
             ("4th Quarter", "4th Quarter"),
         ])
+    extension_program = models.CharField(max_length=255)
     from_date = models.DateField()
     to_date = models.DateField()
     campus = models.CharField(max_length=255)
@@ -519,7 +520,7 @@ class ExtensionProgramOp2(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
 
     def __str__(self):
-        return f"{self.mandated_priority_program} - {self.quarter} ({self.from_date} to {self.to_date})"
+        return f"{self.mandated_priority_program} - {self.extension_program} for {self.quarter} ({self.from_date} to {self.to_date})"
 
 # OC
 class ExtensionProgramOC(models.Model):

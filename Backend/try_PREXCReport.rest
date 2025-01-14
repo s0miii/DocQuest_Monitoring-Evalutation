@@ -13,8 +13,9 @@ Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
 Content-Type: application/json
 
 {
-    "mandated_priority_program": "Example Academic Program",
-    "quarter": "1st Quarter",
+    "mandated_priority_program": "Example Mandated Program",
+    "quarter": "2nd Quarter",
+    "extension_program": "Example Extension Program",
     "from_date": "2024-01-01",
     "to_date": "2024-12-31",
     "campus": "Example Campus",
@@ -29,8 +30,9 @@ Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
 Content-Type: application/json
 
 {
-    "mandated_priority_program": "Updated Academic Program",
+    "mandated_priority_program": "Updated Priority Program",
     "quarter": "1st Quarter",
+    "extension_program": "Updated Extension Program",
     "from_date": "2024-02-01",
     "to_date": "2024-12-31",
     "campus": "Updated Campus",

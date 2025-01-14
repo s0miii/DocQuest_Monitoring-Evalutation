@@ -323,8 +323,8 @@ class CreatedAttendanceRecordAdmin(admin.ModelAdmin):
 # OP2
 @admin.register(ExtensionProgramOp2)
 class ExtensionProgramOp2Admin(admin.ModelAdmin):
-    list_display = ('id', 'mandated_priority_program','quarter', 'from_date', 'to_date', 'campus', 'remarks', 'created_at')
-    search_fields = ('mandated_priority_program','quarter', 'campus')
+    list_display = ('id', 'mandated_priority_program','quarter','extension_program', 'from_date', 'to_date', 'campus', 'remarks', 'created_at')
+    search_fields = ('mandated_priority_program','quarter', 'extension_program', 'campus')
     list_filter = ('from_date', 'to_date') 
     ordering = ('-created_at',)  
 
