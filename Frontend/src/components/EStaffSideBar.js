@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation, NavLink } from "react-router-dom";
 
@@ -7,8 +7,12 @@ function EStaffSideBar({ onFilterChange }) {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Helper function to check if the pathname is related to a specific section
-    const isPathActive = (path) => location.pathname.startsWith(path);
+    useEffect(() => {
+        // Automatically open and highlight the PREXC Report dropdown if the path is related
+        if (location.pathname.includes('/estaff/prexc')) {
+            setActiveDropdown('prexc');
+        }
+    }, [location.pathname]);
 
     const handleLogout = async () => {
         const token = localStorage.getItem('token');
@@ -30,6 +34,12 @@ function EStaffSideBar({ onFilterChange }) {
         setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
     };
 
+    // Custom isActive function for better control over active link state
+    const getIsActive = (path) => {
+        // Only consider exactly matching path as active
+        return location.pathname === path;
+    };
+
     return (
         <div className="fixed z-50 w-1/5 h-screen overflow-y-auto text-white bg-vlu">
             <div className="flex justify-center">
@@ -41,7 +51,9 @@ function EStaffSideBar({ onFilterChange }) {
                         <NavLink
                             to="/estaff"
                             className={({ isActive }) =>
-                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                                `text-lg block px-6 py-3 ${isActive && !location.pathname.includes('/estaff/prexc') ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`
+                            }
+                            isActive={() => getIsActive("/estaff")}
                         >
                             Dashboard
                         </NavLink>
@@ -86,7 +98,9 @@ function EStaffSideBar({ onFilterChange }) {
                     <li>
                         <button
                             onClick={() => toggleDropdown('prexc')}
-                            className={`text-lg block px-6 py-3 w-full text-left ${activeDropdown === 'prexc' ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
+                            className={`text-lg block px-6 py-3 w-full text-left ${
+                                activeDropdown === 'prexc' ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'
+                            }`}
                         >
                             PREXC Report
                         </button>
