@@ -17,6 +17,7 @@ router.register(r'attendance_templates', AttendanceTemplateViewSet, basename='at
 router.register(r'attendance_records', AttendanceRecordViewSet, basename='attendance_record')
 
 router.register(r'extension_program_op2', ExtensionProgramOp2ViewSet)
+router.register(r'extension_program_oc', ExtensionProgramOCViewSet)
 
 ### Checklist Items
 router.register(r'daily_attendance', DailyAttendanceRecordViewSet)

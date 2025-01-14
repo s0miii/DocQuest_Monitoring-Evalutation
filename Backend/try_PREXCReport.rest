@@ -13,8 +13,8 @@ Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
 Content-Type: application/json
 
 {
-    "academic_program": "Example Academic Program",
-    "extension_program": "Example Extension Program",
+    "mandated_priority_program": "Example Academic Program",
+    "quarter": "1st Quarter",
     "from_date": "2024-01-01",
     "to_date": "2024-12-31",
     "campus": "Example Campus",
@@ -29,8 +29,8 @@ Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
 Content-Type: application/json
 
 {
-    "academic_program": "Updated Academic Program",
-    "extension_program": "Updated Extension Program",
+    "mandated_priority_program": "Updated Academic Program",
+    "quarter": "1st Quarter",
     "from_date": "2024-02-01",
     "to_date": "2024-12-31",
     "campus": "Updated Campus",
@@ -40,6 +40,54 @@ Content-Type: application/json
 ###
 
 ### Delete an Extension Program OP2 Entry (Replace <id> with an actual record ID)
-DELETE http://127.0.0.1:8000/monitoring/extension_program_op2/1/
+DELETE http://127.0.0.1:8000/monitoring/extension_program_op2/2/
+Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Accept: application/json
+
+
+# -----------------------------
+# FOR OC
+
+### Fetch All Extension Program OC Entries
+GET http://127.0.0.1:8000/monitoring/extension_program_oc/
+Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Accept: application/json
+
+###
+
+### Create a New Extension Program OC Entry
+POST http://127.0.0.1:8000/monitoring/extension_program_oc/
+Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Content-Type: application/json
+
+{
+    "memorandum_of_agreements": "Institute of Integrated Electrical Engineers",
+    "extension_program": "Bigay Liwanag",
+    "from_date": "2024-01-01",
+    "to_date": "2024-03-01",
+    "campus": "CEA",
+    "remarks": "Program completed successfully."
+}
+
+###
+
+### Update an Existing Extension Program OC Entry (Replace <id> with an actual record ID)
+PUT http://127.0.0.1:8000/monitoring/extension_program_oc/1/
+Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
+Content-Type: application/json
+
+{
+    "memorandum_of_agreements": "Updated 2 MOA Name",
+    "extension_program": "Updated 2 Program Name",
+    "from_date": "2024-02-01",
+    "to_date": "2024-04-01",
+    "campus": "Updated Campus Name",
+    "remarks": "Updated remarks."
+}
+
+###
+
+### Delete an Extension Program OC Entry (Replace <id> with an actual record ID)
+DELETE http://127.0.0.1:8000/monitoring/extension_program_oc/1/
 Authorization: Token 95b4b4cdc399f6cb52408613c1eaffc0f30e4e0a
 Accept: application/json
