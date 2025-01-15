@@ -535,3 +535,45 @@ class ExtensionProgramOC(models.Model):
     def __str__(self):
         return f"{self.memorandum_of_agreements} - {self.extension_program} ({self.from_date} to {self.to_date})"
     
+# College Performance
+class CollegePerformanceRow(models.Model):
+    campus = models.CharField(max_length=255, blank=True, null=True)  # e.g., 'CEA', 'CITC'
+
+    # Programs (vertically articulated programs counted as 1)
+    programs_number = models.FloatField(null=True, blank=True)  # Column 0
+    programs_percentage = models.FloatField(null=True, blank=True)  # Column 1
+
+    # Faculty with plantilla
+    faculty_number = models.FloatField(null=True, blank=True)  # Column 2
+    faculty_percentage = models.FloatField(null=True, blank=True)  # Column 3
+
+    # Average Percentage (Programs & Faculty)
+    average_percentage = models.FloatField(null=True, blank=True)  # Column 4
+
+    # Persons trained weighted by the length of training
+    persons_trained_target = models.FloatField(null=True, blank=True)  # Column 5
+    persons_trained_weighted_accomplishment = models.FloatField(null=True, blank=True)  # Column 6
+    persons_trained_variance = models.FloatField(null=True, blank=True)  # Column 7
+
+    # Active Partnerships
+    partnerships_target = models.FloatField(null=True, blank=True)  # Column 8
+    partnerships_accomplishment = models.FloatField(null=True, blank=True)  # Column 9
+    partnerships_variance = models.FloatField(null=True, blank=True)  # Column 10
+
+    # Beneficiaries who rated the course satisfactory or higher
+    beneficiaries_target = models.FloatField(null=True, blank=True)  # Column 11
+    beneficiaries_accomplishment = models.FloatField(null=True, blank=True)  # Column 12
+    beneficiaries_variance = models.FloatField(null=True, blank=True)  # Column 13
+
+    # Extension programs
+    extension_programs_target = models.FloatField(null=True, blank=True)  # Column 14
+    extension_programs_accomplishment = models.FloatField(null=True, blank=True)  # Column 15
+    extension_programs_variance = models.FloatField(null=True, blank=True)  # Column 16
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.campus
+    
+    
