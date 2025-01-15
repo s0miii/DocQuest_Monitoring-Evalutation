@@ -6,52 +6,53 @@ import { FaArrowLeft } from "react-icons/fa";
 
 const EStaffOC = () => {
   const navigate = useNavigate();
-
   const [data, setData] = useState([]); // Start with an empty table
   const [editIndex, setEditIndex] = useState(null); // Track the row being edited
 
-
-  useEffect(() => {
-    const fetchOCData = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
+    // Fetch all entries on component mount
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
         alert("User not logged in. Please log in again.");
         navigate("/login");
         return;
-      }
+        }
 
-      try {
-        const response = await fetch('http://127.0.0.1:8000/monitoring/extension_program_oc/', {
-          headers: {
+        fetch("http://127.0.0.1:8000/monitoring/extension_program_oc/", {
+        headers: {
             Authorization: `Token ${token}`,
-            Accept: 'application/json',
-          },
-        });
+            Accept: "application/json",
+        },
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (Array.isArray(data)) {
+            setData(data);
+            } else {
+            console.error("Invalid data format received:", data);
+            alert("Error fetching data. Please refresh the page.");
+            }
+        })
+        .catch((error) => console.error("Error fetching data:", error));
+    }, [navigate]);
 
-        if (!response.ok) throw new Error('Failed to fetch');
-        const fetchedData = await response.json();
-        setData(fetchedData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchOCData();
-  }, [navigate]);
 
   // Add a new empty row
   const handleAddRow = () => {
-    const newRow = {
-      memorandum_of_agreements: "",
-      extension_program: "",
-      from_date: "",
-      to_date: "",
-      campus: "",
-      remarks: "",
-      id: null, // This will be filled after saving the new entry
-    };
-    setData([...data, newRow]);
-    setEditIndex(data.length); // Set edit index to the last current item
+    const newData = [
+      ...data,
+      {
+        memorandum_of_agreements: "",
+        extension_program: "",
+        from_date: "",
+        to_date: "",
+        campus: "",
+        remarks: "",
+        id: null, 
+      },
+      ];
+    setData(newData);
+    setEditIndex(newData.length - 1); // Set to last new index
   };
 
   // Handle input changes
@@ -61,51 +62,59 @@ const EStaffOC = () => {
     setData(newData);
   };
 
-  // Handle saving changes for a row
-  const handleSaveClick = async (index) => {
-    const entry = data[index];
-    if (!entry) {
-      console.error("Attempted to save undefined entry at index:", index);
-      return; // Stop function if entry is undefined
-    }
+  
+    // Handle saving changes for a row
+    const handleSaveClick = async (index) => {
+      console.log("Attempting to save at index:", index);
 
-    const token = localStorage.getItem("token");
-    if (!token) {
+      if (index < 0 || index >= data.length) {
+      alert("Invalid index. Please refresh and try again.");
+      return;
+      }
+
+      const entry = data[index];
+      if (!entry.memorandum_of_agreements || !entry.extension_program || !entry.from_date || !entry.to_date) {
+      alert("Please fill in all required fields.");
+      return;
+      }
+
+      const token = localStorage.getItem("token");
+      if (!token) {
       alert("User not logged in. Please log in again.");
       navigate("/login");
       return;
-    }
+      }
 
-    const url = entry.id ? `http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/` : `http://127.0.0.1:8000/monitoring/extension_program_oc/`;
-    const method = entry.id ? 'PUT' : 'POST';
+      const url = entry.id
+      ? `http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/`
+      : `http://127.0.0.1:8000/monitoring/extension_program_oc/`;
+      const method = entry.id ? "PUT" : "POST";
 
-    try {
+      try {
       const response = await fetch(url, {
-        method: method,
-        headers: {
+          method: method,
+          headers: {
           Authorization: `Token ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          memorandum_of_agreements: entry.memorandum_of_agreements,
-          extension_program: entry.extension_program,
-          from_date: entry.from_date,
-          to_date: entry.to_date,
-          campus: entry.campus,
-          remarks: entry.remarks,
-        }),
+          "Content-Type": "application/json",
+          },
+          body: JSON.stringify(entry),
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const updatedEntry = await response.json();
+      if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Error saving data");
+      }
 
+      const updatedEntry = await response.json();
       const updatedData = [...data];
-      updatedData[index] = {...updatedData[index], ...updatedEntry, id: updatedEntry.id || updatedData[index].id};
+      updatedData[index] = entry.id ? updatedEntry : { ...entry, id: updatedEntry.id };
       setData(updatedData);
       setEditIndex(null);
-    } catch (error) {
-      console.error('Error saving data:', error);
-    }
+      alert("Save successful!");
+      } catch (error) {
+      console.error("Error saving data:", error);
+      alert(`Error saving data: ${error.message}`);
+      }
   };
 
   const handleDeleteRow = async (index) => {
@@ -181,107 +190,108 @@ const EStaffOC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((row, index) => (
-                      <tr key={index} className="border-b border-gray-300">
-                        <td className="px-4 py-2 border border-gray-400">{index + 1}</td>
-                        {editIndex === index ? (
-                          <>
-                            <td className="px-4 py-2 border border-gray-400 max-w-[200px]">
-                              <input
-                                type="text"
-                                value={row.memorandum_of_agreements}
-                                onChange={(e) => handleInputChange(e, "memorandum_of_agreements", index)}
-                                className="w-full px-2 py-1 truncate border border-gray-300"
-                              />
-                            </td>
-                            <td className="px-4 py-2 border border-gray-400 max-w-[200px]">
-                              <input
-                                type="text"
-                                value={row.extension_program}
-                                onChange={(e) => handleInputChange(e, "extension_program", index)}
-                                className="w-full px-2 py-1 truncate border border-gray-300"
-                              />
-                            </td>
-                            <td className="px-4 py-2 border border-gray-400 w-[100px]">
-                              <input
-                                type="date"
-                                value={row.from_date}
-                                onChange={(e) => handleInputChange(e, "from_date", index)}
-                                className="w-full px-2 py-1 border border-gray-300"
-                              />
-                            </td>
-                            <td className="px-4 py-2 border border-gray-400 w-[100px]">
-                              <input
-                                type="date"
-                                value={row.to_date}
-                                onChange={(e) => handleInputChange(e, "to_date", index)}
-                                className="w-full px-2 py-1 border border-gray-300"
-                              />
-                            </td>
-                            <td className="px-4 py-2 border border-gray-400 max-w-[150px]">
-                              <input
-                                type="text"
-                                value={row.campus}
-                                onChange={(e) => handleInputChange(e, "campus", index)}
-                                className="w-full px-2 py-1 truncate border border-gray-300"
-                              />
-                            </td>
-                            <td className="px-4 py-2 border border-gray-400 max-w-[150px]">
-                              <input
-                                type="text"
-                                value={row.remarks}
-                                onChange={(e) => handleInputChange(e, "remarks", index)}
-                                className="w-full px-2 py-1 truncate border border-gray-300"
-                              />
-                            </td>
-                            <td className="px-4 py-2 border border-gray-400 w-[150px]">
-                              <button
-                                onClick={handleSaveClick}
-                                className="px-4 py-1 text-white bg-green-500 rounded"
-                              >
-                                Save
-                              </button>
-                            </td>
-                          </>
-                        ) : (
-                          <>
-                            <td className="px-4 py-2 break-words border border-gray-400 max-w-[200px]">
-                              {row.memorandum_of_agreements}
-                            </td>
-                            <td className="px-4 py-2 break-words border border-gray-400 max-w-[200px]">
-                              {row.extension_program}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-400 w-[100px]">
-                              {row.from_date}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-400 w-[100px]">
-                              {row.to_date}
-                            </td>
-                            <td className="px-4 py-2 break-words border border-gray-400 max-w-[150px]">
-                              {row.campus}
-                            </td>
-                            <td className="px-4 py-2 break-words border border-gray-400 max-w-[150px]">
-                              {row.remarks}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-400 w-[150px]">
-                              <button
-                                onClick={() => setEditIndex(index)}
-                                className="px-4 py-1 mb-1 mr-2 text-white bg-blue-500 rounded"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteRow(index)}
-                                className="px-4 py-1 text-white bg-red-500 rounded"
-                              >
-                                Delete
-                              </button>
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
+                        {Array.isArray(data) &&
+                        data.map((row, index) => (
+                            <tr key={index} className="border-b border-gray-300">
+                            <td className="px-4 py-2 border border-gray-400">{index + 1}</td>
+                            {editIndex === index ? (
+                                <>
+                                <td className="px-4 py-2 border border-gray-400 max-w-[200px]">
+                                    <input
+                                    type="text"
+                                    value={row.memorandum_of_agreements}
+                                    onChange={(e) => handleInputChange(e, "memorandum_of_agreements", index)}
+                                    className="w-full px-2 py-1 truncate border border-gray-300"
+                                    />
+                                </td>
+                                <td className="px-4 py-2 border border-gray-400 max-w-[200px]">
+                                    <input
+                                    type="text"
+                                    value={row.extension_program}
+                                    onChange={(e) => handleInputChange(e, "extension_program", index)}
+                                    className="w-full px-2 py-1 truncate border border-gray-300"
+                                    />
+                                </td>
+                                <td className="px-4 py-2 border border-gray-400 w-[100px]">
+                                    <input
+                                    type="date"
+                                    value={row.from_date}
+                                    onChange={(e) => handleInputChange(e, "from_date", index)}
+                                    className="w-full px-2 py-1 border border-gray-300"
+                                    />
+                                </td>
+                                <td className="px-4 py-2 border border-gray-400 w-[100px]">
+                                    <input
+                                    type="date"
+                                    value={row.to_date}
+                                    onChange={(e) => handleInputChange(e, "to_date", index)}
+                                    className="w-full px-2 py-1 border border-gray-300"
+                                    />
+                                </td>
+                                <td className="px-4 py-2 border border-gray-400 max-w-[150px]">
+                                    <input
+                                    type="text"
+                                    value={row.campus}
+                                    onChange={(e) => handleInputChange(e, "campus", index)}
+                                    className="w-full px-2 py-1 truncate border border-gray-300"
+                                    />
+                                </td>
+                                <td className="px-4 py-2 border border-gray-400 max-w-[150px]">
+                                    <input
+                                    type="text"
+                                    value={row.remarks}
+                                    onChange={(e) => handleInputChange(e, "remarks", index)}
+                                    className="w-full px-2 py-1 truncate border border-gray-300"
+                                    />
+                                </td>
+                                <td className="px-4 py-2 border border-gray-400 w-[150px]">
+                                    <button
+                                    onClick={() => handleSaveClick(index)}
+                                    className="px-4 py-1 text-white bg-green-500 rounded"
+                                    >
+                                    Save
+                                    </button>
+                                </td>
+                                </>
+                            ) : (
+                                <>
+                                <td className="px-4 py-2 break-words border border-gray-400 max-w-[200px]">
+                                    {row.memorandum_of_agreements}
+                                </td>
+                                <td className="px-4 py-2 break-words border border-gray-400 max-w-[200px]">
+                                    {row.extension_program}
+                                </td>
+                                <td className="px-4 py-2 border border-gray-400 w-[100px]">
+                                    {row.from_date}
+                                </td>
+                                <td className="px-4 py-2 border border-gray-400 w-[100px]">
+                                    {row.to_date}
+                                </td>
+                                <td className="px-4 py-2 break-words border border-gray-400 max-w-[150px]">
+                                    {row.campus}
+                                </td>
+                                <td className="px-4 py-2 break-words border border-gray-400 max-w-[150px]">
+                                    {row.remarks}
+                                </td>
+                                <td className="px-4 py-2 border border-gray-400 w-[150px]">
+                                    <button
+                                    onClick={() => setEditIndex(index)}
+                                    className="px-4 py-1 mb-1 mr-2 text-white bg-blue-500 rounded"
+                                    >
+                                    Edit
+                                    </button>
+                                    <button
+                                    onClick={() => handleDeleteRow(index)}
+                                    className="px-4 py-1 text-white bg-red-500 rounded"
+                                    >
+                                    Delete
+                                    </button>
+                                </td>
+                                </>
+                            )}
+                            </tr>
+                        ))}
+                    </tbody>
                 </table>
               </div>
               <button
