@@ -31,6 +31,7 @@ import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
 import StaffProjectsDashboard from "./pages/estaff/StaffProjectsDashboard";
 import StaffDailyAttRec from "./pages/estaff/StaffDailyAttRec";
+import StaffEvalSum from "./pages/estaff/StaffEvalSum.js";
 import StaffCvDtr from "./pages/estaff/StaffCvDtr";
 import StaffLecNotes from "./pages/estaff/StaffLecNotes";
 import StaffPhotoDocs from "./pages/estaff/StaffPhotoDocs";
@@ -85,6 +86,7 @@ function App() {
                   <Route path="/estaff/projreq/:projectID" element={<EStaffProjReq />} />
                   <Route path="/staff-projects-dashboard" element={<StaffProjectsDashboard />} />
                   <Route path="/staff/project/:projectID/daily-attendance" element={<StaffDailyAttRec />} />
+                  <Route path="/staff/project/:projectID/summary-of-evaluation" element={<StaffEvalSum />} />
                   <Route path="/staff/project/:projectID/trainer-cv-dtr" element={<StaffCvDtr />} />
                   <Route path="/staff/project/:projectID/lecture-notes" element={<StaffLecNotes />} />
                   <Route path="/staff/project/:projectID/photo-documentations" element={<StaffPhotoDocs />} />
