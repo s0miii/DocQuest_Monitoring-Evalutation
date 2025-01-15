@@ -587,7 +587,7 @@ const ProjLeadDailyAttRec = () => {
                                     }}
                                 >
                                     <table className="min-w-full bg-white rounded-lg shadow-md table-auto">
-                                        <thead className="sticky top-0 z-10 bg-gray-100">
+                                        <thead className="top-0 z-10 bg-gray-100">
                                             <tr className="border-b">
                                                 <th
                                                     className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
@@ -708,7 +708,7 @@ const ProjLeadDailyAttRec = () => {
                                     Add New Submission
                                 </h2>
 
-                                <div className="grid grid-cols-3 gap-4 mb-6">
+                                <div className="grid grid-cols-1 gap-4 mb-6">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">
                                             Description
@@ -721,34 +721,10 @@ const ProjLeadDailyAttRec = () => {
                                             onChange={(e) => setDescription(e.target.value)}
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Date
-                                        </label>
-                                        <input
-                                            type="date"
-                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            placeholder="Set Date"
-                                            value={date}
-                                            onChange={(e) => setDate(e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Total Number of Attendees
-                                        </label>
-                                        <input
-                                            type="number"
-                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            placeholder="Number of Attendees"
-                                            value={totalAttendees}
-                                            onChange={(e) => setAttendees(e.target.value)}
-                                        />
-                                    </div>
                                 </div>
 
                                 {/* Preview of Attached Files */}
-                                <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
+                                <div className="p-4 mb-6 border border-gray-300 rounded-lg">
                                     <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
                                     {attachedFiles.length === 0 && (
                                         <div className="mb-3 text-gray-400">

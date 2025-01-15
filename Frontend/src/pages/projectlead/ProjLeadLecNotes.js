@@ -305,7 +305,7 @@ const ProjLeadLecNotes = () => {
                             }}
                         >
                             <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
-                                <thead className="sticky top-0 bg-gray-100 z-10">
+                                <thead className="top-0 bg-gray-100 z-10">
                                     <tr className="border-b">
                                         <th
                                             className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
@@ -447,7 +447,7 @@ const ProjLeadLecNotes = () => {
                         </div>
 
                         {/* Preview of Attached Files */}
-                        <div className="border border-gray-300 rounded-lg p-4 mb-6 relative">
+                        <div className="border border-gray-300 rounded-lg p-4 mb-6">
                             <h3 className="font-semibold text-center mb-3">Attach Files</h3>
                             {attachedFiles.length === 0 && (
                                 <div className="text-gray-400 mb-3">

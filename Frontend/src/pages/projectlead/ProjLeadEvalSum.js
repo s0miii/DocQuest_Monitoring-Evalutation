@@ -318,7 +318,7 @@ const ProjLeadEvalSum = () => {
         if (!confirmDelete) return;
 
         try {
-            // Adjust model_name to "daily_attendance"
+            // Adjust model_name to "summary_of_evaluation"
             const modelName = "summary_of_evaluation";
             const response = await fetch(
                 `${API_URL}/monitoring/submissions/${modelName}/${submissionId}/`,
@@ -522,7 +522,7 @@ const ProjLeadEvalSum = () => {
                                     }}
                                 >
                                     <table className="min-w-full bg-white rounded-lg shadow-md table-auto">
-                                        <thead className="sticky top-0 z-10 bg-gray-100">
+                                        <thead className="top-0 z-10 bg-gray-100">
                                             <tr className="border-b">
                                                 <th
                                                     className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
@@ -664,7 +664,7 @@ const ProjLeadEvalSum = () => {
                                 </div>
 
                                 {/* Preview of Attached Files */}
-                                <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
+                                <div className="p-4 mb-6 border border-gray-300 rounded-lg">
                                     <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
                                     {attachedFiles.length === 0 && (
                                         <div className="mb-3 text-gray-400">
