@@ -664,7 +664,7 @@ const ProjLeadEvalSum = () => {
                                 </div>
 
                                 {/* Preview of Attached Files */}
-                                <div className="p-4 mb-6 border border-gray-300 rounded-lg">
+                                <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
                                     <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
                                     {attachedFiles.length === 0 && (
                                         <div className="mb-3 text-gray-400">

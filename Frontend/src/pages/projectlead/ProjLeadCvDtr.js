@@ -445,7 +445,7 @@ const ProjLeadCvDtr = () => {
                         </div>
 
                         {/* Preview of Attached Files */}
-                        <div className="border border-gray-300 rounded-lg p-4 mb-6">
+                        <div className="relative border border-gray-300 rounded-lg p-4 mb-6">
                             <h3 className="font-semibold text-center mb-3">Attach Files</h3>
                             {attachedFiles.length === 0 && (
                                 <div className="text-gray-400 mb-3">

@@ -724,7 +724,7 @@ const ProjLeadDailyAttRec = () => {
                                 </div>
 
                                 {/* Preview of Attached Files */}
-                                <div className="p-4 mb-6 border border-gray-300 rounded-lg">
+                                <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
                                     <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
                                     {attachedFiles.length === 0 && (
                                         <div className="mb-3 text-gray-400">
@@ -735,8 +735,7 @@ const ProjLeadDailyAttRec = () => {
                                         type="file"
                                         multiple
                                         onChange={handleFileChange}
-                                        className="absolute inset-0 opacity-0 cursor-pointer"
-                                        style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
+                                        className={`absolute inset-0 w-20 h-20 opacity-0 cursor-pointer ${attachedFiles.length > 0 ? '-z-10' : 'z-10'}`}// Prevent interference
                                     />
                                     {attachedFiles.length > 0 && (
                                         <div
