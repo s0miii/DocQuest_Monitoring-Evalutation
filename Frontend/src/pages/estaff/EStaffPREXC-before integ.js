@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar";
 import { FaArrowLeft } from "react-icons/fa";
+import axios from "axios";
+
 
 const EStaffPREXC = () => {
     const navigate = useNavigate();
@@ -41,10 +43,59 @@ const EStaffPREXC = () => {
         }));
     };
 
-    const handleSave = () => {
-        console.log("Saving data...", rows); // Simulate saving
-        alert("Save button clicked. Check the console for the data!");
-      };
+    // const handleSave = () => {
+    //     console.log("Saving data...", rows); // Simulate saving
+    //     alert("Save button clicked. Check the console for the data!");
+    //   };
+
+    const handleSave = async () => {
+        const token = localStorage.getItem('token'); // Replace with the correct token retrieval method
+    
+        const dataToSave = Object.entries(rows).map(([campus, values]) => ({
+            campus,
+            programs_number: parseFloat(values[0]) || 0,
+            programs_percentage: parseFloat(calculatePercentage(campus, 0, 0)) || 0,
+            faculty_number: parseFloat(values[2]) || 0,
+            faculty_percentage: parseFloat(calculatePercentage(campus, 2, 2)) || 0,
+            average_percentage: parseFloat(calculateTotal(4)) || 0,
+            persons_trained_target: parseFloat(values[5]) || 0,
+            persons_trained_weighted_accomplishment: parseFloat(calculateIndex5(campus)) || 0,
+            persons_trained_variance: parseFloat(
+                (parseFloat(calculateIndex5(campus)) || 0) - (parseFloat(values[6]) || 0)
+            ) || 0,
+            partnerships_target: parseFloat(values[8]) || 0,
+            partnerships_accomplishment: parseFloat(values[9]) || 0,
+            partnerships_variance: parseFloat(
+                (parseFloat(values[9]) || 0) - (parseFloat(values[8]) || 0)
+            ) || 0,
+            beneficiaries_target: parseFloat(values[11]) || 0,
+            beneficiaries_accomplishment: parseFloat(values[12]) || 0,
+            beneficiaries_variance: parseFloat(
+                (parseFloat(values[12]) || 0) - (parseFloat(values[11]) || 0)
+            ) || 0,
+            extension_programs_target: parseFloat(values[14]) || 0,
+            extension_programs_accomplishment: parseFloat(values[15]) || 0,
+            extension_programs_variance: parseFloat(
+                (parseFloat(values[15]) || 0) - (parseFloat(values[14]) || 0)
+            ) || 0,
+        }));
+    
+        try {
+            await axios.post("http://127.0.0.1:8000/monitoring/college_performance/", dataToSave, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`, // Add token here
+                },
+            });
+            alert("Data saved successfully!");
+        } catch (error) {
+            console.error("Error saving data:", error.response?.data || error.message);
+            alert("Failed to save data! Please try again.");
+        }
+    };
+    
+    
       
 
     // Function to calculate totals for the "TOTAL" row
