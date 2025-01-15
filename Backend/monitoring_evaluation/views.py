@@ -1063,6 +1063,7 @@ class ProjectNarrativeCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.submitted_by = self.request.user
         return super().form_valid(form)
+# UNTIL DARI Wyn ----------
     
 # API Views
 class DailyAttendanceRecordViewSet(viewsets.ModelViewSet): 
@@ -1109,6 +1110,7 @@ class ProjectNarrativeViewSet(viewsets.ModelViewSet):
     queryset = ProjectNarrative.objects.all()
     serializer_class = ProjectNarrativeSerializer
     permission_classes = [IsAuthenticated]
+# KANI PUD ---------------------------------------
 
 # Evaluation ViewSet for Evaluation Forms
 class EvaluationViewSet(viewsets.ModelViewSet):

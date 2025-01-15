@@ -1,53 +1,7 @@
-# ### Create Accomplishment Report FOR PROJECT 1 - TESTING kay wyn lang
-# POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
-# Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
-# Content-Type: application/json
-
-# {
-#   "project": 1, 
-#   "banner_program_title": "Trial 6: Updated With Photo Accomplishment Report",
-#   "flagship_program": "Sample Flagship Program",
-#   "training_modality": "Face to Face",
-#   "actualStartDateImplementation": "2024-12-26",
-#   "actualEndDateImplementation": "2024-12-31",
-#   "project_narrative": {
-#     "phase_description": "Initial Phase of Implementation",
-#     "activities_topics": "Workshop on Environmental Awareness",
-#     "issues_challenges": "Limited resources and time constraints",
-#     "participant_engagement_quality": "High engagement and interaction",
-#     "discussion_comments": "Positive feedback from participants",
-#     "ways_forward_plans": "Follow-up sessions and resource allocation"
-#   }
-# }
-
-# ###
-# # Test Endpoint for Accompolishment Report Submission
-# POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
-# Content-Type: application/json
-# Authorization: Token 85a475256adb3504c8836ffdac14bcb71cef48ec
-
-# {
-#   "project": 2,
-#   "banner_program_title": "IKA 6 - DAPAT WA NAY 0",
-#   "flagship_program": "Sample Flagship Program",
-#   "training_modality": "Face to Face",
-#   "actualStartDateImplementation": "2024-01-01",
-#   "actualEndDateImplementation": "2024-01-05",
-#   "project_narrative": {
-#     "phase_description": "Initial Phase of Implementation",
-#     "activities_topics": "Workshop on Environmental Awareness",
-#     "issues_challenges": "Limited resources and time constraints",
-#     "participant_engagement_quality": "High engagement and interaction",
-#     "discussion_comments": "Positive feedback from participants",
-#     "ways_forward_plans": "Follow-up sessions and resource allocation"
-#   }
-# }
-
-
 ###
 # Get Accomplishment Reports by User
 GET http://127.0.0.1:8000/monitoring/accomplishment_reports/
-Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
+Authorization: Token 674505cd58b096afbefa3d9f2a0c6c3ace6ee0df
 
 ###
 # Delete Accomplishment Report by report ID
@@ -62,7 +16,7 @@ Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 # SA REFINED NI NGA ACCOMPLISHMENT - input fields ang naa here
 ###
 POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
-Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
+Authorization: Token 674505cd58b096afbefa3d9f2a0c6c3ace6ee0df
 Content-Type: application/json
 
 {
