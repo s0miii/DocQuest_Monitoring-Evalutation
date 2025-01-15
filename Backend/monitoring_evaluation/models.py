@@ -500,7 +500,6 @@ class CreatedAttendanceRecord(models.Model):
 
 
  # Models for PREXC Report
- 
  # OP2
 class ExtensionProgramOp2(models.Model):
     mandated_priority_program = models.CharField(max_length=255)

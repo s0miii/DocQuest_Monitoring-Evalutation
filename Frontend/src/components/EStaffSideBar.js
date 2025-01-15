@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, useLocation, NavLink } from "react-router-dom";
 
@@ -7,24 +7,13 @@ function EStaffSideBar({ onFilterChange }) {
     const navigate = useNavigate();
     const location = useLocation();
 
-    useEffect(() => {
-        // Automatically open and highlight the PREXC Report dropdown if the path is related
-        if (location.pathname.includes('/estaff/prexc')) {
-            setActiveDropdown('prexc');
-        }
-    }, [location.pathname]);
-
-    // deployed
-    // const API_URL = process.env.REACT_APP_API_URL;
-
-    // local
-    const API_URL = 'http://127.0.0.1:8000/';
-    // ${API_URL}
+    // Helper function to check if the pathname is related to a specific section
+    const isPathActive = (path) => location.pathname.startsWith(path);
 
     const handleLogout = async () => {
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`${API_URL}/auth/token/logout/`, {}, {
+            await axios.post('https://web-production-4b16.up.railway.app/auth/token/logout/', {}, {
                 headers: {
                     'Authorization': `Token ${token}`,
                 },
@@ -41,14 +30,8 @@ function EStaffSideBar({ onFilterChange }) {
         setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
     };
 
-    // Custom isActive function for better control over active link state
-    const getIsActive = (path) => {
-        // Only consider exactly matching path as active
-        return location.pathname === path;
-    };
-
     return (
-        <div className="w-1/5 bg-vlu text-white h-screen fixed z-50">
+        <div className="fixed z-50 w-1/5 h-screen overflow-y-auto text-white bg-vlu">
             <div className="flex justify-center">
                 <img src="/images/logo2.png" alt="DocQuestLogo" className="w-52" />
             </div>
@@ -58,9 +41,7 @@ function EStaffSideBar({ onFilterChange }) {
                         <NavLink
                             to="/estaff"
                             className={({ isActive }) =>
-                                `text-lg block px-6 py-3 ${isActive && !location.pathname.includes('/estaff/prexc') ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`
-                            }
-                            isActive={() => getIsActive("/estaff")}
+                                `text-lg block px-6 py-3 ${isActive ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
                         >
                             Dashboard
                         </NavLink>
@@ -105,8 +86,7 @@ function EStaffSideBar({ onFilterChange }) {
                     <li>
                         <button
                             onClick={() => toggleDropdown('prexc')}
-                            className={`text-lg block px-6 py-3 w-full text-left ${activeDropdown === 'prexc' ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'
-                                }`}
+                            className={`text-lg block px-6 py-3 w-full text-left ${activeDropdown === 'prexc' ? 'text-yellow-500 font-bold' : 'hover:text-yellow-500'}`}
                         >
                             PREXC Report
                         </button>
@@ -188,7 +168,7 @@ function EStaffSideBar({ onFilterChange }) {
                     <li>
                         <button
                             onClick={handleLogout}
-                            className="text-lg text-white block px-6 py-3 hover:text-red-600 w-full text-left"
+                            className="block w-full px-6 py-3 text-lg text-left text-white hover:text-red-600"
                         >
                             Log out
                         </button>
