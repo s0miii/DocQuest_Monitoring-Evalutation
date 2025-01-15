@@ -587,7 +587,7 @@ const ProjLeadDailyAttRec = () => {
                                     }}
                                 >
                                     <table className="min-w-full bg-white rounded-lg shadow-md table-auto">
-                                        <thead className="sticky top-0 z-10 bg-gray-100">
+                                        <thead className="top-0 z-10 bg-gray-100">
                                             <tr className="border-b">
                                                 <th
                                                     className="px-6 py-3 text-sm font-medium tracking-wider text-center text-gray-700 uppercase cursor-pointer"
@@ -640,7 +640,8 @@ const ProjLeadDailyAttRec = () => {
                                                     <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
                                                         <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
                                                             <a
-                                                                href={`${API_URL}/media/${submission.directory}/${submission.file_name}`}
+                                                                // href={`${API_URL}/media/${submission.directory}/${submission.file_name}`}
+                                                                href={submission.file_url}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="block text-center text-blue-600 truncate hover:underline"
@@ -708,7 +709,7 @@ const ProjLeadDailyAttRec = () => {
                                     Add New Submission
                                 </h2>
 
-                                <div className="grid grid-cols-3 gap-4 mb-6">
+                                <div className="grid grid-cols-1 gap-4 mb-6">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">
                                             Description
@@ -719,30 +720,6 @@ const ProjLeadDailyAttRec = () => {
                                             placeholder="Enter a Short Description"
                                             value={description}
                                             onChange={(e) => setDescription(e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Date
-                                        </label>
-                                        <input
-                                            type="date"
-                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            placeholder="Set Date"
-                                            value={date}
-                                            onChange={(e) => setDate(e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Total Number of Attendees
-                                        </label>
-                                        <input
-                                            type="number"
-                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            placeholder="Number of Attendees"
-                                            value={totalAttendees}
-                                            onChange={(e) => setAttendees(e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -759,8 +736,7 @@ const ProjLeadDailyAttRec = () => {
                                         type="file"
                                         multiple
                                         onChange={handleFileChange}
-                                        className="absolute inset-0 opacity-0 cursor-pointer"
-                                        style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
+                                        className={`absolute inset-0 w-20 h-20 opacity-0 cursor-pointer ${attachedFiles.length > 0 ? '-z-10' : 'z-10'}`}// Prevent interference
                                     />
                                     {attachedFiles.length > 0 && (
                                         <div

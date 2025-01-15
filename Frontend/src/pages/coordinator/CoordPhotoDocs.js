@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
-import EStaffSideBar from "../../components/EStaffSideBar";
+import CoordinatorSideBar from "../../components/CoordinatorSideBar";
 import { FaArrowLeft } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 
-const StaffPhotoDocs = () => {
+const CoordPhotoDocs = () => {
     const navigate = useNavigate();
     const { projectID } = useParams(); // Extract projectID from the URL
     const [projectDetails, setProjectDetails] = useState(null);
@@ -17,6 +17,13 @@ const StaffPhotoDocs = () => {
     const handleViewClick = (path) => {
         navigate(path.replace(":projectID", projectID));
     };
+
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
 
     // Fetch project details and submissions
     useEffect(() => {
@@ -35,7 +42,7 @@ const StaffPhotoDocs = () => {
                 }
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/projects/${projectID}/details/`,
+                    `${API_URL}/monitoring/projects/${projectID}/details/`,
                     {
                         method: "GET",
                         headers: {
@@ -74,7 +81,7 @@ const StaffPhotoDocs = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Photo%20Documentations/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Photo%20Documentations/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -133,7 +140,7 @@ const StaffPhotoDocs = () => {
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
-                <EStaffSideBar />
+                <CoordinatorSideBar />
             </div>
             {/* Main content area */}
             <div className="flex-1 ml-[20%]">
@@ -253,7 +260,7 @@ const StaffPhotoDocs = () => {
                                             <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                                     <a
-                                                        href={`http://127.0.0.1:8000/media/${submission.directory}/${submission.file_name}`}
+                                                        href={submission.file_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:underline truncate block text-center"
@@ -307,4 +314,4 @@ const StaffPhotoDocs = () => {
     );
 };
 
-export default StaffPhotoDocs;
+export default CoordPhotoDocs;

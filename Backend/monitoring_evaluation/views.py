@@ -3,6 +3,7 @@ from rest_framework.views import APIView, View
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.renderers import JSONRenderer
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import transaction
@@ -128,7 +129,7 @@ def send_dynamic_reminder_email(request, project_id):
 
 
 # retrieve projects based on user role each project
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class UserProjectsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -208,13 +209,15 @@ class UserProjectsView(APIView):
 
 
 # retrieve projects for staff role
-@role_required(allowed_role_codes=["estf"])  # Restrict access to estaff only
+@role_required(allowed_role_codes=["estf", "coord", "head"])  # Restrict access to estaff only
 class StaffProjectsView(APIView):
     permission_classes = [IsAuthenticated]
 
     # Define role mapping for scalability (only estf for now)
     role_mapping = {
         "estf": "Extension Staff",
+        "coord": "College Extension Coordinator",
+        "head": "Department/College Head",
     }
 
     def get(self, request):
@@ -281,7 +284,7 @@ class StaffProjectsView(APIView):
 
     
 # Proponent Project Details
-@role_required(allowed_role_codes=["ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["ppnt", "estf", "coord", "head"])
 class ProponentProjectDetailsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -362,7 +365,7 @@ def project_proponents(request, project_id):
         return Response({"error": str(e)}, status=500)
 
 # document count for checklist item
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def document_counts(request, project_id):
@@ -371,8 +374,9 @@ def document_counts(request, project_id):
 
     # Check user roles dynamically
     is_project_leader = project.userID == user
-    is_estaff = user.role.filter(code="estf").exists()  # Adjusted for `role` field
-    is_coord = user.role.filter(code="coord").exists()  # Adjusted for `role` field
+    is_estaff = user.role.filter(code="estf").exists()  
+    is_coord = user.role.filter(code="coord").exists()
+    is_head = user.role.filter(code="head").exists()  
 
     # Initialize counts dictionary
     document_counts = {}
@@ -391,10 +395,12 @@ def document_counts(request, project_id):
         try:
             if is_project_leader:  # Project leader sees all documents
                 count = model.objects.filter(project=project).count()
-            elif is_estaff:  # estaff and coordinator see all documents
+            elif is_estaff:  # estaff, coordinator and head see all documents
                 count = model.objects.filter(project=project).count()
-            # elif is_coord:  # estaff and coordinator see all documents
-            #     count = model.objects.filter(project=project, status="Approved").count()
+            elif is_coord:  # estaff, coordinator and head see all documents
+                count = model.objects.filter(project=project, status="Approved").count()
+            elif is_head:  # estaff, coordinator and head see all documents
+                count = model.objects.filter(project=project, status="Approved").count()
             else:  # Proponent sees only their own documents
                 count = model.objects.filter(project=project, proponent=user).count()
 
@@ -478,7 +484,7 @@ def get_user_roles(request):
 
 
 ### upload files
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class DailyAttendanceUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -681,7 +687,7 @@ class OtherFilesUploadView(APIView):
         return Response(OtherFilesSerializer(other_file).data, status=status.HTTP_201_CREATED)
 
 
-# Deletee submission
+# Deletee submission 
 MODEL_MAP = {
     "daily_attendance": DailyAttendanceRecord,
     "summary_of_evaluation": SummaryOfEvaluation,
@@ -719,7 +725,7 @@ def delete_submission(request, model_name, submission_id):
 
 
 ## view all submissions
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class ChecklistItemSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -732,13 +738,14 @@ class ChecklistItemSubmissionsView(APIView):
             project = get_object_or_404(Project, projectID=project_id, status="approved")
 
             # Determine roles for the user
+            is_head = user.role.filter(code="head").exists()
             is_coord = user.role.filter(code="coord").exists()
             is_estaff = user.role.filter(code="estf").exists()
             is_project_leader = project.userID == user
             is_proponent = project.proponents.filter(userID=user.userID).exists()
 
             # Ensure user has access to the project
-            if not (is_project_leader or is_proponent or is_estaff):
+            if not (is_project_leader or is_proponent or is_estaff or is_coord or is_head):
                 return Response({"error": "You do not have access to this project."}, status=status.HTTP_403_FORBIDDEN)
 
             # Initialize submissions list
@@ -763,9 +770,12 @@ class ChecklistItemSubmissionsView(APIView):
             if is_project_leader:
                 # Fetch records for project leader and all proponents
                 records = model.objects.filter(project=project, proponent__in=[user] + list(project.proponents.all()))
+            elif is_head:
+                # Fetch all records for Head
+                records = model.objects.filter(project=project, status="Approved")
             elif is_coord:
-                # Fetch all records for EStaff
-                records = model.objects.filter(project=project, status="approved")
+                # Fetch all records for Coordinator
+                records = model.objects.filter(project=project, status="Approved")
             elif is_estaff:
                 # Fetch all records for EStaff
                 records = model.objects.filter(project=project)
@@ -892,7 +902,7 @@ def get_proponent_checklist(request, project_id):
 
 
 ## View checklist assignments by project
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class ChecklistItemSubmissionView(APIView): ## this is a different class from the first one above!!!!
     permission_classes = [IsAuthenticated]
 
@@ -986,7 +996,7 @@ class UpdateSubmissionStatusView(APIView):
             return Response({"error": "Submission not found."}, status=status.HTTP_404_NOT_FOUND)
 
 # proponent view, display the status and rejection reason
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class ProponentSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -1581,7 +1591,6 @@ class AttendanceRecordViewSet(viewsets.ModelViewSet):
     
 # Submit Attendance Record (For Authenticated Users Only)
 # This view is retained for scenarios where authenticated users (e.g., staff or project leaders) 
-# might need to submit attendance records programmatically or through internal workflows.
 class SubmitAttendanceRecordView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -1789,4 +1798,55 @@ class ExtensionProgramOCViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 # For Campus Performance
+# class CollegePerformanceAPI(APIView):
+#     def get(self, request):
+#         rows = CollegePerformanceRow.objects.all()
+#         serializer = CollegePerformanceRowSerializer(rows, many=True)
+#         return Response(serializer.data)
+
+#     def post(self, request):
+#         data = request.data
+#         for row in data:
+#             CollegePerformanceRow.objects.update_or_create(
+#                 campus=row['campus'],
+#                 defaults=row
+#             )
+#         return Response({"message": "Data saved successfully"}, status=status.HTTP_200_OK)
+
+# @role_required(allowed_role_codes=["estf"])
+# class CollegePerformanceViewSet(viewsets.ModelViewSet):
+#     queryset = CollegePerformanceRow.objects.all()
+#     serializer_class = CollegePerformanceRowSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def create(self, request, *args, **kwargs):
+#         # Logging for debugging
+#         import logging
+#         logger = logging.getLogger(__name__)
+#         logger.info(f"Received data: {request.data}")
+
+#         # Handle bulk creation
+#         many = isinstance(request.data, list)
+#         serializer = self.get_serializer(data=request.data, many=many)
+#         serializer.is_valid(raise_exception=True)
+
+#         # Perform create
+#         self.perform_create(serializer)
+
+#         # Return the serialized data
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@role_required(allowed_role_codes=["estf"])
+class CollegePerformanceViewSet(viewsets.ModelViewSet):
+    queryset = CollegePerformanceRow.objects.all()
+    serializer_class = CollegePerformanceRowSerializer
+    permission_classes = [IsAuthenticated]
+    renderer_classes = [JSONRenderer]   
+
+    def create(self, request, *args, **kwargs):
+        many = isinstance(request.data, list)
+        serializer = self.get_serializer(data=request.data, many=many)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 

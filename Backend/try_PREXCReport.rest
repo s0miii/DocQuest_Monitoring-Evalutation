@@ -2,14 +2,14 @@
 
 ### Fetch All Extension Program OP2 Entries
 GET http://127.0.0.1:8000/monitoring/extension_program_op2/
-Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Accept: application/json
 
 ###
 
 ### Create a New Extension Program OP2 Entry
 POST http://127.0.0.1:8000/monitoring/extension_program_op2/
-Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -26,7 +26,7 @@ Content-Type: application/json
 
 ### Update an Existing Extension Program OP2 Entry (Replace <id> with an actual record ID)
 PUT http://127.0.0.1:8000/monitoring/extension_program_op2/1/
-Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -43,7 +43,7 @@ Content-Type: application/json
 
 ### Delete an Extension Program OP2 Entry (Replace <id> with an actual record ID)
 DELETE http://127.0.0.1:8000/monitoring/extension_program_op2/2/
-Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Accept: application/json
 
 
@@ -52,14 +52,14 @@ Accept: application/json
 
 ### Fetch All Extension Program OC Entries
 GET http://127.0.0.1:8000/monitoring/extension_program_oc/
-Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Accept: application/json
 
 ###
 
 ### Create a New Extension Program OC Entry
 POST http://127.0.0.1:8000/monitoring/extension_program_oc/
-Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -75,7 +75,7 @@ Content-Type: application/json
 
 ### Update an Existing Extension Program OC Entry (Replace <id> with an actual record ID)
 PUT http://127.0.0.1:8000/monitoring/extension_program_oc/1/
-Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -91,5 +91,77 @@ Content-Type: application/json
 
 ### Delete an Extension Program OC Entry (Replace <id> with an actual record ID)
 DELETE http://127.0.0.1:8000/monitoring/extension_program_oc/1/
-Authorization: Token 75b5414156c3e55e5504a15533dfad5323c2bb0d
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Accept: application/json
+
+
+# -----------------------------
+# FOR College Performance
+
+### Get all rows
+GET http://127.0.0.1:8000/monitoring/college_performance/
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
+Content-Type: application/json
+
+###
+
+### Create a new row
+POST http://127.0.0.1:8000/monitoring/college_performance/
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
+Content-Type: application/json
+
+{
+    "campus": "CITC",
+    "programs_number": 10,
+    "programs_percentage": 50.0,
+    "faculty_number": 5,
+    "faculty_percentage": 60.0,
+    "average_percentage": 55.0,
+    "persons_trained_target": 100,
+    "persons_trained_weighted_accomplishment": 90.0,
+    "persons_trained_variance": 10.0,
+    "partnerships_target": 3,
+    "partnerships_accomplishment": 2,
+    "partnerships_variance": 1,
+    "beneficiaries_target": 70.0,
+    "beneficiaries_accomplishment": 65.0,
+    "beneficiaries_variance": 5.0,
+    "extension_programs_target": 2,
+    "extension_programs_accomplishment": 2,
+    "extension_programs_variance": 0
+}
+
+###
+
+### Update an existing row
+PUT http://127.0.0.1:8000/monitoring/college_performance/1/
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
+Content-Type: application/json
+
+{
+    "campus": "CEA Updated",
+    "programs_number": 12,
+    "programs_percentage": 55.0,
+    "faculty_number": 6,
+    "faculty_percentage": 65.0,
+    "average_percentage": 60.0,
+    "persons_trained_target": 110,
+    "persons_trained_weighted_accomplishment": 95.0,
+    "persons_trained_variance": 15.0,
+    "partnerships_target": 4,
+    "partnerships_accomplishment": 3,
+    "partnerships_variance": 1,
+    "beneficiaries_target": 75.0,
+    "beneficiaries_accomplishment": 70.0,
+    "beneficiaries_variance": 5.0,
+    "extension_programs_target": 3,
+    "extension_programs_accomplishment": 3,
+    "extension_programs_variance": 0
+}
+
+###
+
+### Delete a row
+DELETE http://127.0.0.1:8000/monitoring/college_performance/1/
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
+Content-Type: application/json

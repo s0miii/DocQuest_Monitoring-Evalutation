@@ -19,6 +19,8 @@ router.register(r'attendance_records', AttendanceRecordViewSet, basename='attend
 
 router.register(r'extension_program_op2', ExtensionProgramOp2ViewSet)
 router.register(r'extension_program_oc', ExtensionProgramOCViewSet)
+router.register(r'college_performance', CollegePerformanceViewSet, basename='college_performance')
+
 
 ### Checklist Items
 router.register(r'daily_attendance', DailyAttendanceRecordViewSet)
@@ -126,6 +128,10 @@ urlpatterns = [
     
     # fetch the list of trainers per project
     path('project/<int:project_id>/trainers/', get_trainers_by_project, name='get_trainers_by_project')
+
+
+    # College Performance for PREXC Report
+    
 
 ]
 
