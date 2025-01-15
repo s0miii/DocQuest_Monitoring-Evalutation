@@ -1,0 +1,76 @@
+# OP2
+class ExtensionProgramOp2(models.Model):
+    mandated_priority_program = models.CharField(max_length=255)
+    quarter = models.CharField(
+        max_length=50,
+        choices=[
+            ("1st Quarter", "1st Quarter"),
+            ("2nd Quarter", "2nd Quarter"),
+            ("3rd Quarter", "3rd Quarter"),
+            ("4th Quarter", "4th Quarter"),
+        ])
+    extension_program = models.CharField(max_length=255)
+    from_date = models.DateField()
+    to_date = models.DateField()
+    campus = models.CharField(max_length=255)
+    remarks = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+
+    def __str__(self):
+        return f"{self.mandated_priority_program} - {self.extension_program} for {self.quarter} ({self.from_date} to {self.to_date})"
+
+# OC
+class ExtensionProgramOC(models.Model):
+    memorandum_of_agreements = models.TextField()  # Allows longer text for flexibility
+    extension_program = models.TextField()  # For detailed program descriptions
+    from_date = models.DateField()
+    to_date = models.DateField()
+    campus = models.CharField(max_length=255)
+    remarks = models.TextField(blank=True, null=True)  # Optional remarks or links
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+
+    def __str__(self):
+        return f"{self.memorandum_of_agreements} - {self.extension_program} ({self.from_date} to {self.to_date})"
+    
+# College Performance
+class CollegePerformanceRow(models.Model):
+    campus = models.CharField(max_length=255, blank=True, null=True)  # e.g., 'CEA', 'CITC'
+
+    # Programs (vertically articulated programs counted as 1)
+    programs_number = models.FloatField(null=True, blank=True)  # Column 0
+    programs_percentage = models.FloatField(null=True, blank=True)  # Column 1
+
+    # Faculty with plantilla
+    faculty_number = models.FloatField(null=True, blank=True)  # Column 2
+    faculty_percentage = models.FloatField(null=True, blank=True)  # Column 3
+
+    # Average Percentage (Programs & Faculty)
+    average_percentage = models.FloatField(null=True, blank=True)  # Column 4
+
+    # Persons trained weighted by the length of training
+    persons_trained_target = models.FloatField(null=True, blank=True)  # Column 5
+    persons_trained_weighted_accomplishment = models.FloatField(null=True, blank=True)  # Column 6
+    persons_trained_variance = models.FloatField(null=True, blank=True)  # Column 7
+
+    # Active Partnerships
+    partnerships_target = models.FloatField(null=True, blank=True)  # Column 8
+    partnerships_accomplishment = models.FloatField(null=True, blank=True)  # Column 9
+    partnerships_variance = models.FloatField(null=True, blank=True)  # Column 10
+
+    # Beneficiaries who rated the course satisfactory or higher
+    beneficiaries_target = models.FloatField(null=True, blank=True)  # Column 11
+    beneficiaries_accomplishment = models.FloatField(null=True, blank=True)  # Column 12
+    beneficiaries_variance = models.FloatField(null=True, blank=True)  # Column 13
+
+    # Extension programs
+    extension_programs_target = models.FloatField(null=True, blank=True)  # Column 14
+    extension_programs_accomplishment = models.FloatField(null=True, blank=True)  # Column 15
+    extension_programs_variance = models.FloatField(null=True, blank=True)  # Column 16
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.campus
+    
+    
