@@ -24,7 +24,7 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
             case "Daily Attendance":
                 return `/proponents/project/${projectID}/daily-attendance`;
             case "Summary of Evaluation":
-                return `/proponents/project/${projectID}/evaluation-summary`;
+                return `/proponents/project/${projectID}/summary-of-evaluation`;
             case "Trainer CV DTR":
                 return `/proponents/project/${projectID}/trainer-cv-dtr`;
             case "Lecture Notes":
@@ -41,7 +41,6 @@ const ProponentsProjReq = ({ totalRequirements, completedRequirements }) => {
     useEffect(() => {
         const fetchProjectDetails = async () => {
             try {
-
 
                 // Fetch project details
                 const projectResponse = await fetch(

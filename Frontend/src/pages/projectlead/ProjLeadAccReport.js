@@ -31,6 +31,17 @@ const ProjLeadAccReport = () => {
     const [projectDetails, setProjectDetails] = useState({});
     const [error, setError] = useState('');
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
+    const handleViewClick = (path) => {
+        navigate(path.replace(":projectID", projectID));
+    };
+
     // Fetch project details 
     useEffect(() => {
         if (!projectID) {
@@ -89,9 +100,13 @@ const ProjLeadAccReport = () => {
     
             try {
                 const response = await fetch(
-                    `http://127.0.0.1:8000/monitoring/accomplishment_reports/${id}`, // Adjust the URL as needed
+                    `${API_URL}/monitoring/project/${projectID}/checklist/Other%20Files/submissions/`,
                     {
-                        headers: { Authorization: `Token ${token}` }
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            "Content-Type": "application/json",
+                        },
                     }
                 );
     
@@ -165,8 +180,7 @@ const ProjLeadAccReport = () => {
 
         fetchDetails();
     }, [id, navigate]);
-    
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         

@@ -91,7 +91,7 @@ const ProjLeadEvalSum = () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/Daily%20Attendance/submissions/`,
+                `http://127.0.0.1:8000/monitoring/project/${projectID}/checklist/SummaryOfEvaluation/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -273,7 +273,7 @@ const ProjLeadEvalSum = () => {
 
         if (attachedFiles.length > 0) {
             attachedFiles.forEach((file) => {
-                formData.append("attendance_file", file);
+                formData.append("evaluation_file", file);
             });
         } else {
             alert("Please attach at least one file.");
@@ -281,7 +281,7 @@ const ProjLeadEvalSum = () => {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/attendance/${projectID}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/monitoring/upload/evaluation/${projectID}/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`,
@@ -316,8 +316,8 @@ const ProjLeadEvalSum = () => {
         if (!confirmDelete) return;
 
         try {
-            // Adjust model_name to "daily_attendance"
-            const modelName = "daily_attendance";
+            // Adjust model_name to "summary_of_evaluation"
+            const modelName = "summary_of_evaluation";
             const response = await fetch(
                 `http://127.0.0.1:8000/monitoring/submissions/${modelName}/${submissionId}/`,
                 {

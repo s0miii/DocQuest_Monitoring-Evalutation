@@ -32,9 +32,7 @@ const EStaffOP2 = () => {
 
     // Add a new empty row
     const handleAddRow = () => {
-        setData([
-        ...data,
-        {
+        const newData = [...data, {
             quarter: "",
             mandated_priority_program: "",
             extension_program: "",
@@ -43,9 +41,10 @@ const EStaffOP2 = () => {
             campus: "",
             remarks: "",
             id: null,
-        },
-        ]);
-        setEditIndex(data.length); // Automatically set the new row to edit mode
+        }];
+        setData(newData);
+        setEditIndex(newData.length - 1); // Set to last new index
+        console.log("Added new row, new data length:", newData.length);
     };
 
     // Handle input changes
@@ -55,12 +54,23 @@ const EStaffOP2 = () => {
         setData(newData);
     };
 
+
+
     const handleSaveClick = index => {
-        // Ensure the entry exists
+        console.log("Attempting to save at index:", index);  // Debug log
+        console.log("Current data:", data);   
+
+        if (index < 0 || index >= data.length) {
+            console.error('Invalid index:', index);
+            alert('Invalid index. Please refresh the data or try again.');
+            return;
+        }
+
         const entry = data[index];
         if (!entry) {
             console.error('Error: No entry found at this index.');
-            return; // Stop the function if no entry is found
+            alert('No entry found at this index.');
+            return;
         }
 
         const token = localStorage.getItem("token");
@@ -70,44 +80,34 @@ const EStaffOP2 = () => {
             return;
         }
 
-        const url = entry.id
-            ? `http://127.0.0.1:8000/monitoring/extension_program_op2/${entry.id}/`
-            : `http://127.0.0.1:8000/monitoring/extension_program_op2/`;
+        const url = entry.id ? `http://127.0.0.1:8000/monitoring/extension_program_op2/${entry.id}/` : `http://127.0.0.1:8000/monitoring/extension_program_op2/`;
         const method = entry.id ? 'PUT' : 'POST';
 
         fetch(url, {
-            method,
+            method: method,
             headers: {
                 Authorization: `Token ${token}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                quarter: entry.quarter,
-                mandated_priority_program: entry.mandated_priority_program,
-                extension_program: entry.extension_program,
-                from_date: entry.from_date,
-                to_date: entry.to_date,
-                campus: entry.campus,
-                remarks: entry.remarks,
-            }),
+            body: JSON.stringify(entry)
         })
         .then(response => {
             if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json().then(err => { throw new Error(`${err.detail || 'Unknown error'} status: ${response.status}`) });
             }
             return response.json();
         })
         .then(updatedEntry => {
             const updatedData = [...data];
-            if (!entry.id) {
-                updatedData[index] = {...entry, id: updatedEntry.id};
-            } else {
-                updatedData[index] = updatedEntry;
-            }
+            updatedData[index] = entry.id ? updatedEntry : { ...entry, id: updatedEntry.id };
             setData(updatedData);
             setEditIndex(null);
+            alert('Save successful!');
         })
-        .catch(error => console.error('Error saving data:', error));
+        .catch(error => {
+            console.error('Error saving data:', error);
+            alert('Error saving data: ' + error.message);
+        });
     };
 
 
