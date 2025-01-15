@@ -195,3 +195,18 @@ class ExtensionProgramOCSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExtensionProgramOC
         fields = '__all__'        
+
+class CollegePerformanceRowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CollegePerformanceRow
+        fields = '__all__'
+        extra_kwargs = {
+            field: {'required': False} for field in [
+                'programs_number', 'programs_percentage', 'faculty_number', 
+                'faculty_percentage', 'average_percentage', 'persons_trained_target', 
+                'persons_trained_weighted_accomplishment', 'persons_trained_variance',
+                'partnerships_target', 'partnerships_accomplishment', 'partnerships_variance',
+                'beneficiaries_target', 'beneficiaries_accomplishment', 'beneficiaries_variance',
+                'extension_programs_target', 'extension_programs_accomplishment', 'extension_programs_variance'
+            ]
+        }   

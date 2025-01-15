@@ -3,6 +3,7 @@ from rest_framework.views import APIView, View
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.renderers import JSONRenderer
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import transaction
@@ -1587,7 +1588,6 @@ class AttendanceRecordViewSet(viewsets.ModelViewSet):
     
 # Submit Attendance Record (For Authenticated Users Only)
 # This view is retained for scenarios where authenticated users (e.g., staff or project leaders) 
-# might need to submit attendance records programmatically or through internal workflows.
 class SubmitAttendanceRecordView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -1798,4 +1798,55 @@ class ExtensionProgramOCViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 # For Campus Performance
+# class CollegePerformanceAPI(APIView):
+#     def get(self, request):
+#         rows = CollegePerformanceRow.objects.all()
+#         serializer = CollegePerformanceRowSerializer(rows, many=True)
+#         return Response(serializer.data)
+
+#     def post(self, request):
+#         data = request.data
+#         for row in data:
+#             CollegePerformanceRow.objects.update_or_create(
+#                 campus=row['campus'],
+#                 defaults=row
+#             )
+#         return Response({"message": "Data saved successfully"}, status=status.HTTP_200_OK)
+
+# @role_required(allowed_role_codes=["estf"])
+# class CollegePerformanceViewSet(viewsets.ModelViewSet):
+#     queryset = CollegePerformanceRow.objects.all()
+#     serializer_class = CollegePerformanceRowSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def create(self, request, *args, **kwargs):
+#         # Logging for debugging
+#         import logging
+#         logger = logging.getLogger(__name__)
+#         logger.info(f"Received data: {request.data}")
+
+#         # Handle bulk creation
+#         many = isinstance(request.data, list)
+#         serializer = self.get_serializer(data=request.data, many=many)
+#         serializer.is_valid(raise_exception=True)
+
+#         # Perform create
+#         self.perform_create(serializer)
+
+#         # Return the serialized data
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@role_required(allowed_role_codes=["estf"])
+class CollegePerformanceViewSet(viewsets.ModelViewSet):
+    queryset = CollegePerformanceRow.objects.all()
+    serializer_class = CollegePerformanceRowSerializer
+    permission_classes = [IsAuthenticated]
+    renderer_classes = [JSONRenderer]   
+
+    def create(self, request, *args, **kwargs):
+        many = isinstance(request.data, list)
+        serializer = self.get_serializer(data=request.data, many=many)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
