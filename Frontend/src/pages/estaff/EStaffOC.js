@@ -7,9 +7,8 @@ import { FaArrowLeft } from "react-icons/fa";
 const EStaffOC = () => {
   const navigate = useNavigate();
 
-  const [data, setData] = useState([]); // Start with an empty table
-  const [editIndex, setEditIndex] = useState(null); // Track the row being edited
-
+  const [data, setData] = useState([]); // Table data
+  const [editIndex, setEditIndex] = useState(null); // Index of the row being edited
 
   useEffect(() => {
     const fetchOCData = async () => {
@@ -21,25 +20,24 @@ const EStaffOC = () => {
       }
 
       try {
-        const response = await fetch('http://127.0.0.1:8000/monitoring/extension_program_oc/', {
+        const response = await fetch("http://127.0.0.1:8000/monitoring/extension_program_oc/", {
           headers: {
             Authorization: `Token ${token}`,
-            Accept: 'application/json',
+            Accept: "application/json",
           },
         });
 
-        if (!response.ok) throw new Error('Failed to fetch');
+        if (!response.ok) throw new Error("Failed to fetch data.");
         const fetchedData = await response.json();
         setData(fetchedData);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
     };
 
     fetchOCData();
   }, [navigate]);
 
-  // Add a new empty row
   const handleAddRow = () => {
     const newRow = {
       memorandum_of_agreements: "",
@@ -48,25 +46,23 @@ const EStaffOC = () => {
       to_date: "",
       campus: "",
       remarks: "",
-      id: null, // This will be filled after saving the new entry
+      id: null,
     };
     setData([...data, newRow]);
-    setEditIndex(data.length); // Set edit index to the last current item
+    setEditIndex(data.length); // Set the last row to edit mode
   };
 
-  // Handle input changes
   const handleInputChange = (e, field, index) => {
     const newData = [...data];
     newData[index][field] = e.target.value;
     setData(newData);
   };
 
-  // Handle saving changes for a row
   const handleSaveClick = async (index) => {
     const entry = data[index];
-    if (!entry) {
-      console.error("Attempted to save undefined entry at index:", index);
-      return; // Stop function if entry is undefined
+    if (!entry.memorandum_of_agreements || !entry.extension_program || !entry.from_date || !entry.to_date) {
+      alert("Please fill in all required fields.");
+      return;
     }
 
     const token = localStorage.getItem("token");
@@ -76,35 +72,35 @@ const EStaffOC = () => {
       return;
     }
 
-    const url = entry.id ? `http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/` : `http://127.0.0.1:8000/monitoring/extension_program_oc/`;
-    const method = entry.id ? 'PUT' : 'POST';
+    const url = entry.id
+      ? `http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/`
+      : `http://127.0.0.1:8000/monitoring/extension_program_oc/`;
+    const method = entry.id ? "PUT" : "POST";
 
     try {
       const response = await fetch(url, {
-        method: method,
+        method,
         headers: {
           Authorization: `Token ${token}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          memorandum_of_agreements: entry.memorandum_of_agreements,
-          extension_program: entry.extension_program,
-          from_date: entry.from_date,
-          to_date: entry.to_date,
-          campus: entry.campus,
-          remarks: entry.remarks,
-        }),
+        body: JSON.stringify(entry),
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const updatedEntry = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Error saving data.");
+      }
 
+      const updatedEntry = await response.json();
       const updatedData = [...data];
-      updatedData[index] = {...updatedData[index], ...updatedEntry, id: updatedEntry.id || updatedData[index].id};
+      updatedData[index] = entry.id ? updatedEntry : { ...entry, id: updatedEntry.id };
       setData(updatedData);
       setEditIndex(null);
+      alert("Save successful!");
     } catch (error) {
-      console.error('Error saving data:', error);
+      console.error("Error saving data:", error);
+      alert(`Error saving data: ${error.message}`);
     }
   };
 
@@ -124,18 +120,17 @@ const EStaffOC = () => {
 
     try {
       await fetch(`http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           Authorization: `Token ${token}`,
-          Accept: 'application/json',
+          Accept: "application/json",
         },
       });
-      setData(data.filter((_, i) => i !== index));  // Update local state to remove the entry
+      setData(data.filter((_, i) => i !== index));
     } catch (error) {
-      console.error('Error deleting data:', error);
+      console.error("Error deleting data:", error);
     }
   };
-
 
   return (
     <div className="flex min-h-screen bg-gray-200">
@@ -151,33 +146,18 @@ const EStaffOC = () => {
           <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
             <h1 className="mb-5 text-2xl font-medium">Extension Program OC</h1>
             <div className="w-full p-4 overflow-x-auto bg-gray-100">
-              {/* Scrollable Table Container */}
               <div className="min-w-full bg-white border border-gray-300">
                 <table className="min-w-full text-sm text-center border-collapse table-auto">
                   <thead>
                     <tr>
                       <th className="px-4 py-2 border border-gray-400 w-[50px]">#</th>
-                      <th className="px-4 py-2 border border-gray-400 max-w-[200px]">
-                        Memorandum of Agreements
-                      </th>
-                      <th className="px-4 py-2 border border-gray-400 max-w-[200px]">
-                        Extension Program/Activities
-                      </th>
-                      <th className="px-4 py-2 border border-gray-400 w-[100px]">
-                        From
-                      </th>
-                      <th className="px-4 py-2 border border-gray-400 w-[100px]">
-                        To
-                      </th>
-                      <th className="px-4 py-2 border border-gray-400 max-w-[150px]">
-                        Campus/College
-                      </th>
-                      <th className="px-4 py-2 border border-gray-400 max-w-[150px]">
-                        Remarks/Link
-                      </th>
-                      <th className="px-4 py-2 border border-gray-400 w-[150px]">
-                        Actions
-                      </th>
+                      <th className="px-4 py-2 border border-gray-400 max-w-[200px]">Memorandum of Agreements</th>
+                      <th className="px-4 py-2 border border-gray-400 max-w-[200px]">Extension Program/Activities</th>
+                      <th className="px-4 py-2 border border-gray-400 w-[100px]">From</th>
+                      <th className="px-4 py-2 border border-gray-400 w-[100px]">To</th>
+                      <th className="px-4 py-2 border border-gray-400 max-w-[150px]">Campus/College</th>
+                      <th className="px-4 py-2 border border-gray-400 max-w-[150px]">Remarks/Link</th>
+                      <th className="px-4 py-2 border border-gray-400 w-[150px]">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -236,7 +216,7 @@ const EStaffOC = () => {
                             </td>
                             <td className="px-4 py-2 border border-gray-400 w-[150px]">
                               <button
-                                onClick={handleSaveClick}
+                                onClick={() => handleSaveClick(index)}
                                 className="px-4 py-1 text-white bg-green-500 rounded"
                               >
                                 Save
