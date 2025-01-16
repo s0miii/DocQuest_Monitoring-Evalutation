@@ -21,7 +21,7 @@ Content-Type: application/json
 
 {
   "project": 2,
-  "banner_program_title": "TRY 01-16-25",
+  "banner_program_title": "TRY 01-16-25 - clrice",
   "flagship_program": "Flagship Program 1",
   "training_modality": "Face to Face",
   "actualStartDateImplementation": "2024-12-01",

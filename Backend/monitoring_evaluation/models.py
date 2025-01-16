@@ -159,6 +159,8 @@ class AccomplishmentReport(models.Model):
     submitted_by = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, related_name='submitted_accomplishments'
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     # Related models
     prexc_achievement = models.OneToOneField(

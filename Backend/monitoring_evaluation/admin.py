@@ -189,6 +189,8 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
         'get_partner_agency',
         'get_prexc_achievement',
         'get_project_narrative',
+        'created_at',
+        'updated_at'
     )
     search_fields = (
         'banner_program_title', 
