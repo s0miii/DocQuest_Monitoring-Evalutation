@@ -17,7 +17,7 @@ const EStaffOC = () => {
         alert("User not logged in. Please log in again.");
         navigate("/login");
         return;
-      }
+        }
 
       try {
         const response = await fetch("http://127.0.0.1:8000/monitoring/extension_program_oc/", {
@@ -65,19 +65,19 @@ const EStaffOC = () => {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
+      const token = localStorage.getItem("token");
+      if (!token) {
       alert("User not logged in. Please log in again.");
       navigate("/login");
       return;
-    }
+      }
 
     const url = entry.id
       ? `http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/`
       : `http://127.0.0.1:8000/monitoring/extension_program_oc/`;
     const method = entry.id ? "PUT" : "POST";
 
-    try {
+      try {
       const response = await fetch(url, {
         method,
         headers: {

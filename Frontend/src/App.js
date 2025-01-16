@@ -31,6 +31,7 @@ import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
 import StaffProjectsDashboard from "./pages/estaff/StaffProjectsDashboard";
 import StaffDailyAttRec from "./pages/estaff/StaffDailyAttRec";
+import StaffEvalSum from "./pages/estaff/StaffEvalSum.js";
 import StaffCvDtr from "./pages/estaff/StaffCvDtr";
 import StaffLecNotes from "./pages/estaff/StaffLecNotes";
 import StaffPhotoDocs from "./pages/estaff/StaffPhotoDocs";
@@ -70,10 +71,7 @@ function App() {
                   <Route path="/deptoff" element={<DeptOffDashboard />} />
                   <Route path="/deptoff-projects-dashboard" element={<DeptOffProjectsDashboard />} />
 
-
                   <Route path="/collegedean-projects-dashboard" element={<CollegeDeanProjectsDashboard />} />
-
-
 
                   <Route path="/coordinator" element={<CoordinatorDashboard />} />
 
@@ -88,6 +86,7 @@ function App() {
                   <Route path="/estaff/projreq/:projectID" element={<EStaffProjReq />} />
                   <Route path="/staff-projects-dashboard" element={<StaffProjectsDashboard />} />
                   <Route path="/staff/project/:projectID/daily-attendance" element={<StaffDailyAttRec />} />
+                  <Route path="/staff/project/:projectID/summary-of-evaluation" element={<StaffEvalSum />} />
                   <Route path="/staff/project/:projectID/trainer-cv-dtr" element={<StaffCvDtr />} />
                   <Route path="/staff/project/:projectID/lecture-notes" element={<StaffLecNotes />} />
                   <Route path="/staff/project/:projectID/photo-documentations" element={<StaffPhotoDocs />} />
@@ -96,9 +95,9 @@ function App() {
                   <Route path="/projlead/proj" element={<ProjLeadProjects />} />
                   <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
                   <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />
-                  <Route path="/projlead/project/:projectID/accomplishment-report/:id" element={<ProjLeadAccReport />} />
+                  <Route path="/projlead/project/:projectID/accomplishment-report" element={<ProjLeadAccReport />} />
                   <Route path="/projlead/project/:projectID/daily-attendance" element={<ProjLeadDailyAttRec />} />
-                  <Route path="/projlead/project/:projectID/evaluation-summary" element={<ProjLeadEvalSum />} />
+                  <Route path="/projlead/project/:projectID/summary-of-evaluation" element={<ProjLeadEvalSum />} />
                   <Route path="/projlead/project/:projectID/trainer-cv-dtr" element={<ProjLeadCvDtr />} />
                   <Route path="/projlead/project/:projectID/lecture-notes" element={<ProjLeadLecNotes />} />
                   <Route path="/projlead/project/:projectID/other-files" element={<ProjLeadOthers />} />
@@ -108,19 +107,18 @@ function App() {
                   <Route path="/projects-dashboard" element={<ProjectsDashboard />} />
                   <Route path="/proponents/proj/req/:projectID" element={<ProponentsProjReq />} />
                   <Route path="/proponents/project/:projectID/daily-attendance" element={<ProponentsDailyAttRec />} />
-                  <Route path="/proponents/project/:projectID/evaluation-summary" element={<ProponentsEvalSum />} />
+                  <Route path="/proponents/project/:projectID/summary-of-evaluation" element={<ProponentsEvalSum />} />
                   <Route path="/proponents/project/:projectID/trainer-cv-dtr" element={<ProponentsCvDtr />} />
                   <Route path="/proponents/project/:projectID/modules-notes" element={<ProponentsLecNotes />} />
                   <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
                   <Route path="/proponents/project/:projectID/photo-documentations" element={<ProponentsPhotoDocs />} />
-
+                  
                   <Route path="/monitoring/evaluation/fill/:token" element={<EvaluationForm />} />
                   <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
                   <Route path="/projlead/attendance-records/:templateId" element={<AttendanceReport />} />
                   <Route path="/trainer-project/:trainerID/:projectID" element={<TrainerProjectDetails />} />
                   <Route path="/evaluations/:trainerID/:projectID" element={<EvaluationReport />} />
             </Routes>
-
       );
 }
 

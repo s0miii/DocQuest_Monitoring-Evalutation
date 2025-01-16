@@ -2,14 +2,14 @@
 
 ### Fetch All Extension Program OP2 Entries
 GET http://127.0.0.1:8000/monitoring/extension_program_op2/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Accept: application/json
 
 ###
 
 ### Create a New Extension Program OP2 Entry
 POST http://127.0.0.1:8000/monitoring/extension_program_op2/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -26,7 +26,7 @@ Content-Type: application/json
 
 ### Update an Existing Extension Program OP2 Entry (Replace <id> with an actual record ID)
 PUT http://127.0.0.1:8000/monitoring/extension_program_op2/1/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -43,7 +43,7 @@ Content-Type: application/json
 
 ### Delete an Extension Program OP2 Entry (Replace <id> with an actual record ID)
 DELETE http://127.0.0.1:8000/monitoring/extension_program_op2/2/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Accept: application/json
 
 
@@ -52,14 +52,14 @@ Accept: application/json
 
 ### Fetch All Extension Program OC Entries
 GET http://127.0.0.1:8000/monitoring/extension_program_oc/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Accept: application/json
 
 ###
 
 ### Create a New Extension Program OC Entry
 POST http://127.0.0.1:8000/monitoring/extension_program_oc/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -75,7 +75,7 @@ Content-Type: application/json
 
 ### Update an Existing Extension Program OC Entry (Replace <id> with an actual record ID)
 PUT http://127.0.0.1:8000/monitoring/extension_program_oc/1/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -91,7 +91,7 @@ Content-Type: application/json
 
 ### Delete an Extension Program OC Entry (Replace <id> with an actual record ID)
 DELETE http://127.0.0.1:8000/monitoring/extension_program_oc/1/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Accept: application/json
 
 
@@ -100,14 +100,14 @@ Accept: application/json
 
 ### Get all rows
 GET http://127.0.0.1:8000/monitoring/college_performance/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 ###
 
 ### Create a new row
 POST http://127.0.0.1:8000/monitoring/college_performance/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -135,7 +135,7 @@ Content-Type: application/json
 
 ### Update an existing row
 PUT http://127.0.0.1:8000/monitoring/college_performance/1/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json
 
 {
@@ -163,5 +163,5 @@ Content-Type: application/json
 
 ### Delete a row
 DELETE http://127.0.0.1:8000/monitoring/college_performance/1/
-Authorization: Token a4553b4193b2172a2602444b29405b7df13668a5
+Authorization: Token 5a1a751283e491ec278660d80e3a35570c5d6077
 Content-Type: application/json

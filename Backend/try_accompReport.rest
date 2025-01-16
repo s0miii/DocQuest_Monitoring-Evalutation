@@ -1,12 +1,12 @@
 ###
 # Get Accomplishment Reports by User
 GET http://127.0.0.1:8000/monitoring/accomplishment_reports/
-Authorization: Token 674505cd58b096afbefa3d9f2a0c6c3ace6ee0df
+Authorization: Token 9b2797170bdd3bee8a3b7fdbab7860c136e51438
 
 ###
 # Delete Accomplishment Report by report ID
 DELETE http://127.0.0.1:8000/monitoring/accomplishment_reports/2/
-Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
+Authorization: Token 547dca520cf2940cd3cada1bf5208411a27d3ce5
 
 
 
@@ -16,12 +16,12 @@ Authorization: Token c3a1f99c5cb49b5e5e536f3eef1f8a0501326cbc
 # SA REFINED NI NGA ACCOMPLISHMENT - input fields ang naa here
 ###
 POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
-Authorization: Token 674505cd58b096afbefa3d9f2a0c6c3ace6ee0df
+Authorization: Token 9b2797170bdd3bee8a3b7fdbab7860c136e51438
 Content-Type: application/json
 
 {
-  "project": 1,
-  "banner_program_title": "TISTING KUNG GAGANA NI ANG POST REQUEST",
+  "project": 2,
+  "banner_program_title": "TRY 01-16-25",
   "flagship_program": "Flagship Program 1",
   "training_modality": "Face to Face",
   "actualStartDateImplementation": "2024-12-01",
