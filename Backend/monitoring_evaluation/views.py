@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.renderers import JSONRenderer
+from rest_framework.viewsets import ModelViewSet
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import transaction
@@ -296,6 +297,13 @@ class ProponentProjectDetailsView(APIView):
             # Fetch project leader details
             project_leader_name = f"{project.userID.firstname} {project.userID.lastname}"
 
+            # Fetch related information from new models
+            program_categories = ", ".join([category.title for category in project.projectCategory.all()])
+            proponents = ", ".join([f"{user.firstname} {user.lastname}" for user in project.proponents.all()])
+            
+            # Access the project location (address) details
+            project_location = f"{project.projectLocationID.street}, {project.projectLocationID.barangayID.barangay}" if project.projectLocationID else "N/A"
+
             # Prepare project details
             project_details = {
                 "projectTitle": project.projectTitle,
@@ -303,6 +311,15 @@ class ProponentProjectDetailsView(APIView):
                 "targetDate": f"{project.targetStartDateImplementation or 'N/A'} - {project.targetEndDateImplementation or 'N/A'}",
                 "partnerAgency": ", ".join([agency.agencyName for agency in project.agency.all()]),
                 "projectLeader": project_leader_name,
+                
+                "researchTitle": project.researchTitle,
+                "projectType": project.projectType,  # New field added
+                "programs": ", ".join([program.title for program in project.program.all()]),
+                "programCategories": program_categories,
+                "beneficiaries": project.beneficiaries,
+                "accreditationLevel": project.accreditationLevel,
+                "proponents": proponents,
+                "projectLocation": project_location,
             }
 
             # Fetch assigned documentary requirements for the current proponent
@@ -395,11 +412,9 @@ def document_counts(request, project_id):
         try:
             if is_project_leader:  # Project leader sees all documents
                 count = model.objects.filter(project=project).count()
-            elif is_estaff:  # estaff, coordinator and head see all documents
+            elif is_estaff:  # estaff, coordinator and head see all documents 
                 count = model.objects.filter(project=project).count()
-            elif is_coord:  # estaff, coordinator and head see all documents
-                count = model.objects.filter(project=project, status="Approved").count()
-            elif is_head:  # estaff, coordinator and head see all documents
+            elif is_coord or is_head:  # coordinator and head see all approved documents
                 count = model.objects.filter(project=project, status="Approved").count()
             else:  # Proponent sees only their own documents
                 count = model.objects.filter(project=project, proponent=user).count()
@@ -1072,6 +1087,7 @@ class ProjectNarrativeCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.submitted_by = self.request.user
         return super().form_valid(form)
+# UNTIL DARI Wyn ----------
     
 # API Views
 class DailyAttendanceRecordViewSet(viewsets.ModelViewSet): 
@@ -1118,6 +1134,7 @@ class ProjectNarrativeViewSet(viewsets.ModelViewSet):
     queryset = ProjectNarrative.objects.all()
     serializer_class = ProjectNarrativeSerializer
     permission_classes = [IsAuthenticated]
+# KANI PUD ---------------------------------------
 
 # Evaluation ViewSet for Evaluation Forms
 class EvaluationViewSet(viewsets.ModelViewSet):
@@ -1359,87 +1376,54 @@ def get_detailed_evaluations(project_id):
 @api_view(['GET'])
 def evaluation_summary_view(request, project_id):
     try:
-        # Step 1: Check for an existing summary in the database
-        try:
-            summary = EvaluationSummary.objects.get(project_id=project_id)
-        except EvaluationSummary.DoesNotExist:
-            summary = None
+        evaluations = Evaluation.objects.filter(project_id=project_id)
+        if not evaluations.exists():
+            return Response({
+                "message": "No evaluations found.",
+                "categories": {label: 0 for label in ["excellent", "very_satisfactory", "satisfactory", "fair", "poor"]},
+                "subtotal": 0,
+                "total_evaluations": 0,
+                "percentages": {},
+            }, status=200)
 
-        # Step 2: Determine if recalculation is needed
-        recalculate = False
-        if summary:
-            # Check if the summary is outdated (you can adjust the condition)
-            time_difference = now() - summary.last_updated
-            if time_difference.seconds > 3600:  # 1 hour threshold
-                recalculate = True
-        else:
-            recalculate = True
+        categories = {
+            "excellent": 0,
+            "very_satisfactory": 0,
+            "satisfactory": 0,
+            "fair": 0,
+            "poor": 0,
+        }
 
-        if recalculate:
-            # Step 3: Recalculate the summary dynamically
-            evaluations = Evaluation.objects.filter(project_id=project_id)
-            if not evaluations.exists():
-                return Response({
-                    "message": "No evaluations found for this project.",
-                    "evaluations": [],
-                    "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
-                    "total_evaluations": 0,
-                    "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
-                    "detailed_evaluations": [],
-
-                }, status=200)
-
-            # Count evaluators in each rating category
-            categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
-            total_evaluations = evaluations.count()
-            for evaluation in evaluations:
-                avg = evaluation.overall_rating
-                if avg <= 1:
-                    categories["poor"] += 1
-                elif avg <= 2:
-                    categories["fair"] += 1
-                elif avg <= 3:
-                    categories["good"] += 1
-                elif avg <= 4:
-                    categories["better"] += 1
-                else:
-                    categories["best"] += 1
-
-            # Calculate percentages
-            percentages = {
-                key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0
-                for key, value in categories.items()
-            }
-
-            # Step 4: Update or create the database record
-            if summary:
-                summary.total_evaluations = total_evaluations
-                summary.categories = categories
-                summary.percentages = percentages
-                summary.last_updated = now()
-                summary.save()
+        for evaluation in evaluations:
+            avg = evaluation.overall_rating
+            if avg == 5:
+                categories["excellent"] += 1
+            elif avg == 4:
+                categories["very_satisfactory"] += 1
+            elif avg == 3:
+                categories["satisfactory"] += 1
+            elif avg == 2:
+                categories["fair"] += 1
             else:
-                summary = EvaluationSummary.objects.create(
-                    project_id=project_id,
-                    total_evaluations=total_evaluations,
-                    categories=categories,
-                    percentages=percentages,
-                )
+                categories["poor"] += 1
 
-        # Step 5: Get detailed evaluations
-        detailed_evaluations = get_detailed_evaluations(project_id)
+        subtotal = sum(categories.values())
+        percentages = {
+            key: round((value / subtotal) * 100, 2) if subtotal > 0 else 0
+            for key, value in categories.items()
+        }
 
-        # Step 6: Return the summary (whether from database or recalculated)
         return Response({
             "message": "Evaluations summary retrieved successfully.",
-            "total_evaluations": summary.total_evaluations,
-            "categories": summary.categories,
-            "percentages": summary.percentages,
-            "detailed_evaluations": detailed_evaluations,
+            "categories": categories,
+            "subtotal": subtotal,
+            "total_evaluations": subtotal,
+            "percentages": percentages,
         }, status=200)
 
     except Exception as e:
         return Response({"message": "An error occurred.", "error": str(e)}, status=500)
+
 
 # # View that generates evaluation summary table - no model to store data yet, purely view lang
 # @api_view(['GET'])
@@ -1837,16 +1821,34 @@ class ExtensionProgramOCViewSet(viewsets.ModelViewSet):
 #         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @role_required(allowed_role_codes=["estf"])
-class CollegePerformanceViewSet(viewsets.ModelViewSet):
+# class CollegePerformanceViewSet(viewsets.ModelViewSet):
+#     queryset = CollegePerformanceRow.objects.all()
+#     serializer_class = CollegePerformanceRowSerializer
+#     permission_classes = [IsAuthenticated]
+#     renderer_classes = [JSONRenderer]   
+
+#     def create(self, request, *args, **kwargs):
+#         many = isinstance(request.data, list)
+#         serializer = self.get_serializer(data=request.data, many=many)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_create(serializer)
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+class CollegePerformanceViewSet(ModelViewSet):
     queryset = CollegePerformanceRow.objects.all()
     serializer_class = CollegePerformanceRowSerializer
-    permission_classes = [IsAuthenticated]
-    renderer_classes = [JSONRenderer]   
+    renderer_classes = [JSONRenderer]
 
     def create(self, request, *args, **kwargs):
-        many = isinstance(request.data, list)
-        serializer = self.get_serializer(data=request.data, many=many)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Log incoming data for debugging
+        print("Incoming Data:", request.data)
+        
+        # Use the serializer to validate the data
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Data saved successfully!"}, status=status.HTTP_201_CREATED)
+        
+        # Log errors for debugging
+        print("Serializer Errors:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

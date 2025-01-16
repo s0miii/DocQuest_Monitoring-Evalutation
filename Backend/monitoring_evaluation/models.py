@@ -207,9 +207,17 @@ class AccomplishmentReport(models.Model):
     def accreditation_level(self):
         return self.project.accreditationLevel
 
+    # @property
+    # def college(self):
+    #     return self.project.college
+
     @property
     def college(self):
-        return self.project.college
+        # Collect all colleges associated with the project's programs
+        colleges = {program.collegeID for program in self.project.program.all() if program.collegeID}
+        
+        # # Return the first college if any, or None
+        return colleges.pop() if colleges else None
 
     @property
     def target_groups_beneficiaries(self):
@@ -500,6 +508,7 @@ class CreatedAttendanceRecord(models.Model):
 
 
  # Models for PREXC Report
+ 
  # OP2
 class ExtensionProgramOp2(models.Model):
     mandated_priority_program = models.CharField(max_length=255)

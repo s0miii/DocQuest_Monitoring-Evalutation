@@ -152,7 +152,7 @@ class EvaluationSummaryAdmin(admin.ModelAdmin):
     list_filter = ('last_updated',)    
 
 
-# Custom Form for AccomplishmentReportAdmin
+# # Custom Form for AccomplishmentReportAdmin
 class AccomplishmentReportForm(forms.ModelForm):
     class Meta:
         model = AccomplishmentReport
@@ -257,9 +257,22 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
         return obj.accreditation_level if obj.project else "N/A"
     get_accreditation_level.short_description = 'Accreditation Level'
 
+    # def get_college(self, obj):
+    #     return obj.college if obj.project else "N/A"
+    # get_college.short_description = 'College'
+    
     def get_college(self, obj):
-        return obj.college if obj.project else "N/A"
+        # Check if the project exists
+        if obj.project:
+            # Dynamically get the college from related data (e.g., Program -> College)
+            if obj.project.program.exists():
+                # Assume the first program's college is relevant
+                program = obj.project.program.first()
+                return program.collegeID.title if program.collegeID else "No College Assigned"
+            return "N/A"  # Return a default value if no project or college is associated
+
     get_college.short_description = 'College'
+
 
     def get_target_groups_beneficiaries(self, obj):
         return obj.target_groups_beneficiaries if obj.project else "N/A"

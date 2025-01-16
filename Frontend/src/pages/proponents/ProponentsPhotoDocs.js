@@ -412,7 +412,7 @@ const ProponentsPhotoDocs = () => {
                             Add New Submission
                         </h2>
 
-                        <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="grid grid-cols-1 gap-4 mb-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
                                     Description
@@ -423,18 +423,6 @@ const ProponentsPhotoDocs = () => {
                                     placeholder="Enter a Short Description"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Date
-                                </label>
-                                <input
-                                    type="date"
-                                    className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
-                                    placeholder="Set Date"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
                                 />
                             </div>
                         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar";
@@ -9,6 +9,67 @@ import axios from "axios";
 const EStaffPREXC = () => {
     const navigate = useNavigate();
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("User not logged in. Please log in again.");
+                navigate("/login");
+                return;
+            }
+
+            try {
+                const response = await axios.get(
+                    `${API_URL}/monitoring/college_performance/`,
+                    {
+                        headers: {
+                            Authorization: `Token ${token}`,
+                            Accept: "application/json",
+                        },
+                    }
+                );
+
+                // Transform fetched data into the format required by the `rows` state
+                const fetchedRows = response.data.reduce((acc, item) => {
+                    acc[item.campus] = [
+                        item.programs_number || "",
+                        item.programs_percentage || "",
+                        item.faculty_number || "",
+                        item.faculty_percentage || "",
+                        item.average_percentage || "",
+                        item.persons_trained_target || "",
+                        item.persons_trained_weighted_accomplishment || "",
+                        item.persons_trained_variance || "",
+                        item.partnerships_target || "",
+                        item.partnerships_accomplishment || "",
+                        item.partnerships_variance || "",
+                        item.beneficiaries_target || "",
+                        item.beneficiaries_accomplishment || "",
+                        item.beneficiaries_variance || "",
+                        item.extension_programs_target || "",
+                        item.extension_programs_accomplishment || "",
+                        item.extension_programs_variance || "",
+                    ];
+                    return acc;
+                }, {});
+
+                setRows((prev) => ({ ...prev, ...fetchedRows }));
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchData();
+    }, [navigate]);
+
+
     const handleViewClick = (path) => {
         navigate(path);
     }
@@ -16,12 +77,7 @@ const EStaffPREXC = () => {
     const [month, setMonth] = useState("Month");
     const [year, setYear] = useState("Year");
 
-    // deployed
-    const API_URL = process.env.REACT_APP_API_URL;
 
-    // local
-    // const API_URL = 'http://127.0.0.1:8000/';
-    // ${API_URL}
 
     // State to hold input values for JASAAN and CEA rows
     const [rows, setRows] = useState({
@@ -56,35 +112,33 @@ const EStaffPREXC = () => {
     //   };
 
     const handleSave = async () => {
-        const token = localStorage.getItem('token'); // Replace with the correct token retrieval method
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("User not logged in. Please log in again.");
+            navigate("/login");
+            return;
+        }
 
+        // Transform `rows` into the backend's required format
         const dataToSave = Object.entries(rows).map(([campus, values]) => ({
             campus,
-            programs_number: parseFloat(values[0]) || 0,
-            programs_percentage: parseFloat(calculatePercentage(campus, 0, 0)) || 0,
-            faculty_number: parseFloat(values[2]) || 0,
-            faculty_percentage: parseFloat(calculatePercentage(campus, 2, 2)) || 0,
-            average_percentage: parseFloat(calculateTotal(4)) || 0,
-            persons_trained_target: parseFloat(values[5]) || 0,
-            persons_trained_weighted_accomplishment: parseFloat(calculateIndex5(campus)) || 0,
-            persons_trained_variance: parseFloat(
-                (parseFloat(calculateIndex5(campus)) || 0) - (parseFloat(values[6]) || 0)
-            ) || 0,
-            partnerships_target: parseFloat(values[8]) || 0,
-            partnerships_accomplishment: parseFloat(values[9]) || 0,
-            partnerships_variance: parseFloat(
-                (parseFloat(values[9]) || 0) - (parseFloat(values[8]) || 0)
-            ) || 0,
-            beneficiaries_target: parseFloat(values[11]) || 0,
-            beneficiaries_accomplishment: parseFloat(values[12]) || 0,
-            beneficiaries_variance: parseFloat(
-                (parseFloat(values[12]) || 0) - (parseFloat(values[11]) || 0)
-            ) || 0,
-            extension_programs_target: parseFloat(values[14]) || 0,
-            extension_programs_accomplishment: parseFloat(values[15]) || 0,
-            extension_programs_variance: parseFloat(
-                (parseFloat(values[15]) || 0) - (parseFloat(values[14]) || 0)
-            ) || 0,
+            programs_number: parseFloat(values[0]) || null,
+            programs_percentage: parseFloat(values[1]) || null,
+            faculty_number: parseFloat(values[2]) || null,
+            faculty_percentage: parseFloat(values[3]) || null,
+            average_percentage: parseFloat(values[4]) || null,
+            persons_trained_target: parseFloat(values[5]) || null,
+            persons_trained_weighted_accomplishment: parseFloat(values[6]) || null,
+            persons_trained_variance: parseFloat(values[7]) || null,
+            partnerships_target: parseFloat(values[8]) || null,
+            partnerships_accomplishment: parseFloat(values[9]) || null,
+            partnerships_variance: parseFloat(values[10]) || null,
+            beneficiaries_target: parseFloat(values[11]) || null,
+            beneficiaries_accomplishment: parseFloat(values[12]) || null,
+            beneficiaries_variance: parseFloat(values[13]) || null,
+            extension_programs_target: parseFloat(values[14]) || null,
+            extension_programs_accomplishment: parseFloat(values[15]) || null,
+            extension_programs_variance: parseFloat(values[16]) || null,
         }));
 
         try {

@@ -53,55 +53,6 @@ class ProjectNarrativeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 # Accomplishment Report Serializer
-# class AccomplishmentReportSerializer(serializers.ModelSerializer):
-#     total_number_of_days = serializers.ReadOnlyField()
-#     submitted_by = serializers.SerializerMethodField()
-#     project_narrative = ProjectNarrativeSerializer(required=True)
-#     approved_photos = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = AccomplishmentReport
-#         fields = '__all__'
-#         read_only_fields = ['submitted_by','total_number_of_days']
-
-#     def get_submitted_by(self, obj):
-#         if obj.submitted_by:
-#             return f"{obj.submitted_by.firstname} {obj.submitted_by.lastname}"
-#         return None
-    
-#     def get_approved_photos(self, obj):
-#         approved_photos = PhotoDocumentation.objects.filter(
-#             project=obj.project, status="Approved"
-#         )
-#         return PhotoDocumentationSerializer(approved_photos, many=True).data
-    
-#     def validate(self, data):
-#         start_date = data.get('actualStartDateImplementation')
-#         end_date = data.get('actualEndDateImplementation')
-        
-#         if start_date and end_date and start_date > end_date:
-#             raise serializers.ValidationError("Start date must be before or equal to the end date.")
-#         return data
-    
-#     def create(self, validated_data):
-#         project_narrative_data = validated_data.pop('project_narrative')
-#         project_narrative = ProjectNarrative.objects.create(**project_narrative_data)
-
-#         accomplishment_report = AccomplishmentReport.objects.create(
-#             project_narrative=project_narrative,
-#             **validated_data
-#         )
-#         return accomplishment_report
-
-#     def update(self, instance, validated_data):
-#         project_narrative_data = validated_data.pop('project_narrative', None)
-#         if project_narrative_data:
-#             ProjectNarrative.objects.update_or_create(
-#                 accomplishment_report=instance,
-#                 defaults=project_narrative_data
-#             )
-#         return super().update(instance, validated_data)
-
 class AccomplishmentReportSerializer(serializers.ModelSerializer):
     total_number_of_days = serializers.ReadOnlyField()
     submitted_by = serializers.SerializerMethodField()

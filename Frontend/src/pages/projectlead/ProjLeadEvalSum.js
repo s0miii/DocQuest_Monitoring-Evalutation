@@ -30,6 +30,7 @@ const ProjLeadEvalSum = () => {
     // local
     // const API_URL = 'http://127.0.0.1:8000/';
     // ${API_URL}
+
     const [categories, setCategories] = useState({});
     const [totalEvaluations, setTotalEvaluations] = useState();
 
@@ -436,7 +437,7 @@ const ProjLeadEvalSum = () => {
                 <Topbar />
                 <div className="flex flex-col px-10 mt-14">
                     <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/projlead/proj/req/:projectID')}>
+                        <button className="mr-2" onClick={() => handleViewClick(`/projlead/proj/req/${projectID}`)}>
                             <FaArrowLeft />
                         </button>
                         <h1 className="text-2xl font-semibold">Evaluation Summary</h1>
@@ -636,7 +637,7 @@ const ProjLeadEvalSum = () => {
                                     Add New Submission
                                 </h2>
 
-                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="grid grid-cols-1 gap-4 mb-6">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">
                                             Description
@@ -647,18 +648,6 @@ const ProjLeadEvalSum = () => {
                                             placeholder="Enter a Short Description"
                                             value={description}
                                             onChange={(e) => setDescription(e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Date
-                                        </label>
-                                        <input
-                                            type="date"
-                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            placeholder="Set Date"
-                                            value={date}
-                                            onChange={(e) => setDate(e.target.value)}
                                         />
                                     </div>
                                 </div>
