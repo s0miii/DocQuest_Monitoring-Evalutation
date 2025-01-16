@@ -108,7 +108,7 @@ const ProjLeadProjReq = () => {
 
         fetchProjectDetails();
         fetchDocumentCounts();
-    }, [projectID]);
+    }, [projectID, navigate, token]);
 
     if (loading) {
         return (
