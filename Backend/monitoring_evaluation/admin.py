@@ -108,10 +108,10 @@ class ChecklistAssignmentAdmin(admin.ModelAdmin):
 
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
-    list_display = ('trainer', 'project', 'attendee_name', 'overall_rating', 'submitted_at')
-    search_fields = ('attendee_name', 'project__projectTitle', 'trainer__faculty')
-    list_filter = ('project', 'trainer')
-    
+    list_display = ('proponent', 'project', 'attendee_name', 'overall_rating', 'submitted_at')
+    search_fields = ('attendee_name', 'project__projectTitle', 'proponent__firstname', 'proponent__lastname')
+    list_filter = ('project', 'proponent')
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.filter(project__status='approved')
@@ -123,8 +123,8 @@ class EvaluationAdmin(admin.ModelAdmin):
     def evaluation_link(self, obj):
         try:
             # Attempt to reverse the URL
-            if obj.trainer and obj.project:
-                url = reverse('evaluation_form', args=[obj.trainer.LOTID, obj.project.projectID])
+            if obj.proponent and obj.project:
+                url = reverse('evaluation_form', args=[obj.proponent.id, obj.project.projectID])
                 return format_html('<a href="{}" target="_blank">Evaluate</a>', url)
         except Exception:
             # Handle missing or undefined URL gracefully
@@ -133,17 +133,19 @@ class EvaluationAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
-        extra_context['title'] = "Evaluations Grouped by Trainer and Project"
+        extra_context['title'] = "Evaluations Grouped by Proponent and Project"
         return super().changelist_view(request, extra_context=extra_context)
+
 
 
 @admin.register(EvaluationSharableLink)
 class EvaluationSharableLinkAdmin(admin.ModelAdmin):
-    list_display = ('id', 'trainer', 'project', 'expiration_date', 'created_at', 'sharable_link')
+    list_display = ('id', 'proponent', 'project', 'expiration_date', 'created_at', 'sharable_link')
     list_filter = ('expiration_date', 'created_at')
-    search_fields = ('trainer__faculty', 'project__projectTitle', 'token')
+    search_fields = ('proponent__firstname', 'proponent__lastname', 'project__projectTitle', 'token')
     ordering = ('-created_at',)
     readonly_fields = ('sharable_link',)
+
 
 @admin.register(EvaluationSummary)
 class EvaluationSummaryAdmin(admin.ModelAdmin):
@@ -189,6 +191,8 @@ class AccomplishmentReportAdmin(admin.ModelAdmin):
         'get_partner_agency',
         'get_prexc_achievement',
         'get_project_narrative',
+        'created_at',
+        'updated_at'
     )
     search_fields = (
         'banner_program_title', 

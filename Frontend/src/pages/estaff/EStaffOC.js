@@ -26,7 +26,7 @@ const EStaffOC = () => {
       }
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/monitoring/extension_program_oc/", {
+        const response = await fetch(`${API_URL}/monitoring/extension_program_oc/`, {
           headers: {
             Authorization: `Token ${token}`,
             Accept: "application/json",

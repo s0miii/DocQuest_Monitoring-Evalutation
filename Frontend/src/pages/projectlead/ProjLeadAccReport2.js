@@ -191,10 +191,10 @@ const ProjLeadAccReport = () => {
             return;
         }
 
-        const url = accReport.id
-            ? `${API_URL}/monitoring/accomplishment_reports/${accReport.id}/`
+        const method = id ? 'PUT' : 'POST'; // Use PUT if id exists, POST otherwise
+        const url = id
+            ? `${API_URL}/monitoring/accomplishment_reports/${id}/`
             : `${API_URL}/monitoring/accomplishment_reports/`;
-        const method = accReport.id ? "PUT" : "POST";
 
         try {
             const response = await fetch(url, {

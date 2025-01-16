@@ -153,33 +153,33 @@ const ProjLeadEvalSum = () => {
     };
 
     useEffect(() => {
-        const fetchTrainers = async () => {
+        const fetchProponents = async () => {
             const token = localStorage.getItem("token");
             if (!projectID || !token) {
                 console.error("Project ID is undefined or user is not logged in.");
-                setTrainers([]); // Ensures trainers is always an array
+                setTrainers([]); // Fallback to an empty array
                 return;
             }
 
             try {
-                const response = await fetch(`${API_URL}/monitoring/project/${projectID}/trainers/`, {
+                const response = await fetch(`${API_URL}/monitoring/project/${projectID}/proponents/`, {
                     headers: {
                         Authorization: `Token ${token}`,
                         "Content-Type": "application/json",
                     },
                 });
                 if (!response.ok) {
-                    throw new Error('Failed to fetch trainers');
+                    throw new Error('Failed to fetch proponents');
                 }
                 const data = await response.json();
-                setTrainers(data.trainers || []); // Fallback to an empty array if undefined
+                setTrainers(data.proponents || []); // Fallback to an empty array if undefined
             } catch (error) {
-                console.error('Error fetching trainers:', error);
-                setTrainers([]); // Ensures trainers is always an array on error
+                console.error('Error fetching proponents:', error);
+                setTrainers([]); // Ensure trainers (proponents) is always an array
             }
         };
 
-        fetchTrainers();
+        fetchProponents();
     }, [projectID]);
 
     // Fetch generated links when the "generateLinks" tab is selected
@@ -399,9 +399,8 @@ const ProjLeadEvalSum = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log(data);  // Log to see the exact structure
-                    setCategories(data.categories);
-                    setTotalEvaluations(data.total_evaluations);
+                    setCategories(data.categories); // Categories object
+                    setTotalEvaluations(data.total_evaluations); // Total count
                 } else {
                     alert("Failed to fetch evaluation summary");
                 }
@@ -723,80 +722,46 @@ const ProjLeadEvalSum = () => {
                     {choice === "generateLinks" && (
                         <div>
                             {/* Evaluation Summary Section */}
-                            <div className="p-6 mb-6 bg-white rounded-lg shadow-lg">
-                                <h2 className="mb-4 text-xl font-semibold text-center">Summary of Evaluation</h2>
+                            <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                                <h2 className="text-xl font-semibold text-center mb-4">Summary of Evaluation</h2>
                                 <div className="overflow-x-auto">
-                                    <table className="w-full max-w-md mx-auto text-sm text-center border border-collapse border-gray-300 table-fixed">
+                                    <table className="table-fixed w-full max-w-md mx-auto text-sm text-center border-collapse border border-gray-300">
                                         <thead className="bg-gray-200">
                                             <tr>
-                                                <th className="w-2/3 px-4 py-2 border border-gray-300">Rating</th>
-                                                <th className="w-1/3 px-4 py-2 border border-gray-300">Total Responses</th>
+                                                <th className="px-4 py-2 border border-gray-300 w-2/3">Rating</th>
+                                                <th className="px-4 py-2 border border-gray-300 w-1/3">Total Responses</th>
+                                                <th className="px-4 py-2 border border-gray-300 w-1/3">Percentage</th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            {Object.entries(categories).map(([key, value]) => (
+                                                <tr key={key}>
+                                                    <td className="px-4 py-2 border border-gray-300 capitalize">
+                                                        {key.replace("_", " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}
+                                                    </td>
+                                                    <td className="px-4 py-2 border border-gray-300">{value}</td>
+                                                    <td className="px-4 py-2 border border-gray-300">
+                                                        {totalEvaluations > 0 ? ((value / totalEvaluations) * 100).toFixed(2) + "%" : "0%"}
+                                                    </td>
+                                                </tr>
+                                            ))}
                                             <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Excellent (5)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
+                                                <td className="font-semibold px-4 py-2 border border-gray-300">Sub total</td>
+                                                <td className="font-semibold px-4 py-2 border border-gray-300">{totalEvaluations}</td>
+                                                <td className="font-semibold px-4 py-2 border border-gray-300">
+                                                    {totalEvaluations > 0 ? "100%" : "0%"}
                                                 </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Very Satisfactory (4)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Satisfactory (3)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Fair (2)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-4 py-2 border border-gray-300">Poor (1)</td>
-                                                <td className="px-4 py-2 border border-gray-300">
-                                                    <input
-                                                        type="number"
-                                                        className="w-full p-2 text-center bg-gray-100 rounded-lg"
-                                                        placeholder="0"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-4 py-2 font-semibold border border-gray-300">Sub Total</td>
-                                                <td className="px-4 py-2 font-semibold border border-gray-300">15</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                                <div className="grid max-w-2xl grid-cols-2 gap-4 mx-auto mt-4">
+
+                                <div className="grid grid-cols-2 gap-4 mt-4 max-w-2xl mx-auto">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">Total Evaluations</label>
                                         <input
                                             type="text"
-                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
+                                            className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
                                             value={totalEvaluations}
                                             readOnly
                                         />
@@ -805,12 +770,13 @@ const ProjLeadEvalSum = () => {
                                         <label className="block text-sm font-medium text-gray-700">Percentage</label>
                                         <input
                                             type="text"
-                                            className="w-full p-3 mt-1 bg-gray-100 rounded-lg"
-                                            value={`${(totalEvaluations / totalEvaluations * 100).toFixed(2)}%`}
+                                            className="bg-gray-100 rounded-lg p-3 mt-1 w-full"
+                                            value={totalEvaluations > 0 ? "100%" : "0%"}
                                             readOnly
                                         />
                                     </div>
                                 </div>
+
                             </div>
 
                             {/* Generated Evaluation Links Section */}
@@ -890,16 +856,17 @@ const ProjLeadEvalSum = () => {
                                 <h2 className="mb-4 text-xl font-semibold text-center">Generate Sharable Link</h2>
                                 <form onSubmit={handleGenerateLink}>
                                     <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">Trainer</label>
+                                        <label className="block text-sm font-medium text-gray-700">Proponent</label>
                                         <select
-                                            value={linkData.trainer}
+                                            value={linkData.trainer} // Trainer here refers to the selected proponent
                                             onChange={(e) => setLinkData({ ...linkData, trainer: e.target.value })}
                                             className="w-full p-2 bg-gray-100 rounded-lg"
                                         >
-                                            <option value="">Select a Trainer</option>
-                                            {Array.isArray(trainers) && trainers.map((trainer) => (
-                                                <option key={trainer.LOTID} value={trainer.LOTID}>{trainer.faculty}</option>
-                                            ))}
+                                            <option value="">Select a Proponent</option>
+                                            {Array.isArray(trainers) &&
+                                                trainers.map((trainer) => (
+                                                    <option key={trainer.id} value={trainer.id}>{trainer.name}</option>
+                                                ))}
                                         </select>
                                     </div>
 

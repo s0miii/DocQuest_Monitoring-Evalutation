@@ -171,6 +171,7 @@ const ProjLeadLecNotes = () => {
         if (!confirmDelete) return;
 
         try {
+            const modelName = "lecture_notes";
             const response = await fetch(
                 `${API_URL}/monitoring/submissions/${modelName}/${submissionId}/`,
                 {
@@ -392,7 +393,7 @@ const ProjLeadLecNotes = () => {
                                                         <span className="text-gray-500">Cannot Remove</span>
                                                     ) : (
                                                         <button
-                                                            onClick={() => handleDelete(submission.submission_id)}
+                                                            onClick={() => handleDelete(submission.submission_id, "lecture_notes")}
                                                             className="text-red-500 hover:text-red-700"
                                                         >
                                                             Remove

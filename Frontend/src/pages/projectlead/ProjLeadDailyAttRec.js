@@ -724,23 +724,25 @@ const ProjLeadDailyAttRec = () => {
                                     </div>
                                 </div>
 
+
                                 {/* Preview of Attached Files */}
-                                <div className="relative p-4 mb-6 border border-gray-300 rounded-lg">
-                                    <h3 className="mb-3 font-semibold text-center">Attach Files</h3>
+                                <div className="border border-gray-300 rounded-lg p-4 mb-6 relative">
+                                    <h3 className="font-semibold text-center mb-3">Attach Files</h3>
                                     {attachedFiles.length === 0 && (
-                                        <div className="mb-3 text-gray-400">
-                                            <span className="block text-3xl text-center">+</span>
+                                        <div className="text-gray-400 mb-3">
+                                            <span className="block text-center text-3xl">+</span>
                                         </div>
                                     )}
                                     <input
                                         type="file"
                                         multiple
                                         onChange={handleFileChange}
-                                        className={`absolute inset-0 w-20 h-20 opacity-0 cursor-pointer ${attachedFiles.length > 0 ? '-z-10' : 'z-10'}`}// Prevent interference
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        style={{ zIndex: attachedFiles.length > 0 ? -1 : 1 }} // Prevent interference
                                     />
                                     {attachedFiles.length > 0 && (
                                         <div
-                                            className="grid w-full grid-cols-5 gap-3 mt-4 overflow-y-auto"
+                                            className="grid grid-cols-5 gap-3 mt-4 w-full overflow-y-auto"
                                             style={{
                                                 maxHeight: "250px", // Scrollable height
                                                 paddingRight: "10px", // Space for scrollbar
@@ -753,11 +755,11 @@ const ProjLeadDailyAttRec = () => {
                                                         <img
                                                             src={URL.createObjectURL(file)}
                                                             alt={`attachment-preview-${index}`}
-                                                            className="object-cover w-20 h-20 rounded-lg" // Deducted 10% width
+                                                            className="h-20 w-20 object-cover rounded-lg" // Deducted 10% width
                                                         />
                                                     )
                                                     : (
-                                                        <div className="flex items-center justify-center w-20 h-20 text-gray-600 bg-gray-200 rounded-lg">
+                                                        <div className="flex items-center justify-center h-20 w-20 bg-gray-200 rounded-lg text-gray-600">
                                                             <span className="text-lg">{fileExtension}</span>
                                                         </div>
                                                     );
@@ -765,12 +767,12 @@ const ProjLeadDailyAttRec = () => {
                                                 return (
                                                     <div
                                                         key={index}
-                                                        className="flex flex-col items-center p-2 border border-gray-200 rounded-lg shadow-md"
+                                                        className="flex flex-col items-center border border-gray-200 rounded-lg p-2 shadow-md"
                                                         title={file.name}
                                                         style={{ marginBottom: "10px" }}
                                                     >
                                                         {filePreview}
-                                                        <p className="w-full mt-2 text-xs text-center truncate">{file.name}</p>
+                                                        <p className="text-xs mt-2 text-center truncate w-full">{file.name}</p>
                                                     </div>
                                                 );
                                             })}
