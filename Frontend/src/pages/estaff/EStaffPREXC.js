@@ -9,6 +9,13 @@ import axios from "axios";
 const EStaffPREXC = () => {
     const navigate = useNavigate();
 
+    // deployed
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    // local
+    // const API_URL = 'http://127.0.0.1:8000/';
+    // ${API_URL}
+
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem("token");
@@ -20,7 +27,7 @@ const EStaffPREXC = () => {
     
             try {
                 const response = await axios.get(
-                    "http://127.0.0.1:8000/monitoring/college_performance/",
+                    `${API_URL}/monitoring/college_performance/`,
                     {
                         headers: {
                             Authorization: `Token ${token}`,
@@ -134,7 +141,7 @@ const EStaffPREXC = () => {
     
         try {
             await axios.post(
-                "http://127.0.0.1:8000/monitoring/college_performance/",
+                `${API_URL}/monitoring/college_performance/`,
                 dataToSave,
                 {
                     headers: {

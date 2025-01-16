@@ -10,6 +10,13 @@ const EStaffOC = () => {
   const [data, setData] = useState([]); // Table data
   const [editIndex, setEditIndex] = useState(null); // Index of the row being edited
 
+  // deployed
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  // local
+  // const API_URL = 'http://127.0.0.1:8000/';
+  // ${API_URL}
+
   useEffect(() => {
     const fetchOCData = async () => {
       const token = localStorage.getItem("token");
@@ -20,7 +27,7 @@ const EStaffOC = () => {
         }
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/monitoring/extension_program_oc/", {
+        const response = await fetch(`${API_URL}/monitoring/extension_program_oc/`, {
           headers: {
             Authorization: `Token ${token}`,
             Accept: "application/json",
@@ -73,8 +80,8 @@ const EStaffOC = () => {
       }
 
     const url = entry.id
-      ? `http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/`
-      : `http://127.0.0.1:8000/monitoring/extension_program_oc/`;
+      ? `${API_URL}/monitoring/extension_program_oc/${entry.id}/`
+      : `${API_URL}/monitoring/extension_program_oc/`;
     const method = entry.id ? "PUT" : "POST";
 
       try {
@@ -119,7 +126,7 @@ const EStaffOC = () => {
     }
 
     try {
-      await fetch(`http://127.0.0.1:8000/monitoring/extension_program_oc/${entry.id}/`, {
+      await fetch(`${API_URL}/monitoring/extension_program_oc/${entry.id}/`, {
         method: "DELETE",
         headers: {
           Authorization: `Token ${token}`,
