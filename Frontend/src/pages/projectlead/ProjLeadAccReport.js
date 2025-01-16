@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import ProjLeadSidebar from "../../components/ProjLeadSideBar";
@@ -7,7 +7,7 @@ import GeneratePDFDocument from "../../components/Monitoring PDFs/GeneratePDFDoc
 
 const ProjLeadAccReport = () => {
     const navigate = useNavigate();
-    const { projectID, id} = useParams();
+    const { projectID, id } = useParams();
     const [loading, setLoading] = useState(true);
     const [isProjectLeader, setIsProjectLeader] = useState(false);
     const [pdfUrl, setPdfUrl] = useState("");
@@ -23,7 +23,7 @@ const ProjLeadAccReport = () => {
         issues_challenges: '',
         participant_engagement_quality: '',
         discussion_comments: '',
-        ways_forward_plans: '', 
+        ways_forward_plans: '',
         total_number_of_days: '',
         submitted_by: '',
     });
@@ -87,7 +87,7 @@ const ProjLeadAccReport = () => {
 
         fetchProjectDetails();
     }, [projectID, navigate]);
-    
+
 
     useEffect(() => {
         const fetchSubmittedReports = async () => {
@@ -97,7 +97,7 @@ const ProjLeadAccReport = () => {
                 navigate("/login");
                 return;
             }
-    
+
             try {
                 const response = await fetch(
                     `${API_URL}/monitoring/project/${projectID}/checklist/Other%20Files/submissions/`,
@@ -109,7 +109,7 @@ const ProjLeadAccReport = () => {
                         },
                     }
                 );
-    
+
                 if (response.ok) {
                     const reportsData = await response.json();
                     // Check if the response is an array before setting the state
@@ -126,9 +126,9 @@ const ProjLeadAccReport = () => {
                 console.error("Error fetching submitted reports:", error);
             }
         };
-    
+
         if (id) fetchSubmittedReports();
-    }, [id, navigate]);    
+    }, [id, navigate]);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -183,19 +183,19 @@ const ProjLeadAccReport = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         const token = localStorage.getItem("token");
         if (!token) {
             alert("User not logged in. Please log in again.");
             navigate("/login");
             return;
         }
-        
-        const method = id ? 'PUT' : 'POST'; // Use PUT if id exists, POST otherwise
-        const url = id 
-            ? `${API_URL}/monitoring/accomplishment_reports/${id}/` 
+
+        const url = accReport.id
+            ? `${API_URL}/monitoring/accomplishment_reports/${accReport.id}/`
             : `${API_URL}/monitoring/accomplishment_reports/`;
-        
+        const method = accReport.id ? "PUT" : "POST";
+
         try {
             const response = await fetch(url, {
                 method: method,
@@ -207,7 +207,7 @@ const ProjLeadAccReport = () => {
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.detail || "Failed to submit report.");
-            
+
             // Update state carefully, check if the response data includes the necessary properties
             const newFile = { ...data, dateSubmitted: new Date(data.dateSubmitted).toLocaleDateString() };
             setSubmittedFiles(prevFiles => [...prevFiles, newFile]);
@@ -264,7 +264,7 @@ const ProjLeadAccReport = () => {
                     {/* Main Form */}
                     <div className="bg-white shadow-lg rounded-lg p-8 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-6">Extension Accomplishment Report</h2>
-                        
+
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Banner Program Title</label>
                             <input
@@ -288,7 +288,7 @@ const ProjLeadAccReport = () => {
                                 placeholder="Enter Flagship Program..."
                             />
                         </div>
-                        
+
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700">Project Title</label>
                             <p className="bg-gray-100 rounded-lg p-3 mt-1">{projectDetails.projectTitle}</p>
@@ -502,7 +502,7 @@ const ProjLeadAccReport = () => {
                                 />
                             </div>
                         </div>
-                        
+
                         {/* Photo Documentation */}
                         <h2 className="text-xl font-semibold text-center mb-6 mt-8">Photo Documentation</h2>
                         <div className="grid grid-cols-1 gap-4">
@@ -566,7 +566,7 @@ const ProjLeadAccReport = () => {
                                             <td className="px-6 py-4 text-center text-sm text-gray-500">{file.dateSubmitted}</td>
                                             <td className="px-6 py-4 text-center text-sm text-gray-500">Submitted</td>
                                             <td className="px-6 py-4 text-center text-l">
-                                                <button 
+                                                <button
                                                     className='mr-2 text-blue-500'
                                                     onClick={() => handleEdit(file)}
                                                 >
@@ -593,7 +593,7 @@ const ProjLeadAccReport = () => {
                                 </tbody>
                             </table>
                         </div>
-                    </div> 
+                    </div>
                 </div>
             </div>
         </div>

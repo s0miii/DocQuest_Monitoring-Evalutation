@@ -371,7 +371,7 @@ const StaffPhotoDocs = () => {
                                             <tr key={submission.submission_id} className="border-b hover:bg-gray-100">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                                     <a
-                                                        href={`${API_URL}/media/${submission.directory}/${submission.file_name}`}
+                                                        href={submission.file_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:underline truncate block text-center"

@@ -42,6 +42,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 DEBUG = env.bool("DEBUG", default=False)
 
+BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')  # Default to local if not provided
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+
 DEVELOPMENT_MODE = env.bool("DEVELOPMENT_MODE", default=False)
 
 
@@ -134,6 +137,8 @@ if DEVELOPMENT_MODE:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+    DEBUG = True
 
     # Media Files
     MEDIA_URL = '/media/'

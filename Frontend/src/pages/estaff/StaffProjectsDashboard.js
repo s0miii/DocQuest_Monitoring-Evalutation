@@ -3,6 +3,7 @@ import { FaSearch, FaFilter } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar"; // Adjusted to match the Estaff-specific sidebar
+import CoordinatorSideBar from "../../components/CoordinatorSideBar";
 import axios from "axios";
 
 const StaffProjectsDashboard = () => {
@@ -33,7 +34,10 @@ const StaffProjectsDashboard = () => {
 
         const roles = JSON.parse(localStorage.getItem("roles") || "[]");
 
-        if (!roles.includes("estf")) {
+        const allowedRoles = ["estf", "coord", "head"];
+        const hasAllowedRole = roles.some(role => allowedRoles.includes(role));
+
+        if (!hasAllowedRole) {
             localStorage.clear();
             navigate("/login", { replace: true });
             return;
@@ -46,7 +50,7 @@ const StaffProjectsDashboard = () => {
             let page = 1;
             let totalPages = 1;
 
-            // Fetch data from all pages
+            // Fetch project data
             do {
                 const response = await axios.get(
                     `${API_URL}/monitoring/staff-projects/?page=${page}&page_size=${pageSize}`,
@@ -59,27 +63,46 @@ const StaffProjectsDashboard = () => {
                 );
 
                 const { data, meta } = response.data;
-
-                // Combine current page data into allProjects
-                allProjects = [...allProjects, ...data];
                 totalPages = meta.total_pages;
-                page += 1; // Move to the next page
+                page += 1;
+
+                // Merge progress data into projects
+                const projectsWithProgress = await Promise.all(
+                    data.map(async (project) => {
+                        const progressResponse = await fetch(
+                            `${API_URL}/monitoring/project/${project.projectID}/progress/`,
+                            {
+                                method: "GET",
+                                headers: {
+                                    Authorization: `Token ${token}`,
+                                    "Content-Type": "application/json",
+                                },
+                            }
+                        );
+                        const progressData = await progressResponse.json();
+
+                        return {
+                            ...project,
+                            progress: progressData.progress || 0, // Default to 0 if progress is missing
+                            isCompleted: progressData.progress >= 100,
+                        };
+                    })
+                );
+
+                allProjects = [...allProjects, ...projectsWithProgress];
             } while (page <= totalPages);
 
-            // Update the projects state with all fetched projects
-            setProjects(allProjects.map((project) => ({
-                ...project,
-                isCompleted: project.progress >= 100, // Mark completion status
-            })));
-            setError(null); // Clear any previous errors
+            setProjects(allProjects);
+            setError(null);
         } catch (error) {
             console.error("Error fetching projects:", error);
             setError(error.message || "Failed to fetch projects");
             setProjects([]);
         } finally {
-            setLoading(false); // Stop the loading spinner
+            setLoading(false);
         }
     };
+
 
     useEffect(() => {
         fetchProjects(currentPage); // Fetch projects when the component loads or page changes
@@ -90,7 +113,9 @@ const StaffProjectsDashboard = () => {
         if (roles.includes("estf")) {
             navigate(`/estaff/projreq/${project.projectID}`);
         } else if (roles.includes("coord")) {
-            navigate(`/coord/proj/${project.projectID}`);
+            navigate(`/coord/projreq/${project.projectID}`);
+        } else if (roles.includes("head")) {
+            navigate(`/coord/projreq/${project.projectID}`);
         } else {
             alert("Unknown role or unauthorized access.");
         }
@@ -218,7 +243,19 @@ const StaffProjectsDashboard = () => {
     return (
         <div className="bg-gray-200 min-h-screen flex">
             <div className="w-1/5 fixed h-full">
-                <EStaffSideBar />
+                {(() => {
+                    const roles = JSON.parse(localStorage.getItem("roles")) || [];
+
+                    if (roles.includes("estf")) {
+                        return <EStaffSideBar />;
+                    } else if (roles.includes("coord")) {
+                        return <CoordinatorSideBar />;
+                        // } else if (roles.includes("head")) { 
+                        //     return <CoordinatorSideBar />;
+                    } else {
+                        return <div>No Sidebar Available</div>;
+                    }
+                })()}
             </div>
             <div className="flex-1 ml-[20%]">
                 <Topbar />

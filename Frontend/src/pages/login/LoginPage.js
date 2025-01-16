@@ -65,7 +65,7 @@ const LoginPage = () => {
       } else if (rolesList.includes('vpala')) {
         navigate('/vpala'); // Add a specific route for 'vpala' if needed
       } else if (rolesList.includes('coord')) {
-        navigate('/coordinatordashboard');
+        navigate('/coordinator');
       } else if (rolesList.includes('cldn')) {
         navigate('/college-dean');
       } else if (rolesList.includes('prch')) {

@@ -216,7 +216,7 @@ const ProjLeadAssignProponents = () => {
                         <h1 className="text-2xl font-semibold">Assign Proponents</h1>
                     </div>
 
-                    <div className="flex items-center space-x-3 mb-5">
+                    {/* <div className="flex items-center space-x-3 mb-5">
                         <button
                             className={`text-sm ${activeTraining === "Training"
                                 ? "text-blue-500 font-semibold underline"
@@ -236,7 +236,7 @@ const ProjLeadAssignProponents = () => {
                         >
                             Non-Training
                         </button>
-                    </div>
+                    </div> */}
 
                     <div className="bg-white shadow-md rounded-lg p-6">
                         <table className="w-full border-collapse border border-gray-300">

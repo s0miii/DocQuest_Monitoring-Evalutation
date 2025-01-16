@@ -28,6 +28,16 @@ import CollegeDeanProjectsDashboard from "./pages/collegeDean/CollegeDeanProject
 // import DeptOffGenerateDocument from "./pages/deptoff/DeptOffGenerateDocument";
 // import DeptOffProfilePage from "./pages/deptoff/DeptOffProfilePage";
 import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
+import CoordProjReq from "./pages/coordinator/CoordProjReq.js";
+// import CoordProjectsDashboard from "./pages/coordinator/CoordProjectsDashboard";
+import CoordCvDtr from "./pages/coordinator/CoordCvDtr.js";
+import CoordDailyAttRec from "./pages/coordinator/CoordDailyAttRec.js";
+import CoordEvalSum from "./pages/coordinator/CoordEvalSum.js";
+import CoordLecNotes from "./pages/coordinator/CoordLecNotes.js";
+import CoordOthers from "./pages/coordinator/CoordOthers.js";
+import CoordPhotoDocs from "./pages/coordinator/CoordPhotoDocs.js";
+
+
 import SignatoryDashboard from "./pages/signatory/SignatoryDashboard";
 import StaffProjectsDashboard from "./pages/estaff/StaffProjectsDashboard";
 import StaffDailyAttRec from "./pages/estaff/StaffDailyAttRec";
@@ -73,10 +83,20 @@ function App() {
 
                   <Route path="/collegedean-projects-dashboard" element={<CollegeDeanProjectsDashboard />} />
 
+                  {/* Coordinator */}
                   <Route path="/coordinator" element={<CoordinatorDashboard />} />
+                  {/* <Route path="/coord-projects-dashboard" element={<CoordProjectsDashboard />} /> */}
+                  <Route path="/coord/projreq/:projectID" element={<CoordProjReq />} />
+                  <Route path="/coord/project/:projectID/daily-attendance" element={<CoordDailyAttRec />} />
+                  <Route path="/coord/project/:projectID/summary-of-evaluation" element={<CoordEvalSum />} />
+                  <Route path="/coord/project/:projectID/trainer-cv-dtr" element={<CoordCvDtr />} />
+                  <Route path="/coord/project/:projectID/lecture-notes" element={<CoordLecNotes />} />
+                  <Route path="/coord/project/:projectID/photo-documentations" element={<CoordPhotoDocs />} />
+                  <Route path="/coord/project/:projectID/other-files" element={<CoordOthers />} />
 
                   <Route path="/signatory" element={<SignatoryDashboard />} />
 
+                  {/* Estaff */}
                   <Route path="/estaff" element={<EstaffDashboard />} />
                   <Route path="/estaff/prexc/op1-op3" element={<EStaffOP1OP3 />} />
                   <Route path="/estaff/prexc/op2" element={<EStaffOP2 />} />
@@ -92,6 +112,7 @@ function App() {
                   <Route path="/staff/project/:projectID/photo-documentations" element={<StaffPhotoDocs />} />
                   <Route path="/staff/project/:projectID/other-files" element={<StaffOthers />} />
 
+                  {/* Project Leader */}
                   <Route path="/projlead/proj" element={<ProjLeadProjects />} />
                   <Route path="/projlead/proj/req/:projectID" element={<ProjLeadProjReq />} />
                   <Route path="/projlead/assign-checklist/:projectID" element={<ProjLeadAssignProponents />} />
@@ -103,7 +124,7 @@ function App() {
                   <Route path="/projlead/project/:projectID/other-files" element={<ProjLeadOthers />} />
                   <Route path="/projlead/project/:projectID/photo-documentations" element={<ProjLeadPhotoDocs />} />
 
-
+                  {/* Proponent */}
                   <Route path="/projects-dashboard" element={<ProjectsDashboard />} />
                   <Route path="/proponents/proj/req/:projectID" element={<ProponentsProjReq />} />
                   <Route path="/proponents/project/:projectID/daily-attendance" element={<ProponentsDailyAttRec />} />
@@ -112,7 +133,7 @@ function App() {
                   <Route path="/proponents/project/:projectID/modules-notes" element={<ProponentsLecNotes />} />
                   <Route path="/proponents/project/:projectID/other" element={<ProponentsOtherFiles />} />
                   <Route path="/proponents/project/:projectID/photo-documentations" element={<ProponentsPhotoDocs />} />
-                  
+
                   <Route path="/monitoring/evaluation/fill/:token" element={<EvaluationForm />} />
                   <Route path="/attendance/fill/:token" element={<FillAttendanceForm />} />
                   <Route path="/projlead/attendance-records/:templateId" element={<AttendanceReport />} />

@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.renderers import JSONRenderer
+from rest_framework.viewsets import ModelViewSet
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db import transaction
@@ -20,6 +21,7 @@ from .forms import *
 from .serializers import *
 from .utils import send_reminder_email
 from .decorators import role_required
+from django.conf import settings
 from django.http import HttpResponseForbidden, JsonResponse
 import secrets, logging
 from django.utils.dateparse import parse_date
@@ -129,7 +131,7 @@ def send_dynamic_reminder_email(request, project_id):
 
 
 # retrieve projects based on user role each project
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class UserProjectsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -209,13 +211,15 @@ class UserProjectsView(APIView):
 
 
 # retrieve projects for staff role
-@role_required(allowed_role_codes=["estf"])  # Restrict access to estaff only
+@role_required(allowed_role_codes=["estf", "coord", "head"])  # Restrict access to estaff only
 class StaffProjectsView(APIView):
     permission_classes = [IsAuthenticated]
 
     # Define role mapping for scalability (only estf for now)
     role_mapping = {
         "estf": "Extension Staff",
+        "coord": "College Extension Coordinator",
+        "head": "Department/College Head",
     }
 
     def get(self, request):
@@ -282,7 +286,7 @@ class StaffProjectsView(APIView):
 
     
 # Proponent Project Details
-@role_required(allowed_role_codes=["ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["ppnt", "estf", "coord", "head"])
 class ProponentProjectDetailsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -379,7 +383,7 @@ def project_proponents(request, project_id):
         return Response({"error": str(e)}, status=500)
 
 # document count for checklist item
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def document_counts(request, project_id):
@@ -388,8 +392,9 @@ def document_counts(request, project_id):
 
     # Check user roles dynamically
     is_project_leader = project.userID == user
-    is_estaff = user.role.filter(code="estf").exists()  # Adjusted for `role` field
-    is_coord = user.role.filter(code="coord").exists()  # Adjusted for `role` field
+    is_estaff = user.role.filter(code="estf").exists()  
+    is_coord = user.role.filter(code="coord").exists()
+    is_head = user.role.filter(code="head").exists()  
 
     # Initialize counts dictionary
     document_counts = {}
@@ -408,10 +413,10 @@ def document_counts(request, project_id):
         try:
             if is_project_leader:  # Project leader sees all documents
                 count = model.objects.filter(project=project).count()
-            elif is_estaff:  # estaff and coordinator see all documents
+            elif is_estaff:  # estaff, coordinator and head see all documents 
                 count = model.objects.filter(project=project).count()
-            # elif is_coord:  # estaff and coordinator see all documents
-            #     count = model.objects.filter(project=project, status="Approved").count()
+            elif is_coord or is_head:  # coordinator and head see all approved documents
+                count = model.objects.filter(project=project, status="Approved").count()
             else:  # Proponent sees only their own documents
                 count = model.objects.filter(project=project, proponent=user).count()
 
@@ -495,7 +500,7 @@ def get_user_roles(request):
 
 
 ### upload files
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class DailyAttendanceUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -698,14 +703,14 @@ class OtherFilesUploadView(APIView):
         return Response(OtherFilesSerializer(other_file).data, status=status.HTTP_201_CREATED)
 
 
-# Deletee submission
+# Deletee submission 
 MODEL_MAP = {
     "daily_attendance": DailyAttendanceRecord,
     "summary_of_evaluation": SummaryOfEvaluation,
     "trainer_cv_dtr": TrainerCvDtr,
     "lecture_notes": ModulesLectureNotes,
     "photo_documentations": PhotoDocumentation,
-    "other_files": OtherFiles,
+    "other_files": OtherFiles, 
 }
 
 @api_view(["DELETE"])
@@ -736,7 +741,7 @@ def delete_submission(request, model_name, submission_id):
 
 
 ## view all submissions
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class ChecklistItemSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -749,13 +754,14 @@ class ChecklistItemSubmissionsView(APIView):
             project = get_object_or_404(Project, projectID=project_id, status="approved")
 
             # Determine roles for the user
+            is_head = user.role.filter(code="head").exists()
             is_coord = user.role.filter(code="coord").exists()
             is_estaff = user.role.filter(code="estf").exists()
             is_project_leader = project.userID == user
             is_proponent = project.proponents.filter(userID=user.userID).exists()
 
             # Ensure user has access to the project
-            if not (is_project_leader or is_proponent or is_estaff):
+            if not (is_project_leader or is_proponent or is_estaff or is_coord or is_head):
                 return Response({"error": "You do not have access to this project."}, status=status.HTTP_403_FORBIDDEN)
 
             # Initialize submissions list
@@ -780,9 +786,12 @@ class ChecklistItemSubmissionsView(APIView):
             if is_project_leader:
                 # Fetch records for project leader and all proponents
                 records = model.objects.filter(project=project, proponent__in=[user] + list(project.proponents.all()))
+            elif is_head:
+                # Fetch all records for Head
+                records = model.objects.filter(project=project, status="Approved")
             elif is_coord:
-                # Fetch all records for EStaff
-                records = model.objects.filter(project=project, status="approved")
+                # Fetch all records for Coordinator
+                records = model.objects.filter(project=project, status="Approved")
             elif is_estaff:
                 # Fetch all records for EStaff
                 records = model.objects.filter(project=project)
@@ -909,7 +918,7 @@ def get_proponent_checklist(request, project_id):
 
 
 ## View checklist assignments by project
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class ChecklistItemSubmissionView(APIView): ## this is a different class from the first one above!!!!
     permission_classes = [IsAuthenticated]
 
@@ -1003,7 +1012,7 @@ class UpdateSubmissionStatusView(APIView):
             return Response({"error": "Submission not found."}, status=status.HTTP_404_NOT_FOUND)
 
 # proponent view, display the status and rejection reason
-@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord"])
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 class ProponentSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -1224,24 +1233,22 @@ class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
 
 # API-based Eval Link Generation - NEW
 class GenerateEvaluationSharableLinkView(APIView):
-    # API to generate sharable links for evaluations.
     def post(self, request):
         project_id = request.data.get("project_id")
-        trainer_id = request.data.get("trainer_id")
+        proponent_id = request.data.get("proponent_id")
         expiration_date = request.data.get("expiration_date")
 
         try:
             project = Project.objects.get(pk=project_id)
 
-            # Check if the project has a trainer
-            trainer = None
-            if trainer_id:
-                trainer = LoadingOfTrainers.objects.filter(pk=trainer_id).first()
-                if not trainer:
-                    return Response({"error": "Trainer not found."}, status=status.HTTP_400_BAD_REQUEST)
+            proponent = None
+            if proponent_id:
+                proponent = CustomUser.objects.filter(pk=proponent_id).first()
+                if not proponent:
+                    return Response({"error": "Proponent not found."}, status=status.HTTP_400_BAD_REQUEST)
 
             sharable_link, created = EvaluationSharableLink.objects.get_or_create(
-                trainer=trainer,
+                proponent=proponent,
                 project=project,
                 defaults={"expiration_date": expiration_date},
             )
@@ -1253,9 +1260,8 @@ class GenerateEvaluationSharableLinkView(APIView):
             return Response({
                 "message": "Sharable link generated successfully.",
                 "data": {
-                    "trainer_id": trainer.LOTID if trainer else None,
-                    "trainer_name": trainer.faculty if trainer else None,
-                    "trainingLoad": trainer.trainingLoad if trainer else None,
+                    "proponent_id": proponent.id if proponent else None,
+                    "proponent_name": f"{proponent.first_name} {proponent.last_name}" if proponent else None,
                     "project_id": project.projectID,
                     "project_title": project.projectTitle,
                     "expiration_date": sharable_link.expiration_date,
@@ -1269,62 +1275,64 @@ class GenerateEvaluationSharableLinkView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class SubmitEvaluationView(APIView):
-    # API to retrieve and submit evaluations via sharable links.
     permission_classes = [AllowAny]
-    
+
     def get(self, request, token):
         sharable_link = get_object_or_404(EvaluationSharableLink, token=token)
 
         if sharable_link.expiration_date and sharable_link.expiration_date < timezone.now().date():
             return Response({"error": "This link has expired."}, status=status.HTTP_400_BAD_REQUEST)
 
-        base_url = request.build_absolute_uri('/')[:-1]
-        sharable_link_url = f"{base_url}/monitoring/evaluation/fill/{sharable_link.token}/"
+        # Fetch the frontend base URL dynamically
+        frontend_base_url = settings.FRONTEND_URL
+        sharable_link_url = f"{frontend_base_url}/evaluation/fill/{sharable_link.token}/"
 
         return Response({
-            "trainer_id": sharable_link.trainer.LOTID,
-            "trainer_name": sharable_link.trainer.faculty,
+            "proponent_id": sharable_link.proponent.id if sharable_link.proponent else None,
+            "proponent_name": f"{sharable_link.proponent.first_name} {sharable_link.proponent.last_name}" if sharable_link.proponent else "No Proponent Assigned",
             "project_id": sharable_link.project.projectID,
             "project_title": sharable_link.project.projectTitle,
             "expiration_date": sharable_link.expiration_date,
-            "sharable_link": sharable_link_url
+            "sharable_link": sharable_link_url,
         }, status=status.HTTP_200_OK)
 
     def post(self, request, token):
-            sharable_link = get_object_or_404(EvaluationSharableLink, token=token)
+        sharable_link = get_object_or_404(EvaluationSharableLink, token=token)
 
-            if sharable_link.expiration_date and sharable_link.expiration_date < timezone.now().date():
-                return Response({"error": "This link has expired."}, status=status.HTTP_400_BAD_REQUEST)
+        if sharable_link.expiration_date and sharable_link.expiration_date < timezone.now().date():
+            return Response({"error": "This link has expired."}, status=status.HTTP_400_BAD_REQUEST)
 
-            required_fields = ["attendee_name", "relevance_of_topics", "organizational_flow", "learning_methods"]
-            missing_fields = [field for field in required_fields if field not in request.data]
-            if missing_fields:
-                return Response({"error": f"Missing required fields: {', '.join(missing_fields)}"}, status=status.HTTP_400_BAD_REQUEST)
+        required_fields = ["attendee_name", "relevance_of_topics", "organizational_flow", "learning_methods"]
+        missing_fields = [field for field in required_fields if field not in request.data]
+        if missing_fields:
+            return Response({"error": f"Missing required fields: {', '.join(missing_fields)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-            existing_evaluation = Evaluation.objects.filter(
-                attendee_name=request.data.get("attendee_name"),
-                trainer=sharable_link.trainer,
-                project=sharable_link.project
-            ).first()
+        existing_evaluation = Evaluation.objects.filter(
+            attendee_name=request.data.get("attendee_name"),
+            proponent=sharable_link.proponent,  # Updated
+            project=sharable_link.project
+        ).first()
 
-            if existing_evaluation:
-                return Response({"error": "You have already submitted an evaluation."}, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Inject trainer and project into the data
-            data = request.data.copy()
-            data["trainer"] = sharable_link.trainer.LOTID
-            data["project"] = sharable_link.project.projectID
+        if existing_evaluation:
+            return Response({"error": "You have already submitted an evaluation."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Inject proponent and project into the data
+        data = request.data.copy()
+        data["proponent"] = sharable_link.proponent.id if sharable_link.proponent else None  # Updated
+        data["project"] = sharable_link.project.projectID
 
-            serializer = EvaluationSerializer(data=data)
-            if serializer.is_valid():
-                evaluation = serializer.save()
-                return Response({
-                    "message": "Evaluation submitted successfully.",
-                    "evaluation_id": evaluation.id
-                }, status=status.HTTP_201_CREATED)
+        serializer = EvaluationSerializer(data=data)
+        if serializer.is_valid():
+            evaluation = serializer.save()
+            return Response({
+                "message": "Evaluation submitted successfully.",
+                "evaluation_id": evaluation.id
+            }, status=status.HTTP_201_CREATED)
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 def evaluation_form_view(request, trainer_id, project_id):
     trainer = get_object_or_404(LoadingOfTrainers, pk=trainer_id)
@@ -1368,87 +1376,54 @@ def get_detailed_evaluations(project_id):
 @api_view(['GET'])
 def evaluation_summary_view(request, project_id):
     try:
-        # Step 1: Check for an existing summary in the database
-        try:
-            summary = EvaluationSummary.objects.get(project_id=project_id)
-        except EvaluationSummary.DoesNotExist:
-            summary = None
+        evaluations = Evaluation.objects.filter(project_id=project_id)
+        if not evaluations.exists():
+            return Response({
+                "message": "No evaluations found.",
+                "categories": {label: 0 for label in ["excellent", "very_satisfactory", "satisfactory", "fair", "poor"]},
+                "subtotal": 0,
+                "total_evaluations": 0,
+                "percentages": {},
+            }, status=200)
 
-        # Step 2: Determine if recalculation is needed
-        recalculate = False
-        if summary:
-            # Check if the summary is outdated (you can adjust the condition)
-            time_difference = now() - summary.last_updated
-            if time_difference.seconds > 3600:  # 1 hour threshold
-                recalculate = True
-        else:
-            recalculate = True
+        categories = {
+            "excellent": 0,
+            "very_satisfactory": 0,
+            "satisfactory": 0,
+            "fair": 0,
+            "poor": 0,
+        }
 
-        if recalculate:
-            # Step 3: Recalculate the summary dynamically
-            evaluations = Evaluation.objects.filter(project_id=project_id)
-            if not evaluations.exists():
-                return Response({
-                    "message": "No evaluations found for this project.",
-                    "evaluations": [],
-                    "categories": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
-                    "total_evaluations": 0,
-                    "percentages": {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0},
-                    "detailed_evaluations": [],
-
-                }, status=200)
-
-            # Count evaluators in each rating category
-            categories = {"poor": 0, "fair": 0, "good": 0, "better": 0, "best": 0}
-            total_evaluations = evaluations.count()
-            for evaluation in evaluations:
-                avg = evaluation.overall_rating
-                if avg <= 1:
-                    categories["poor"] += 1
-                elif avg <= 2:
-                    categories["fair"] += 1
-                elif avg <= 3:
-                    categories["good"] += 1
-                elif avg <= 4:
-                    categories["better"] += 1
-                else:
-                    categories["best"] += 1
-
-            # Calculate percentages
-            percentages = {
-                key: round((value / total_evaluations) * 100, 2) if total_evaluations > 0 else 0
-                for key, value in categories.items()
-            }
-
-            # Step 4: Update or create the database record
-            if summary:
-                summary.total_evaluations = total_evaluations
-                summary.categories = categories
-                summary.percentages = percentages
-                summary.last_updated = now()
-                summary.save()
+        for evaluation in evaluations:
+            avg = evaluation.overall_rating
+            if avg == 5:
+                categories["excellent"] += 1
+            elif avg == 4:
+                categories["very_satisfactory"] += 1
+            elif avg == 3:
+                categories["satisfactory"] += 1
+            elif avg == 2:
+                categories["fair"] += 1
             else:
-                summary = EvaluationSummary.objects.create(
-                    project_id=project_id,
-                    total_evaluations=total_evaluations,
-                    categories=categories,
-                    percentages=percentages,
-                )
+                categories["poor"] += 1
 
-        # Step 5: Get detailed evaluations
-        detailed_evaluations = get_detailed_evaluations(project_id)
+        subtotal = sum(categories.values())
+        percentages = {
+            key: round((value / subtotal) * 100, 2) if subtotal > 0 else 0
+            for key, value in categories.items()
+        }
 
-        # Step 6: Return the summary (whether from database or recalculated)
         return Response({
             "message": "Evaluations summary retrieved successfully.",
-            "total_evaluations": summary.total_evaluations,
-            "categories": summary.categories,
-            "percentages": summary.percentages,
-            "detailed_evaluations": detailed_evaluations,
+            "categories": categories,
+            "subtotal": subtotal,
+            "total_evaluations": subtotal,
+            "percentages": percentages,
         }, status=200)
 
     except Exception as e:
         return Response({"message": "An error occurred.", "error": str(e)}, status=500)
+
 
 # # View that generates evaluation summary table - no model to store data yet, purely view lang
 # @api_view(['GET'])
@@ -1557,7 +1532,7 @@ class CreateAttendanceTemplateView(APIView):
             )
 
         # Generate sharable link
-        sharable_link = f"{request.build_absolute_uri('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
+        sharable_link = f"{settings.FRONTEND_URL('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
 
         # # Use the frontend base URL for the sharable link
         # frontend_base_url = settings.FRONTEND_BASE_URL  # Retrieve the frontend URL from settings
@@ -1761,10 +1736,21 @@ class CalculateTotalAttendeesView(APIView):
             status=200
         )
         
-# Fetch list of trainers per project from docquestapp
-def get_trainers_by_project(request, project_id):
-    trainers = LoadingOfTrainers.objects.filter(project_id=project_id).values('LOTID', 'faculty', 'trainingLoad', 'hours')
-    return JsonResponse({'trainers': list(trainers)})
+# Fetch list of proponents per project
+def get_proponents_by_project(request, project_id):
+    try:
+        # Get the project with the given ID
+        project = Project.objects.get(projectID=project_id)
+
+        # Fetch proponents related to the project
+        proponents = project.proponents.values('userID', 'firstname', 'lastname', 'email')
+
+        # Convert to list for JSON response
+        return JsonResponse({'proponents': list(proponents)}, status=200)
+    except Project.DoesNotExist:
+        return JsonResponse({'error': 'Project not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 # # For OC
 
@@ -1846,16 +1832,34 @@ class ExtensionProgramOCViewSet(viewsets.ModelViewSet):
 #         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @role_required(allowed_role_codes=["estf"])
-class CollegePerformanceViewSet(viewsets.ModelViewSet):
+# class CollegePerformanceViewSet(viewsets.ModelViewSet):
+#     queryset = CollegePerformanceRow.objects.all()
+#     serializer_class = CollegePerformanceRowSerializer
+#     permission_classes = [IsAuthenticated]
+#     renderer_classes = [JSONRenderer]   
+
+#     def create(self, request, *args, **kwargs):
+#         many = isinstance(request.data, list)
+#         serializer = self.get_serializer(data=request.data, many=many)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_create(serializer)
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+class CollegePerformanceViewSet(ModelViewSet):
     queryset = CollegePerformanceRow.objects.all()
     serializer_class = CollegePerformanceRowSerializer
-    permission_classes = [IsAuthenticated]
-    renderer_classes = [JSONRenderer]   
+    renderer_classes = [JSONRenderer]
 
     def create(self, request, *args, **kwargs):
-        many = isinstance(request.data, list)
-        serializer = self.get_serializer(data=request.data, many=many)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Log incoming data for debugging
+        print("Incoming Data:", request.data)
+        
+        # Use the serializer to validate the data
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Data saved successfully!"}, status=status.HTTP_201_CREATED)
+        
+        # Log errors for debugging
+        print("Serializer Errors:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

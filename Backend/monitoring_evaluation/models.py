@@ -3,6 +3,7 @@ from django.db.models import Avg
 from docquestapp.models import Project, CustomUser, LoadingOfTrainers
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
 from django.contrib.auth import get_user_model
 import secrets
 from datetime import date
@@ -300,7 +301,7 @@ class ProjectNarrative(models.Model):
     
 # Model for Evaluation Form
 class Evaluation(models.Model):
-    trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluations")
+    proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="evaluations", null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name="evaluations")
     attendee_name = models.CharField(max_length=255)
 
@@ -333,7 +334,7 @@ class Evaluation(models.Model):
     access_token = models.CharField(max_length=64, unique=True, blank=True, null=True)
     
     class Meta:
-        unique_together = ('trainer', 'project', 'attendee_name')
+        unique_together = ('proponent', 'project', 'attendee_name')
 
     @property
     def trainingLoad(self):
@@ -390,27 +391,24 @@ class Evaluation(models.Model):
 def generate_token_32():
     return secrets.token_urlsafe(16)  # Generates a 32-character token
 class EvaluationSharableLink(models.Model):
-    trainer = models.ForeignKey(LoadingOfTrainers, on_delete=models.CASCADE, related_name="evaluation_links", null=True, blank=True)
+    proponent = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="evaluation_links", null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="evaluation_links")
-    token = models.CharField(default=generate_token_32, max_length=64, unique=True)    
+    token = models.CharField(default=generate_token_32, max_length=64, unique=True)
     sharable_link = models.URLField(max_length=500, blank=True, null=True)
     expiration_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    @property
-    def trainingLoad(self):
-        return self.trainer.trainingLoad if self.trainer else None
 
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = secrets.token_urlsafe(16)
 
-        # Generate the sharable link if not already set
+        # Update to dynamically generate links
         if not self.sharable_link:
-            base_url = "http://127.0.0.1:8000/monitoring/evaluation/fill"
+            base_url = f"{settings.FRONTEND_URL}/monitoring/evaluation/fill"
             self.sharable_link = f"{base_url}/{self.token}/"
-        
+
         super().save(*args, **kwargs)
+
 
     def is_valid(self):
         return not self.expiration_date or self.expiration_date >= timezone.now().date()
@@ -479,7 +477,7 @@ class AttendanceTemplate(models.Model):
 
         # Generate the sharable link if it does not exist
         if not self.sharable_link:
-            base_url = "http://127.0.0.1:8000/monitoring/attendance/fill"
+            base_url = f"{settings.FRONTEND_URL}/monitoring/attendance/fill"
             self.sharable_link = f"{base_url}/{self.token}/"
 class TotalAttendees(models.Model):
     project = models.OneToOneField('docquestapp.Project', on_delete=models.CASCADE, related_name="total_attendees")

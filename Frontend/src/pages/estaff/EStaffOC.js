@@ -6,9 +6,8 @@ import { FaArrowLeft } from "react-icons/fa";
 
 const EStaffOC = () => {
   const navigate = useNavigate();
-
-  const [data, setData] = useState([]); // Table data
-  const [editIndex, setEditIndex] = useState(null); // Index of the row being edited
+  const [data, setData] = useState([]); // Start with an empty table
+  const [editIndex, setEditIndex] = useState(null); // Track the row being edited
 
   // deployed
   const API_URL = process.env.REACT_APP_API_URL;
@@ -24,7 +23,7 @@ const EStaffOC = () => {
         alert("User not logged in. Please log in again.");
         navigate("/login");
         return;
-        }
+      }
 
       try {
         const response = await fetch(`${API_URL}/monitoring/extension_program_oc/`, {
@@ -72,19 +71,19 @@ const EStaffOC = () => {
       return;
     }
 
-      const token = localStorage.getItem("token");
-      if (!token) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       alert("User not logged in. Please log in again.");
       navigate("/login");
       return;
-      }
+    }
 
     const url = entry.id
       ? `${API_URL}/monitoring/extension_program_oc/${entry.id}/`
       : `${API_URL}/monitoring/extension_program_oc/`;
     const method = entry.id ? "PUT" : "POST";
 
-      try {
+    try {
       const response = await fetch(url, {
         method,
         headers: {
@@ -127,7 +126,7 @@ const EStaffOC = () => {
 
     try {
       await fetch(`${API_URL}/monitoring/extension_program_oc/${entry.id}/`, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: {
           Authorization: `Token ${token}`,
           Accept: "application/json",
