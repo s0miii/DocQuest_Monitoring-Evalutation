@@ -9,10 +9,6 @@ DELETE http://127.0.0.1:8000/monitoring/accomplishment_reports/2/
 Authorization: Token 3d3314db5089fd833c5a6bee6cfca04227daeb6f
 
 
-
-
-
-
 # SA REFINED NI NGA ACCOMPLISHMENT - input fields ang naa here
 ###
 POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
