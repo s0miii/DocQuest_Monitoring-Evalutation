@@ -191,11 +191,11 @@ const ProjLeadAccReport = () => {
             return;
         }
         
-        const url = accReport.id
-        ? `${API_URL}/monitoring/accomplishment_reports/${accReport.id}/`
-        : `${API_URL}/monitoring/accomplishment_reports/`;
-        const method = accReport.id ? "PUT" : "POST";
-
+        const method = id ? 'PUT' : 'POST'; // Use PUT if id exists, POST otherwise
+        const url = id 
+            ? `${API_URL}/monitoring/accomplishment_reports/${id}/` 
+            : `${API_URL}/monitoring/accomplishment_reports/`;
+        
         try {
             const response = await fetch(url, {
                 method: method,
@@ -520,7 +520,7 @@ const ProjLeadAccReport = () => {
                         </div>
 
                         
-                        <form onSubmit={handleSubmit} div className="mt-4 flex justify-center">
+                        <form onSubmit={handleSubmit} className="mt-4 flex justify-center">
                             <button
                                 type="submit"
                                 className="bg-blue-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-blue-600 transition"
@@ -540,7 +540,7 @@ const ProjLeadAccReport = () => {
                             }}
                         >
                             <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
-                                <thead className="sticky top-0 bg-gray-100 z-10">
+                                <thead className="top-0 bg-gray-100 z-10">
                                     <tr className="border-b">
                                         <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider">
                                             File
