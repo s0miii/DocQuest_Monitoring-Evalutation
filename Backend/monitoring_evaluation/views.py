@@ -1,9 +1,9 @@
 from rest_framework import status, viewsets, generics
 from rest_framework.views import APIView, View
 from rest_framework.response import Response
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes, renderer_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.renderers import JSONRenderer
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework.viewsets import ModelViewSet
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -433,6 +433,7 @@ def document_counts(request, project_id):
 
 
 # project progress
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def project_progress(request, project_id):
