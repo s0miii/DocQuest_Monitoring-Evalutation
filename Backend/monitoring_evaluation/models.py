@@ -431,7 +431,10 @@ class EvaluationSummary(models.Model):
 # Attendance Template and Attendance Record Model
 class AttendanceTemplate(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attendance_templates")
-    templateName = models.CharField(max_length=255, default="Attendance Template")    
+    first_name = models.CharField(max_length=50, default="Unknown")
+    middle_name = models.CharField(max_length=50, default="Unknown")
+    last_name = models.CharField(max_length=50, default="Unknown")
+    templateName = models.CharField(max_length=255, default="Attendance Template")
     trainerLoad = models.ForeignKey(
         LoadingOfTrainers,
         on_delete=models.CASCADE,
@@ -440,6 +443,7 @@ class AttendanceTemplate(models.Model):
         related_name='attendance_templates'
     )
 
+    # Configuration Options
     include_attendee_name = models.BooleanField(default=False)
     include_gender = models.BooleanField(default=False)
     include_college = models.BooleanField(default=False)
@@ -447,38 +451,45 @@ class AttendanceTemplate(models.Model):
     include_year_section = models.BooleanField(default=False)
     include_agency_office = models.BooleanField(default=False)
     include_contact_number = models.BooleanField(default=False)
-    
+
+    # Unique Link Generation
     sharable_link = models.URLField(max_length=500, blank=True, null=True)
-    token = models.CharField(default=generate_token_32, max_length=64, unique=True)
+    token = models.CharField(default=secrets.token_urlsafe, max_length=64, unique=True)
     expiration_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        # Prevent duplicate names for the same project
+        unique_together = ('project', 'first_name', 'middle_name', 'last_name')
+
     def is_valid(self):
-        # Check if the template is still valid based on the expiration date."""
+        """Check if the template is still valid based on the expiration date."""
         if self.expiration_date:
             return date.today() <= self.expiration_date
         return True
 
     def __str__(self):
-        return f"{self.templateName} for {self.project.projectTitle}"    
-    
+        return f"{self.templateName} for {self.project.projectTitle}"
+
     def save(self, *args, **kwargs):
-        # Generate a unique token if wala pa
+        # Generate a unique token if it doesn't exist
         if not self.token:
             self.token = secrets.token_urlsafe(16)
 
-        while True: 
+        # Retry saving if a duplicate token error occurs
+        while True:
             try:
-                # Save the record
                 super().save(*args, **kwargs)
                 break
-            except IntegrityError:  # If a duplicate token error occurs, regenerate the token
+            except IntegrityError:
                 self.token = secrets.token_urlsafe(16)
 
-        # Generate the sharable link if it does not exist
+        # Generate the sharable link if it doesn't exist
         if not self.sharable_link:
             base_url = f"{settings.FRONTEND_URL}/monitoring/attendance/fill"
             self.sharable_link = f"{base_url}/{self.token}/"
+
+
 class TotalAttendees(models.Model):
     project = models.OneToOneField('docquestapp.Project', on_delete=models.CASCADE, related_name="total_attendees")
     total_attendees = models.PositiveIntegerField(default=0)
@@ -493,21 +504,25 @@ class TotalAttendees(models.Model):
 class CreatedAttendanceRecord(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     template = models.ForeignKey(AttendanceTemplate, on_delete=models.CASCADE)
-    attendee_name = models.CharField(max_length=255, null=True, blank=True)
+    
+    # Updated name fields
+    first_name = models.CharField(max_length=255, default="Unknown")
+    middle_name = models.CharField(max_length=255, blank=True, default="")
+    last_name = models.CharField(max_length=255, default="Unknown")
+
+    # Optional fields based on the template configuration
     gender = models.CharField(max_length=50, null=True, blank=True)
     college = models.CharField(max_length=255, null=True, blank=True)
     department = models.CharField(max_length=255, null=True, blank=True)
     year_section = models.CharField(max_length=255, null=True, blank=True)
     agency_office = models.CharField(max_length=255, null=True, blank=True)
     contact_number = models.CharField(max_length=50, null=True, blank=True)
+
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Record for {self.project.projectTitle} submitted at {self.submitted_at}"
-    
 
-
- # Models for PREXC Report
  
  # OP2
 class ExtensionProgramOp2(models.Model):

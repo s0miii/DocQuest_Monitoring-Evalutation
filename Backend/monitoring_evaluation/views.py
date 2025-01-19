@@ -783,6 +783,7 @@ class ChecklistItemSubmissionsView(APIView):
 
             model, directory = model_mapping[checklist_item_name]
 
+        # file filters
             # Fetch records based on role
             if is_project_leader:
                 # Fetch records for project leader and all proponents
@@ -885,7 +886,7 @@ class AssignChecklistItemsView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# fetch the proponent's checklist assignment
 def get_proponent_checklist(request, project_id):
     try:
         # Fetch the project and related proponents
@@ -1160,6 +1161,7 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
         return queryset
 
+# para ingani ni siya
 class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
     queryset = EvaluationSharableLink.objects.all()
     serializer_class = EvaluationSharableLinkSerializer
@@ -1525,12 +1527,15 @@ class CreateAttendanceTemplateView(APIView):
 
         # Create the template
         attendance_template = AttendanceTemplate.objects.create(
-            project=project, 
-            trainerLoad=trainer_load, 
-            expiration_date=expiration_date,  
-            templateName=request.data.get("templateName"), 
+            project=project,
+            first_name=request.data.get("first_name"),
+            middle_name=request.data.get("middle_name"),
+            last_name=request.data.get("last_name"),
+            trainerLoad=trainer_load,
+            expiration_date=expiration_date,
+            templateName=request.data.get("templateName"),
             **fields
-            )
+        )
 
         # Generate sharable link
         sharable_link = f"{settings.FRONTEND_URL('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
@@ -1609,7 +1614,9 @@ class SubmitAttendanceRecordView(APIView):
         attendance_record = CreatedAttendanceRecord.objects.create(
             project=project,
             template=template,
-            attendee_name=data.get("attendee_name"),
+            first_name=data.get("first_name"),
+            middle_name=data.get("middle_name"),
+            last_name=data.get("last_name"),
             gender=data.get("gender"),
             college=data.get("college"),
             department=data.get("department"),
