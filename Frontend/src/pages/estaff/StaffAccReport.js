@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import Topbar from "../../components/Topbar";
 import { useParams } from "react-router-dom";
 
-const StaffOthers = () => {
+const StaffAccReport = () => {
     const navigate = useNavigate();
-    const { projectID } = useParams(); // Extract projectID from the URL
+    const { projectID } = useParams(); 
     const [projectDetails, setProjectDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [submissions, setSubmissions] = useState([]);
@@ -18,9 +19,6 @@ const StaffOthers = () => {
     // const API_URL = 'http://127.0.0.1:8000/';
     // ${API_URL}
 
-    const handleViewClick = (path) => {
-        navigate(path.replace(":projectID", projectID));
-    };
 
     // Fetch project details and submissions
     useEffect(() => {
@@ -78,7 +76,7 @@ const StaffOthers = () => {
 
         try {
             const response = await fetch(
-                `${API_URL}/monitoring/project/${projectID}/checklist/Other%20Files/submissions/`,
+                `${API_URL}/monitoring/project/${projectID}/checklist/Accomplishment%20Report/submissions/`,
                 {
                     method: "GET",
                     headers: {
@@ -109,7 +107,7 @@ const StaffOthers = () => {
 
         try {
             const response = await fetch(
-                `${API_URL}/monitoring/submission/update/other_files/${submissionId}/`,
+                `${API_URL}/monitoring/submission/update/daily_attendance/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {
@@ -150,7 +148,7 @@ const StaffOthers = () => {
 
         try {
             const response = await fetch(
-                `${API_URL}/monitoring/submission/update/other_files/${submissionId}/`,
+                `${API_URL}/monitoring/submission/update/daily_attendance/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {
@@ -184,7 +182,7 @@ const StaffOthers = () => {
 
         try {
             const response = await fetch(
-                `${API_URL}/monitoring/submission/update/other_files/${submissionId}/`,
+                `${API_URL}/monitoring/submission/update/daily_attendance/${submissionId}/`,
                 {
                     method: "POST",
                     headers: {
@@ -237,17 +235,17 @@ const StaffOthers = () => {
         );
     }
 
-    if (!projectDetails) {
-        return <div>Project not found.</div>;
-    }
-
-
 
     return (
         <div className="bg-gray-200 flex">
             {/* Main content area */}
             <div className>
+                <Topbar />
                 <div className="flex flex-col mt-14 px-10">
+                    <div className="flex items-center mb-5">
+                        <h1 className="text-2xl font-semibold">Accomplishment Report</h1>
+                    </div>
+
                     {/* Submitted Files Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
@@ -258,7 +256,7 @@ const StaffOthers = () => {
                             }}
                         >
                             <table className="min-w-full table-auto bg-white rounded-lg shadow-md">
-                                <thead className="sticky top-0 bg-gray-100 z-10">
+                                <thead className="top-0 bg-gray-100 z-10">
                                     <tr className="border-b">
                                         <th
                                             className="px-6 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider cursor-pointer"
@@ -387,4 +385,4 @@ const StaffOthers = () => {
     );
 };
 
-export default StaffOthers;
+export default StaffAccReport;

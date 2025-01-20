@@ -3,6 +3,47 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Topbar from "../../components/Topbar";
 import EStaffSideBar from "../../components/EStaffSideBar";
 import { FaArrowLeft } from "react-icons/fa";
+import StaffAccReport from "./StaffAccReport";
+import StaffDailyAttRec from "./StaffDailyAttRec";
+import StaffEvalSum from "./StaffEvalSum";
+import StaffLecNotes from "./StaffLecNotes";
+import StaffCvDtr from "./StaffCvDtr";
+import StaffPhotoDocs from "./StaffPhotoDocs";
+import StaffOthers from "./StaffOthers";
+
+const Modal = ({ isOpen, onClose, children }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+            <div className="bg-white p-4 rounded-lg shadow-lg relative">
+                {children}
+                <button onClick={onClose} className="absolute top-2 right-2 text-xl">✖</button>
+            </div>
+        </div>
+    );
+};
+
+const ItemDetailModal = ({ itemName }) => {
+    switch (itemName) {
+        case 'Accomplishment Report':
+            return <StaffAccReport />;
+        case 'Daily Attendance':
+            return <StaffDailyAttRec />;
+        case 'Summary of Evaluation':
+            return <StaffEvalSum />;
+        case 'Trainer CV DTR':
+            return <StaffCvDtr />;
+        case 'Lecture Notes':
+            return <StaffLecNotes />;
+        case 'Photo Documentations':
+            return <StaffPhotoDocs />;
+        case 'Other Files':
+            return <StaffOthers/>;
+        default:
+            return <div>No details available</div>;
+    }
+};
 
 
 const EStaffProjReq = () => {
@@ -14,6 +55,8 @@ const EStaffProjReq = () => {
     const [projectProgress, setProjectProgress] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalItem, setModalItem] = useState(null);
 
     // deployed
     const API_URL = process.env.REACT_APP_API_URL;
@@ -23,9 +66,10 @@ const EStaffProjReq = () => {
     // ${API_URL}
 
 
-    const handleViewClick = (path) => {
-        navigate(path);
-    }
+    const handleViewClick = itemName => {
+        setModalItem(itemName);
+        setModalOpen(true);
+    };
 
     useEffect(() => {
         const fetchProjectDetails = async () => {
@@ -257,6 +301,21 @@ const EStaffProjReq = () => {
                     <div className="assigned-requirements">
                         <div className="bg-white shadow-lg rounded-lg p-6 ">
                             <div className="space-y-4 text-lg">
+                                {/* Manually Add Accomplishment Report */}
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p>Accomplishment Report</p>
+                                        <p className="text-gray-500 text-base">
+                                            {documentCounts["Accomplishment Report"] || 0} document(s) attached
+                                        </p>
+                                    </div>
+                                    <button
+                                        className="text-blue-500 hover:underline"
+                                        onClick={() => handleViewClick(`/projlead/project/${projectID}/accomplishment-report`)}
+                                    >
+                                        View
+                                    </button>
+                                </div>
                                 {Object.entries(documentCounts).map(([itemName, count]) => (
                                     <div key={itemName} className="flex justify-between items-center">
                                         <div>
@@ -267,7 +326,7 @@ const EStaffProjReq = () => {
                                         </div>
                                         <button
                                             className="text-blue-500 hover:underline"
-                                            onClick={() => handleViewClick(`/staff/project/${projectID}/${itemName.replace(/\s+/g, '-').toLowerCase()}`)}
+                                            onClick={() => handleViewClick(itemName)}
                                         >
                                             View
                                         </button>
@@ -278,6 +337,10 @@ const EStaffProjReq = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal */}
+            <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setModalItem(null); }}>
+                <ItemDetailModal itemName={modalItem} />
+            </Modal>
         </div>
     );
 };

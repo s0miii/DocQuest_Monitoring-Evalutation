@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import Topbar from "../../components/Topbar";
-import EStaffSideBar from "../../components/EStaffSideBar";
-import { FaArrowLeft } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 
 const StaffEvalSum = () => {
@@ -244,78 +241,14 @@ const StaffEvalSum = () => {
         return <div>Project not found.</div>;
     }
 
-
-
     return (
-        <div className="bg-gray-200 min-h-screen flex">
-            <div className="w-1/5 fixed h-full">
-                <EStaffSideBar />
-            </div>
+        <div className="bg-gray-200 flex">
             {/* Main content area */}
-            <div className="flex-1 ml-[20%]">
-                <Topbar />
+            <div className>
                 <div className="flex flex-col mt-14 px-10">
-                    <div className="flex items-center mb-5">
-                        <button className="mr-2" onClick={() => handleViewClick('/estaff/projreq/:projectID')}>
-                            <FaArrowLeft />
-                        </button>
-                        <h1 className="text-2xl font-semibold">Summary of Evaluation</h1>
-                    </div>
-                    {/* Project Details */}
-                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">
-                            Project Details
-                        </h2>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Project Title
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.projectTitle}
-                                </p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Project Leader
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.projectLeader}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4 mt-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    College/Campus
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.college}
-                                </p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Target Date
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.targetDate}
-                                </p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Partner Agency
-                                </label>
-                                <p className="bg-gray-100 rounded-lg p-3 mt-1">
-                                    {projectDetails.partnerAgency}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Submitted Files Section */}
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-center mb-4">Submitted Files</h2>
+                        <h2 className="text-xl font-semibold text-center mb-4">Summary of Evaluation</h2>
                         <div
                             className="overflow-y-auto"
                             style={{
