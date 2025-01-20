@@ -1,23 +1,23 @@
 ###
 # Get Accomplishment Reports by User
 GET http://127.0.0.1:8000/monitoring/accomplishment_reports/
-Authorization: Token 3d3314db5089fd833c5a6bee6cfca04227daeb6f
+Authorization: Token ba734d9997709a45e3c28075dcdbd40f075c37ce
 
 ###
 # Delete Accomplishment Report by report ID
 DELETE http://127.0.0.1:8000/monitoring/accomplishment_reports/2/
-Authorization: Token 3d3314db5089fd833c5a6bee6cfca04227daeb6f
+Authorization: Token ba734d9997709a45e3c28075dcdbd40f075c37ce
 
 
 # SA REFINED NI NGA ACCOMPLISHMENT - input fields ang naa here
 ###
 POST http://127.0.0.1:8000/monitoring/accomplishment_reports/
-Authorization: Token 3d3314db5089fd833c5a6bee6cfca04227daeb6f
+Authorization: Token ba734d9997709a45e3c28075dcdbd40f075c37ce
 Content-Type: application/json
 
 {
   "project": 2,
-  "banner_program_title": "TRY 01-16-25 - clrice",
+  "banner_program_title": "TRY ACCOMP",
   "flagship_program": "Flagship Program 1",
   "training_modality": "Face to Face",
   "actualStartDateImplementation": "2024-12-01",

@@ -164,141 +164,143 @@ class AccomplishmentReportForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Ensure 'project' field displays available projects
         self.fields['project'].queryset = Project.objects.filter(status='approved')
-@admin.register(AccomplishmentReport)
-class AccomplishmentReportAdmin(admin.ModelAdmin):
-    form = AccomplishmentReportForm  # Attach the custom form
+# @admin.register(AccomplishmentReport)
+# class AccomplishmentReportAdmin(admin.ModelAdmin):
+#     form = AccomplishmentReportForm  # Attach the custom form
 
-    list_display = (
-        'id', 
-        'project_link', 
-        'banner_program_title', 
-        'flagship_program', 
-        'training_modality', 
-        'actualStartDateImplementation',
-        'actualEndDateImplementation', 
-        'total_number_of_days', 
-        'submitted_by', 
-        'get_project_title', 
-        'get_project_type', 
-        'get_project_category', 
-        'get_research_title', 
-        'get_proponents', 
-        'get_program', 
-        'get_accreditation_level', 
-        'get_college', 
-        'get_target_groups_beneficiaries', 
-        'get_project_location', 
-        'get_partner_agency',
-        'get_prexc_achievement',
-        'get_project_narrative',
-        'created_at',
-        'updated_at'
-    )
-    search_fields = (
-        'banner_program_title', 
-        'flagship_program', 
-        'training_modality', 
-        'project__projectTitle', 
-        'submitted_by__email',
-    )
-    list_filter = (
-        'actualStartDateImplementation',
-        'actualEndDateImplementation',
-        'training_modality', 
-    )
-    ordering = ('-actualStartDateImplementation',)
+#     list_display = (
+#         'id', 
+#         'project_link', 
+#         'banner_program_title', 
+#         'flagship_program', 
+#         'training_modality', 
+#         'actualStartDateImplementation',
+#         'actualEndDateImplementation', 
+#         'total_number_of_days', 
+#         'submitted_by', 
+#         'get_project_title', 
+#         'get_project_type', 
+#         'get_project_category', 
+#         'get_research_title', 
+#         'get_proponents', 
+#         'get_program', 
+#         'get_accreditation_level', 
+#         'get_college', 
+#         'get_target_groups_beneficiaries', 
+#         'get_project_location', 
+#         'get_partner_agency',
+#         'get_prexc_achievement',
+#         'get_project_narrative',
+#         'created_at',
+#         'updated_at'
+#     )
+#     search_fields = (
+#         'banner_program_title', 
+#         'flagship_program', 
+#         'training_modality', 
+#         'project__projectTitle', 
+#         'submitted_by__email',
+#     )
+#     list_filter = (
+#         'actualStartDateImplementation',
+#         'actualEndDateImplementation',
+#         'training_modality', 
+#     )
+#     ordering = ('-actualStartDateImplementation',)
 
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        return queryset.select_related(
-            'project', 
-            'submitted_by',
-            'prexc_achievement',
-            'project_narrative'
-        ).prefetch_related(
-            'project__proponents', 
-            'project__program', 
-            'project__agency'
-        )
+#     def get_queryset(self, request):
+#         queryset = super().get_queryset(request)
+#         return queryset.select_related(
+#             'project', 
+#             'submitted_by',
+#             'prexc_achievement',
+#             'project_narrative'
+#         ).prefetch_related(
+#             'project__proponents', 
+#             'project__program', 
+#             'project__agency'
+#         )
     
-    def project_link(self, obj):
-        if obj.project:
-            url = reverse("admin:docquestapp_project_change", args=[obj.project.projectID])
-            return format_html('<a href="{}">{}</a>', url, obj.project.projectTitle)
-        return "N/A"
-    project_link.short_description = "Project"
+#     def project_link(self, obj):
+#         if obj.project:
+#             url = reverse("admin:docquestapp_project_change", args=[obj.project.projectID])
+#             return format_html('<a href="{}">{}</a>', url, obj.project.projectTitle)
+#         return "N/A"
+#     project_link.short_description = "Project"
 
-    def get_project_title(self, obj):
-        return obj.project_title if obj.project else "N/A"
-    get_project_title.short_description = 'Project Title'
+#     def get_project_title(self, obj):
+#         return obj.project_title if obj.project else "N/A"
+#     get_project_title.short_description = 'Project Title'
 
-    def get_project_type(self, obj):
-        return obj.project_type if obj.project else "N/A"
-    get_project_type.short_description = 'Project Type'
+#     def get_project_type(self, obj):
+#         return obj.project_type if obj.project else "N/A"
+#     get_project_type.short_description = 'Project Type'
 
-    def get_project_category(self, obj):
-        if obj.project:
-            return ", ".join([category.title for category in obj.project.projectCategory.all()])
-        return "N/A"
-    get_project_category.short_description = 'Project Category'
+#     def get_project_category(self, obj):
+#         if obj.project:
+#             return ", ".join([category.title for category in obj.project.projectCategory.all()])
+#         return "N/A"
+#     get_project_category.short_description = 'Project Category'
 
-    def get_research_title(self, obj):
-        return obj.research_title if obj.project else "N/A"
-    get_research_title.short_description = 'Research Title'
+#     def get_research_title(self, obj):
+#         return obj.research_title if obj.project else "N/A"
+#     get_research_title.short_description = 'Research Title'
 
-    def get_proponents(self, obj):
-        if obj.project:
-            return ", ".join([f"{proponent.firstname} {proponent.lastname}" for proponent in obj.project.proponents.all()])
-        return "N/A"
+#     def get_proponents(self, obj):
+#         if obj.project:
+#             return ", ".join([f"{proponent.firstname} {proponent.lastname}" for proponent in obj.project.proponents.all()])
+#         return "N/A"
 
-    def get_program(self, obj):
-        if obj.project:
-            return ", ".join([program.title for program in obj.project.program.all()])
-        return "N/A"
-    get_program.short_description = 'Program'
+#     def get_program(self, obj):
+#         if obj.project:
+#             return ", ".join([program.title for program in obj.project.program.all()])
+#         return "N/A"
+#     get_program.short_description = 'Program'
 
-    def get_accreditation_level(self, obj):
-        return obj.accreditation_level if obj.project else "N/A"
-    get_accreditation_level.short_description = 'Accreditation Level'
+#     def get_accreditation_level(self, obj):
+#         return obj.accreditation_level if obj.project else "N/A"
+#     get_accreditation_level.short_description = 'Accreditation Level'
 
-    # def get_college(self, obj):
-    #     return obj.college if obj.project else "N/A"
-    # get_college.short_description = 'College'
+#     # def get_college(self, obj):
+#     #     return obj.college if obj.project else "N/A"
+#     # get_college.short_description = 'College'
     
-    def get_college(self, obj):
-        # Check if the project exists
-        if obj.project:
-            # Dynamically get the college from related data (e.g., Program -> College)
-            if obj.project.program.exists():
-                # Assume the first program's college is relevant
-                program = obj.project.program.first()
-                return program.collegeID.title if program.collegeID else "No College Assigned"
-            return "N/A"  # Return a default value if no project or college is associated
+#     def get_college(self, obj):
+#         # Check if the project exists
+#         if obj.project:
+#             # Dynamically get the college from related data (e.g., Program -> College)
+#             if obj.project.program.exists():
+#                 # Assume the first program's college is relevant
+#                 program = obj.project.program.first()
+#                 return program.collegeID.title if program.collegeID else "No College Assigned"
+#             return "N/A"  # Return a default value if no project or college is associated
 
-    get_college.short_description = 'College'
+#     get_college.short_description = 'College'
 
 
-    def get_target_groups_beneficiaries(self, obj):
-        return obj.target_groups_beneficiaries if obj.project else "N/A"
-    get_target_groups_beneficiaries.short_description = 'Beneficiaries'
+#     def get_target_groups_beneficiaries(self, obj):
+#         return obj.target_groups_beneficiaries if obj.project else "N/A"
+#     get_target_groups_beneficiaries.short_description = 'Beneficiaries'
 
-    def get_project_location(self, obj):
-        return obj.project_location if obj.project else "N/A"
-    get_project_location.short_description = 'Project Location'
+#     def get_project_location(self, obj):
+#         return obj.project_location if obj.project else "N/A"
+#     get_project_location.short_description = 'Project Location'
 
-    def get_partner_agency(self, obj):
-        if obj.project:
-            return ", ".join([str(a) for a in obj.project.agency.all()])
-        return "N/A"
-    get_partner_agency.short_description = 'Partner Agency'
+#     def get_partner_agency(self, obj):
+#         if obj.project:
+#             return ", ".join([str(a) for a in obj.project.agency.all()])
+#         return "N/A"
+#     get_partner_agency.short_description = 'Partner Agency'
 
-    def get_prexc_achievement(self, obj):
-        return obj.prexc_achievement.id if obj.prexc_achievement else "N/A"
-    get_prexc_achievement.short_description = 'PREXC Achievement ID'
+#     def get_prexc_achievement(self, obj):
+#         return obj.prexc_achievement.id if obj.prexc_achievement else "N/A"
+#     get_prexc_achievement.short_description = 'PREXC Achievement ID'
 
-    def get_project_narrative(self, obj):
-        return obj.project_narrative.id if obj.project_narrative else "N/A"
-    get_project_narrative.short_description = 'Project Narrative ID'
+#     def get_project_narrative(self, obj):
+#         return obj.project_narrative.id if obj.project_narrative else "N/A"
+#     get_project_narrative.short_description = 'Project Narrative ID'
+
+admin.site.register(AccomplishmentReport)
 
 @admin.register(ProjectNarrative)
 class ProjectNarrativeAdmin(admin.ModelAdmin):
@@ -333,7 +335,15 @@ class AttendanceTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(CreatedAttendanceRecord)
 class CreatedAttendanceRecordAdmin(admin.ModelAdmin):
-    list_display = ['id', 'project', 'attendee_name', 'submitted_at']
+    list_display = [
+        'id', 
+        'project', 
+        'first_name', 
+        'middle_name', 
+        'last_name', 
+        'submitted_at'
+    ]
+
 
 
 #For PREXC Report

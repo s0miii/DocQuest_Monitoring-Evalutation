@@ -86,6 +86,9 @@ class AttendanceTemplateForm(forms.ModelForm):
         fields = [
             "project",
             "templateName",
+            "first_name",
+            "middle_name",
+            "last_name",
             "include_attendee_name",
             "include_gender",
             "include_college",
@@ -95,28 +98,56 @@ class AttendanceTemplateForm(forms.ModelForm):
             "include_contact_number",
         ]
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Safely fetch fields from cleaned_data
+        first_name = cleaned_data.get("first_name", "").strip()
+        middle_name = cleaned_data.get("middle_name", "").strip()  # Optional field
+        last_name = cleaned_data.get("last_name", "").strip()
+
+        # Validate required fields
+        if not first_name:
+            self.add_error("first_name", "First name is required.")
+        if not last_name:
+            self.add_error("last_name", "Last name is required.")
+
+        # Custom validation logic if needed
+        if first_name and last_name and len(first_name) < 2:
+            self.add_error("first_name", "First name must be at least 2 characters long.")
+        if first_name and last_name and len(last_name) < 2:
+            self.add_error("last_name", "Last name must be at least 2 characters long.")
+
+        return cleaned_data
+
+
+
 class CreatedAttendanceRecordForm(forms.ModelForm):
     class Meta:
         model = CreatedAttendanceRecord
         fields = [
             'project',
             'template',
-            'attendee_name',
+            'first_name',
+            'middle_name',
+            'last_name',
             'gender',
             'college',
             'department',
             'year_section',
             'agency_office',
-            'contact_number'
+            'contact_number',
         ]
-    
+
     # Require fields
     def clean(self):
         cleaned_data = super().clean()
 
-        # Example: Require attendee_name and gender
-        if not cleaned_data.get('attendee_name'):
-            self.add_error('attendee_name', "Attendee name is required.")
+        # Example: Require first_name, last_name, and gender
+        if not cleaned_data.get('first_name'):
+            self.add_error('first_name', "First name is required.")
+        if not cleaned_data.get('last_name'):
+            self.add_error('last_name', "Last name is required.")
         if not cleaned_data.get('gender'):
             self.add_error('gender', "Gender is required.")
 

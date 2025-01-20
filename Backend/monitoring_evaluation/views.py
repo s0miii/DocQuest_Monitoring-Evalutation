@@ -1,9 +1,9 @@
 from rest_framework import status, viewsets, generics
 from rest_framework.views import APIView, View
 from rest_framework.response import Response
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes, renderer_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.renderers import JSONRenderer
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework.viewsets import ModelViewSet
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -433,6 +433,7 @@ def document_counts(request, project_id):
 
 
 # project progress
+@role_required(allowed_role_codes=["pjld", "ppnt", "estf", "coord", "head"])
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def project_progress(request, project_id):
@@ -782,6 +783,7 @@ class ChecklistItemSubmissionsView(APIView):
 
             model, directory = model_mapping[checklist_item_name]
 
+        # file filters
             # Fetch records based on role
             if is_project_leader:
                 # Fetch records for project leader and all proponents
@@ -884,7 +886,7 @@ class AssignChecklistItemsView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# fetch the proponent's checklist assignment
 def get_proponent_checklist(request, project_id):
     try:
         # Fetch the project and related proponents
@@ -1159,6 +1161,7 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         print(f"Filtered queryset: {queryset.query}")  # Log the filtered query
         return queryset
 
+# para ingani ni siya
 class EvaluationSharableLinkViewSet(viewsets.ModelViewSet):
     queryset = EvaluationSharableLink.objects.all()
     serializer_class = EvaluationSharableLinkSerializer
@@ -1524,12 +1527,15 @@ class CreateAttendanceTemplateView(APIView):
 
         # Create the template
         attendance_template = AttendanceTemplate.objects.create(
-            project=project, 
-            trainerLoad=trainer_load, 
-            expiration_date=expiration_date,  
-            templateName=request.data.get("templateName"), 
+            project=project,
+            first_name=request.data.get("first_name"),
+            middle_name=request.data.get("middle_name"),
+            last_name=request.data.get("last_name"),
+            trainerLoad=trainer_load,
+            expiration_date=expiration_date,
+            templateName=request.data.get("templateName"),
             **fields
-            )
+        )
 
         # Generate sharable link
         sharable_link = f"{settings.FRONTEND_URL('/')[:-1]}/monitoring/attendance/fill/{attendance_template.token}/"
@@ -1608,7 +1614,9 @@ class SubmitAttendanceRecordView(APIView):
         attendance_record = CreatedAttendanceRecord.objects.create(
             project=project,
             template=template,
-            attendee_name=data.get("attendee_name"),
+            first_name=data.get("first_name"),
+            middle_name=data.get("middle_name"),
+            last_name=data.get("last_name"),
             gender=data.get("gender"),
             college=data.get("college"),
             department=data.get("department"),

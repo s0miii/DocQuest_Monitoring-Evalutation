@@ -119,17 +119,37 @@ class EvaluationSharableLinkSerializer(serializers.ModelSerializer):
         # You can add custom creation logic here if needed
         return super().create(validated_data)
 
+
 class AttendanceTemplateSerializer(serializers.ModelSerializer):
-    sharable_link = serializers.SerializerMethodField()
     class Meta:
         model = AttendanceTemplate
-        fields = '__all__'
+        fields = [
+            'project', 'templateName', 'trainerLoad', 'first_name', 'middle_name', 'last_name',
+            'include_attendee_name', 'include_gender', 'include_college', 'include_department',
+            'include_year_section', 'include_agency_office', 'include_contact_number', 'sharable_link',
+            'token', 'expiration_date', 'created_at',
+        ]
 
-    def get_sharable_link(self, obj):
-        request = self.context.get('request')
-        if request:
-            return f"{settings.FRONTEND_BASE_URL}/attendance/fill/{obj.token}/"
-        return None
+    def create(self, validated_data):
+        # Automatically generate a unique token and sharable link
+        instance = AttendanceTemplate.objects.create(**validated_data)
+        instance.save()  # Triggers the token and link generation logic in the model
+        return instance
+
+    def validate(self, attrs):
+        # Validate for duplicates
+        if AttendanceTemplate.objects.filter(
+            project=attrs['project'],
+            first_name=attrs['first_name'],
+            middle_name=attrs['middle_name'],
+            last_name=attrs['last_name']
+        ).exists():
+            raise serializers.ValidationError(
+                "An attendee with this name already exists for this project."
+            )
+        return attrs
+
+    
 class CreatedAttendanceRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreatedAttendanceRecord
